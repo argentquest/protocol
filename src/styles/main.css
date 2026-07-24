@@ -189,6 +189,33 @@ button:disabled {
   text-align: right;
 }
 
+.dev-mode-badge {
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  padding: 5px 12px;
+  border: 1px solid rgba(255, 85, 221, 0.45);
+  color: #ff7de4;
+  background: #0a1020;
+  font-family: var(--mono);
+  font-size: 0.55rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  transform: translate(-50%, 50%);
+}
+
+.dev-banner {
+  max-width: 560px;
+  margin-bottom: 22px;
+  padding: 12px 15px;
+  border-left: 2px solid #ff55dd;
+  color: #e9a8da;
+  background: rgba(255, 85, 221, 0.07);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  line-height: 1.55;
+}
+
 .total-score span,
 .total-score strong {
   font-family: var(--mono);
@@ -990,6 +1017,39 @@ input[type='range'] {
   background: rgba(112, 246, 255, 0.07);
 }
 
+.dev-step-button,
+.debug-toggle {
+  min-height: 43px;
+  border: 1px solid rgba(255, 85, 221, 0.25);
+  color: #b68aa9;
+  background: rgba(255, 85, 221, 0.055);
+  cursor: pointer;
+  font-family: var(--mono);
+}
+
+.dev-step-button {
+  width: 36px;
+  padding: 0;
+  font-size: 1.2rem;
+}
+
+.dev-step-button:disabled {
+  opacity: 0.3;
+}
+
+.debug-toggle {
+  padding: 0 11px;
+  font-size: 0.57rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.debug-toggle.is-on {
+  border-color: #ff55dd;
+  color: #ff8ae8;
+  box-shadow: inset 0 0 14px rgba(255, 85, 221, 0.08);
+}
+
 .game-header__scores {
   display: grid;
   grid-template-columns: auto auto;
@@ -1026,6 +1086,7 @@ input[type='range'] {
   padding: 20px;
   border: 1px solid rgba(113, 185, 211, 0.16);
   background: rgba(7, 17, 31, 0.82);
+  overflow-y: auto;
 }
 
 .hud-readout {
@@ -1150,6 +1211,54 @@ input[type='range'] {
   line-height: 1.55;
 }
 
+.debug-panel {
+  padding: 12px;
+  border: 1px solid rgba(255, 85, 221, 0.25);
+  background: rgba(36, 8, 39, 0.28);
+  font-family: var(--mono);
+}
+
+.debug-panel__heading {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  color: #ff78e2;
+  font-size: 0.56rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.debug-panel dl {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+
+.debug-panel dl > div {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 8px;
+}
+
+.debug-panel dt,
+.debug-panel dd {
+  margin: 0;
+  font-size: 0.52rem;
+  line-height: 1.35;
+}
+
+.debug-panel dt {
+  color: #6c8193;
+}
+
+.debug-panel dd {
+  overflow: hidden;
+  color: #b7cbd5;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .arena-shell {
   position: relative;
   display: grid;
@@ -1222,6 +1331,57 @@ input[type='range'] {
   stroke: rgba(112, 246, 255, 0.65);
   stroke-width: 4;
   vector-effect: non-scaling-stroke;
+}
+
+.debug-route {
+  fill: none;
+  stroke: #7cff8c;
+  stroke-dasharray: 8 9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3;
+  opacity: 0.75;
+  vector-effect: non-scaling-stroke;
+}
+
+.debug-route-node {
+  fill: #07101d;
+  stroke: #7cff8c;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.debug-hitbox > * {
+  fill: rgba(255, 85, 221, 0.04);
+  stroke: #ff55dd;
+  stroke-dasharray: 5 5;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.debug-motion-envelope > * {
+  fill: rgba(255, 70, 100, 0.025);
+  stroke: rgba(255, 99, 130, 0.7);
+  stroke-dasharray: 12 10;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.debug-center {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.debug-label {
+  fill: #d7ffdc;
+  font-family: var(--mono);
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  paint-order: stroke;
+  stroke: #07101d;
+  stroke-width: 5px;
 }
 
 .obstacle > *,

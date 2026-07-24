@@ -17,6 +17,10 @@ const EMPTY_HUD = {
   score: 0,
   attainableMaximum: 0,
   earnedBonuses: 0,
+  fps: 0,
+  timeFactor: 0,
+  routeFactor: 0,
+  totalPenalty: 0,
 }
 
 function formatTime(milliseconds) {
@@ -57,6 +61,9 @@ function buildInitialRuntime(level, attemptNumber) {
     lastReachedTarget: null,
     collisionLatched: false,
     lastHudAt: 0,
+    fps: 0,
+    fpsFrames: 0,
+    fpsWindowStartedAt: 0,
   }
 }
 
@@ -68,6 +75,9 @@ export default function GameView({
   onComplete,
   onAttemptFailed,
   onExit,
+  devMode = false,
+  onPreviousLevel,
+  onNextLevel,
 }) {
   const svgRef = useRef(null)
   const tokenRef = useRef(null)
@@ -85,6 +95,7 @@ export default function GameView({
   const [phase, setPhase] = useState('ready')
   const [flash, setFlash] = useState(false)
   const [visibleBonus, setVisibleBonus] = useState(null)
+  const [debugVisible, setDebugVisible] = useState(devMode)
 
   const staticObstacles = level.obstacles
 
@@ -128,6 +139,10 @@ export default function GameView({
         score: score.finalScore,
         attainableMaximum: score.attainableMaximum,
         earnedBonuses: runtime.earnedBonuses,
+        fps: runtime.fps,
+        timeFactor: score.timeFactor,
+        routeFactor: score.routeFactor,
+        totalPenalty: score.collisionPenalty + score.bonusPenalty,
       })
     },
     [scoreRuntime],
@@ -357,6 +372,17 @@ export default function GameView({
   useEffect(() => {
     const animate = (now) => {
       const runtime = runtimeRef.current
+      if (devMode) {
+        if (!runtime.fpsWindowStartedAt) runtime.fpsWindowStartedAt = now
+        runtime.fpsFrames += 1
+        const fpsElapsed = now - runtime.fpsWindowStartedAt
+        if (fpsElapsed >= 500) {
+          runtime.fps = Math.round((runtime.fpsFrames * 1000) / fpsElapsed)
+          runtime.fpsFrames = 0
+          runtime.fpsWindowStartedAt = now
+          setHud((current) => ({ ...current, fps: runtime.fps }))
+        }
+      }
       if (runtime.dragging) processMovement(now)
       else if (runtime.mode === 'ready') setMovingTransforms(0)
       frameRef.current = requestAnimationFrame(animate)
@@ -365,7 +391,7 @@ export default function GameView({
     return () => {
       cancelAnimationFrame(frameRef.current)
     }
-  }, [processMovement, setMovingTransforms])
+  }, [devMode, processMovement, setMovingTransforms])
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -468,6 +494,36 @@ export default function GameView({
             Restart
             <kbd>R</kbd>
           </button>
+          {devMode && (
+            <>
+              <button
+                className="dev-step-button"
+                type="button"
+                onClick={onPreviousLevel}
+                disabled={level.number === 1}
+                aria-label="Previous playtest level"
+              >
+                ‹
+              </button>
+              <button
+                className="dev-step-button"
+                type="button"
+                onClick={onNextLevel}
+                disabled={level.number === 10}
+                aria-label="Next playtest level"
+              >
+                ›
+              </button>
+              <button
+                className={`debug-toggle ${debugVisible ? 'is-on' : ''}`}
+                type="button"
+                onClick={() => setDebugVisible((visible) => !visible)}
+                aria-pressed={debugVisible}
+              >
+                Overlay
+              </button>
+            </>
+          )}
         </div>
         <div>
           <p className="eyebrow">Protocol {String(level.number).padStart(2, '0')}</p>
@@ -519,6 +575,43 @@ export default function GameView({
             {message}
           </p>
           <p className="hud-hint">Hold the mouse. The token’s full shape must clear every edge.</p>
+          {devMode && (
+            <div className="debug-panel" data-testid="playtest-diagnostics">
+              <div className="debug-panel__heading">
+                <span>Playtest diagnostics</span>
+                <strong>{hud.fps} FPS</strong>
+              </div>
+              <dl>
+                <div>
+                  <dt>Seed</dt>
+                  <dd>{level.seed}</dd>
+                </div>
+                <div>
+                  <dt>Generated</dt>
+                  <dd>
+                    {level.generationSummary.generatedObstacles}/
+                    {level.generationSummary.requestedObstacles} obstacles
+                  </dd>
+                </div>
+                <div>
+                  <dt>Route nodes</dt>
+                  <dd>{level.validatedPath?.length ?? 0}</dd>
+                </div>
+                <div>
+                  <dt>Time factor</dt>
+                  <dd>{Math.round(hud.timeFactor * 100)}%</dd>
+                </div>
+                <div>
+                  <dt>Route factor</dt>
+                  <dd>{Math.round(hud.routeFactor * 100)}%</dd>
+                </div>
+                <div>
+                  <dt>Penalty</dt>
+                  <dd>{Math.round(hud.totalPenalty).toLocaleString()}</dd>
+                </div>
+              </dl>
+            </div>
+          )}
         </aside>
 
         <div className="arena-shell">
@@ -559,6 +652,68 @@ export default function GameView({
               <g className="arena-scanlines">
                 <path d="M0 250 H1000 M0 500 H1000 M0 750 H1000" />
               </g>
+
+              {devMode && debugVisible && (
+                <g className="debug-layer" aria-hidden="true">
+                  <polyline
+                    className="debug-route"
+                    points={(level.validatedPath ?? [])
+                      .map((point) => `${point.x},${point.y}`)
+                      .join(' ')}
+                  />
+                  {(level.validatedPath ?? []).map((point, index) => (
+                    <circle
+                      key={`${point.x}-${point.y}-${index}`}
+                      className="debug-route-node"
+                      cx={point.x}
+                      cy={point.y}
+                      r="5"
+                    />
+                  ))}
+                  {staticObstacles.map((obstacle) => (
+                    <SvgShape
+                      key={`debug-${obstacle.id}`}
+                      item={obstacle}
+                      className="debug-hitbox"
+                    />
+                  ))}
+                  {level.movingObstacles.map((obstacle) => (
+                    <SvgShape
+                      key={`envelope-${obstacle.id}`}
+                      item={{
+                        ...obstacle,
+                        width:
+                          obstacle.width +
+                          (obstacle.axis === 'x' ? obstacle.amplitude * 2 : 0),
+                        height:
+                          obstacle.height +
+                          (obstacle.axis === 'y' ? obstacle.amplitude * 2 : 0),
+                      }}
+                      className="debug-motion-envelope"
+                    />
+                  ))}
+                  <circle
+                    className="debug-center"
+                    cx={level.startPoint.x}
+                    cy={level.startPoint.y}
+                    r="8"
+                  />
+                  <text
+                    className="debug-label"
+                    x={level.startPoint.x + 14}
+                    y={level.startPoint.y - 14}
+                  >
+                    START
+                  </text>
+                  <text
+                    className="debug-label"
+                    x={level.mainTarget.x + 18}
+                    y={level.mainTarget.y - 18}
+                  >
+                    MAIN
+                  </text>
+                </g>
+              )}
 
               <g className="obstacle-layer">
                 {staticObstacles.map((obstacle) => (

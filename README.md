@@ -33,6 +33,19 @@ Vite automatically reloads the browser when source files change.
 
 During a level, use the visible **Restart** control or press `R` to reset the current attempt without changing the generated course.
 
+## Developer playtest mode
+
+Add `?dev=1` to any local or deployed game URL:
+
+```text
+http://localhost:5173/?dev=1
+http://localhost:8080/?dev=1
+```
+
+Playtest mode unlocks all ten levels, adds previous/next level controls, and displays the deterministic seed, validated route, collision geometry, moving-obstacle envelopes, live scoring factors, and frame rate. The **Overlay** button hides or restores the SVG diagnostics.
+
+Completed developer runs are stored separately in browser storage under `path-protocol.playtest-runs`. They do not unlock levels or replace the player's normal best scores. Remove `?dev=1` to return to the regular game.
+
 ## Run automated checks
 
 Run the unit, geometry, generation, persistence, and component tests:
@@ -79,7 +92,7 @@ Run the end-to-end suite:
 npm run test:e2e
 ```
 
-The browser suite verifies navigation, successful Level 1 completion, and continuous-collision handling.
+The browser suite verifies navigation, successful Level 1 completion, continuous-collision handling, manual restart, and developer playtest access.
 
 ## Run with Docker Compose
 

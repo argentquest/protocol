@@ -863,3 +863,14 @@ Although gameplay is mouse-based, menus should support keyboard navigation.
 - **Smooth input:** animation-frame processing and direct SVG updates keep dragging responsive.
 - **Replay value:** ghost trails and best-score replacement make improvement visible.
 - **Extensible themes:** gameplay geometry does not depend on a particular visual theme.
+
+## 22. Developer Playtest Mode
+
+Developer playtest mode is enabled with the `?dev=1` query parameter. It is a local browser capability and requires no server or alternate build.
+
+- All configured levels are selectable without mutating the player's unlock state.
+- Previous and next controls allow immediate movement through the ten-level sequence.
+- The SVG overlay exposes the generated valid route, static collision shapes, moving-obstacle envelopes, and authored start and target centers.
+- A diagnostics panel reports the shared seed, generated-obstacle count, route-node count, FPS, live time factor, route factor, and total penalty.
+- Completed playtest runs use the separate `path-protocol.playtest-runs` storage key and never update normal best scores or cumulative score.
+- The overlay is diagnostic only; it does not affect input, collision checks, timing, scoring, or deterministic generation.

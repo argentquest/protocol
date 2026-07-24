@@ -18,6 +18,12 @@ describe('levelGenerator', () => {
         }),
         config.id,
       ).toBe(true)
+      expect(level.validatedPath?.length, config.id).toBeGreaterThan(1)
+      expect(level.validatedPath[0], config.id).toEqual(level.startPoint)
+      expect(level.validatedPath.at(-1), config.id).toEqual({
+        x: level.mainTarget.x,
+        y: level.mainTarget.y,
+      })
     }
   })
 

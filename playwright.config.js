@@ -7,10 +7,12 @@ export default defineConfig({
     baseURL: 'http://127.0.0.1:4173',
     trace: 'retain-on-failure',
   },
-  webServer: {
-    command: 'npm run preview -- --host 127.0.0.1',
-    port: 4173,
-    reuseExistingServer: true,
-  },
+  webServer: process.env.PLAYWRIGHT_EXTERNAL_SERVER
+    ? undefined
+    : {
+        command: 'node node_modules/vite/bin/vite.js preview --host 127.0.0.1',
+        port: 4173,
+        reuseExistingServer: true,
+      },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
 })

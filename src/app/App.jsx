@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { activeTheme, levels as levelConfigs } from '../config/loadConfig.js'
 import GameView from '../game/GameView.jsx'
 import { createAudioManager } from '../game/audio/audioManager.js'
+import { recordPlaytestRun } from '../game/debug/playtestLog.js'
 import { generateLevel } from '../game/generation/levelGenerator.js'
 import {
   cumulativeScore,
@@ -25,7 +26,7 @@ function ProtocolMark({ compact = false }) {
   )
 }
 
-function ShellHeader({ onHome, onLevels, onInstructions, onSettings, score }) {
+function ShellHeader({ onHome, onLevels, onInstructions, onSettings, score, devMode }) {
   return (
     <header className="shell-header">
       <button className="brand-button" type="button" onClick={onHome}>
@@ -45,6 +46,7 @@ function ShellHeader({ onHome, onLevels, onInstructions, onSettings, score }) {
           Controls
         </button>
       </nav>
+      {devMode && <span className="dev-mode-badge">DEV PLAYTEST</span>}
       <div className="total-score">
         <span>Total score</span>
         <strong>{score.toLocaleString()}</strong>
@@ -53,13 +55,18 @@ function ShellHeader({ onHome, onLevels, onInstructions, onSettings, score }) {
   )
 }
 
-function HomeScreen({ progress, totalScore, onPlay, onLevels, onInstructions }) {
+function HomeScreen({ progress, totalScore, onPlay, onLevels, onInstructions, devMode }) {
   const completedCount = Object.values(progress.levels).filter((level) => level.completed).length
   const hasProgress = completedCount > 0
 
   return (
     <main className="home-screen">
       <section className="hero-copy">
+        {devMode && (
+          <div className="dev-banner">
+            Developer playtest is active. All chambers are unlocked and player progress is isolated.
+          </div>
+        )}
         <p className="eyebrow">
           <span className="live-pip" />
           Precision systems online
@@ -153,7 +160,7 @@ function HomeScreen({ progress, totalScore, onPlay, onLevels, onInstructions }) 
   )
 }
 
-function LevelSelect({ levels, progress, onSelect }) {
+function LevelSelect({ levels, progress, onSelect, devMode }) {
   return (
     <main className="content-screen">
       <div className="screen-heading">
@@ -163,7 +170,7 @@ function LevelSelect({ levels, progress, onSelect }) {
       </div>
       <section className="level-grid" aria-label="Available levels">
         {levels.map((level) => {
-          const unlocked = level.number <= progress.player.highestUnlockedLevel
+          const unlocked = devMode || level.number <= progress.player.highestUnlockedLevel
           const record = progress.levels[level.id]
           return (
             <button
@@ -176,7 +183,13 @@ function LevelSelect({ levels, progress, onSelect }) {
               <div className="level-card__top">
                 <span className="level-number">{String(level.number).padStart(2, '0')}</span>
                 <span className="level-state">
-                  {!unlocked ? 'LOCKED' : record?.completed ? 'CLEARED' : 'AVAILABLE'}
+                  {devMode
+                    ? 'PLAYTEST'
+                    : !unlocked
+                      ? 'LOCKED'
+                      : record?.completed
+                        ? 'CLEARED'
+                        : 'AVAILABLE'}
                 </span>
               </div>
               <div>
@@ -341,7 +354,16 @@ function Settings({ settings, onChange, onReset }) {
   )
 }
 
-function Results({ level, result, improved, cumulative, onReplay, onNext, onLevels }) {
+function Results({
+  level,
+  result,
+  improved,
+  cumulative,
+  onReplay,
+  onNext,
+  onLevels,
+  devMode,
+}) {
   const efficiency = Math.round(result.routeFactor * 100)
   const timeRating = Math.round(result.timeFactor * 100)
   return (
@@ -351,7 +373,7 @@ function Results({ level, result, improved, cumulative, onReplay, onNext, onLeve
         <i />
       </div>
       <p className="eyebrow">Protocol {String(level.number).padStart(2, '0')} complete</p>
-      <h1>{improved ? 'New chamber record' : 'Vector secured'}</h1>
+      <h1>{devMode ? 'Playtest run captured' : improved ? 'New chamber record' : 'Vector secured'}</h1>
       <div className="results-score">
         <strong>{result.finalScore.toLocaleString()}</strong>
         <span>/ {result.attainableMaximum.toLocaleString()}</span>
@@ -397,6 +419,10 @@ function Results({ level, result, improved, cumulative, onReplay, onNext, onLeve
 }
 
 export default function App() {
+  const devMode = useMemo(
+    () => new URLSearchParams(window.location.search).get('dev') === '1',
+    [],
+  )
   const [progress, setProgress] = useState(() => loadProgress())
   const [screen, setScreen] = useState('home')
   const [selectedLevelId, setSelectedLevelId] = useState('level-01')
@@ -436,6 +462,12 @@ export default function App() {
   }
 
   const handleComplete = (result) => {
+    if (devMode) {
+      recordPlaytestRun(currentLevel, result)
+      setLastResult({ result, improved: false, level: currentLevel })
+      setScreen('results')
+      return
+    }
     const recorded = recordLevelResult(progress, currentLevel, result)
     saveProgress(recorded.progress)
     setProgress(recorded.progress)
@@ -444,6 +476,7 @@ export default function App() {
   }
 
   const handleFailedAttempt = () => {
+    if (devMode) return
     setProgress((current) => {
       const updated = recordFailedAttempt(current, currentLevel.id)
       saveProgress(updated)
@@ -471,6 +504,11 @@ export default function App() {
     playLevel(`level-${String(nextNumber).padStart(2, '0')}`)
   }
 
+  const previousLevel = () => {
+    const previousNumber = Math.max(1, currentLevel.number - 1)
+    playLevel(`level-${String(previousNumber).padStart(2, '0')}`)
+  }
+
   const showShell = screen !== 'game'
 
   return (
@@ -494,6 +532,7 @@ export default function App() {
           onLevels={() => navigate('levels')}
           onInstructions={() => navigate('instructions')}
           onSettings={() => navigate('settings')}
+          devMode={devMode}
         />
       )}
 
@@ -504,10 +543,16 @@ export default function App() {
           onPlay={continuePlay}
           onLevels={() => navigate('levels')}
           onInstructions={() => navigate('instructions')}
+          devMode={devMode}
         />
       )}
       {screen === 'levels' && (
-        <LevelSelect levels={generatedLevels} progress={progress} onSelect={playLevel} />
+        <LevelSelect
+          levels={generatedLevels}
+          progress={progress}
+          onSelect={playLevel}
+          devMode={devMode}
+        />
       )}
       {screen === 'instructions' && <Instructions />}
       {screen === 'settings' && (
@@ -527,6 +572,9 @@ export default function App() {
           onComplete={handleComplete}
           onAttemptFailed={handleFailedAttempt}
           onExit={() => navigate('levels')}
+          devMode={devMode}
+          onPreviousLevel={previousLevel}
+          onNextLevel={nextLevel}
         />
       )}
       {screen === 'results' && lastResult && (
@@ -538,6 +586,7 @@ export default function App() {
           onReplay={() => playLevel(lastResult.level.id)}
           onNext={nextLevel}
           onLevels={() => navigate('levels')}
+          devMode={devMode}
         />
       )}
 

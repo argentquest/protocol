@@ -68,3 +68,19 @@ test('manually restarts an active attempt with the restart shortcut', async ({ p
   await expect(page.getByText(/press and hold the token to try again/i)).toBeVisible()
   await expect(page.locator('.ghost-trail')).toHaveCount(1)
 })
+
+test('opens any level with route diagnostics in developer playtest mode', async ({ page }) => {
+  await page.goto('/?dev=1')
+  await expect(page.getByText(/dev playtest/i)).toBeVisible()
+  await page.getByRole('button', { name: /select level/i }).click()
+
+  const finalLevel = page.getByRole('button', { name: /10.*final protocol/i })
+  await expect(finalLevel).toBeEnabled()
+  await finalLevel.click()
+
+  await expect(page.getByTestId('playtest-diagnostics')).toContainText(/seed/i)
+  await expect(page.locator('.debug-route')).toBeVisible()
+  await expect(page.getByRole('button', { name: /next playtest level/i })).toBeDisabled()
+  await page.getByRole('button', { name: /previous playtest level/i }).click()
+  await expect(page.getByRole('application', { name: /containment obstacle course/i })).toBeVisible()
+})

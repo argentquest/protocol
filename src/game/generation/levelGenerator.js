@@ -34,7 +34,10 @@ function overlapsReserved(candidate, reserved, minimumGap) {
   return reserved.some((item) => shapesIntersect(expanded, item))
 }
 
-export function pathExists({ arena, token, start, target, obstacles, gridSize = 24 }) {
+function searchPath(
+  { arena, token, start, target, obstacles, gridSize = 24 },
+  includePoints,
+) {
   const columns = Math.ceil(1000 / gridSize)
   const rows = Math.ceil(1000 / gridSize)
   const key = (column, row) => `${column}:${row}`
@@ -46,6 +49,7 @@ export function pathExists({ arena, token, start, target, obstacles, gridSize = 
   const targetCell = toCell(target)
   const queue = [startCell]
   const visited = new Set([key(startCell.column, startCell.row)])
+  const cameFrom = new Map()
   const directions = [
     [1, 0],
     [-1, 0],
@@ -57,9 +61,28 @@ export function pathExists({ arena, token, start, target, obstacles, gridSize = 
     [-1, 1],
   ]
 
-  while (queue.length) {
-    const cell = queue.shift()
-    if (cell.column === targetCell.column && cell.row === targetCell.row) return true
+  let queueIndex = 0
+  while (queueIndex < queue.length) {
+    const cell = queue[queueIndex]
+    queueIndex += 1
+    if (cell.column === targetCell.column && cell.row === targetCell.row) {
+      if (!includePoints) return []
+
+      const cells = []
+      let cellKey = key(cell.column, cell.row)
+      const startKey = key(startCell.column, startCell.row)
+      while (cellKey !== startKey) {
+        const [column, row] = cellKey.split(':').map(Number)
+        cells.push({
+          x: column * gridSize + gridSize / 2,
+          y: row * gridSize + gridSize / 2,
+        })
+        cellKey = cameFrom.get(cellKey)
+        if (!cellKey) break
+      }
+      cells.reverse()
+      return [{ ...start }, ...cells.slice(0, -1), { ...target }]
+    }
 
     for (const [xChange, yChange] of directions) {
       const next = { column: cell.column + xChange, row: cell.row + yChange }
@@ -78,12 +101,22 @@ export function pathExists({ arena, token, start, target, obstacles, gridSize = 
       }
       const candidate = { ...token, x: point.x, y: point.y }
       if (!isSafePosition(candidate, arena, obstacles)) continue
-      visited.add(key(next.column, next.row))
+      const nextKey = key(next.column, next.row)
+      visited.add(nextKey)
+      cameFrom.set(nextKey, key(cell.column, cell.row))
       queue.push(next)
     }
   }
 
-  return false
+  return null
+}
+
+export function pathExists(options) {
+  return searchPath(options, false) !== null
+}
+
+export function findPath(options) {
+  return searchPath(options, true)
 }
 
 function makeGeneratedObstacle(level, random, index) {
@@ -196,6 +229,15 @@ export function generateLevel(level) {
     throw new Error(`${level.id}: configured manual course is not solvable.`)
   }
 
+  const validatedPath = findPath({
+    arena: level.arena,
+    token,
+    start: startPoint,
+    target: targetPoint,
+    obstacles,
+    gridSize: level.generation.pathGrid,
+  })
+
   return {
     ...level,
     startPoint,
@@ -206,6 +248,7 @@ export function generateLevel(level) {
     bonusTargets: level.bonuses.targets.map((target) =>
       normalizeShape({ ...target, shape: 'circle', width: target.size, height: target.size }),
     ),
+    validatedPath,
     generationSummary: {
       requestedObstacles: level.generation.obstacleCount,
       generatedObstacles: generatedObstacles.length,
