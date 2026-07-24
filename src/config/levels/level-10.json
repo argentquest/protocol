@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "level-10",
+  "number": 10,
+  "name": "Final Protocol",
+  "seed": "path-protocol-final-v1",
+  "difficulty": 10,
+  "briefing": "All systems are live. Complete the protocol and pursue only what you can bank.",
+  "arena": {
+    "shape": "polygon",
+    "points": [[100, 70], [550, 45], [875, 130], [955, 450], [860, 875], [490, 960], [120, 860], [45, 480]]
+  },
+  "token": { "shape": "rect", "size": 58 },
+  "start": { "mode": "generated", "region": { "x": 120, "y": 700, "width": 130, "height": 120 } },
+  "mainTarget": { "mode": "generated", "region": { "x": 720, "y": 150, "width": 130, "height": 120 }, "size": 48 },
+  "generation": { "obstacleCount": 10, "allowedShapes": ["rect", "circle", "diamond"], "minSize": 72, "maxSize": 140, "minimumGap": 66, "pathGrid": 16 },
+  "manualObstacles": [
+    { "id": "protocol-core-a", "shape": "diamond", "x": 390, "y": 390, "size": 125 },
+    { "id": "protocol-core-b", "shape": "circle", "x": 650, "y": 620, "size": 125 }
+  ],
+  "movingObstacles": [
+    { "id": "scanner-a", "shape": "rect", "x": 500, "y": 270, "width": 135, "height": 34, "axis": "x", "amplitude": 190, "periodMs": 3200, "phase": 0 },
+    { "id": "scanner-b", "shape": "rect", "x": 720, "y": 500, "width": 34, "height": 135, "axis": "y", "amplitude": 180, "periodMs": 3900, "phase": 1.4 },
+    { "id": "scanner-c", "shape": "circle", "x": 300, "y": 650, "size": 68, "axis": "x", "amplitude": 150, "periodMs": 3600, "phase": 2.6 }
+  ],
+  "scoring": { "baseMaximum": 4000, "parTimeMs": 16000, "parDistance": 1680, "timeWeight": 0.5, "distanceWeight": 0.5, "collisionPenaltyRate": 0.2, "maximumCollisions": 3 },
+  "bonuses": {
+    "maximumTargets": 3,
+    "rewardPerTarget": 700,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.2,
+    "targets": [
+      { "id": "relay-a", "x": 790, "y": 750, "size": 40 },
+      { "id": "relay-b", "x": 260, "y": 240, "size": 40 },
+      { "id": "relay-c", "x": 190, "y": 690, "size": 38 }
+    ]
+  }
+}

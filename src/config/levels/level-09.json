@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "level-09",
+  "number": 9,
+  "name": "Containment",
+  "seed": "path-protocol-containment-v1",
+  "difficulty": 9,
+  "briefing": "Containment walls flex around two active hazard fields.",
+  "arena": {
+    "shape": "polygon",
+    "points": [[80, 120], [370, 45], [780, 80], [950, 310], [885, 870], [650, 950], [210, 910], [45, 640]]
+  },
+  "token": { "shape": "diamond", "size": 54 },
+  "start": { "mode": "generated", "region": { "x": 120, "y": 700, "width": 130, "height": 120 } },
+  "mainTarget": { "mode": "generated", "region": { "x": 710, "y": 150, "width": 130, "height": 120 }, "size": 48 },
+  "generation": { "obstacleCount": 9, "allowedShapes": ["rect", "circle", "diamond"], "minSize": 75, "maxSize": 145, "minimumGap": 67, "pathGrid": 16 },
+  "manualObstacles": [
+    { "id": "containment-core", "shape": "circle", "x": 510, "y": 510, "size": 150 }
+  ],
+  "movingObstacles": [
+    { "id": "scanner-a", "shape": "rect", "x": 400, "y": 350, "width": 130, "height": 36, "axis": "x", "amplitude": 170, "periodMs": 3500, "phase": 0.7 },
+    { "id": "scanner-b", "shape": "circle", "x": 660, "y": 650, "size": 76, "axis": "y", "amplitude": 165, "periodMs": 4100, "phase": 2.2 }
+  ],
+  "scoring": { "baseMaximum": 3500, "parTimeMs": 14500, "parDistance": 1550, "timeWeight": 0.5, "distanceWeight": 0.5, "collisionPenaltyRate": 0.2, "maximumCollisions": 3 },
+  "bonuses": {
+    "maximumTargets": 3,
+    "rewardPerTarget": 600,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.2,
+    "targets": [
+      { "id": "relay-a", "x": 780, "y": 720, "size": 42 },
+      { "id": "relay-b", "x": 320, "y": 230, "size": 40 },
+      { "id": "relay-c", "x": 210, "y": 650, "size": 40 }
+    ]
+  }
+}

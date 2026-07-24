@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "level-07",
+  "number": 7,
+  "name": "Motion Detected",
+  "seed": "path-protocol-motion-detected-v1",
+  "difficulty": 7,
+  "briefing": "A live scanner now crosses the safest route.",
+  "arena": { "shape": "rect", "margin": 34, "cornerRadius": 46 },
+  "token": { "shape": "circle", "size": 44 },
+  "start": { "mode": "generated", "region": { "x": 80, "y": 760, "width": 150, "height": 120 } },
+  "mainTarget": { "mode": "generated", "region": { "x": 780, "y": 90, "width": 120, "height": 150 }, "size": 50 },
+  "generation": { "obstacleCount": 7, "allowedShapes": ["rect", "circle"], "minSize": 80, "maxSize": 150, "minimumGap": 68, "pathGrid": 18 },
+  "manualObstacles": [],
+  "movingObstacles": [
+    { "id": "scanner-a", "shape": "rect", "x": 500, "y": 500, "width": 150, "height": 42, "axis": "x", "amplitude": 210, "periodMs": 4200, "phase": 0 }
+  ],
+  "scoring": { "baseMaximum": 2700, "parTimeMs": 12000, "parDistance": 1360, "timeWeight": 0.5, "distanceWeight": 0.5, "collisionPenaltyRate": 0.2, "maximumCollisions": 3 },
+  "bonuses": {
+    "maximumTargets": 2,
+    "rewardPerTarget": 500,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.2,
+    "targets": [
+      { "id": "relay-a", "x": 810, "y": 720, "size": 44 },
+      { "id": "relay-b", "x": 180, "y": 220, "size": 42 }
+    ]
+  }
+}

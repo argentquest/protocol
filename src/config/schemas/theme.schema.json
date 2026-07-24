@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "path-protocol-theme.schema.json",
+  "title": "Path Protocol themes",
+  "type": "object",
+  "required": ["schemaVersion", "activeTheme", "themes"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "activeTheme": { "type": "string" },
+    "themes": { "type": "object", "minProperties": 1 }
+  },
+  "additionalProperties": false
+}

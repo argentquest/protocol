@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "level-06",
+  "number": 6,
+  "name": "Shape Test",
+  "seed": "path-protocol-shape-test-v1",
+  "difficulty": 6,
+  "briefing": "A diamond token changes every clearance calculation.",
+  "arena": {
+    "shape": "polygon",
+    "points": [[90, 90], [850, 55], [950, 300], [870, 910], [520, 950], [75, 820], [45, 360]]
+  },
+  "token": { "shape": "diamond", "size": 58 },
+  "start": { "mode": "generated", "region": { "x": 110, "y": 690, "width": 140, "height": 120 } },
+  "mainTarget": { "mode": "generated", "region": { "x": 730, "y": 130, "width": 130, "height": 140 }, "size": 52 },
+  "generation": { "obstacleCount": 8, "allowedShapes": ["rect", "circle", "diamond"], "minSize": 75, "maxSize": 155, "minimumGap": 70, "pathGrid": 18 },
+  "manualObstacles": [],
+  "movingObstacles": [],
+  "scoring": { "baseMaximum": 2350, "parTimeMs": 11200, "parDistance": 1320, "timeWeight": 0.5, "distanceWeight": 0.5, "collisionPenaltyRate": 0.2, "maximumCollisions": 3 },
+  "bonuses": {
+    "maximumTargets": 2,
+    "rewardPerTarget": 450,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.2,
+    "targets": [
+      { "id": "relay-a", "x": 760, "y": 730, "size": 44 },
+      { "id": "relay-b", "x": 320, "y": 180, "size": 44 }
+    ]
+  }
+}

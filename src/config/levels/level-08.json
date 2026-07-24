@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "level-08",
+  "number": 8,
+  "name": "Crossing Signals",
+  "seed": "path-protocol-crossing-signals-v1",
+  "difficulty": 8,
+  "briefing": "Two scanner cycles intersect. Timing is now geometry.",
+  "arena": { "shape": "rect", "margin": 32, "cornerRadius": 30 },
+  "token": { "shape": "rect", "size": 52 },
+  "start": { "mode": "generated", "region": { "x": 80, "y": 760, "width": 140, "height": 120 } },
+  "mainTarget": { "mode": "generated", "region": { "x": 770, "y": 100, "width": 130, "height": 140 }, "size": 50 },
+  "generation": { "obstacleCount": 8, "allowedShapes": ["rect", "circle", "diamond"], "minSize": 75, "maxSize": 145, "minimumGap": 66, "pathGrid": 18 },
+  "manualObstacles": [],
+  "movingObstacles": [
+    { "id": "scanner-a", "shape": "rect", "x": 500, "y": 390, "width": 140, "height": 38, "axis": "x", "amplitude": 220, "periodMs": 3800, "phase": 0 },
+    { "id": "scanner-b", "shape": "rect", "x": 610, "y": 570, "width": 38, "height": 150, "axis": "y", "amplitude": 210, "periodMs": 4600, "phase": 1.8 }
+  ],
+  "scoring": { "baseMaximum": 3100, "parTimeMs": 13200, "parDistance": 1450, "timeWeight": 0.5, "distanceWeight": 0.5, "collisionPenaltyRate": 0.2, "maximumCollisions": 3 },
+  "bonuses": {
+    "maximumTargets": 2,
+    "rewardPerTarget": 550,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.2,
+    "targets": [
+      { "id": "relay-a", "x": 810, "y": 750, "size": 42 },
+      { "id": "relay-b", "x": 170, "y": 210, "size": 42 }
+    ]
+  }
+}

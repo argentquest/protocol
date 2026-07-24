@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "activeTheme": "future-lab",
+  "themes": {
+    "future-lab": {
+      "name": "Future Lab",
+      "colors": {
+        "background": "#050914",
+        "backgroundRaised": "#091323",
+        "panel": "#0c1729",
+        "panelStrong": "#111f35",
+        "grid": "#17365e",
+        "gridBright": "#24598c",
+        "token": "#70f6ff",
+        "tokenCore": "#e8fdff",
+        "mainTarget": "#43e5b0",
+        "bonusTarget": "#ff55dd",
+        "hazard": "#ffb224",
+        "hazardCore": "#ff7048",
+        "danger": "#ff4664",
+        "text": "#ecfaff",
+        "textMuted": "#89a8bf",
+        "success": "#43e5b0"
+      },
+      "effects": {
+        "glowIntensity": 0.8,
+        "trailWidth": 5,
+        "ghostTrailOpacity": 0.18,
+        "targetPulseDurationMs": 900,
+        "collisionFlashDurationMs": 220
+      },
+      "audio": {
+        "music": {
+          "mode": "synth",
+          "defaultVolume": 0.22
+        },
+        "effects": {
+          "dragStart": 420,
+          "targetReached": 780,
+          "bonusOffered": 980,
+          "collision": 130,
+          "attemptFailed": 90,
+          "levelComplete": 620
+        },
+        "effectsDefaultVolume": 0.55
+      }
+    }
+  }
+}
