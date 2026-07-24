@@ -14,6 +14,7 @@ describe('App', () => {
     expect(screen.getByRole('heading', { name: /select a chamber/i })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: /01.*calibration/i }))
     expect(screen.getByRole('application', { name: /calibration obstacle course/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /restart attempt/i })).toBeInTheDocument()
   })
 
   it('shows the operator field guide', () => {

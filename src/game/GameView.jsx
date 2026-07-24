@@ -74,7 +74,6 @@ export default function GameView({
   const trailRef = useRef(null)
   const movingRefs = useRef(new Map())
   const frameRef = useRef(null)
-  const restartTimerRef = useRef(null)
   const attemptNumberRef = useRef(1)
   const runtimeRef = useRef(buildInitialRuntime(level, 1))
   const [hud, setHud] = useState({
@@ -209,22 +208,17 @@ export default function GameView({
       }
       onAttemptFailed()
       audio.play('attemptFailed')
-      setPhase('failed')
       setVisibleBonus(null)
-      setMessage(reason)
       publishHud(runtime, performance.now(), true)
 
-      clearTimeout(restartTimerRef.current)
-      restartTimerRef.current = setTimeout(() => {
-        attemptNumberRef.current += 1
-        const next = buildInitialRuntime(level, attemptNumberRef.current)
-        runtimeRef.current = next
-        updateTokenElement(next.tokenPosition)
-        updateTrailElement([])
-        setHud({ ...EMPTY_HUD, attainableMaximum: level.scoring.baseMaximum })
-        setPhase('ready')
-        setMessage('Press and hold the token to begin')
-      }, 650)
+      attemptNumberRef.current += 1
+      const next = buildInitialRuntime(level, attemptNumberRef.current)
+      runtimeRef.current = next
+      updateTokenElement(next.tokenPosition)
+      updateTrailElement([])
+      setHud({ ...EMPTY_HUD, attainableMaximum: level.scoring.baseMaximum })
+      setPhase('ready')
+      setMessage(`${reason}. Press and hold the token to try again.`)
     },
     [
       audio,
@@ -235,6 +229,16 @@ export default function GameView({
       updateTrailElement,
     ],
   )
+
+  const handleManualRestart = useCallback(() => {
+    const runtime = runtimeRef.current
+    if (runtime.mode === 'restarting') return
+    if (runtime.mode === 'ready') {
+      setMessage('Chamber ready — press and hold the token')
+      return
+    }
+    resetAttempt('Attempt restarted — chamber layout preserved')
+  }, [resetAttempt])
 
   const completeAttempt = useCallback(
     (bonusFailed = false) => {
@@ -360,9 +364,26 @@ export default function GameView({
     frameRef.current = requestAnimationFrame(animate)
     return () => {
       cancelAnimationFrame(frameRef.current)
-      clearTimeout(restartTimerRef.current)
     }
   }, [processMovement, setMovingTransforms])
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (
+        event.key.toLowerCase() !== 'r' ||
+        event.repeat ||
+        event.target instanceof HTMLInputElement ||
+        event.target instanceof HTMLTextAreaElement
+      ) {
+        return
+      }
+      event.preventDefault()
+      handleManualRestart()
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [handleManualRestart])
 
   useEffect(() => {
     const runtime = buildInitialRuntime(level, 1)
@@ -432,9 +453,22 @@ export default function GameView({
   return (
     <main className={`game-screen ${flash ? 'is-collision' : ''}`}>
       <header className="game-header">
-        <button className="icon-button" type="button" onClick={onExit} aria-label="Exit level">
-          <span aria-hidden="true">←</span>
-        </button>
+        <div className="game-header__actions">
+          <button className="icon-button" type="button" onClick={onExit} aria-label="Exit level">
+            <span aria-hidden="true">←</span>
+          </button>
+          <button
+            className="restart-button"
+            type="button"
+            onClick={handleManualRestart}
+            aria-label="Restart attempt"
+            title="Restart attempt (R)"
+          >
+            <span aria-hidden="true">↻</span>
+            Restart
+            <kbd>R</kbd>
+          </button>
+        </div>
         <div>
           <p className="eyebrow">Protocol {String(level.number).padStart(2, '0')}</p>
           <h1>{level.name}</h1>

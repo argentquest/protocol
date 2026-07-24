@@ -946,6 +946,50 @@ input[type='range'] {
   color: #70f6ff;
 }
 
+.game-header__actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.restart-button {
+  display: inline-flex;
+  min-height: 43px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid rgba(120, 190, 215, 0.22);
+  color: #8eabba;
+  background: rgba(9, 22, 38, 0.7);
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.restart-button > span {
+  color: #70f6ff;
+  font-size: 1rem;
+}
+
+.restart-button kbd {
+  display: grid;
+  min-width: 20px;
+  height: 20px;
+  place-items: center;
+  border: 1px solid rgba(112, 246, 255, 0.2);
+  color: #5f8196;
+  font-family: var(--mono);
+  font-size: 0.55rem;
+}
+
+.restart-button:hover {
+  border-color: #70f6ff;
+  color: #d9edf4;
+  background: rgba(112, 246, 255, 0.07);
+}
+
 .game-header__scores {
   display: grid;
   grid-template-columns: auto auto;

@@ -83,6 +83,8 @@ No game framework is required initially. The game has a focused interaction mode
 
 The same generated course remains in place for retries. A retry must not silently create an easier or harder layout.
 
+The level header provides a visible Restart control. Pressing it, or the `R` keyboard shortcut, releases pointer capture, ends the current attempt, preserves its route as a ghost trail when available, and resets the token, timer, collisions, and score without regenerating the course.
+
 ### 4.2 Token behavior
 
 - The pointer controls the center of the token.

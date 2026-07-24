@@ -31,6 +31,8 @@ http://localhost:5173
 
 Vite automatically reloads the browser when source files change.
 
+During a level, use the visible **Restart** control or press `R` to reset the current attempt without changing the generated course.
+
 ## Run automated checks
 
 Run the unit, geometry, generation, persistence, and component tests:

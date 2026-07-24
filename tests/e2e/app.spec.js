@@ -49,3 +49,22 @@ test('counts a continuous invalid position as one collision', async ({ page }) =
   await expect(page.getByText(/2 remaining/i)).toBeVisible()
   await page.mouse.up()
 })
+
+test('manually restarts an active attempt with the restart shortcut', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('button', { name: /begin calibration/i }).click()
+  const token = await page.evaluate(() => {
+    const matrix = document.querySelector('.token').getScreenCTM()
+    return { x: matrix.e, y: matrix.f }
+  })
+
+  await page.mouse.move(token.x, token.y)
+  await page.mouse.down()
+  await page.mouse.move(token.x + 35, token.y - 25, { steps: 8 })
+  await expect(page.getByText(/main protocol target active/i)).toBeVisible()
+  await page.keyboard.press('r')
+  await expect(page.getByText(/attempt restarted.*layout preserved/i)).toBeVisible()
+  await page.mouse.up()
+  await expect(page.getByText(/press and hold the token to try again/i)).toBeVisible()
+  await expect(page.locator('.ghost-trail')).toHaveCount(1)
+})
