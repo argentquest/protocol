@@ -95,6 +95,7 @@ export default function GameView({
   const [phase, setPhase] = useState('ready')
   const [flash, setFlash] = useState(false)
   const [visibleBonus, setVisibleBonus] = useState(null)
+  const [bonusPrompt, setBonusPrompt] = useState(false)
   const [debugVisible, setDebugVisible] = useState(devMode)
 
   const staticObstacles = level.obstacles
@@ -183,12 +184,13 @@ export default function GameView({
       if (random() <= chance) {
         runtime.activeBonus = level.bonusTargets[runtime.earnedBonuses]
         setVisibleBonus(runtime.activeBonus)
-        setMessage('Bonus relay available — release to bank or keep moving to pursue')
         audio.play('bonusOffered')
+        return true
       } else {
         runtime.activeBonus = null
         setVisibleBonus(null)
         setMessage('No relay signal — release to bank your score')
+        return false
       }
     },
     [audio, level, scoreRuntime],
@@ -203,10 +205,38 @@ export default function GameView({
       setPhase('target-reached')
       setVisibleBonus(null)
       audio.play('targetReached')
-      offerNextBonus(runtime)
+      const hasBonusOffer = offerNextBonus(runtime)
+      if (hasBonusOffer) {
+        const checkpoint = { x: target.x, y: target.y }
+        runtime.dragging = false
+        runtime.mode = 'bonus-prompt'
+        runtime.pendingPoint = null
+        runtime.tokenPosition = checkpoint
+        runtime.lastSafe = checkpoint
+        runtime.lastPointerPosition = checkpoint
+        runtime.trail.push(checkpoint)
+        if (
+          runtime.pointerId !== null &&
+          svgRef.current?.hasPointerCapture?.(runtime.pointerId)
+        ) {
+          svgRef.current.releasePointerCapture(runtime.pointerId)
+        }
+        runtime.pointerId = null
+        updateTokenElement(checkpoint)
+        updateTrailElement(runtime.trail)
+        setPhase('bonus-prompt')
+        setMessage('Bonus relay available — choose whether to bank or pursue')
+        setBonusPrompt(true)
+      }
       publishHud(runtime, performance.now(), true)
     },
-    [audio, offerNextBonus, publishHud],
+    [
+      audio,
+      offerNextBonus,
+      publishHud,
+      updateTokenElement,
+      updateTrailElement,
+    ],
   )
 
   const resetAttempt = useCallback(
@@ -224,6 +254,7 @@ export default function GameView({
       onAttemptFailed()
       audio.play('attemptFailed')
       setVisibleBonus(null)
+      setBonusPrompt(false)
       publishHud(runtime, performance.now(), true)
 
       attemptNumberRef.current += 1
@@ -256,9 +287,9 @@ export default function GameView({
   }, [resetAttempt])
 
   const completeAttempt = useCallback(
-    (bonusFailed = false) => {
+    (bonusFailed = false, allowPaused = false) => {
       const runtime = runtimeRef.current
-      if (!runtime.dragging) return
+      if (!runtime.dragging && !allowPaused) return
       runtime.dragging = false
       runtime.elapsedMs = performance.now() - runtime.startedAt
       if (bonusFailed) {
@@ -272,6 +303,7 @@ export default function GameView({
         svgRef.current.releasePointerCapture(runtime.pointerId)
       }
       audio.play('levelComplete')
+      setBonusPrompt(false)
       publishHud(runtime, performance.now(), true)
       onComplete({
         ...result,
@@ -284,6 +316,19 @@ export default function GameView({
     },
     [audio, onComplete, publishHud, scoreRuntime],
   )
+
+  const pursueBonus = () => {
+    const runtime = runtimeRef.current
+    if (runtime.mode !== 'bonus-prompt') return
+    runtime.mode = 'bonus-ready'
+    setBonusPrompt(false)
+    setPhase('bonus-ready')
+    setMessage('Bonus relay active — press and hold the token to continue')
+  }
+
+  const bankBonusOffer = () => {
+    completeAttempt(false, true)
+  }
 
   const processMovement = useCallback(
     (now, movingObstacles) => {
@@ -386,6 +431,10 @@ export default function GameView({
         processMovement(now, movingObstacles)
       } else if (runtime.mode === 'ready') {
         setMovingTransforms(0)
+      } else if (runtime.startedAt > 0) {
+        runtime.elapsedMs = now - runtime.startedAt
+        setMovingTransforms(runtime.elapsedMs)
+        publishHud(runtime, now)
       }
       frameRef.current = requestAnimationFrame(animate)
     }
@@ -393,7 +442,7 @@ export default function GameView({
     return () => {
       cancelAnimationFrame(frameRef.current)
     }
-  }, [devMode, processMovement, setMovingTransforms])
+  }, [devMode, processMovement, publishHud, setMovingTransforms])
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -419,6 +468,7 @@ export default function GameView({
     attemptNumberRef.current = 1
     setGhostTrails([])
     setVisibleBonus(null)
+    setBonusPrompt(false)
     setHud({ ...EMPTY_HUD, attainableMaximum: level.scoring.baseMaximum })
     setPhase('ready')
     setMessage('Press and hold the token to begin')
@@ -431,7 +481,7 @@ export default function GameView({
   const handlePointerDown = (event) => {
     if (event.button !== 0 || (event.pointerType && event.pointerType !== 'mouse')) return
     const runtime = runtimeRef.current
-    if (runtime.mode !== 'ready') return
+    if (runtime.mode !== 'ready' && runtime.mode !== 'bonus-ready') return
     event.preventDefault()
     audio.ensureContext()
     audio.startMusic()
@@ -443,13 +493,16 @@ export default function GameView({
     svgRef.current.setPointerCapture(event.pointerId)
     runtime.pointerId = event.pointerId
     runtime.dragging = true
-    runtime.mode = 'dragging-main'
-    runtime.startedAt = performance.now()
-    runtime.trail = [{ ...runtime.tokenPosition }]
+    const pursuingBonus = runtime.mode === 'bonus-ready'
+    runtime.mode = pursuingBonus ? 'dragging-bonus' : 'dragging-main'
+    if (!pursuingBonus) {
+      runtime.startedAt = performance.now()
+      runtime.trail = [{ ...runtime.tokenPosition }]
+    }
     runtime.lastPointerPosition = { ...point }
     runtime.pendingPoint = point
-    setPhase('dragging-main')
-    setMessage('Main protocol target active')
+    setPhase(pursuingBonus ? 'dragging-bonus' : 'dragging-main')
+    setMessage(pursuingBonus ? 'Bonus relay committed' : 'Main protocol target active')
     audio.play('dragStart')
   }
 
@@ -783,6 +836,35 @@ export default function GameView({
           </div>
         </div>
       </section>
+      {bonusPrompt && (
+        <div className="bonus-dialog-backdrop">
+          <section
+            className="bonus-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="bonus-dialog-title"
+          >
+            <p className="eyebrow">Optional relay detected</p>
+            <h2 id="bonus-dialog-title">Bonus target available</h2>
+            <p>
+              Bank the score you have now, or pursue the relay for up to{' '}
+              {level.bonuses.rewardPerTarget.toLocaleString()} extra points.
+            </p>
+            <p className="bonus-dialog__warning">
+              Pursuing restarts your drag at this target. The clock keeps running, and releasing
+              before the bonus target applies a 20% penalty.
+            </p>
+            <div className="bonus-dialog__actions">
+              <button className="secondary-button" type="button" onClick={bankBonusOffer}>
+                Bank score
+              </button>
+              <button className="primary-button" type="button" onClick={pursueBonus} autoFocus>
+                OK — pursue bonus
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </main>
   )
 }

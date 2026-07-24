@@ -1384,6 +1384,57 @@ input[type='range'] {
   stroke-width: 5px;
 }
 
+.bonus-dialog-backdrop {
+  position: fixed;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  inset: 0;
+  padding: 24px;
+  background: rgba(2, 7, 15, 0.78);
+  backdrop-filter: blur(8px);
+}
+
+.bonus-dialog {
+  width: min(520px, 100%);
+  padding: 32px;
+  border: 1px solid rgba(255, 85, 221, 0.48);
+  box-shadow:
+    0 0 0 1px rgba(112, 246, 255, 0.08) inset,
+    0 24px 80px rgba(0, 0, 0, 0.55),
+    0 0 46px rgba(255, 85, 221, 0.1);
+  background:
+    linear-gradient(135deg, rgba(255, 85, 221, 0.07), transparent 42%),
+    #081321;
+}
+
+.bonus-dialog h2 {
+  margin: 6px 0 14px;
+  color: #f4fbff;
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+}
+
+.bonus-dialog > p:not(.eyebrow) {
+  color: #a9beca;
+  line-height: 1.65;
+}
+
+.bonus-dialog__warning {
+  margin: 18px 0 0;
+  padding: 13px 15px;
+  border-left: 2px solid #ff55dd;
+  background: rgba(255, 85, 221, 0.06);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+}
+
+.bonus-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+
 .obstacle > *,
 .obstacle--moving > * {
   fill: rgba(255, 155, 44, 0.13);

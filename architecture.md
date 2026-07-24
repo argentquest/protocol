@@ -78,8 +78,9 @@ No game framework is required initially. The game has a focused interaction mode
 6. The normal cursor is hidden inside the play area; the token becomes the visible cursor.
 7. The token follows the pointer while the mouse button remains held.
 8. The player reaches the main target by touching it with any part of the token.
-9. The player may release while at the reached target to complete the level, or continue if a bonus target is offered.
-10. Releasing before the main target is reached ends the attempt and restarts the level.
+9. If a bonus is offered, the game releases pointer capture and presents a bank-or-pursue popup.
+10. Choosing pursue anchors the token at the target just reached and requires a new press-and-drag from that checkpoint.
+11. Releasing before the main target is reached ends the attempt and restarts the level.
 
 The same generated course remains in place for retries. A retry must not silently create an easier or harder layout.
 
@@ -129,8 +130,8 @@ A continuous overlap must count as only one collision. Another collision can be 
 ### 4.5 Mouse release behavior
 
 - Releasing before reaching the main target fails the attempt and restarts the level.
-- Once a required target has been reached, releasing while the token is still touching that target banks the score and completes the attempt.
-- If a bonus target has been accepted by moving away from the last reached target, releasing before touching the bonus target ends the bonus run and applies its configured 20% penalty.
+- When a bonus is offered, pointer capture is released so the player can choose to bank or pursue in the popup.
+- If a bonus target has been accepted, releasing the new drag before touching the bonus target ends the bonus run and applies its configured 20% penalty.
 - Losing pointer capture, leaving the browser window, or losing page focus is treated as a mouse release.
 
 ### 4.6 Bonus targets
@@ -141,8 +142,10 @@ A continuous overlap must count as only one collision. Another collision can be 
 - Bonus targets are ordered.
 - After the main target or current bonus target is reached, the game calculates whether another bonus target is offered.
 - The default offer probability is the player's current score percentage. For example, an 80% score produces an 80% offer chance.
-- The player can release at the currently reached target to bank the score.
-- If the player keeps holding and moves toward the offered target, the same drag, timer, distance, and trail continue.
+- A popup announces each offered bonus and presents explicit **Bank score** and **OK — pursue bonus** actions.
+- Banking completes the attempt immediately without a bonus-failure penalty.
+- Pursuing re-centers the token on the target just reached and requires a new mouse-down there.
+- The timer, accumulated distance, score, and trail belong to the same attempt and continue through the popup and new drag segment.
 - Reaching a bonus target raises the maximum score attainable during that attempt by the amount configured for that target.
 - Failing an accepted bonus target costs 20% of the level score, as configured.
 - The chain stops when the player releases, fails a pursued target, no bonus is offered, or the configured maximum bonus count is reached.
@@ -204,6 +207,8 @@ BOOT
   -> DRAGGING_TO_MAIN
   -> TARGET_REACHED
        -> BONUS_OFFERED
+            -> BONUS_READY
+            -> LEVEL_COMPLETE
        -> LEVEL_COMPLETE
   -> DRAGGING_TO_BONUS
        -> TARGET_REACHED
@@ -217,8 +222,10 @@ Important transitions:
 - `LEVEL_READY -> DRAGGING_TO_MAIN`: valid mouse-down on token.
 - `DRAGGING_TO_MAIN -> ATTEMPT_FAILED`: early release or third collision.
 - `DRAGGING_TO_MAIN -> TARGET_REACHED`: token touches main target.
-- `TARGET_REACHED -> LEVEL_COMPLETE`: player releases at the reached target.
-- `TARGET_REACHED -> DRAGGING_TO_BONUS`: bonus is offered and player leaves the safe target while holding.
+- `TARGET_REACHED -> BONUS_OFFERED`: bonus qualification succeeds and the bank-or-pursue popup opens.
+- `BONUS_OFFERED -> LEVEL_COMPLETE`: player banks the current score.
+- `BONUS_OFFERED -> BONUS_READY`: player confirms pursuit and the token is anchored at the reached target.
+- `BONUS_READY -> DRAGGING_TO_BONUS`: valid new mouse-down on the anchored token.
 - `DRAGGING_TO_BONUS -> BONUS_FAILED`: early release or other configured bonus failure.
 
 Pause, focus loss, and pointer-capture loss must have explicit transitions and tests.

@@ -105,3 +105,53 @@ test('keeps moving obstacles animated while the held token is stationary', async
   expect(secondTransform).not.toBe(firstTransform)
   await page.mouse.up()
 })
+
+test('restarts a pursued bonus drag from the reached target while time continues', async ({
+  page,
+}) => {
+  await page.goto('/?dev=1')
+  await page.getByRole('button', { name: /select level/i }).click()
+  await page.getByRole('button', { name: /03.*tight tolerances/i }).click()
+  const route = await page.evaluate(() => {
+    const svg = document.querySelector('.game-arena')
+    const matrix = svg.getScreenCTM()
+    const routePoints = document.querySelector('.debug-route').points
+    return Array.from(routePoints).map((point) => ({
+      x: point.x * matrix.a + point.y * matrix.c + matrix.e,
+      y: point.x * matrix.b + point.y * matrix.d + matrix.f,
+    }))
+  })
+
+  await page.mouse.move(route[0].x, route[0].y)
+  await page.mouse.down()
+  for (const point of route.slice(1)) {
+    await page.mouse.move(point.x, point.y)
+  }
+  await page.mouse.up()
+
+  const dialog = page.getByRole('dialog', { name: /bonus target available/i })
+  await expect(dialog).toBeVisible()
+  await page.waitForTimeout(250)
+  await page.getByRole('button', { name: /ok.*pursue bonus/i }).click()
+  await expect(page.getByText(/press and hold the token to continue/i)).toBeVisible()
+
+  const checkpoint = await page.evaluate(() => {
+    const center = (selector) => {
+      const matrix = document.querySelector(selector).getScreenCTM()
+      return { x: matrix.e, y: matrix.f }
+    }
+    return { token: center('.token'), target: center('.target--main') }
+  })
+  expect(checkpoint.token.x).toBeCloseTo(checkpoint.target.x, 1)
+  expect(checkpoint.token.y).toBeCloseTo(checkpoint.target.y, 1)
+
+  const elapsedBefore = await page.locator('.hud-readout').filter({ hasText: 'Time' }).innerText()
+  await page.waitForTimeout(250)
+  const elapsedAfter = await page.locator('.hud-readout').filter({ hasText: 'Time' }).innerText()
+  expect(elapsedAfter).not.toBe(elapsedBefore)
+
+  await page.mouse.move(checkpoint.token.x, checkpoint.token.y)
+  await page.mouse.down()
+  await page.mouse.up()
+  await expect(page.getByRole('heading', { name: /playtest run captured/i })).toBeVisible()
+})
