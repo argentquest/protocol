@@ -84,3 +84,24 @@ test('opens any level with route diagnostics in developer playtest mode', async 
   await page.getByRole('button', { name: /previous playtest level/i }).click()
   await expect(page.getByRole('application', { name: /containment obstacle course/i })).toBeVisible()
 })
+
+test('keeps moving obstacles animated while the held token is stationary', async ({ page }) => {
+  await page.goto('/?dev=1')
+  await page.getByRole('button', { name: /select level/i }).click()
+  await page.getByRole('button', { name: /07.*motion detected/i }).click()
+
+  const token = await page.evaluate(() => {
+    const matrix = document.querySelector('.token').getScreenCTM()
+    return { x: matrix.e, y: matrix.f }
+  })
+  await page.mouse.move(token.x, token.y)
+  await page.mouse.down()
+
+  const movingObstacle = page.locator('.obstacle--moving').first()
+  const firstTransform = await movingObstacle.getAttribute('transform')
+  await page.waitForTimeout(350)
+  const secondTransform = await movingObstacle.getAttribute('transform')
+
+  expect(secondTransform).not.toBe(firstTransform)
+  await page.mouse.up()
+})

@@ -286,14 +286,12 @@ export default function GameView({
   )
 
   const processMovement = useCallback(
-    (now) => {
+    (now, movingObstacles) => {
       const runtime = runtimeRef.current
       if (!runtime.dragging || !runtime.pendingPoint) return
-      runtime.elapsedMs = now - runtime.startedAt
       const desired = runtime.pendingPoint
       runtime.pendingPoint = null
-      const moving = setMovingTransforms(runtime.elapsedMs)
-      const allObstacles = [...staticObstacles, ...moving]
+      const allObstacles = [...staticObstacles, ...movingObstacles]
       const tokenAtLastSafe = { ...level.token, ...runtime.lastSafe }
       const swept = sweepShape(
         runtime.lastSafe,
@@ -361,7 +359,6 @@ export default function GameView({
       level,
       publishHud,
       resetAttempt,
-      setMovingTransforms,
       staticObstacles,
       targetReached,
       updateTokenElement,
@@ -383,8 +380,13 @@ export default function GameView({
           setHud((current) => ({ ...current, fps: runtime.fps }))
         }
       }
-      if (runtime.dragging) processMovement(now)
-      else if (runtime.mode === 'ready') setMovingTransforms(0)
+      if (runtime.dragging) {
+        runtime.elapsedMs = now - runtime.startedAt
+        const movingObstacles = setMovingTransforms(runtime.elapsedMs)
+        processMovement(now, movingObstacles)
+      } else if (runtime.mode === 'ready') {
+        setMovingTransforms(0)
+      }
       frameRef.current = requestAnimationFrame(animate)
     }
     frameRef.current = requestAnimationFrame(animate)
