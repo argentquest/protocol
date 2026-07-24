@@ -739,6 +739,18 @@ path-protocol/
 - Use spatial indexing if later levels contain enough hazards to justify it.
 - Pause animation and audio when the tab is hidden, while treating focus loss as an ended attempt.
 
+### 17.1 Container deployment
+
+The production game can run as a static Nginx container:
+
+- A multi-stage Docker build uses Node only to install dependencies and run the Vite production build.
+- The runtime image contains Nginx and the generated `dist` files only.
+- Nginx falls back to `index.html` for client-side navigation.
+- Hashed assets use long-lived immutable caching, while HTML is not cached.
+- The container exposes port 80 and provides `/healthz` for health checks.
+- Docker Compose maps the local development port `8080` to container port `80`.
+- No backend, database, persistent volume, secret, or runtime environment variable is required.
+
 ## 18. Accessibility and Usability
 
 Although gameplay is mouse-based, menus should support keyboard navigation.
@@ -849,4 +861,3 @@ Although gameplay is mouse-based, menus should support keyboard navigation.
 - **Smooth input:** animation-frame processing and direct SVG updates keep dragging responsive.
 - **Replay value:** ghost trails and best-score replacement make improvement visible.
 - **Extensible themes:** gameplay geometry does not depend on a particular visual theme.
-

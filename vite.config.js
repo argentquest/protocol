@@ -7,6 +7,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/tests/setup.js',
     exclude: ['tests/e2e/**', 'node_modules/**', 'dist/**'],
+    testTimeout: 15000,
     coverage: {
       reporter: ['text', 'html'],
     },

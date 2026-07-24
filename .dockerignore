@@ -1,0 +1,12 @@
+.git
+.agents
+dist
+node_modules
+coverage
+playwright-report
+test-results
+*.log
+.env
+.env.*
+architecture.md
+sprints.md
