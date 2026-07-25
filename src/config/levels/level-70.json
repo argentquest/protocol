@@ -1,0 +1,245 @@
+{
+  "schemaVersion": 2,
+  "id": "level-70",
+  "number": 70,
+  "name": "Omega Protocol",
+  "seed": "path-protocol-omega-protocol-v1",
+  "difficulty": 15,
+  "briefing": "Apex-tier chamber 10: denser geometry and overclocked hazards demand complete control.",
+  "arena": {
+    "shape": "polygon",
+    "points": [
+      [
+        110,
+        140
+      ],
+      [
+        400,
+        45
+      ],
+      [
+        800,
+        90
+      ],
+      [
+        945,
+        330
+      ],
+      [
+        900,
+        800
+      ],
+      [
+        620,
+        940
+      ],
+      [
+        210,
+        890
+      ],
+      [
+        55,
+        610
+      ],
+      [
+        70,
+        300
+      ]
+    ],
+    "mediaId": "arena-polygon"
+  },
+  "token": {
+    "shape": "diamond",
+    "size": 52,
+    "mediaId": "token-diamond"
+  },
+  "start": {
+    "mode": "manual",
+    "x": 500,
+    "y": 800,
+    "mediaId": "start-pad"
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "x": 500,
+    "y": 200,
+    "size": 58,
+    "mediaId": "target-main"
+  },
+  "generation": {
+    "obstacleCount": 10,
+    "allowedShapes": [
+      "rect",
+      "circle",
+      "diamond"
+    ],
+    "minSize": 80,
+    "maxSize": 150,
+    "minimumGap": 70,
+    "pathGrid": 20,
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    }
+  },
+  "manualObstacles": [],
+  "movingObstacles": [
+    {
+      "id": "apex-x",
+      "shape": "rect",
+      "x": 500,
+      "y": 360,
+      "width": 170,
+      "height": 38,
+      "axis": "x",
+      "amplitude": 210,
+      "periodMs": 3120,
+      "phase": 0,
+      "mediaId": "obstacle-moving-rect"
+    },
+    {
+      "id": "apex-y",
+      "shape": "rect",
+      "x": 650,
+      "y": 630,
+      "width": 38,
+      "height": 170,
+      "axis": "y",
+      "amplitude": 180,
+      "periodMs": 3588,
+      "phase": 1.5,
+      "mediaId": "obstacle-moving-rect"
+    }
+  ],
+  "trackingObstacles": [
+    {
+      "id": "apex-a",
+      "shape": "circle",
+      "x": 300,
+      "y": 340,
+      "width": 56,
+      "height": 56,
+      "zone": {
+        "x": 170,
+        "y": 180,
+        "width": 380,
+        "height": 420
+      },
+      "maxSpeed": 151,
+      "acceleration": 219,
+      "mediaId": "obstacle-tracking-circle",
+      "turnRateDegreesPerSecond": 190
+    },
+    {
+      "id": "apex-b",
+      "shape": "diamond",
+      "x": 700,
+      "y": 340,
+      "width": 58,
+      "height": 58,
+      "zone": {
+        "x": 460,
+        "y": 170,
+        "width": 380,
+        "height": 420
+      },
+      "maxSpeed": 151,
+      "acceleration": 219,
+      "mediaId": "obstacle-tracking-diamond",
+      "turnRateDegreesPerSecond": 190
+    },
+    {
+      "id": "apex-c",
+      "shape": "rect",
+      "x": 500,
+      "y": 720,
+      "width": 62,
+      "height": 44,
+      "zone": {
+        "x": 250,
+        "y": 450,
+        "width": 500,
+        "height": 420
+      },
+      "maxSpeed": 143,
+      "acceleration": 208,
+      "mediaId": "obstacle-tracking-rect",
+      "turnRateDegreesPerSecond": 190
+    }
+  ],
+  "coins": [
+    {
+      "id": "coin-a",
+      "x": 280,
+      "y": 700,
+      "size": 30,
+      "value": 2,
+      "mediaId": "coin-standard"
+    },
+    {
+      "id": "coin-b",
+      "x": 500,
+      "y": 500,
+      "size": 30,
+      "value": 3,
+      "mediaId": "coin-standard"
+    },
+    {
+      "id": "coin-c",
+      "x": 730,
+      "y": 280,
+      "size": 30,
+      "value": 2,
+      "mediaId": "coin-standard"
+    }
+  ],
+  "rewards": {
+    "completionCoins": 10,
+    "bonusCoinsPerTarget": 5
+  },
+  "scoring": {
+    "baseMaximum": 35000,
+    "parTimeMs": 32775,
+    "parDistance": 2860,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 3,
+    "rewardPerTarget": 1800,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.2,
+    "targets": [
+      {
+        "id": "relay-a",
+        "x": 780,
+        "y": 790,
+        "size": 42,
+        "mediaId": "target-bonus"
+      },
+      {
+        "id": "relay-b",
+        "x": 470,
+        "y": 150,
+        "size": 40,
+        "mediaId": "target-bonus"
+      },
+      {
+        "id": "relay-c",
+        "x": 190,
+        "y": 280,
+        "size": 38,
+        "mediaId": "target-bonus"
+      }
+    ]
+  },
+  "movement": {
+    "maximumSpeed": 360,
+    "acceleration": 1400,
+    "deceleration": 1800,
+    "keyboardSpeed": 280
+  }
+}

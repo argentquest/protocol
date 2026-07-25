@@ -1,6 +1,11 @@
-FROM node:20.19-alpine AS build
+FROM node:20.19-bookworm-slim AS build
 
 WORKDIR /app
+
+RUN apt-get update \
+    && apt-get install --yes --no-install-recommends ffmpeg \
+    && ffmpeg -version \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY package.json package-lock.json ./
 RUN npm ci

@@ -1,18 +1,22 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "path-protocol-powerup.schema.json",
-  "title": "Path Protocol power-up catalog",
+  "$id": "https://path-protocol.local/schemas/powerup.schema.json",
+  "title": "Path Protocol V2 power-up catalog",
   "type": "object",
+  "additionalProperties": false,
   "required": ["schemaVersion", "powerups"],
   "properties": {
-    "schemaVersion": { "const": 1 },
+    "schemaVersion": { "const": 2 },
     "powerups": {
       "type": "array",
       "minItems": 1,
+      "maxItems": 9,
       "items": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
           "id",
+          "mediaId",
           "name",
           "key",
           "description",
@@ -20,17 +24,17 @@
           "coinCost",
           "durationMs",
           "effect",
-          "sound",
-          "color"
+          "soundId"
         ],
         "properties": {
-          "id": { "type": "string", "minLength": 1 },
-          "name": { "type": "string", "minLength": 1 },
+          "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+          "mediaId": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+          "name": { "type": "string", "minLength": 1, "maxLength": 80 },
           "key": { "type": "string", "pattern": "^[1-9]$" },
-          "description": { "type": "string", "minLength": 1 },
+          "description": { "type": "string", "minLength": 1, "maxLength": 300 },
           "unlockScore": { "type": "integer", "minimum": 0 },
           "coinCost": { "type": "integer", "minimum": 1 },
-          "durationMs": { "type": "integer", "minimum": 1 },
+          "durationMs": { "type": "integer", "minimum": 1, "maximum": 120000 },
           "effect": {
             "enum": [
               "obstacleShield",
@@ -40,14 +44,24 @@
               "routeScan"
             ]
           },
+          "soundId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
           "slowMultiplier": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
-          "radius": { "type": "number", "exclusiveMinimum": 0 },
-          "sound": { "type": "string", "minLength": 1 },
-          "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" }
+          "radius": { "type": "number", "exclusiveMinimum": 0, "maximum": 1000 }
         },
-        "additionalProperties": false
+        "allOf": [
+          {
+            "if": { "properties": { "effect": { "const": "slowField" } } },
+            "then": { "required": ["slowMultiplier"] }
+          },
+          {
+            "if": { "properties": { "effect": { "const": "coinMagnet" } } },
+            "then": { "required": ["radius"] }
+          }
+        ]
       }
     }
-  },
-  "additionalProperties": false
+  }
 }

@@ -1,26 +1,131 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "level-11",
   "number": 11,
   "name": "Pursuit Vector",
   "seed": "path-protocol-pursuit-vector-v1",
   "difficulty": 7,
   "briefing": "A steering sentinel wakes when the token begins moving.",
-  "arena": { "shape": "rect", "margin": 38, "cornerRadius": 52 },
-  "token": { "shape": "circle", "size": 38 },
-  "start": { "mode": "generated", "region": { "x": 760, "y": 700, "width": 140, "height": 150 } },
-  "mainTarget": { "mode": "generated", "region": { "x": 90, "y": 110, "width": 140, "height": 150 }, "size": 50 },
-  "generation": { "obstacleCount": 6, "allowedShapes": ["rect", "circle"], "minSize": 80, "maxSize": 145, "minimumGap": 68, "pathGrid": 20 },
+  "arena": {
+    "shape": "rect",
+    "margin": 38,
+    "cornerRadius": 52,
+    "mediaId": "arena-standard"
+  },
+  "token": {
+    "shape": "circle",
+    "size": 38,
+    "mediaId": "token-circle"
+  },
+  "start": {
+    "mode": "generated",
+    "region": {
+      "x": 760,
+      "y": 700,
+      "width": 140,
+      "height": 150
+    },
+    "mediaId": "start-pad"
+  },
+  "mainTarget": {
+    "mode": "generated",
+    "region": {
+      "x": 90,
+      "y": 110,
+      "width": 140,
+      "height": 150
+    },
+    "size": 50,
+    "mediaId": "target-main"
+  },
+  "generation": {
+    "obstacleCount": 6,
+    "allowedShapes": [
+      "rect",
+      "circle"
+    ],
+    "minSize": 80,
+    "maxSize": 145,
+    "minimumGap": 68,
+    "pathGrid": 20,
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    }
+  },
   "manualObstacles": [],
   "movingObstacles": [],
   "trackingObstacles": [
-    { "id": "hunter-a", "shape": "circle", "x": 500, "y": 500, "width": 54, "height": 54, "zone": { "x": 260, "y": 240, "width": 480, "height": 500 }, "maxSpeed": 78, "acceleration": 110 }
+    {
+      "id": "hunter-a",
+      "shape": "circle",
+      "x": 500,
+      "y": 500,
+      "width": 54,
+      "height": 54,
+      "zone": {
+        "x": 260,
+        "y": 240,
+        "width": 480,
+        "height": 500
+      },
+      "maxSpeed": 78,
+      "acceleration": 110,
+      "mediaId": "obstacle-tracking-circle",
+      "turnRateDegreesPerSecond": 160
+    }
   ],
   "coins": [
-    { "id": "coin-a", "x": 300, "y": 690, "size": 30, "value": 1 },
-    { "id": "coin-b", "x": 690, "y": 310, "size": 30, "value": 1 }
+    {
+      "id": "coin-a",
+      "x": 300,
+      "y": 690,
+      "size": 30,
+      "value": 1,
+      "mediaId": "coin-standard"
+    },
+    {
+      "id": "coin-b",
+      "x": 690,
+      "y": 310,
+      "size": 30,
+      "value": 1,
+      "mediaId": "coin-standard"
+    }
   ],
-  "rewards": { "completionCoins": 2, "bonusCoinsPerTarget": 1 },
-  "scoring": { "baseMaximum": 4300, "parTimeMs": 15000, "parDistance": 1500, "timeWeight": 0.5, "distanceWeight": 0.5, "collisionPenaltyRate": 0.2, "maximumCollisions": 3 },
-  "bonuses": { "maximumTargets": 1, "rewardPerTarget": 600, "offerChanceMode": "currentScorePercent", "failurePenaltyRate": 0.2, "targets": [{ "id": "relay-a", "x": 820, "y": 760, "size": 44 }] }
+  "rewards": {
+    "completionCoins": 2,
+    "bonusCoinsPerTarget": 1
+  },
+  "scoring": {
+    "baseMaximum": 4300,
+    "parTimeMs": 15000,
+    "parDistance": 1500,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 1,
+    "rewardPerTarget": 600,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.2,
+    "targets": [
+      {
+        "id": "relay-a",
+        "x": 820,
+        "y": 760,
+        "size": 44,
+        "mediaId": "target-bonus"
+      }
+    ]
+  },
+  "movement": {
+    "maximumSpeed": 360,
+    "acceleration": 1400,
+    "deceleration": 1800,
+    "keyboardSpeed": 280
+  }
 }

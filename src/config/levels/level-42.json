@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 2,
+  "id": "level-42",
+  "number": 42,
+  "name": "Split Calibration",
+  "seed": "path-protocol-split-calibration-v1",
+  "difficulty": 2,
+  "briefing": "Expansion chamber 42: a difficulty-2 variation with a new deterministic layout.",
+  "arena": {
+    "shape": "rect",
+    "margin": 34,
+    "cornerRadius": 42,
+    "mediaId": "arena-standard"
+  },
+  "token": {
+    "shape": "circle",
+    "size": 38,
+    "mediaId": "token-circle"
+  },
+  "start": {
+    "mode": "generated",
+    "region": {
+      "x": 760,
+      "y": 720,
+      "width": 150,
+      "height": 140
+    },
+    "mediaId": "start-pad"
+  },
+  "mainTarget": {
+    "mode": "generated",
+    "region": {
+      "x": 90,
+      "y": 100,
+      "width": 150,
+      "height": 160
+    },
+    "size": 56,
+    "mediaId": "target-main"
+  },
+  "generation": {
+    "obstacleCount": 5,
+    "allowedShapes": [
+      "rect",
+      "circle"
+    ],
+    "minSize": 85,
+    "maxSize": 165,
+    "minimumGap": 68,
+    "pathGrid": 22,
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    }
+  },
+  "manualObstacles": [
+    {
+      "id": "deflector",
+      "shape": "rect",
+      "x": 430,
+      "y": 430,
+      "width": 160,
+      "height": 62,
+      "mediaId": "obstacle-static-rect"
+    }
+  ],
+  "movingObstacles": [],
+  "coins": [
+    {
+      "id": "coin-a",
+      "x": 500,
+      "y": 500,
+      "size": 30,
+      "value": 1,
+      "mediaId": "coin-standard"
+    }
+  ],
+  "rewards": {
+    "completionCoins": 1,
+    "bonusCoinsPerTarget": 1
+  },
+  "scoring": {
+    "baseMaximum": 21000,
+    "parTimeMs": 7200,
+    "parDistance": 980,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 0,
+    "rewardPerTarget": 0,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.2,
+    "targets": []
+  },
+  "movement": {
+    "maximumSpeed": 360,
+    "acceleration": 1400,
+    "deceleration": 1800,
+    "keyboardSpeed": 280
+  },
+  "trackingObstacles": []
+}

@@ -5,7 +5,7 @@ const preview = spawn(
   ['node_modules/vite/bin/vite.js', 'preview', '--host', '127.0.0.1'],
   {
     cwd: process.cwd(),
-    stdio: 'inherit',
+    stdio: 'ignore',
     windowsHide: true,
   },
 )
@@ -38,7 +38,11 @@ try {
   await waitForPreview()
   const playwright = spawn(
     process.execPath,
-    ['node_modules/@playwright/test/cli.js', 'test'],
+    [
+      'node_modules/@playwright/test/cli.js',
+      'test',
+      ...process.argv.slice(2),
+    ],
     {
       cwd: process.cwd(),
       env: { ...process.env, PLAYWRIGHT_EXTERNAL_SERVER: '1' },

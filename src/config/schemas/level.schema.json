@@ -1,42 +1,424 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "path-protocol-level.schema.json",
-  "title": "Path Protocol level",
+  "$id": "https://path-protocol.local/schemas/level.schema.json",
+  "title": "Path Protocol V2 level",
   "type": "object",
+  "additionalProperties": false,
   "required": [
     "schemaVersion",
     "id",
     "number",
     "name",
     "seed",
+    "difficulty",
+    "briefing",
     "arena",
     "token",
+    "movement",
     "start",
     "mainTarget",
     "generation",
+    "manualObstacles",
+    "movingObstacles",
+    "trackingObstacles",
+    "coins",
+    "rewards",
     "scoring",
     "bonuses"
   ],
   "properties": {
-    "schemaVersion": { "const": 1 },
+    "schemaVersion": { "const": 2 },
     "id": { "type": "string", "pattern": "^level-[0-9]{2}$" },
-    "number": { "type": "integer", "minimum": 1 },
-    "name": { "type": "string", "minLength": 1 },
-    "seed": { "type": "string", "minLength": 1 },
-    "difficulty": { "type": "integer", "minimum": 1, "maximum": 10 },
-    "briefing": { "type": "string" },
-    "arena": { "type": "object" },
-    "token": { "type": "object" },
-    "start": { "type": "object" },
-    "mainTarget": { "type": "object" },
-    "generation": { "type": "object" },
-    "manualObstacles": { "type": "array" },
-    "movingObstacles": { "type": "array" },
-    "trackingObstacles": { "type": "array" },
-    "coins": { "type": "array" },
-    "rewards": { "type": "object" },
-    "scoring": { "type": "object" },
-    "bonuses": { "type": "object" }
+    "number": { "type": "integer", "minimum": 1, "maximum": 99 },
+    "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "seed": { "type": "string", "minLength": 1, "maxLength": 160 },
+    "difficulty": {
+      "type": "integer",
+      "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15]
+    },
+    "briefing": { "type": "string", "minLength": 1, "maxLength": 300 },
+    "arena": { "$ref": "#/$defs/arena" },
+    "token": { "$ref": "#/$defs/token" },
+    "movement": { "$ref": "#/$defs/movement" },
+    "start": { "$ref": "#/$defs/start" },
+    "mainTarget": { "$ref": "#/$defs/mainTarget" },
+    "generation": { "$ref": "#/$defs/generation" },
+    "manualObstacles": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/staticObstacle" }
+    },
+    "movingObstacles": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/movingObstacle" }
+    },
+    "trackingObstacles": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/trackingObstacle" }
+    },
+    "coins": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/coin" }
+    },
+    "rewards": { "$ref": "#/$defs/rewards" },
+    "scoring": { "$ref": "#/$defs/scoring" },
+    "bonuses": { "$ref": "#/$defs/bonuses" }
   },
-  "additionalProperties": false
+  "$defs": {
+    "mediaId": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "coordinate": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1000
+    },
+    "positiveDimension": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 1000
+    },
+    "region": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y", "width", "height"],
+      "properties": {
+        "x": { "$ref": "#/$defs/coordinate" },
+        "y": { "$ref": "#/$defs/coordinate" },
+        "width": { "$ref": "#/$defs/positiveDimension" },
+        "height": { "$ref": "#/$defs/positiveDimension" }
+      }
+    },
+    "arena": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["shape", "mediaId", "margin", "cornerRadius"],
+          "properties": {
+            "shape": { "const": "rect" },
+            "mediaId": { "$ref": "#/$defs/mediaId" },
+            "margin": { "type": "number", "minimum": 0, "maximum": 400 },
+            "cornerRadius": { "type": "number", "minimum": 0, "maximum": 500 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["shape", "mediaId", "margin"],
+          "properties": {
+            "shape": { "const": "ellipse" },
+            "mediaId": { "$ref": "#/$defs/mediaId" },
+            "margin": { "type": "number", "minimum": 0, "maximum": 400 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["shape", "mediaId", "points"],
+          "properties": {
+            "shape": { "const": "polygon" },
+            "mediaId": { "$ref": "#/$defs/mediaId" },
+            "points": {
+              "type": "array",
+              "minItems": 3,
+              "items": {
+                "type": "array",
+                "prefixItems": [
+                  { "$ref": "#/$defs/coordinate" },
+                  { "$ref": "#/$defs/coordinate" }
+                ],
+                "items": false,
+                "minItems": 2,
+                "maxItems": 2
+              }
+            }
+          }
+        }
+      ]
+    },
+    "token": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["shape", "size", "mediaId"],
+      "properties": {
+        "shape": { "enum": ["circle", "rect", "diamond"] },
+        "size": { "$ref": "#/$defs/positiveDimension" },
+        "mediaId": { "$ref": "#/$defs/mediaId" }
+      }
+    },
+    "movement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["maximumSpeed", "acceleration", "deceleration", "keyboardSpeed"],
+      "properties": {
+        "maximumSpeed": { "type": "number", "exclusiveMinimum": 0, "maximum": 2000 },
+        "acceleration": { "type": "number", "exclusiveMinimum": 0, "maximum": 10000 },
+        "deceleration": { "type": "number", "exclusiveMinimum": 0, "maximum": 10000 },
+        "keyboardSpeed": { "type": "number", "exclusiveMinimum": 0, "maximum": 2000 }
+      }
+    },
+    "start": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode", "mediaId", "region"],
+          "properties": {
+            "mode": { "const": "generated" },
+            "mediaId": { "$ref": "#/$defs/mediaId" },
+            "region": { "$ref": "#/$defs/region" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode", "mediaId", "x", "y"],
+          "properties": {
+            "mode": { "const": "manual" },
+            "mediaId": { "$ref": "#/$defs/mediaId" },
+            "x": { "$ref": "#/$defs/coordinate" },
+            "y": { "$ref": "#/$defs/coordinate" }
+          }
+        }
+      ]
+    },
+    "mainTarget": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode", "mediaId", "region", "size"],
+          "properties": {
+            "mode": { "const": "generated" },
+            "mediaId": { "$ref": "#/$defs/mediaId" },
+            "region": { "$ref": "#/$defs/region" },
+            "size": { "$ref": "#/$defs/positiveDimension" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode", "mediaId", "x", "y", "size"],
+          "properties": {
+            "mode": { "const": "manual" },
+            "mediaId": { "$ref": "#/$defs/mediaId" },
+            "x": { "$ref": "#/$defs/coordinate" },
+            "y": { "$ref": "#/$defs/coordinate" },
+            "size": { "$ref": "#/$defs/positiveDimension" }
+          }
+        }
+      ]
+    },
+    "generation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "obstacleCount",
+        "allowedShapes",
+        "mediaByShape",
+        "minSize",
+        "maxSize",
+        "minimumGap",
+        "pathGrid"
+      ],
+      "properties": {
+        "obstacleCount": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "allowedShapes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "enum": ["circle", "rect", "diamond"] }
+        },
+        "mediaByShape": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["circle", "rect", "diamond"],
+          "properties": {
+            "circle": { "$ref": "#/$defs/mediaId" },
+            "rect": { "$ref": "#/$defs/mediaId" },
+            "diamond": { "$ref": "#/$defs/mediaId" }
+          }
+        },
+        "minSize": { "$ref": "#/$defs/positiveDimension" },
+        "maxSize": { "$ref": "#/$defs/positiveDimension" },
+        "minimumGap": { "type": "number", "minimum": 0, "maximum": 500 },
+        "pathGrid": { "type": "integer", "minimum": 4, "maximum": 100 }
+      }
+    },
+    "shapeDimensions": {
+      "oneOf": [
+        {
+          "required": ["size"],
+          "properties": {
+            "size": { "$ref": "#/$defs/positiveDimension" }
+          }
+        },
+        {
+          "required": ["width", "height"],
+          "properties": {
+            "width": { "$ref": "#/$defs/positiveDimension" },
+            "height": { "$ref": "#/$defs/positiveDimension" }
+          }
+        }
+      ]
+    },
+    "staticObstacle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "mediaId", "shape", "x", "y"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "mediaId": { "$ref": "#/$defs/mediaId" },
+        "shape": { "enum": ["circle", "rect", "diamond"] },
+        "x": { "$ref": "#/$defs/coordinate" },
+        "y": { "$ref": "#/$defs/coordinate" },
+        "size": { "$ref": "#/$defs/positiveDimension" },
+        "width": { "$ref": "#/$defs/positiveDimension" },
+        "height": { "$ref": "#/$defs/positiveDimension" }
+      },
+      "allOf": [{ "$ref": "#/$defs/shapeDimensions" }]
+    },
+    "movingObstacle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "mediaId",
+        "shape",
+        "x",
+        "y",
+        "axis",
+        "amplitude",
+        "periodMs",
+        "phase"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "mediaId": { "$ref": "#/$defs/mediaId" },
+        "shape": { "enum": ["circle", "rect", "diamond"] },
+        "x": { "$ref": "#/$defs/coordinate" },
+        "y": { "$ref": "#/$defs/coordinate" },
+        "size": { "$ref": "#/$defs/positiveDimension" },
+        "width": { "$ref": "#/$defs/positiveDimension" },
+        "height": { "$ref": "#/$defs/positiveDimension" },
+        "axis": { "enum": ["x", "y"] },
+        "amplitude": { "type": "number", "minimum": 0, "maximum": 1000 },
+        "periodMs": { "type": "integer", "minimum": 100, "maximum": 120000 },
+        "phase": { "type": "number" }
+      },
+      "allOf": [{ "$ref": "#/$defs/shapeDimensions" }]
+    },
+    "trackingObstacle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "mediaId",
+        "shape",
+        "x",
+        "y",
+        "width",
+        "height",
+        "zone",
+        "maxSpeed",
+        "acceleration",
+        "turnRateDegreesPerSecond"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "mediaId": { "$ref": "#/$defs/mediaId" },
+        "shape": { "enum": ["circle", "rect", "diamond"] },
+        "x": { "$ref": "#/$defs/coordinate" },
+        "y": { "$ref": "#/$defs/coordinate" },
+        "width": { "$ref": "#/$defs/positiveDimension" },
+        "height": { "$ref": "#/$defs/positiveDimension" },
+        "zone": { "$ref": "#/$defs/region" },
+        "maxSpeed": { "type": "number", "exclusiveMinimum": 0, "maximum": 2000 },
+        "acceleration": { "type": "number", "exclusiveMinimum": 0, "maximum": 10000 },
+        "turnRateDegreesPerSecond": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1440
+        }
+      }
+    },
+    "coin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "mediaId", "x", "y", "size", "value"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "mediaId": { "$ref": "#/$defs/mediaId" },
+        "x": { "$ref": "#/$defs/coordinate" },
+        "y": { "$ref": "#/$defs/coordinate" },
+        "size": { "$ref": "#/$defs/positiveDimension" },
+        "value": { "type": "integer", "minimum": 1, "maximum": 1000 }
+      }
+    },
+    "rewards": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["completionCoins", "bonusCoinsPerTarget"],
+      "properties": {
+        "completionCoins": { "type": "integer", "minimum": 0, "maximum": 10000 },
+        "bonusCoinsPerTarget": { "type": "integer", "minimum": 0, "maximum": 10000 }
+      }
+    },
+    "scoring": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "baseMaximum",
+        "parTimeMs",
+        "parDistance",
+        "timeWeight",
+        "distanceWeight",
+        "collisionPenaltyRate",
+        "maximumCollisions"
+      ],
+      "properties": {
+        "baseMaximum": { "type": "integer", "minimum": 1 },
+        "parTimeMs": { "type": "integer", "minimum": 1 },
+        "parDistance": { "type": "number", "exclusiveMinimum": 0 },
+        "timeWeight": { "type": "number", "minimum": 0, "maximum": 1 },
+        "distanceWeight": { "type": "number", "minimum": 0, "maximum": 1 },
+        "collisionPenaltyRate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "maximumCollisions": { "type": "integer", "minimum": 1, "maximum": 20 }
+      }
+    },
+    "bonusTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "mediaId", "x", "y", "size"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "mediaId": { "$ref": "#/$defs/mediaId" },
+        "x": { "$ref": "#/$defs/coordinate" },
+        "y": { "$ref": "#/$defs/coordinate" },
+        "size": { "$ref": "#/$defs/positiveDimension" }
+      }
+    },
+    "bonuses": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maximumTargets",
+        "rewardPerTarget",
+        "offerChanceMode",
+        "failurePenaltyRate",
+        "targets"
+      ],
+      "properties": {
+        "maximumTargets": { "type": "integer", "minimum": 0, "maximum": 20 },
+        "rewardPerTarget": { "type": "integer", "minimum": 0 },
+        "offerChanceMode": { "const": "currentScorePercent" },
+        "failurePenaltyRate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "targets": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/bonusTarget" }
+        }
+      }
+    }
+  }
 }

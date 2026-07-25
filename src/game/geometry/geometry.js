@@ -17,6 +17,24 @@ export function normalizeShape(shape) {
   }
 }
 
+/**
+ * Returns a centered collision shape inset from its visible edge.
+ * The tolerance and resulting dimensions use logical world units.
+ *
+ * @param {object} shapeInput Visual token geometry.
+ * @param {number} toleranceUnits Inset from every visible edge, in world units.
+ * @returns {object} Collision geometry with positive width and height.
+ */
+export function insetShape(shapeInput, toleranceUnits = 0) {
+  const shape = normalizeShape(shapeInput)
+  const inset = Math.max(0, Number(toleranceUnits) || 0) * 2
+  return {
+    ...shape,
+    width: Math.max(EPSILON, shape.width - inset),
+    height: Math.max(EPSILON, shape.height - inset),
+  }
+}
+
 export function polygonForShape(input) {
   const shape = normalizeShape(input)
   const halfWidth = shape.width / 2
@@ -239,9 +257,23 @@ export function advanceTrackingObstacle(obstacle, previousState, target, deltaMs
 
   const dx = target.x - state.x
   const dy = target.y - state.y
-  const magnitude = Math.hypot(dx, dy) || 1
-  const desiredX = (dx / magnitude) * obstacle.maxSpeed
-  const desiredY = (dy / magnitude) * obstacle.maxSpeed
+  const desiredHeading = Math.atan2(dy, dx)
+  const currentHeading =
+    Math.hypot(state.velocityX, state.velocityY) > 0.001
+      ? Math.atan2(state.velocityY, state.velocityX)
+      : (previousState?.headingRadians ?? 0)
+  const wrappedDifference =
+    Math.atan2(
+      Math.sin(desiredHeading - currentHeading),
+      Math.cos(desiredHeading - currentHeading),
+    )
+  const maximumTurn =
+    ((obstacle.turnRateDegreesPerSecond ?? 180) * Math.PI * seconds) / 180
+  const heading =
+    currentHeading +
+    clamp(wrappedDifference, -maximumTurn, maximumTurn)
+  const desiredX = Math.cos(heading) * obstacle.maxSpeed
+  const desiredY = Math.sin(heading) * obstacle.maxSpeed
   const changeX = desiredX - state.velocityX
   const changeY = desiredY - state.velocityY
   const changeMagnitude = Math.hypot(changeX, changeY) || 1
@@ -251,6 +283,7 @@ export function advanceTrackingObstacle(obstacle, previousState, target, deltaMs
   state.velocityY += changeY * steeringScale
   state.x += state.velocityX * seconds
   state.y += state.velocityY * seconds
+  state.headingRadians = heading
 
   const halfWidth = obstacle.width / 2
   const halfHeight = obstacle.height / 2

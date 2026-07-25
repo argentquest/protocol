@@ -1,29 +1,194 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "level-19",
   "number": 19,
   "name": "Edge Pressure",
   "seed": "path-protocol-edge-pressure-v1",
   "difficulty": 9,
   "briefing": "A large circular token leaves little room between pursuit and the wall.",
-  "arena": { "shape": "polygon", "points": [[80,150],[360,60],[810,90],[940,300],[900,790],[650,930],[190,870],[55,590]] },
-  "token": { "shape": "circle", "size": 56 },
-  "start": { "mode": "manual", "x": 190, "y": 200 },
-  "mainTarget": { "mode": "manual", "x": 780, "y": 760, "size": 60 },
-  "generation": { "obstacleCount": 6, "allowedShapes": ["rect", "circle"], "minSize": 90, "maxSize": 155, "minimumGap": 88, "pathGrid": 22 },
+  "arena": {
+    "shape": "polygon",
+    "points": [
+      [
+        80,
+        150
+      ],
+      [
+        360,
+        60
+      ],
+      [
+        810,
+        90
+      ],
+      [
+        940,
+        300
+      ],
+      [
+        900,
+        790
+      ],
+      [
+        650,
+        930
+      ],
+      [
+        190,
+        870
+      ],
+      [
+        55,
+        590
+      ]
+    ],
+    "mediaId": "arena-polygon"
+  },
+  "token": {
+    "shape": "circle",
+    "size": 56,
+    "mediaId": "token-circle"
+  },
+  "start": {
+    "mode": "manual",
+    "x": 190,
+    "y": 200,
+    "mediaId": "start-pad"
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "x": 780,
+    "y": 760,
+    "size": 60,
+    "mediaId": "target-main"
+  },
+  "generation": {
+    "obstacleCount": 6,
+    "allowedShapes": [
+      "rect",
+      "circle"
+    ],
+    "minSize": 90,
+    "maxSize": 155,
+    "minimumGap": 88,
+    "pathGrid": 22,
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    }
+  },
   "manualObstacles": [],
   "movingObstacles": [
-    { "id": "edge-bar", "shape": "rect", "x": 540, "y": 480, "width": 160, "height": 40, "axis": "y", "amplitude": 180, "periodMs": 5200, "phase": 0.6 }
+    {
+      "id": "edge-bar",
+      "shape": "rect",
+      "x": 540,
+      "y": 480,
+      "width": 160,
+      "height": 40,
+      "axis": "y",
+      "amplitude": 180,
+      "periodMs": 5200,
+      "phase": 0.6,
+      "mediaId": "obstacle-moving-rect"
+    }
   ],
   "trackingObstacles": [
-    { "id": "pressure-a", "shape": "circle", "x": 370, "y": 360, "width": 62, "height": 62, "zone": { "x": 150, "y": 150, "width": 520, "height": 520 }, "maxSpeed": 82, "acceleration": 112 },
-    { "id": "pressure-b", "shape": "circle", "x": 700, "y": 650, "width": 62, "height": 62, "zone": { "x": 390, "y": 350, "width": 470, "height": 470 }, "maxSpeed": 82, "acceleration": 112 }
+    {
+      "id": "pressure-a",
+      "shape": "circle",
+      "x": 370,
+      "y": 360,
+      "width": 62,
+      "height": 62,
+      "zone": {
+        "x": 150,
+        "y": 150,
+        "width": 520,
+        "height": 520
+      },
+      "maxSpeed": 82,
+      "acceleration": 112,
+      "mediaId": "obstacle-tracking-circle",
+      "turnRateDegreesPerSecond": 160
+    },
+    {
+      "id": "pressure-b",
+      "shape": "circle",
+      "x": 700,
+      "y": 650,
+      "width": 62,
+      "height": 62,
+      "zone": {
+        "x": 390,
+        "y": 350,
+        "width": 470,
+        "height": 470
+      },
+      "maxSpeed": 82,
+      "acceleration": 112,
+      "mediaId": "obstacle-tracking-circle",
+      "turnRateDegreesPerSecond": 160
+    }
   ],
   "coins": [
-    { "id": "coin-a", "x": 300, "y": 680, "size": 34, "value": 2 },
-    { "id": "coin-b", "x": 700, "y": 300, "size": 34, "value": 2 }
+    {
+      "id": "coin-a",
+      "x": 300,
+      "y": 680,
+      "size": 34,
+      "value": 2,
+      "mediaId": "coin-standard"
+    },
+    {
+      "id": "coin-b",
+      "x": 700,
+      "y": 300,
+      "size": 34,
+      "value": 2,
+      "mediaId": "coin-standard"
+    }
   ],
-  "rewards": { "completionCoins": 4, "bonusCoinsPerTarget": 2 },
-  "scoring": { "baseMaximum": 7500, "parTimeMs": 20000, "parDistance": 1900, "timeWeight": 0.5, "distanceWeight": 0.5, "collisionPenaltyRate": 0.2, "maximumCollisions": 3 },
-  "bonuses": { "maximumTargets": 2, "rewardPerTarget": 950, "offerChanceMode": "currentScorePercent", "failurePenaltyRate": 0.2, "targets": [{ "id": "relay-a", "x": 720, "y": 780, "size": 46 }, { "id": "relay-b", "x": 250, "y": 250, "size": 44 }] }
+  "rewards": {
+    "completionCoins": 4,
+    "bonusCoinsPerTarget": 2
+  },
+  "scoring": {
+    "baseMaximum": 7500,
+    "parTimeMs": 20000,
+    "parDistance": 1900,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 2,
+    "rewardPerTarget": 950,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.2,
+    "targets": [
+      {
+        "id": "relay-a",
+        "x": 720,
+        "y": 780,
+        "size": 46,
+        "mediaId": "target-bonus"
+      },
+      {
+        "id": "relay-b",
+        "x": 250,
+        "y": 250,
+        "size": 44,
+        "mediaId": "target-bonus"
+      }
+    ]
+  },
+  "movement": {
+    "maximumSpeed": 360,
+    "acceleration": 1400,
+    "deceleration": 1800,
+    "keyboardSpeed": 280
+  }
 }

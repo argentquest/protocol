@@ -1,26 +1,104 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "level-03",
   "number": 3,
   "name": "Tight Tolerances",
   "seed": "path-protocol-tolerances-v1",
   "difficulty": 3,
   "briefing": "Clearance is reduced. Precision unlocks an optional relay.",
-  "arena": { "shape": "rect", "margin": 38, "cornerRadius": 54 },
-  "token": { "shape": "circle", "size": 48 },
-  "start": { "mode": "generated", "region": { "x": 90, "y": 740, "width": 160, "height": 140 } },
-  "mainTarget": { "mode": "generated", "region": { "x": 760, "y": 110, "width": 140, "height": 150 }, "size": 54 },
-  "generation": { "obstacleCount": 6, "allowedShapes": ["rect", "circle"], "minSize": 95, "maxSize": 180, "minimumGap": 62, "pathGrid": 20 },
+  "arena": {
+    "shape": "rect",
+    "margin": 38,
+    "cornerRadius": 54,
+    "mediaId": "arena-standard"
+  },
+  "token": {
+    "shape": "circle",
+    "size": 48,
+    "mediaId": "token-circle"
+  },
+  "start": {
+    "mode": "generated",
+    "region": {
+      "x": 90,
+      "y": 740,
+      "width": 160,
+      "height": 140
+    },
+    "mediaId": "start-pad"
+  },
+  "mainTarget": {
+    "mode": "generated",
+    "region": {
+      "x": 760,
+      "y": 110,
+      "width": 140,
+      "height": 150
+    },
+    "size": 54,
+    "mediaId": "target-main"
+  },
+  "generation": {
+    "obstacleCount": 6,
+    "allowedShapes": [
+      "rect",
+      "circle"
+    ],
+    "minSize": 95,
+    "maxSize": 180,
+    "minimumGap": 62,
+    "pathGrid": 20,
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    }
+  },
   "manualObstacles": [],
   "movingObstacles": [],
-  "coins": [{ "id": "coin-a", "x": 520, "y": 540, "size": 28, "value": 1 }],
-  "rewards": { "completionCoins": 1, "bonusCoinsPerTarget": 1 },
-  "scoring": { "baseMaximum": 1450, "parTimeMs": 8200, "parDistance": 1080, "timeWeight": 0.5, "distanceWeight": 0.5, "collisionPenaltyRate": 0.2, "maximumCollisions": 3 },
+  "coins": [
+    {
+      "id": "coin-a",
+      "x": 520,
+      "y": 540,
+      "size": 28,
+      "value": 1,
+      "mediaId": "coin-standard"
+    }
+  ],
+  "rewards": {
+    "completionCoins": 1,
+    "bonusCoinsPerTarget": 1
+  },
+  "scoring": {
+    "baseMaximum": 1450,
+    "parTimeMs": 8200,
+    "parDistance": 1080,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
   "bonuses": {
     "maximumTargets": 1,
     "rewardPerTarget": 300,
     "offerChanceMode": "currentScorePercent",
     "failurePenaltyRate": 0.2,
-    "targets": [{ "id": "relay-a", "x": 820, "y": 720, "size": 48 }]
-  }
+    "targets": [
+      {
+        "id": "relay-a",
+        "x": 820,
+        "y": 720,
+        "size": 48,
+        "mediaId": "target-bonus"
+      }
+    ]
+  },
+  "movement": {
+    "maximumSpeed": 360,
+    "acceleration": 1400,
+    "deceleration": 1800,
+    "keyboardSpeed": 280
+  },
+  "trackingObstacles": []
 }

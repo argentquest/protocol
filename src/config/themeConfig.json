@@ -1,9 +1,12 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
+  "mediaVersion": 1,
+  "defaultMediaRoot": "/media/default",
   "activeTheme": "future-lab",
   "themes": {
     "future-lab": {
       "name": "Future Lab",
+      "mediaRoot": "/media/themes/future-lab",
       "colors": {
         "background": "#050914",
         "backgroundRaised": "#091323",
@@ -13,6 +16,7 @@
         "gridBright": "#24598c",
         "token": "#70f6ff",
         "tokenCore": "#e8fdff",
+        "collisionGuide": "#ffffff",
         "mainTarget": "#43e5b0",
         "bonusTarget": "#ff55dd",
         "hazard": "#ffb224",
@@ -25,31 +29,10 @@
       "effects": {
         "glowIntensity": 0.8,
         "trailWidth": 5,
+        "collisionGuideWidth": 1.5,
         "ghostTrailOpacity": 0.18,
         "targetPulseDurationMs": 900,
         "collisionFlashDurationMs": 220
-      },
-      "audio": {
-        "music": {
-          "mode": "synth",
-          "defaultVolume": 0.22
-        },
-        "effects": {
-          "dragStart": 420,
-          "targetReached": 780,
-          "bonusOffered": 980,
-          "collision": 130,
-          "attemptFailed": 90,
-          "levelComplete": 620,
-          "coinCollected": 1180,
-          "powerObstacleShield": 520,
-          "powerFullShield": 610,
-          "powerSlowField": 240,
-          "powerCoinMagnet": 1320,
-          "powerRouteScan": 860,
-          "powerUnavailable": 170
-        },
-        "effectsDefaultVolume": 0.55
       }
     }
   }

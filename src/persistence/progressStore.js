@@ -1,6 +1,6 @@
 const STORAGE_KEY = 'path-protocol.progress'
-const SCHEMA_VERSION = 1
-const MAX_LEVEL = 30
+const SCHEMA_VERSION = 2
+const MAX_LEVEL = 70
 
 export function createInitialProgress() {
   return {
@@ -24,8 +24,16 @@ export function createInitialProgress() {
   }
 }
 
-function sanitizeProgress(value) {
+function migrateProgress(value) {
+  if (value?.schemaVersion === 1) {
+    return { ...value, schemaVersion: SCHEMA_VERSION }
+  }
+  return value
+}
+
+function sanitizeProgress(savedValue) {
   const initial = createInitialProgress()
+  const value = migrateProgress(savedValue)
   if (!value || typeof value !== 'object' || value.schemaVersion !== SCHEMA_VERSION) {
     return initial
   }
@@ -68,7 +76,13 @@ function sanitizeProgress(value) {
 export function loadProgress(storage = window.localStorage) {
   try {
     const saved = storage.getItem(STORAGE_KEY)
-    return saved ? sanitizeProgress(JSON.parse(saved)) : createInitialProgress()
+    if (!saved) return createInitialProgress()
+    const parsed = JSON.parse(saved)
+    const progress = sanitizeProgress(parsed)
+    if (parsed.schemaVersion !== SCHEMA_VERSION) {
+      storage.setItem(STORAGE_KEY, JSON.stringify(progress))
+    }
+    return progress
   } catch {
     return createInitialProgress()
   }

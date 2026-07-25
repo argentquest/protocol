@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "sounds": [
+    { "soundId": "ambience", "fileName": "ambience", "channel": "ambience", "required": true },
+    { "soundId": "drag-start", "fileName": "drag-start", "channel": "effects", "required": true },
+    { "soundId": "collision", "fileName": "collision", "channel": "effects", "required": true },
+    { "soundId": "attempt-failed", "fileName": "attempt-failed", "channel": "effects", "required": true },
+    { "soundId": "target-reached", "fileName": "target-reached", "channel": "effects", "required": true },
+    { "soundId": "bonus-offered", "fileName": "bonus-offered", "channel": "effects", "required": true },
+    { "soundId": "bonus-accepted", "fileName": "bonus-accepted", "channel": "effects", "required": true },
+    { "soundId": "coin-collected", "fileName": "coin-collected", "channel": "effects", "required": true },
+    { "soundId": "power-obstacle-shield", "fileName": "power-obstacle-shield", "channel": "effects", "required": true },
+    { "soundId": "power-full-shield", "fileName": "power-full-shield", "channel": "effects", "required": true },
+    { "soundId": "power-slow-field", "fileName": "power-slow-field", "channel": "effects", "required": true },
+    { "soundId": "power-coin-magnet", "fileName": "power-coin-magnet", "channel": "effects", "required": true },
+    { "soundId": "power-route-scan", "fileName": "power-route-scan", "channel": "effects", "required": true },
+    { "soundId": "power-unavailable", "fileName": "power-unavailable", "channel": "effects", "required": true },
+    { "soundId": "level-complete", "fileName": "level-complete", "channel": "effects", "required": true }
+  ]
+}

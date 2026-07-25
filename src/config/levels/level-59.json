@@ -1,0 +1,202 @@
+{
+  "schemaVersion": 2,
+  "id": "level-59",
+  "number": 59,
+  "name": "Pursuit Vault",
+  "seed": "path-protocol-pursuit-vault-v1",
+  "difficulty": 9,
+  "briefing": "Expansion chamber 59: a difficulty-9 variation with a new deterministic layout.",
+  "arena": {
+    "shape": "polygon",
+    "points": [
+      [
+        80,
+        120
+      ],
+      [
+        370,
+        45
+      ],
+      [
+        780,
+        80
+      ],
+      [
+        950,
+        310
+      ],
+      [
+        885,
+        870
+      ],
+      [
+        650,
+        950
+      ],
+      [
+        210,
+        910
+      ],
+      [
+        45,
+        640
+      ]
+    ],
+    "mediaId": "arena-polygon"
+  },
+  "token": {
+    "shape": "diamond",
+    "size": 54,
+    "mediaId": "token-diamond"
+  },
+  "start": {
+    "mode": "generated",
+    "region": {
+      "x": 120,
+      "y": 700,
+      "width": 130,
+      "height": 120
+    },
+    "mediaId": "start-pad"
+  },
+  "mainTarget": {
+    "mode": "generated",
+    "region": {
+      "x": 710,
+      "y": 150,
+      "width": 130,
+      "height": 120
+    },
+    "size": 48,
+    "mediaId": "target-main"
+  },
+  "generation": {
+    "obstacleCount": 9,
+    "allowedShapes": [
+      "rect",
+      "circle",
+      "diamond"
+    ],
+    "minSize": 75,
+    "maxSize": 145,
+    "minimumGap": 67,
+    "pathGrid": 16,
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    }
+  },
+  "manualObstacles": [
+    {
+      "id": "containment-core",
+      "shape": "circle",
+      "x": 510,
+      "y": 510,
+      "size": 150,
+      "mediaId": "obstacle-static-circle"
+    }
+  ],
+  "movingObstacles": [
+    {
+      "id": "scanner-a",
+      "shape": "rect",
+      "x": 400,
+      "y": 350,
+      "width": 130,
+      "height": 36,
+      "axis": "x",
+      "amplitude": 170,
+      "periodMs": 3500,
+      "phase": 0.7,
+      "mediaId": "obstacle-moving-rect"
+    },
+    {
+      "id": "scanner-b",
+      "shape": "circle",
+      "x": 660,
+      "y": 650,
+      "size": 76,
+      "axis": "y",
+      "amplitude": 165,
+      "periodMs": 4100,
+      "phase": 2.2,
+      "mediaId": "obstacle-moving-circle"
+    }
+  ],
+  "coins": [
+    {
+      "id": "coin-a",
+      "x": 300,
+      "y": 700,
+      "size": 28,
+      "value": 1,
+      "mediaId": "coin-standard"
+    },
+    {
+      "id": "coin-b",
+      "x": 500,
+      "y": 400,
+      "size": 28,
+      "value": 2,
+      "mediaId": "coin-standard"
+    },
+    {
+      "id": "coin-c",
+      "x": 700,
+      "y": 300,
+      "size": 28,
+      "value": 1,
+      "mediaId": "coin-standard"
+    }
+  ],
+  "rewards": {
+    "completionCoins": 5,
+    "bonusCoinsPerTarget": 3
+  },
+  "scoring": {
+    "baseMaximum": 29500,
+    "parTimeMs": 14500,
+    "parDistance": 1550,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 3,
+    "rewardPerTarget": 600,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.2,
+    "targets": [
+      {
+        "id": "relay-a",
+        "x": 780,
+        "y": 720,
+        "size": 42,
+        "mediaId": "target-bonus"
+      },
+      {
+        "id": "relay-b",
+        "x": 320,
+        "y": 230,
+        "size": 40,
+        "mediaId": "target-bonus"
+      },
+      {
+        "id": "relay-c",
+        "x": 210,
+        "y": 650,
+        "size": 40,
+        "mediaId": "target-bonus"
+      }
+    ]
+  },
+  "movement": {
+    "maximumSpeed": 360,
+    "acceleration": 1400,
+    "deceleration": 1800,
+    "keyboardSpeed": 280
+  },
+  "trackingObstacles": []
+}

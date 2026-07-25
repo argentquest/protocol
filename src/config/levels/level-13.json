@@ -1,26 +1,122 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "level-13",
   "number": 13,
   "name": "Narrow Signal",
   "seed": "path-protocol-narrow-signal-v1",
   "difficulty": 8,
   "briefing": "A compact rectangular token slips through a guarded signal lane.",
-  "arena": { "shape": "ellipse", "margin": 42 },
-  "token": { "shape": "rect", "size": 30 },
-  "start": { "mode": "manual", "x": 250, "y": 200 },
-  "mainTarget": { "mode": "manual", "x": 820, "y": 760, "size": 48 },
-  "generation": { "obstacleCount": 8, "allowedShapes": ["rect", "circle"], "minSize": 70, "maxSize": 135, "minimumGap": 60, "pathGrid": 18 },
+  "arena": {
+    "shape": "ellipse",
+    "margin": 42,
+    "mediaId": "arena-ellipse"
+  },
+  "token": {
+    "shape": "rect",
+    "size": 30,
+    "mediaId": "token-rect"
+  },
+  "start": {
+    "mode": "manual",
+    "x": 250,
+    "y": 200,
+    "mediaId": "start-pad"
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "x": 820,
+    "y": 760,
+    "size": 48,
+    "mediaId": "target-main"
+  },
+  "generation": {
+    "obstacleCount": 8,
+    "allowedShapes": [
+      "rect",
+      "circle"
+    ],
+    "minSize": 70,
+    "maxSize": 135,
+    "minimumGap": 60,
+    "pathGrid": 18,
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    }
+  },
   "manualObstacles": [],
   "movingObstacles": [],
   "trackingObstacles": [
-    { "id": "signal-guard", "shape": "rect", "x": 500, "y": 500, "width": 68, "height": 38, "zone": { "x": 250, "y": 270, "width": 500, "height": 460 }, "maxSpeed": 92, "acceleration": 135 }
+    {
+      "id": "signal-guard",
+      "shape": "rect",
+      "x": 500,
+      "y": 500,
+      "width": 68,
+      "height": 38,
+      "zone": {
+        "x": 250,
+        "y": 270,
+        "width": 500,
+        "height": 460
+      },
+      "maxSpeed": 92,
+      "acceleration": 135,
+      "mediaId": "obstacle-tracking-rect",
+      "turnRateDegreesPerSecond": 160
+    }
   ],
   "coins": [
-    { "id": "coin-a", "x": 330, "y": 650, "size": 26, "value": 1 },
-    { "id": "coin-b", "x": 650, "y": 390, "size": 26, "value": 1 }
+    {
+      "id": "coin-a",
+      "x": 330,
+      "y": 650,
+      "size": 26,
+      "value": 1,
+      "mediaId": "coin-standard"
+    },
+    {
+      "id": "coin-b",
+      "x": 650,
+      "y": 390,
+      "size": 26,
+      "value": 1,
+      "mediaId": "coin-standard"
+    }
   ],
-  "rewards": { "completionCoins": 2, "bonusCoinsPerTarget": 1 },
-  "scoring": { "baseMaximum": 4900, "parTimeMs": 15800, "parDistance": 1480, "timeWeight": 0.5, "distanceWeight": 0.5, "collisionPenaltyRate": 0.2, "maximumCollisions": 3 },
-  "bonuses": { "maximumTargets": 1, "rewardPerTarget": 700, "offerChanceMode": "currentScorePercent", "failurePenaltyRate": 0.2, "targets": [{ "id": "relay-a", "x": 400, "y": 170, "size": 40 }] }
+  "rewards": {
+    "completionCoins": 2,
+    "bonusCoinsPerTarget": 1
+  },
+  "scoring": {
+    "baseMaximum": 4900,
+    "parTimeMs": 15800,
+    "parDistance": 1480,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 1,
+    "rewardPerTarget": 700,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.2,
+    "targets": [
+      {
+        "id": "relay-a",
+        "x": 400,
+        "y": 170,
+        "size": 40,
+        "mediaId": "target-bonus"
+      }
+    ]
+  },
+  "movement": {
+    "maximumSpeed": 360,
+    "acceleration": 1400,
+    "deceleration": 1800,
+    "keyboardSpeed": 280
+  }
 }

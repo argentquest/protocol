@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://path-protocol.local/schemas/mediaRegistry.schema.json",
+  "title": "Path Protocol media registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "mediaVersion", "media"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "mediaVersion": { "type": "integer", "minimum": 1 },
+    "media": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["mediaId", "category", "fileName", "renderMode", "sizing"],
+        "properties": {
+          "mediaId": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+          "category": {
+            "enum": ["arenas", "tokens", "obstacles", "targets", "bonus", "coins", "powers"]
+          },
+          "fileName": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*\\.svg$" },
+          "renderMode": { "const": "vector" },
+          "sizing": { "enum": ["contain", "stretch"] }
+        }
+      }
+    }
+  }
+}

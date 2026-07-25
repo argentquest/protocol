@@ -1,118 +1,151 @@
-export function createAudioManager(themeAudio, initialSettings) {
-  let context = null
-  let master = null
-  let musicGain = null
-  let effectsGain = null
-  let ambientNodes = []
-  let settings = { ...initialSettings }
-  let lastCollisionAt = 0
+import { Howl, Howler } from 'howler'
 
-  function ensureContext() {
-    if (context) {
-      if (context.state === 'suspended') context.resume()
-      return context
-    }
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext
-    if (!AudioContextClass) return null
-    context = new AudioContextClass()
-    master = context.createGain()
-    musicGain = context.createGain()
-    effectsGain = context.createGain()
-    master.gain.value = 0.7
-    musicGain.gain.value = settings.musicEnabled ? settings.musicVolume : 0
-    effectsGain.gain.value = settings.effectsEnabled ? settings.effectsVolume : 0
-    musicGain.connect(master)
-    effectsGain.connect(master)
-    master.connect(context.destination)
-    return context
+const defaults = {
+  musicEnabled: true,
+  musicVolume: 0.22,
+  effectsEnabled: true,
+  effectsVolume: 0.55,
+}
+
+export function createAudioManager(
+  initialSettings = defaults,
+  { HowlClass = Howl, howler = Howler, now = () => performance.now() } = {},
+) {
+  let settings = { ...defaults, ...initialSettings }
+  let unlocked = false
+  let disposed = false
+  const sounds = new Map()
+  const lastPlayedAt = new Map()
+
+  const channelVolume = (entry) => {
+    const ambience = entry.settings.channel === 'ambience'
+    const enabled = ambience ? settings.musicEnabled : settings.effectsEnabled
+    const master = ambience ? settings.musicVolume : settings.effectsVolume
+    return enabled ? entry.settings.volume * master : 0
   }
 
-  function startMusic() {
-    const audioContext = ensureContext()
-    if (!audioContext || ambientNodes.length) return
-    const frequencies = [55, 82.5, 110]
-    ambientNodes = frequencies.map((frequency, index) => {
-      const oscillator = audioContext.createOscillator()
-      const gain = audioContext.createGain()
-      oscillator.type = index === 0 ? 'sine' : 'triangle'
-      oscillator.frequency.value = frequency
-      gain.gain.value = index === 0 ? 0.07 : 0.025
-      oscillator.connect(gain)
-      gain.connect(musicGain)
-      oscillator.start()
-      return { oscillator, gain }
+  function loadSound(entry) {
+    if (disposed) return Promise.reject(new Error('Audio manager was disposed.'))
+    if (sounds.has(entry.soundId)) return sounds.get(entry.soundId).loadPromise
+    const record = { entry, howl: null, playingId: null, loadPromise: null }
+    sounds.set(entry.soundId, record)
+    record.loadPromise = new Promise((resolve, reject) => {
+      const attempts = [
+        ...entry.sources.map((source) => ({ source, html5: false })),
+        { source: entry.sources.at(-1), html5: true },
+      ]
+      const trySource = (attemptIndex) => {
+        const attempt = attempts[attemptIndex]
+        const howl = new HowlClass({
+          src: [attempt.source],
+          preload: false,
+          loop: entry.settings.loop,
+          volume: 0,
+          html5: attempt.html5,
+        })
+        record.howl = howl
+        const loaded = () => {
+          howl.off?.('loaderror', failed)
+          howl.volume(channelVolume(entry))
+          resolve(howl)
+        }
+        const failed = (_id, error) => {
+          howl.off?.('load', loaded)
+          howl.unload()
+          if (attemptIndex + 1 < attempts.length) {
+            trySource(attemptIndex + 1)
+            return
+          }
+          sounds.delete(entry.soundId)
+          reject(
+            new Error(
+              `Unable to load sound "${entry.soundId}": ${error ?? 'unknown error'}`,
+            ),
+          )
+        }
+        howl.once('load', loaded)
+        howl.once('loaderror', failed)
+        howl.load()
+      }
+      trySource(0)
     })
+    return record.loadPromise
+  }
+
+  async function ensureContext() {
+    if (howler.ctx?.state === 'suspended') await howler.ctx.resume()
+    return howler.ctx ?? null
+  }
+
+  function startAmbience() {
+    if (!unlocked || disposed) return false
+    const record = sounds.get('ambience')
+    if (!record || record.playingId !== null) return false
+    const target = channelVolume(record.entry)
+    record.howl.volume(record.entry.settings.fadeInMs > 0 ? 0 : target)
+    record.playingId = record.howl.play()
+    if (record.entry.settings.fadeInMs > 0 && target > 0) {
+      record.howl.fade(0, target, record.entry.settings.fadeInMs, record.playingId)
+    }
+    return true
+  }
+
+  async function unlock() {
+    await ensureContext()
+    unlocked = true
+    startAmbience()
+  }
+
+  function play(soundId) {
+    if (!unlocked || disposed) return null
+    const record = sounds.get(soundId)
+    if (!record || record.entry.settings.channel === 'ambience') return null
+    if (!settings.effectsEnabled) return null
+    const timestamp = now()
+    const previous = lastPlayedAt.get(soundId) ?? -Infinity
+    if (timestamp - previous < record.entry.settings.cooldownMs) return null
+    lastPlayedAt.set(soundId, timestamp)
+    record.howl.volume(channelVolume(record.entry))
+    return record.howl.play()
   }
 
   function updateSettings(nextSettings) {
     settings = { ...settings, ...nextSettings }
-    if (musicGain) {
-      musicGain.gain.setTargetAtTime(
-        settings.musicEnabled ? settings.musicVolume : 0,
-        context.currentTime,
-        0.03,
-      )
+    for (const record of sounds.values()) {
+      const target = channelVolume(record.entry)
+      if (
+        record.entry.settings.channel === 'ambience' &&
+        record.playingId !== null &&
+        record.entry.settings.fadeOutMs > 0
+      ) {
+        record.howl.fade(
+          record.howl.volume(record.playingId),
+          target,
+          record.entry.settings.fadeOutMs,
+          record.playingId,
+        )
+      } else {
+        record.howl.volume(target)
+      }
     }
-    if (effectsGain) {
-      effectsGain.gain.setTargetAtTime(
-        settings.effectsEnabled ? settings.effectsVolume : 0,
-        context.currentTime,
-        0.03,
-      )
-    }
-  }
-
-  function play(name) {
-    const audioContext = ensureContext()
-    if (!audioContext || !settings.effectsEnabled) return
-    if (name === 'collision') {
-      const now = performance.now()
-      if (now - lastCollisionAt < 90) return
-      lastCollisionAt = now
-    }
-    const baseFrequency = themeAudio.effects[name] ?? 440
-    const oscillator = audioContext.createOscillator()
-    const gain = audioContext.createGain()
-    const powerSound = name.startsWith('power')
-    const duration = name === 'levelComplete' ? 0.45 : powerSound ? 0.28 : 0.16
-    const powerWaveforms = {
-      powerObstacleShield: 'triangle',
-      powerFullShield: 'sine',
-      powerSlowField: 'sawtooth',
-      powerCoinMagnet: 'square',
-      powerRouteScan: 'triangle',
-    }
-    oscillator.type =
-      powerWaveforms[name] ??
-      (name === 'collision' || name === 'attemptFailed' ? 'sawtooth' : 'sine')
-    oscillator.frequency.setValueAtTime(baseFrequency, audioContext.currentTime)
-    const targetMultiplier =
-      name === 'powerSlowField'
-        ? 0.5
-        : name === 'powerCoinMagnet'
-          ? 1.8
-          : name === 'collision'
-            ? 0.45
-            : 1.35
-    oscillator.frequency.exponentialRampToValueAtTime(
-      Math.max(45, baseFrequency * targetMultiplier),
-      audioContext.currentTime + duration,
-    )
-    gain.gain.setValueAtTime(0.0001, audioContext.currentTime)
-    gain.gain.exponentialRampToValueAtTime(0.16, audioContext.currentTime + 0.015)
-    gain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + duration)
-    oscillator.connect(gain)
-    gain.connect(effectsGain)
-    oscillator.start()
-    oscillator.stop(audioContext.currentTime + duration)
+    if (unlocked) startAmbience()
   }
 
   function dispose() {
-    for (const node of ambientNodes) node.oscillator.stop()
-    ambientNodes = []
-    context?.close()
-    context = null
+    disposed = true
+    for (const record of sounds.values()) record.howl.unload()
+    sounds.clear()
+    lastPlayedAt.clear()
   }
 
-  return { ensureContext, startMusic, updateSettings, play, dispose }
+  return {
+    ensureContext,
+    loadSound,
+    play,
+    startAmbience,
+    startMusic: unlock,
+    unlock,
+    updateSettings,
+    dispose,
+  }
 }

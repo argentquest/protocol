@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   activeTheme,
+  configurationStatus,
   gameplayConfig,
   levels as levelConfigs,
   powerups,
@@ -9,6 +10,8 @@ import GameView from '../game/GameView.jsx'
 import { createAudioManager } from '../game/audio/audioManager.js'
 import { recordPlaytestRun } from '../game/debug/playtestLog.js'
 import { generateLevel } from '../game/generation/levelGenerator.js'
+import { loadStartupMedia } from '../game/media/startupLoader.js'
+import { sharedVectorAssetCache } from '../game/rendering/pixi/VectorAssetCache.js'
 import {
   cumulativeScore,
   collectCourseCoin,
@@ -31,6 +34,46 @@ function ProtocolMark({ compact = false }) {
         <circle cx="44" cy="21" r="3" />
       </svg>
     </div>
+  )
+}
+
+function StartupScreen({ startup, onStart, onRetry }) {
+  const ready = startup.status === 'ready'
+  const failed = startup.status === 'error'
+  return (
+    <main className="startup-screen" aria-live="polite">
+      <ProtocolMark />
+      <p className="eyebrow">Path Protocol // Future Lab</p>
+      <h1>Starting up the game</h1>
+      <p>
+        {failed
+          ? 'The laboratory media could not be initialized.'
+          : ready
+            ? 'All systems are ready. Start the game to enable sound.'
+            : startup.label}
+      </p>
+      {!failed && (
+        <>
+          <progress
+            aria-label="Startup progress"
+            max="100"
+            value={startup.percentage}
+          />
+          <b>{startup.percentage}%</b>
+        </>
+      )}
+      {failed && <div role="alert">{startup.error}</div>}
+      {ready && (
+        <button className="primary-button" type="button" onClick={onStart}>
+          Start Game
+        </button>
+      )}
+      {failed && (
+        <button className="primary-button" type="button" onClick={onRetry}>
+          Retry startup
+        </button>
+      )}
+    </main>
   )
 }
 
@@ -84,6 +127,7 @@ function HomeScreen({
   onPowers,
   onInstructions,
   devMode,
+  onToggleDevMode,
 }) {
   const completedCount = Object.values(progress.levels).filter((level) => level.completed).length
   const hasProgress = completedCount > 0
@@ -118,6 +162,15 @@ function HomeScreen({
           </button>
           <button className="secondary-button" type="button" onClick={onPowers}>
             Buy power-ups · {progress.player.coins} coins
+          </button>
+          <button
+            className="secondary-button dev-mode-toggle"
+            type="button"
+            aria-label="Dev mode"
+            aria-pressed={devMode}
+            onClick={onToggleDevMode}
+          >
+            Dev mode <b>{devMode ? 'ON' : 'OFF'}</b>
           </button>
         </div>
         <button className="text-button" type="button" onClick={onInstructions}>
@@ -212,7 +265,9 @@ function LevelSelect({ levels, progress, onSelect, onPowers, devMode }) {
           return (
             <button
               key={level.id}
-              className={`level-card ${record?.completed ? 'is-complete' : ''}`}
+              className={`level-card ${
+                record?.completed ? 'is-complete' : ''
+              } ${level.difficulty === 15 ? 'is-apex' : ''}`}
               type="button"
               disabled={!unlocked}
               onClick={() => onSelect(level.id)}
@@ -235,14 +290,23 @@ function LevelSelect({ levels, progress, onSelect, onPowers, devMode }) {
               </div>
               <div className="level-card__meta">
                 <span>
-                  Difficulty <b>{level.difficulty}/10</b>
+                  Difficulty{' '}
+                  <b>
+                    {level.difficulty === 15
+                      ? '15 · APEX'
+                      : `${level.difficulty}/10`}
+                  </b>
                 </span>
                 <span>
                   Best <b>{(record?.bestScore ?? 0).toLocaleString()}</b>
                 </span>
               </div>
               <div className="difficulty-bar">
-                <i style={{ width: `${level.difficulty * 10}%` }} />
+                <i
+                  style={{
+                    width: `${Math.min(100, level.difficulty * 10)}%`,
+                  }}
+                />
               </div>
             </button>
           )
@@ -277,7 +341,6 @@ function PowerLab({ progress, totalScore, onPurchase }) {
             <article
               className={`power-card ${unlocked ? 'is-unlocked' : ''}`}
               key={powerup.id}
-              style={{ '--power-color': powerup.color }}
             >
               <div className="power-card__key">
                 {powerup.key}
@@ -322,15 +385,15 @@ function Instructions() {
     <main className="content-screen guide-screen">
       <div className="screen-heading">
         <p className="eyebrow">Operator field guide</p>
-        <h1>One drag. No shortcuts.</h1>
+        <h1>One route. No shortcuts.</h1>
         <p>Your mouse or the arrow keys control the center of a physical token. Its complete outline must clear the chamber.</p>
       </div>
       <section className="guide-grid">
         <article>
           <span className="guide-index">01</span>
           <div className="guide-icon guide-icon--token"><i /></div>
-          <h2>Press and hold</h2>
-          <p>Begin on the glowing token and hold the mouse, or press Space to toggle keyboard control and steer with the arrow keys.</p>
+          <h2>Click to toggle</h2>
+          <p>Click the glowing token to start mouse control and click again to stop, or press Space to toggle keyboard control and steer with the arrow keys.</p>
         </article>
         <article>
           <span className="guide-index">02</span>
@@ -342,7 +405,7 @@ function Instructions() {
           <span className="guide-index">03</span>
           <div className="guide-icon guide-icon--target"><i /></div>
           <h2>Touch the target</h2>
-          <p>Any token contact activates it. A relay popup lets you bank or begin a new bonus drag from that checkpoint.</p>
+          <p>Any token contact activates it. A relay popup lets you bank or begin a new bonus run from that checkpoint.</p>
         </article>
         <article>
           <span className="guide-index">04</span>
@@ -390,6 +453,7 @@ function Settings({ settings, onChange, onReset }) {
             className={`toggle ${settings.musicEnabled ? 'is-on' : ''}`}
             type="button"
             role="switch"
+            aria-label="Ambient music"
             aria-checked={settings.musicEnabled}
             onClick={() => update('musicEnabled', !settings.musicEnabled)}
           >
@@ -419,6 +483,7 @@ function Settings({ settings, onChange, onReset }) {
             className={`toggle ${settings.effectsEnabled ? 'is-on' : ''}`}
             type="button"
             role="switch"
+            aria-label="Sound effects"
             aria-checked={settings.effectsEnabled}
             onClick={() => update('effectsEnabled', !settings.effectsEnabled)}
           >
@@ -448,6 +513,7 @@ function Settings({ settings, onChange, onReset }) {
             className={`toggle ${settings.reducedMotion ? 'is-on' : ''}`}
             type="button"
             role="switch"
+            aria-label="Reduced motion"
             aria-checked={settings.reducedMotion}
             onClick={() => update('reducedMotion', !settings.reducedMotion)}
           >
@@ -536,38 +602,128 @@ function Results({
   )
 }
 
-export default function App() {
-  const devMode = useMemo(
-    () => new URLSearchParams(window.location.search).get('dev') === '1',
-    [],
-  )
+/**
+ * Resolves playtest mode from an explicit URL override, otherwise enabling it
+ * by default on the local Vite development server.
+ *
+ * @returns {boolean} Whether isolated developer playtesting is active.
+ */
+function initialDevMode() {
+  const override = new URLSearchParams(window.location.search).get('dev')
+  if (override !== null) return override === '1'
+  return import.meta.env.DEV
+}
+
+function PathProtocolApp() {
+  const [devMode, setDevMode] = useState(initialDevMode)
   const [progress, setProgress] = useState(() => loadProgress())
   const [screen, setScreen] = useState('home')
   const [selectedLevelId, setSelectedLevelId] = useState('level-01')
   const [lastResult, setLastResult] = useState(null)
+  const [mediaManifest, setMediaManifest] = useState(null)
+  const [startupAttempt, setStartupAttempt] = useState(0)
+  const [startup, setStartup] = useState({
+    status: 'loading',
+    label: 'Validating configuration',
+    percentage: 0,
+    error: null,
+  })
+  const [started, setStarted] = useState(false)
   const selectedConfig =
     levelConfigs.find((level) => level.id === selectedLevelId) ?? levelConfigs[0]
   const currentLevel = useMemo(() => generateLevel(selectedConfig), [selectedConfig])
   const totalScore = cumulativeScore(progress)
   const audioRef = useRef(null)
+  const audioLifecycleRef = useRef(null)
   const progressRef = useRef(progress)
   progressRef.current = progress
 
   if (!audioRef.current) {
-    audioRef.current = createAudioManager(activeTheme.audio, progress.settings)
+    audioRef.current = createAudioManager(progress.settings)
   }
+
+  useEffect(() => {
+    let cancelled = false
+    setStartup({
+      status: 'loading',
+      label: 'Validating configuration',
+      percentage: 0,
+      error: null,
+    })
+    loadStartupMedia({
+      themeName: 'future-lab',
+      validateConfiguration: async () => {
+        if (!configurationStatus.valid) {
+          throw new Error(configurationStatus.errors.join('; '))
+        }
+      },
+      fetchManifest: async (url) => {
+        const response = await fetch(url)
+        if (!response.ok) throw new Error('Unable to resolve the Future Lab media.')
+        return response.json()
+      },
+      loadVisual: (entry) => sharedVectorAssetCache.load(entry),
+      loadAudio: (entry) => audioRef.current.loadSound(entry),
+      onProgress: (snapshot) => {
+        if (!cancelled) setStartup({ status: 'loading', error: null, ...snapshot })
+      },
+    })
+      .then((manifest) => {
+        if (cancelled) return
+        setMediaManifest(manifest)
+        setStartup({
+          status: 'ready',
+          label: 'All systems ready',
+          percentage: 100,
+          error: null,
+        })
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          setStartup({
+            status: 'error',
+            label: 'Startup failed',
+            percentage: 0,
+            error: error.message,
+          })
+        }
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [startupAttempt])
 
   useEffect(() => {
     audioRef.current.updateSettings(progress.settings)
     document.documentElement.dataset.reducedMotion = String(progress.settings.reducedMotion)
   }, [progress.settings])
 
-  useEffect(() => () => audioRef.current?.dispose(), [])
+  useEffect(() => {
+    const lifecycle = {}
+    audioLifecycleRef.current = lifecycle
+    return () => {
+      queueMicrotask(() => {
+        if (audioLifecycleRef.current === lifecycle) audioRef.current?.dispose()
+      })
+    }
+  }, [])
 
   const navigate = (nextScreen) => {
-    audioRef.current.ensureContext()
-    audioRef.current.startMusic()
     setScreen(nextScreen)
+  }
+
+  const toggleDevMode = () => {
+    setDevMode((current) => {
+      const next = !current
+      const url = new URL(window.location.href)
+      url.searchParams.set('dev', next ? '1' : '0')
+      window.history.replaceState(
+        window.history.state,
+        '',
+        `${url.pathname}${url.search}${url.hash}`,
+      )
+      return next
+    })
   }
 
   const playLevel = (levelId) => {
@@ -623,7 +779,7 @@ export default function App() {
     progressRef.current = purchased.progress
     setProgress(purchased.progress)
     saveProgress(purchased.progress)
-    audioRef.current.play(powerup.sound)
+    audioRef.current.play(powerup.soundId)
   }
 
   const handleUsePowerup = (powerupId) => {
@@ -666,6 +822,19 @@ export default function App() {
 
   const showShell = screen !== 'game'
 
+  if (!started) {
+    return (
+      <StartupScreen
+        startup={startup}
+        onStart={async () => {
+          await audioRef.current.unlock()
+          setStarted(true)
+        }}
+        onRetry={() => setStartupAttempt((attempt) => attempt + 1)}
+      />
+    )
+  }
+
   return (
     <div
       className={`app-shell ${progress.settings.reducedMotion ? 'reduce-motion' : ''}`}
@@ -702,6 +871,7 @@ export default function App() {
           onPowers={() => navigate('powers')}
           onInstructions={() => navigate('instructions')}
           devMode={devMode}
+          onToggleDevMode={toggleDevMode}
         />
       )}
       {screen === 'levels' && (
@@ -747,6 +917,18 @@ export default function App() {
           collectedCoins={progress.player.collectedCoins}
           onUsePowerup={handleUsePowerup}
           onCoinCollected={handleCoinCollected}
+          mediaManifest={mediaManifest}
+          reducedMotion={progress.settings.reducedMotion}
+          tokenCollisionTolerance={
+            gameplayConfig.collision.tokenToleranceUnits
+          }
+          collisionGuideStyle={{
+            color: Number.parseInt(
+              activeTheme.colors.collisionGuide.slice(1),
+              16,
+            ),
+            width: activeTheme.effects.collisionGuideWidth,
+          }}
           pointerResponsePerSecond={gameplayConfig.input.pointerResponsePerSecond}
           keyboardSpeedUnitsPerSecond={
             gameplayConfig.input.keyboardSpeedUnitsPerSecond
@@ -774,4 +956,28 @@ export default function App() {
       )}
     </div>
   )
+}
+
+export function ConfigurationErrorScreen({ errors }) {
+  return (
+    <main className="configuration-error" role="alert">
+      <p className="eyebrow">Startup validation failed</p>
+      <h1>Path Protocol could not initialize</h1>
+      <p>The local game configuration is incomplete or invalid.</p>
+      {import.meta.env.DEV && (
+        <ul>
+          {errors.map((error) => (
+            <li key={error}>{error}</li>
+          ))}
+        </ul>
+      )}
+    </main>
+  )
+}
+
+export default function App() {
+  if (!configurationStatus.valid) {
+    return <ConfigurationErrorScreen errors={configurationStatus.errors} />
+  }
+  return <PathProtocolApp />
 }

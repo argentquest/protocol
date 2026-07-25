@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 2,
+  "id": "level-56",
+  "number": 56,
+  "name": "Geometry Shift",
+  "seed": "path-protocol-geometry-shift-v1",
+  "difficulty": 6,
+  "briefing": "Expansion chamber 56: a difficulty-6 variation with a new deterministic layout.",
+  "arena": {
+    "shape": "polygon",
+    "points": [
+      [
+        90,
+        90
+      ],
+      [
+        850,
+        55
+      ],
+      [
+        950,
+        300
+      ],
+      [
+        870,
+        910
+      ],
+      [
+        520,
+        950
+      ],
+      [
+        75,
+        820
+      ],
+      [
+        45,
+        360
+      ]
+    ],
+    "mediaId": "arena-polygon"
+  },
+  "token": {
+    "shape": "diamond",
+    "size": 58,
+    "mediaId": "token-diamond"
+  },
+  "start": {
+    "mode": "generated",
+    "region": {
+      "x": 420,
+      "y": 760,
+      "width": 160,
+      "height": 110
+    },
+    "mediaId": "start-pad"
+  },
+  "mainTarget": {
+    "mode": "generated",
+    "region": {
+      "x": 410,
+      "y": 100,
+      "width": 180,
+      "height": 120
+    },
+    "size": 52,
+    "mediaId": "target-main"
+  },
+  "generation": {
+    "obstacleCount": 8,
+    "allowedShapes": [
+      "rect",
+      "circle",
+      "diamond"
+    ],
+    "minSize": 75,
+    "maxSize": 155,
+    "minimumGap": 70,
+    "pathGrid": 18,
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    }
+  },
+  "manualObstacles": [],
+  "movingObstacles": [],
+  "coins": [
+    {
+      "id": "coin-a",
+      "x": 330,
+      "y": 670,
+      "size": 28,
+      "value": 1,
+      "mediaId": "coin-standard"
+    },
+    {
+      "id": "coin-b",
+      "x": 690,
+      "y": 330,
+      "size": 28,
+      "value": 1,
+      "mediaId": "coin-standard"
+    }
+  ],
+  "rewards": {
+    "completionCoins": 3,
+    "bonusCoinsPerTarget": 2
+  },
+  "scoring": {
+    "baseMaximum": 28000,
+    "parTimeMs": 11200,
+    "parDistance": 1320,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 2,
+    "rewardPerTarget": 450,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.2,
+    "targets": [
+      {
+        "id": "relay-a",
+        "x": 760,
+        "y": 730,
+        "size": 44,
+        "mediaId": "target-bonus"
+      },
+      {
+        "id": "relay-b",
+        "x": 320,
+        "y": 180,
+        "size": 44,
+        "mediaId": "target-bonus"
+      }
+    ]
+  },
+  "movement": {
+    "maximumSpeed": 360,
+    "acceleration": 1400,
+    "deceleration": 1800,
+    "keyboardSpeed": 280
+  },
+  "trackingObstacles": []
+}

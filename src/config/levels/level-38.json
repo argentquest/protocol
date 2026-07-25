@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 2,
+  "id": "level-38",
+  "number": 38,
+  "name": "Signal Weave",
+  "seed": "path-protocol-signal-weave-v1",
+  "difficulty": 8,
+  "briefing": "Expansion chamber 38: a difficulty-8 variation with a new deterministic layout.",
+  "arena": {
+    "shape": "rect",
+    "margin": 32,
+    "cornerRadius": 30,
+    "mediaId": "arena-standard"
+  },
+  "token": {
+    "shape": "rect",
+    "size": 52,
+    "mediaId": "token-rect"
+  },
+  "start": {
+    "mode": "generated",
+    "region": {
+      "x": 760,
+      "y": 410,
+      "width": 130,
+      "height": 170
+    },
+    "mediaId": "start-pad"
+  },
+  "mainTarget": {
+    "mode": "generated",
+    "region": {
+      "x": 90,
+      "y": 400,
+      "width": 140,
+      "height": 180
+    },
+    "size": 50,
+    "mediaId": "target-main"
+  },
+  "generation": {
+    "obstacleCount": 8,
+    "allowedShapes": [
+      "rect",
+      "circle",
+      "diamond"
+    ],
+    "minSize": 75,
+    "maxSize": 145,
+    "minimumGap": 66,
+    "pathGrid": 18,
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    }
+  },
+  "manualObstacles": [],
+  "movingObstacles": [
+    {
+      "id": "scanner-a",
+      "shape": "rect",
+      "x": 500,
+      "y": 390,
+      "width": 140,
+      "height": 38,
+      "axis": "x",
+      "amplitude": 220,
+      "periodMs": 3800,
+      "phase": 0,
+      "mediaId": "obstacle-moving-rect"
+    },
+    {
+      "id": "scanner-b",
+      "shape": "rect",
+      "x": 610,
+      "y": 570,
+      "width": 38,
+      "height": 150,
+      "axis": "y",
+      "amplitude": 210,
+      "periodMs": 4600,
+      "phase": 1.8,
+      "mediaId": "obstacle-moving-rect"
+    }
+  ],
+  "coins": [
+    {
+      "id": "coin-a",
+      "x": 300,
+      "y": 700,
+      "size": 28,
+      "value": 1,
+      "mediaId": "coin-standard"
+    },
+    {
+      "id": "coin-b",
+      "x": 700,
+      "y": 300,
+      "size": 28,
+      "value": 1,
+      "mediaId": "coin-standard"
+    }
+  ],
+  "rewards": {
+    "completionCoins": 4,
+    "bonusCoinsPerTarget": 2
+  },
+  "scoring": {
+    "baseMaximum": 19000,
+    "parTimeMs": 13200,
+    "parDistance": 1450,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 2,
+    "rewardPerTarget": 550,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.2,
+    "targets": [
+      {
+        "id": "relay-a",
+        "x": 810,
+        "y": 750,
+        "size": 42,
+        "mediaId": "target-bonus"
+      },
+      {
+        "id": "relay-b",
+        "x": 170,
+        "y": 210,
+        "size": 42,
+        "mediaId": "target-bonus"
+      }
+    ]
+  },
+  "movement": {
+    "maximumSpeed": 360,
+    "acceleration": 1400,
+    "deceleration": 1800,
+    "keyboardSpeed": 280
+  },
+  "trackingObstacles": []
+}

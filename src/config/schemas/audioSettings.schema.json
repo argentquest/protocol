@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://path-protocol.local/schemas/audioSettings.schema.json",
+  "title": "Path Protocol audio playback settings",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "sounds"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "sounds": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["volume", "cooldownMs", "loop", "fadeInMs", "fadeOutMs", "channel"],
+        "properties": {
+          "volume": { "type": "number", "minimum": 0, "maximum": 1 },
+          "cooldownMs": { "type": "integer", "minimum": 0, "maximum": 60000 },
+          "loop": { "type": "boolean" },
+          "fadeInMs": { "type": "integer", "minimum": 0, "maximum": 60000 },
+          "fadeOutMs": { "type": "integer", "minimum": 0, "maximum": 60000 },
+          "channel": { "enum": ["ambience", "effects"] }
+        }
+      }
+    }
+  }
+}

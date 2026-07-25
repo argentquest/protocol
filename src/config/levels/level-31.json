@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 2,
+  "id": "level-31",
+  "number": 31,
+  "name": "Vector Primer",
+  "seed": "path-protocol-vector-primer-v1",
+  "difficulty": 1,
+  "briefing": "Expansion chamber 31: a difficulty-1 variation with a new deterministic layout.",
+  "arena": {
+    "shape": "rect",
+    "margin": 34,
+    "cornerRadius": 42,
+    "mediaId": "arena-standard"
+  },
+  "token": {
+    "shape": "circle",
+    "size": 34,
+    "mediaId": "token-circle"
+  },
+  "start": {
+    "mode": "generated",
+    "region": {
+      "x": 90,
+      "y": 710,
+      "width": 150,
+      "height": 150
+    },
+    "mediaId": "start-pad"
+  },
+  "mainTarget": {
+    "mode": "generated",
+    "region": {
+      "x": 760,
+      "y": 120,
+      "width": 130,
+      "height": 150
+    },
+    "size": 58,
+    "mediaId": "target-main"
+  },
+  "generation": {
+    "obstacleCount": 3,
+    "allowedShapes": [
+      "rect"
+    ],
+    "minSize": 90,
+    "maxSize": 155,
+    "minimumGap": 72,
+    "pathGrid": 24,
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    }
+  },
+  "manualObstacles": [],
+  "movingObstacles": [],
+  "coins": [
+    {
+      "id": "coin-a",
+      "x": 500,
+      "y": 500,
+      "size": 30,
+      "value": 1,
+      "mediaId": "coin-standard"
+    }
+  ],
+  "rewards": {
+    "completionCoins": 1,
+    "bonusCoinsPerTarget": 1
+  },
+  "scoring": {
+    "baseMaximum": 15500,
+    "parTimeMs": 6500,
+    "parDistance": 900,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 0,
+    "rewardPerTarget": 0,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.2,
+    "targets": []
+  },
+  "movement": {
+    "maximumSpeed": 360,
+    "acceleration": 1400,
+    "deceleration": 1800,
+    "keyboardSpeed": 280
+  },
+  "trackingObstacles": []
+}

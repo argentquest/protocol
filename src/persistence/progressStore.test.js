@@ -48,10 +48,42 @@ describe('progressStore', () => {
     expect(loadProgress(storage).player.highestUnlockedLevel).toBe(4)
   })
 
+  it('supports progression through the expanded 70-level campaign', () => {
+    const progress = createInitialProgress()
+    progress.player.highestUnlockedLevel = 70
+    const storage = memoryStorage()
+    saveProgress(progress, storage)
+    expect(loadProgress(storage).player.highestUnlockedLevel).toBe(70)
+
+    const completed = recordLevelResult(
+      progress,
+      { id: 'level-70', number: 70 },
+      { finalScore: 35000, elapsedMs: 30000, actualDistance: 2400 },
+    ).progress
+    expect(completed.player.highestUnlockedLevel).toBe(70)
+  })
+
   it('recovers safely from malformed storage', () => {
     const storage = memoryStorage()
     storage.setItem(STORAGE_KEY, '{broken')
     expect(loadProgress(storage)).toEqual(createInitialProgress())
+  })
+
+  it('migrates version-one progress without losing scores, coins, or settings', () => {
+    const storage = memoryStorage()
+    const legacy = createInitialProgress()
+    legacy.schemaVersion = 1
+    legacy.player.coins = 17
+    legacy.levels['level-01'] = { completed: true, bestScore: 8123 }
+    legacy.settings.reducedMotion = true
+    storage.setItem(STORAGE_KEY, JSON.stringify(legacy))
+
+    const migrated = loadProgress(storage)
+    expect(migrated.schemaVersion).toBe(2)
+    expect(migrated.player.coins).toBe(17)
+    expect(migrated.levels['level-01'].bestScore).toBe(8123)
+    expect(migrated.settings.reducedMotion).toBe(true)
+    expect(JSON.parse(storage.getItem(STORAGE_KEY)).schemaVersion).toBe(2)
   })
 
   it('collects each configured course coin only once', () => {

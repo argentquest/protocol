@@ -1,0 +1,181 @@
+{
+  "schemaVersion": 2,
+  "id": "level-66",
+  "number": 66,
+  "name": "Critical Vector",
+  "seed": "path-protocol-critical-vector-v1",
+  "difficulty": 15,
+  "briefing": "Apex-tier chamber 6: denser geometry and overclocked hazards demand complete control.",
+  "arena": {
+    "shape": "rect",
+    "margin": 28,
+    "cornerRadius": 24,
+    "mediaId": "arena-standard"
+  },
+  "token": {
+    "shape": "rect",
+    "size": 46,
+    "mediaId": "token-rect"
+  },
+  "start": {
+    "mode": "manual",
+    "x": 500,
+    "y": 100,
+    "mediaId": "start-pad"
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "x": 500,
+    "y": 900,
+    "size": 54,
+    "mediaId": "target-main"
+  },
+  "generation": {
+    "obstacleCount": 11,
+    "allowedShapes": [
+      "rect",
+      "diamond"
+    ],
+    "minSize": 72,
+    "maxSize": 140,
+    "minimumGap": 58,
+    "pathGrid": 18,
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    }
+  },
+  "manualObstacles": [],
+  "movingObstacles": [],
+  "trackingObstacles": [
+    {
+      "id": "maze-a",
+      "shape": "rect",
+      "x": 280,
+      "y": 360,
+      "width": 58,
+      "height": 44,
+      "zone": {
+        "x": 80,
+        "y": 120,
+        "width": 420,
+        "height": 480
+      },
+      "maxSpeed": 146,
+      "acceleration": 209,
+      "mediaId": "obstacle-tracking-rect",
+      "turnRateDegreesPerSecond": 190
+    },
+    {
+      "id": "maze-b",
+      "shape": "rect",
+      "x": 720,
+      "y": 360,
+      "width": 58,
+      "height": 44,
+      "zone": {
+        "x": 500,
+        "y": 120,
+        "width": 420,
+        "height": 480
+      },
+      "maxSpeed": 146,
+      "acceleration": 209,
+      "mediaId": "obstacle-tracking-rect",
+      "turnRateDegreesPerSecond": 190
+    },
+    {
+      "id": "maze-c",
+      "shape": "diamond",
+      "x": 500,
+      "y": 720,
+      "width": 56,
+      "height": 56,
+      "zone": {
+        "x": 260,
+        "y": 480,
+        "width": 480,
+        "height": 440
+      },
+      "maxSpeed": 138,
+      "acceleration": 196,
+      "mediaId": "obstacle-tracking-diamond",
+      "turnRateDegreesPerSecond": 190
+    }
+  ],
+  "coins": [
+    {
+      "id": "coin-a",
+      "x": 220,
+      "y": 820,
+      "size": 27,
+      "value": 1,
+      "mediaId": "coin-standard"
+    },
+    {
+      "id": "coin-b",
+      "x": 500,
+      "y": 500,
+      "size": 27,
+      "value": 3,
+      "mediaId": "coin-standard"
+    },
+    {
+      "id": "coin-c",
+      "x": 800,
+      "y": 220,
+      "size": 27,
+      "value": 1,
+      "mediaId": "coin-standard"
+    }
+  ],
+  "rewards": {
+    "completionCoins": 10,
+    "bonusCoinsPerTarget": 5
+  },
+  "scoring": {
+    "baseMaximum": 33000,
+    "parTimeMs": 28750,
+    "parDistance": 2552,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 3,
+    "rewardPerTarget": 1800,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.2,
+    "targets": [
+      {
+        "id": "relay-a",
+        "x": 850,
+        "y": 820,
+        "size": 40,
+        "mediaId": "target-bonus"
+      },
+      {
+        "id": "relay-b",
+        "x": 500,
+        "y": 150,
+        "size": 38,
+        "mediaId": "target-bonus"
+      },
+      {
+        "id": "relay-c",
+        "x": 160,
+        "y": 240,
+        "size": 36,
+        "mediaId": "target-bonus"
+      }
+    ]
+  },
+  "movement": {
+    "maximumSpeed": 360,
+    "acceleration": 1400,
+    "deceleration": 1800,
+    "keyboardSpeed": 280
+  }
+}

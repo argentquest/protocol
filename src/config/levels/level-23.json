@@ -1,30 +1,192 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "level-23",
   "number": 23,
   "name": "Vector Swarm",
   "seed": "path-protocol-vector-swarm-v1",
   "difficulty": 10,
   "briefing": "Four small trackers accelerate from overlapping square sectors.",
-  "arena": { "shape": "rect", "margin": 30, "cornerRadius": 30 },
-  "token": { "shape": "circle", "size": 34 },
-  "start": { "mode": "manual", "x": 880, "y": 500 },
-  "mainTarget": { "mode": "manual", "x": 120, "y": 500, "size": 48 },
-  "generation": { "obstacleCount": 8, "allowedShapes": ["rect", "circle"], "minSize": 70, "maxSize": 135, "minimumGap": 62, "pathGrid": 18 },
+  "arena": {
+    "shape": "rect",
+    "margin": 30,
+    "cornerRadius": 30,
+    "mediaId": "arena-standard"
+  },
+  "token": {
+    "shape": "circle",
+    "size": 34,
+    "mediaId": "token-circle"
+  },
+  "start": {
+    "mode": "manual",
+    "x": 880,
+    "y": 500,
+    "mediaId": "start-pad"
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "x": 120,
+    "y": 500,
+    "size": 48,
+    "mediaId": "target-main"
+  },
+  "generation": {
+    "obstacleCount": 8,
+    "allowedShapes": [
+      "rect",
+      "circle"
+    ],
+    "minSize": 70,
+    "maxSize": 135,
+    "minimumGap": 62,
+    "pathGrid": 18,
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    }
+  },
   "manualObstacles": [],
   "movingObstacles": [],
   "trackingObstacles": [
-    { "id": "swarm-a", "shape": "circle", "x": 280, "y": 320, "width": 42, "height": 42, "zone": { "x": 90, "y": 110, "width": 390, "height": 420 }, "maxSpeed": 112, "acceleration": 165 },
-    { "id": "swarm-b", "shape": "circle", "x": 720, "y": 320, "width": 42, "height": 42, "zone": { "x": 520, "y": 110, "width": 390, "height": 420 }, "maxSpeed": 112, "acceleration": 165 },
-    { "id": "swarm-c", "shape": "circle", "x": 280, "y": 700, "width": 42, "height": 42, "zone": { "x": 90, "y": 500, "width": 390, "height": 410 }, "maxSpeed": 112, "acceleration": 165 },
-    { "id": "swarm-d", "shape": "circle", "x": 720, "y": 700, "width": 42, "height": 42, "zone": { "x": 520, "y": 500, "width": 390, "height": 410 }, "maxSpeed": 112, "acceleration": 165 }
+    {
+      "id": "swarm-a",
+      "shape": "circle",
+      "x": 280,
+      "y": 320,
+      "width": 42,
+      "height": 42,
+      "zone": {
+        "x": 90,
+        "y": 110,
+        "width": 390,
+        "height": 420
+      },
+      "maxSpeed": 112,
+      "acceleration": 165,
+      "mediaId": "obstacle-tracking-circle",
+      "turnRateDegreesPerSecond": 160
+    },
+    {
+      "id": "swarm-b",
+      "shape": "circle",
+      "x": 720,
+      "y": 320,
+      "width": 42,
+      "height": 42,
+      "zone": {
+        "x": 520,
+        "y": 110,
+        "width": 390,
+        "height": 420
+      },
+      "maxSpeed": 112,
+      "acceleration": 165,
+      "mediaId": "obstacle-tracking-circle",
+      "turnRateDegreesPerSecond": 160
+    },
+    {
+      "id": "swarm-c",
+      "shape": "circle",
+      "x": 280,
+      "y": 700,
+      "width": 42,
+      "height": 42,
+      "zone": {
+        "x": 90,
+        "y": 500,
+        "width": 390,
+        "height": 410
+      },
+      "maxSpeed": 112,
+      "acceleration": 165,
+      "mediaId": "obstacle-tracking-circle",
+      "turnRateDegreesPerSecond": 160
+    },
+    {
+      "id": "swarm-d",
+      "shape": "circle",
+      "x": 720,
+      "y": 700,
+      "width": 42,
+      "height": 42,
+      "zone": {
+        "x": 520,
+        "y": 500,
+        "width": 390,
+        "height": 410
+      },
+      "maxSpeed": 112,
+      "acceleration": 165,
+      "mediaId": "obstacle-tracking-circle",
+      "turnRateDegreesPerSecond": 160
+    }
   ],
   "coins": [
-    { "id": "coin-a", "x": 240, "y": 800, "size": 25, "value": 1 },
-    { "id": "coin-b", "x": 500, "y": 500, "size": 25, "value": 3 },
-    { "id": "coin-c", "x": 800, "y": 240, "size": 25, "value": 1 }
+    {
+      "id": "coin-a",
+      "x": 240,
+      "y": 800,
+      "size": 25,
+      "value": 1,
+      "mediaId": "coin-standard"
+    },
+    {
+      "id": "coin-b",
+      "x": 500,
+      "y": 500,
+      "size": 25,
+      "value": 3,
+      "mediaId": "coin-standard"
+    },
+    {
+      "id": "coin-c",
+      "x": 800,
+      "y": 240,
+      "size": 25,
+      "value": 1,
+      "mediaId": "coin-standard"
+    }
   ],
-  "rewards": { "completionCoins": 5, "bonusCoinsPerTarget": 2 },
-  "scoring": { "baseMaximum": 9600, "parTimeMs": 22500, "parDistance": 2100, "timeWeight": 0.5, "distanceWeight": 0.5, "collisionPenaltyRate": 0.2, "maximumCollisions": 3 },
-  "bonuses": { "maximumTargets": 2, "rewardPerTarget": 1150, "offerChanceMode": "currentScorePercent", "failurePenaltyRate": 0.2, "targets": [{ "id": "relay-a", "x": 850, "y": 820, "size": 38 }, { "id": "relay-b", "x": 160, "y": 200, "size": 36 }] }
+  "rewards": {
+    "completionCoins": 5,
+    "bonusCoinsPerTarget": 2
+  },
+  "scoring": {
+    "baseMaximum": 9600,
+    "parTimeMs": 22500,
+    "parDistance": 2100,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 2,
+    "rewardPerTarget": 1150,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.2,
+    "targets": [
+      {
+        "id": "relay-a",
+        "x": 850,
+        "y": 820,
+        "size": 38,
+        "mediaId": "target-bonus"
+      },
+      {
+        "id": "relay-b",
+        "x": 160,
+        "y": 200,
+        "size": 36,
+        "mediaId": "target-bonus"
+      }
+    ]
+  },
+  "movement": {
+    "maximumSpeed": 360,
+    "acceleration": 1400,
+    "deceleration": 1800,
+    "keyboardSpeed": 280
+  }
 }

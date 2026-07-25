@@ -95,12 +95,39 @@ function searchPath(
       ) {
         continue
       }
-      const point = {
-        x: next.column * gridSize + gridSize / 2,
-        y: next.row * gridSize + gridSize / 2,
-      }
+      const isTarget =
+        next.column === targetCell.column && next.row === targetCell.row
+      const point = isTarget
+        ? target
+        : {
+            x: next.column * gridSize + gridSize / 2,
+            y: next.row * gridSize + gridSize / 2,
+          }
       const candidate = { ...token, x: point.x, y: point.y }
       if (!isSafePosition(candidate, arena, obstacles)) continue
+      const from =
+        cell.column === startCell.column && cell.row === startCell.row
+          ? start
+          : {
+              x: cell.column * gridSize + gridSize / 2,
+              y: cell.row * gridSize + gridSize / 2,
+            }
+      const midpoint = {
+        ...token,
+        x: (from.x + point.x) / 2,
+        y: (from.y + point.y) / 2,
+      }
+      if (!isSafePosition(midpoint, arena, obstacles)) continue
+      if (xChange !== 0 && yChange !== 0) {
+        const horizontal = { ...token, x: point.x, y: from.y }
+        const vertical = { ...token, x: from.x, y: point.y }
+        if (
+          !isSafePosition(horizontal, arena, obstacles) ||
+          !isSafePosition(vertical, arena, obstacles)
+        ) {
+          continue
+        }
+      }
       const nextKey = key(next.column, next.row)
       visited.add(nextKey)
       cameFrom.set(nextKey, key(cell.column, cell.row))
@@ -129,6 +156,7 @@ function makeGeneratedObstacle(level, random, index) {
       : randomBetween(random, generation.minSize * 0.55, generation.maxSize)
   return normalizeObstacle({
     id: `generated-${index + 1}`,
+    mediaId: generation.mediaByShape[shape],
     shape,
     x: randomBetween(random, 90, 910),
     y: randomBetween(random, 90, 910),
@@ -140,7 +168,7 @@ function makeGeneratedObstacle(level, random, index) {
 
 export function validateLevel(level) {
   const errors = []
-  if (level.schemaVersion !== 1) errors.push('Unsupported schema version.')
+  if (level.schemaVersion !== 2) errors.push('Unsupported schema version.')
   if (!level.id || !level.name || !level.seed) errors.push('Level identity is incomplete.')
   if (level.scoring.timeWeight + level.scoring.distanceWeight !== 1) {
     errors.push('Scoring weights must total 1.')
@@ -159,6 +187,89 @@ export function validateLevel(level) {
   return errors
 }
 
+export function validateGeneratedPlacement(level) {
+  const errors = []
+  const hazards = [
+    ...level.obstacles,
+    ...level.movingObstacles,
+    ...level.trackingObstacles,
+  ]
+  const orderedTargets = [
+    level.token,
+    level.mainTarget,
+    ...level.bonusTargets,
+  ]
+  const pickups = [...orderedTargets, ...level.coins]
+  for (const entity of [...hazards, ...pickups]) {
+    if (!shapeInsideArena(entity, level.arena)) {
+      errors.push(`${entity.id ?? entity.mediaId} is outside the arena`)
+    }
+  }
+  for (const pickup of pickups) {
+    for (const hazard of hazards) {
+      if (shapesIntersect(pickup, hazard)) {
+        errors.push(`${pickup.id ?? pickup.mediaId} overlaps ${hazard.id}`)
+      }
+    }
+  }
+  for (let index = 1; index < orderedTargets.length; index += 1) {
+    if (shapesIntersect(orderedTargets[index - 1], orderedTargets[index])) {
+      errors.push(
+        `${orderedTargets[index - 1].id ?? orderedTargets[index - 1].mediaId} overlaps ${orderedTargets[index].id}`,
+      )
+    }
+  }
+  const uniqueEntities = [...hazards, ...level.coins]
+  for (let first = 0; first < uniqueEntities.length; first += 1) {
+    for (let second = first + 1; second < uniqueEntities.length; second += 1) {
+      if (shapesIntersect(uniqueEntities[first], uniqueEntities[second])) {
+        errors.push(`${uniqueEntities[first].id} overlaps ${uniqueEntities[second].id}`)
+      }
+    }
+  }
+  for (const coin of level.coins) {
+    for (const target of orderedTargets) {
+      if (shapesIntersect(coin, target)) {
+        errors.push(`${coin.id} overlaps ${target.id ?? target.mediaId}`)
+      }
+    }
+  }
+  for (const obstacle of level.movingObstacles) {
+    for (const direction of [-1, 1]) {
+      const position = {
+        ...obstacle,
+        x:
+          obstacle.x +
+          (obstacle.axis === 'x' ? obstacle.amplitude * direction : 0),
+        y:
+          obstacle.y +
+          (obstacle.axis === 'y' ? obstacle.amplitude * direction : 0),
+      }
+      if (!shapeInsideArena(position, level.arena)) {
+        errors.push(`${obstacle.id} leaves the arena during its sweep`)
+      }
+    }
+  }
+  for (const obstacle of level.trackingObstacles) {
+    const halfWidth = obstacle.width / 2
+    const halfHeight = obstacle.height / 2
+    for (const x of [
+      obstacle.zone.x + halfWidth,
+      obstacle.zone.x + obstacle.zone.width - halfWidth,
+    ]) {
+      for (const y of [
+        obstacle.zone.y + halfHeight,
+        obstacle.zone.y + obstacle.zone.height - halfHeight,
+      ]) {
+        if (!shapeInsideArena({ ...obstacle, x, y }, level.arena)) {
+          errors.push(`${obstacle.id} has an invalid tracking zone`)
+        }
+      }
+    }
+  }
+  return [...new Set(errors)]
+}
+
 export function generateLevel(level) {
   const errors = validateLevel(level)
   if (errors.length) throw new Error(`${level.id}: ${errors.join(' ')}`)
@@ -167,13 +278,13 @@ export function generateLevel(level) {
   const startPoint = resolvePoint(level.start, random)
   const targetPoint = resolvePoint(level.mainTarget, random)
   const token = normalizeShape({
-    shape: level.token.shape,
-    size: level.token.size,
+    ...level.token,
     x: startPoint.x,
     y: startPoint.y,
   })
   const mainTarget = normalizeShape({
     id: 'main-target',
+    mediaId: level.mainTarget.mediaId,
     shape: 'circle',
     size: level.mainTarget.size,
     x: targetPoint.x,
@@ -261,6 +372,20 @@ export function generateLevel(level) {
     if (configuredHazards.some((obstacle) => shapesIntersect(target, obstacle))) {
       throw new Error(`${level.id}: bonus target ${target.id} overlaps an obstacle.`)
     }
+  }
+
+  const placementErrors = validateGeneratedPlacement({
+    arena: level.arena,
+    token,
+    mainTarget,
+    bonusTargets,
+    obstacles,
+    movingObstacles,
+    trackingObstacles,
+    coins,
+  })
+  if (placementErrors.length) {
+    throw new Error(`${level.id}: ${placementErrors.join('; ')}.`)
   }
 
   const solvable = pathExists({

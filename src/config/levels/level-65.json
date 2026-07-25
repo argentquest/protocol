@@ -1,0 +1,178 @@
+{
+  "schemaVersion": 2,
+  "id": "level-65",
+  "number": 65,
+  "name": "Quantum Pursuit",
+  "seed": "path-protocol-quantum-pursuit-v1",
+  "difficulty": 15,
+  "briefing": "Apex-tier chamber 5: denser geometry and overclocked hazards demand complete control.",
+  "arena": {
+    "shape": "rect",
+    "margin": 36,
+    "cornerRadius": 46,
+    "mediaId": "arena-standard"
+  },
+  "token": {
+    "shape": "circle",
+    "size": 40,
+    "mediaId": "token-circle"
+  },
+  "start": {
+    "mode": "manual",
+    "x": 140,
+    "y": 150,
+    "mediaId": "start-pad"
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "x": 850,
+    "y": 850,
+    "size": 52,
+    "mediaId": "target-main"
+  },
+  "generation": {
+    "obstacleCount": 10,
+    "allowedShapes": [
+      "rect",
+      "circle"
+    ],
+    "minSize": 75,
+    "maxSize": 145,
+    "minimumGap": 58,
+    "pathGrid": 18,
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    }
+  },
+  "manualObstacles": [],
+  "movingObstacles": [
+    {
+      "id": "corridor-gate",
+      "shape": "rect",
+      "x": 690,
+      "y": 560,
+      "width": 140,
+      "height": 34,
+      "axis": "y",
+      "amplitude": 160,
+      "periodMs": 3354,
+      "phase": 0.2,
+      "mediaId": "obstacle-moving-rect"
+    }
+  ],
+  "trackingObstacles": [
+    {
+      "id": "coin-guard-a",
+      "shape": "circle",
+      "x": 360,
+      "y": 420,
+      "width": 54,
+      "height": 54,
+      "zone": {
+        "x": 130,
+        "y": 180,
+        "width": 500,
+        "height": 520
+      },
+      "maxSpeed": 140,
+      "acceleration": 200,
+      "mediaId": "obstacle-tracking-circle",
+      "turnRateDegreesPerSecond": 190
+    },
+    {
+      "id": "coin-guard-b",
+      "shape": "circle",
+      "x": 720,
+      "y": 660,
+      "width": 54,
+      "height": 54,
+      "zone": {
+        "x": 470,
+        "y": 360,
+        "width": 410,
+        "height": 500
+      },
+      "maxSpeed": 140,
+      "acceleration": 200,
+      "mediaId": "obstacle-tracking-circle",
+      "turnRateDegreesPerSecond": 190
+    }
+  ],
+  "coins": [
+    {
+      "id": "coin-a",
+      "x": 250,
+      "y": 770,
+      "size": 28,
+      "value": 1,
+      "mediaId": "coin-standard"
+    },
+    {
+      "id": "coin-b",
+      "x": 370,
+      "y": 690,
+      "size": 28,
+      "value": 1,
+      "mediaId": "coin-standard"
+    },
+    {
+      "id": "coin-c",
+      "x": 500,
+      "y": 610,
+      "size": 28,
+      "value": 2,
+      "mediaId": "coin-standard"
+    },
+    {
+      "id": "coin-d",
+      "x": 740,
+      "y": 300,
+      "size": 28,
+      "value": 2,
+      "mediaId": "coin-standard"
+    }
+  ],
+  "rewards": {
+    "completionCoins": 10,
+    "bonusCoinsPerTarget": 5
+  },
+  "scoring": {
+    "baseMaximum": 32500,
+    "parTimeMs": 27600,
+    "parDistance": 2464,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 2,
+    "rewardPerTarget": 1800,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.2,
+    "targets": [
+      {
+        "id": "relay-a",
+        "x": 820,
+        "y": 800,
+        "size": 42,
+        "mediaId": "target-bonus"
+      },
+      {
+        "id": "relay-b",
+        "x": 180,
+        "y": 210,
+        "size": 40,
+        "mediaId": "target-bonus"
+      }
+    ]
+  },
+  "movement": {
+    "maximumSpeed": 360,
+    "acceleration": 1400,
+    "deceleration": 1800,
+    "keyboardSpeed": 280
+  }
+}

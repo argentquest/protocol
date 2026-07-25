@@ -1,0 +1,194 @@
+{
+  "schemaVersion": 2,
+  "id": "level-64",
+  "number": 64,
+  "name": "Event Horizon",
+  "seed": "path-protocol-event-horizon-v1",
+  "difficulty": 15,
+  "briefing": "Apex-tier chamber 4: denser geometry and overclocked hazards demand complete control.",
+  "arena": {
+    "shape": "polygon",
+    "points": [
+      [
+        120,
+        120
+      ],
+      [
+        500,
+        45
+      ],
+      [
+        880,
+        120
+      ],
+      [
+        950,
+        500
+      ],
+      [
+        860,
+        880
+      ],
+      [
+        500,
+        950
+      ],
+      [
+        120,
+        870
+      ],
+      [
+        50,
+        500
+      ]
+    ],
+    "mediaId": "arena-polygon"
+  },
+  "token": {
+    "shape": "diamond",
+    "size": 56,
+    "mediaId": "token-diamond"
+  },
+  "start": {
+    "mode": "manual",
+    "x": 820,
+    "y": 180,
+    "mediaId": "start-pad"
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "x": 180,
+    "y": 820,
+    "size": 58,
+    "mediaId": "target-main"
+  },
+  "generation": {
+    "obstacleCount": 8,
+    "allowedShapes": [
+      "diamond",
+      "circle"
+    ],
+    "minSize": 90,
+    "maxSize": 155,
+    "minimumGap": 82,
+    "pathGrid": 22,
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    }
+  },
+  "manualObstacles": [],
+  "movingObstacles": [
+    {
+      "id": "wake-bar",
+      "shape": "rect",
+      "x": 500,
+      "y": 500,
+      "width": 170,
+      "height": 42,
+      "axis": "x",
+      "amplitude": 190,
+      "periodMs": 3900,
+      "phase": 0.5,
+      "mediaId": "obstacle-moving-rect"
+    }
+  ],
+  "trackingObstacles": [
+    {
+      "id": "wake-a",
+      "shape": "diamond",
+      "x": 360,
+      "y": 360,
+      "width": 64,
+      "height": 64,
+      "zone": {
+        "x": 140,
+        "y": 140,
+        "width": 520,
+        "height": 520
+      },
+      "maxSpeed": 122,
+      "acceleration": 165,
+      "mediaId": "obstacle-tracking-diamond",
+      "turnRateDegreesPerSecond": 190
+    },
+    {
+      "id": "wake-b",
+      "shape": "diamond",
+      "x": 680,
+      "y": 650,
+      "width": 64,
+      "height": 64,
+      "zone": {
+        "x": 380,
+        "y": 340,
+        "width": 480,
+        "height": 500
+      },
+      "maxSpeed": 122,
+      "acceleration": 165,
+      "mediaId": "obstacle-tracking-diamond",
+      "turnRateDegreesPerSecond": 190
+    }
+  ],
+  "coins": [
+    {
+      "id": "coin-a",
+      "x": 300,
+      "y": 700,
+      "size": 34,
+      "value": 2,
+      "mediaId": "coin-standard"
+    },
+    {
+      "id": "coin-b",
+      "x": 700,
+      "y": 300,
+      "size": 34,
+      "value": 2,
+      "mediaId": "coin-standard"
+    }
+  ],
+  "rewards": {
+    "completionCoins": 10,
+    "bonusCoinsPerTarget": 5
+  },
+  "scoring": {
+    "baseMaximum": 32000,
+    "parTimeMs": 27025,
+    "parDistance": 2398,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 2,
+    "rewardPerTarget": 1800,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.2,
+    "targets": [
+      {
+        "id": "relay-a",
+        "x": 760,
+        "y": 780,
+        "size": 44,
+        "mediaId": "target-bonus"
+      },
+      {
+        "id": "relay-b",
+        "x": 250,
+        "y": 260,
+        "size": 42,
+        "mediaId": "target-bonus"
+      }
+    ]
+  },
+  "movement": {
+    "maximumSpeed": 360,
+    "acceleration": 1400,
+    "deceleration": 1800,
+    "keyboardSpeed": 280
+  }
+}

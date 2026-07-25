@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <radialGradient id="coin">
+      <stop stop-color="#fff8c9"/>
+      <stop offset=".45" stop-color="#ffd65a"/>
+      <stop offset="1" stop-color="#bf7014"/>
+    </radialGradient>
+  </defs>
+  <circle cx="50" cy="50" r="44" fill="#ffd65a" fill-opacity=".14" stroke="#ffd65a" stroke-width="3"/>
+  <circle cx="50" cy="50" r="32" fill="url(#coin)" stroke="#fff8c9" stroke-width="3"/>
+  <path d="M50 28V72M38 36h18c13 0 13 14 0 14H44c-13 0-13 14 0 14h18" fill="none" stroke="#7a450d" stroke-width="6"/>
+</svg>

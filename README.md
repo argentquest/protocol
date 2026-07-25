@@ -1,20 +1,51 @@
 # Path Protocol
 
-Path Protocol is a 30-level desktop browser precision game built with React, Vite, JavaScript, and SVG.
+Path Protocol is a 70-level desktop browser precision game. The player guides a
+dimensioned token through deterministic obstacle courses, avoids stationary and
+moving hazards, collects one-time coins, reaches ordered targets, and uses
+consumable powers to improve a per-level and cumulative score.
 
-The campaign includes deterministic generated courses, varied token geometry, moving and player-tracking hazards, ordered bonus relays, one-time coin collectibles, and five consumable keyboard power-ups.
+## V2 rearchitecture
 
-Use the prominent **Buy power-ups** action on the home or level-selection screen to open the Power
-Lab. Purchases use collected coins and may require a configured cumulative-score unlock.
+Active V2 development takes place on:
+
+```text
+feature/pixijs-rearchitecture
+```
+
+V2 is treated as a new codebase inside this repository. Its architecture uses:
+
+- React 19 for screens, menus, dialogs, HUD, settings, and the Power Lab.
+- PixiJS with WebGL only for the real-time arena.
+- One imperative Pixi canvas mounted by React.
+- A framework-neutral fixed 60 Hz game engine.
+- External SVG media loaded initially as reusable Pixi vector graphics.
+- Howler.js for effects and looping ambience.
+- WAV audio masters with WebM preferred and MP3 fallback delivery.
+- JSON Schema-validated levels, media, themes, audio, and powers.
+- Browser-local versioned progress storage.
+
+See:
+
+- [`architecturev2.md`](architecturev2.md) for the V2 source of truth.
+- [`sprintv2.md`](sprintv2.md) for live implementation status.
+- [`AGENTS.md`](AGENTS.md) for repository contribution rules.
+
+The older [`architecture.md`](architecture.md) and [`sprints.md`](sprints.md)
+files describe the V1 implementation and remain historical references while V2
+is built.
 
 ## Requirements
 
 - Node.js 20.19 or newer.
 - npm.
-- A desktop mouse, trackpad, or keyboard.
-- Docker Desktop only if running the containerized build.
+- A current desktop browser with WebGL.
+- A mouse, trackpad, or keyboard.
+- FFmpeg for manually inspecting or converting audio. The repository also pins
+  `ffmpeg-static`, so normal npm builds do not depend on a machine-wide install.
+- Docker Desktop only for containerized production testing.
 
-## Run locally for development
+## Current development commands
 
 Install dependencies:
 
@@ -22,7 +53,7 @@ Install dependencies:
 npm install
 ```
 
-Start the Vite development server:
+Start Vite:
 
 ```powershell
 npm run dev
@@ -34,32 +65,18 @@ Open the URL printed by Vite, normally:
 http://localhost:5173
 ```
 
-Vite automatically reloads the browser when source files change.
+The local Vite server starts with **Dev mode** enabled so all 70 levels are
+available for playtesting. Use the **Dev mode** button on the home screen to
+switch back to normal progression. `?dev=1` and `?dev=0` remain available as
+explicit URL overrides.
 
-During a level, use the visible **Restart** control or press `R` to reset the current attempt without changing the generated course.
-
-## Developer playtest mode
-
-Add `?dev=1` to any local or deployed game URL:
-
-```text
-http://localhost:5173/?dev=1
-http://localhost:8080/?dev=1
-```
-
-Playtest mode unlocks all 30 levels, adds previous/next level controls, gives unlimited power-up charges, and displays the deterministic seed, validated route, collision geometry, moving/tracking zones, live scoring factors, and frame rate. The **Overlay** button hides or restores the SVG diagnostics.
-
-Completed developer runs are stored separately in browser storage under `path-protocol.playtest-runs`. They do not unlock levels or replace the player's normal best scores. Remove `?dev=1` to return to the regular game.
-
-## Run automated checks
-
-Run the unit, geometry, generation, persistence, and component tests:
+Run unit and component tests:
 
 ```powershell
 npm run test
 ```
 
-Run the linter:
+Run lint:
 
 ```powershell
 npm run lint
@@ -71,37 +88,107 @@ Create the production build:
 npm run build
 ```
 
-Preview the production build:
-
-```powershell
-npm run preview
-```
-
-The preview is normally available at:
-
-```text
-http://localhost:4173
-```
-
-## Run browser tests
-
-Install the Playwright Chromium test browser once:
-
-```powershell
-npx playwright install chromium
-```
-
-Run the end-to-end suite:
+Run the browser suite:
 
 ```powershell
 npm run test:e2e
 ```
 
-The browser suite verifies navigation, successful Level 1 completion, continuous-collision handling, manual restart, and developer playtest access.
+Run the installed Chrome/Edge compatibility smoke tests:
 
-## Run with Docker Compose
+```powershell
+npm run test:browser-compat
+```
 
-Build and start the production container:
+Firefox can be selected with `--project=firefox` on a runner where Playwright
+Firefox launches successfully. Safari must be verified on macOS; Playwright
+WebKit on Windows does not provide Safari's production audio stack.
+
+## V2 configuration and media commands
+
+The completed V2 foundation provides:
+
+```powershell
+npm run media:audio
+npm run media:audio:force
+npm run media:validate-svg
+npm run media:validate-audio
+npm run media:manifests
+npm run media:prepare
+npm run config:validate
+```
+
+Their intended behavior is:
+
+- `media:audio` creates only missing WebM and MP3 files from WAV masters.
+- `media:audio:force` intentionally regenerates both delivery formats.
+- `media:validate-svg` verifies the complete default vector library.
+- `media:validate-audio` verifies WAV masters, delivery files, and playback
+  settings.
+- `media:manifests` scans default and theme files and generates deterministic
+  visual and audio manifests.
+- `media:prepare` runs source preservation, conversion, validation, and manifest
+  generation as one operation.
+- `config:validate` validates levels, registries, media, themes, audio, and
+  powers before gameplay starts.
+
+Vite development and production builds run configuration and media preparation
+automatically before starting. A normal conversion preserves existing delivery
+files; use the explicit `:force` command only when regeneration is intended.
+
+## Media inheritance
+
+The default media library is complete and mandatory. A theme supplies only the
+individual files it wants to replace:
+
+```text
+valid theme element
+    ↓ otherwise
+valid default element
+    ↓ otherwise
+fatal default-media error
+```
+
+This applies independently to SVG artwork, sound effects, and looping ambience.
+Future Lab initially inherits all defaults and gains overrides one element at a
+time.
+
+Expected layout:
+
+```text
+public/media/
+├── default/
+│   ├── tokens/
+│   ├── obstacles/
+│   ├── targets/
+│   ├── bonus/
+│   ├── coins/
+│   ├── powers/
+│   ├── arenas/
+│   └── audio/
+└── themes/
+    └── future-lab/
+        └── optional overrides
+```
+
+## Sprint workflow
+
+Development proceeds in the sequence defined by `sprintv2.md`.
+
+For each sprint:
+
+1. Mark active tasks `IN PROGRESS`.
+2. Implement the sprint within the boundaries in `architecturev2.md`.
+3. Add focused tests.
+4. Run the full unit suite.
+5. Run lint and production build when executable code changes.
+6. Run relevant Playwright journeys for gameplay or integration work.
+7. Mark tasks and the sprint `DONE` only after required checks pass.
+8. Do not begin the next sprint while a required check is failing.
+
+## Docker
+
+The existing repository provides a multi-stage static-site Docker deployment:
 
 ```powershell
 docker compose up --build -d
@@ -113,64 +200,62 @@ Open:
 http://localhost:8080
 ```
 
-Check container status and health:
+The build stage installs FFmpeg, validates and prepares all media, and creates
+the Vite bundle. The final stage copies only static output into Nginx; Node,
+npm, FFmpeg, source WAV masters outside `dist`, and build tooling are absent.
+
+Inspect the container:
 
 ```powershell
+docker compose build
+docker compose up -d
 docker compose ps
+curl.exe -I http://localhost:8080/
+curl.exe http://localhost:8080/healthz
+docker compose exec path-protocol sh -c "command -v node || true; command -v ffmpeg || true"
 ```
 
-Follow server logs:
-
-```powershell
-docker compose logs -f
-```
-
-Stop and remove the container:
+Stop it with:
 
 ```powershell
 docker compose down
 ```
 
-The image remains locally available as `path-protocol:local`.
+## Troubleshooting
 
-## Run directly with Docker
+- If startup reports a missing default asset, run `npm run media:prepare` and
+  inspect the exact asset named by the error. Theme overrides may fall back;
+  defaults may not.
+- If audio is silent, press **Start Game** once, confirm the two audio switches
+  in **Controls**, and check browser autoplay permissions.
+- If WebGL initialization fails, update the browser and graphics driver and
+  confirm hardware acceleration is enabled.
+- If a released seed fingerprint changes intentionally, review the generated
+  course visually and update the locked fingerprint in the same change.
+- If Docker cannot start, verify Docker Desktop is running before rebuilding.
 
-Build the image:
+## Repository map
 
-```powershell
-docker build -t path-protocol:local .
+```text
+architecturev2.md       V2 product and technical architecture
+sprintv2.md             live V2 implementation tracker
+AGENTS.md               repository instructions
+src/config/             levels, schemas, powers, and game configuration
+src/game/               engine, geometry, generation, audio, and rendering
+public/media/            complete default media, theme overrides, and manifests
+scripts/                build, validation, media, and test helpers
+tests/e2e/              Playwright browser journeys
 ```
 
-Run it:
+## Project rules
 
-```powershell
-docker run --rm --name path-protocol -p 8080:80 path-protocol:local
-```
+- Gameplay geometry comes from JSON, never visual asset bounds.
+- All released level generation is deterministic.
+- Raw input handlers do not run the simulation or update React per event.
+- Default media failures are fatal.
+- Invalid theme overrides fall back to defaults and warn only in development.
+- New dependencies and external assets require recorded licenses.
+- `sprintv2.md` must stay synchronized with completed work.
 
-Open `http://localhost:8080`. Press `Ctrl+C` to stop the foreground container.
-
-## Container behavior
-
-- Node and Vite are used only in the build stage.
-- Nginx serves the final static game from a small runtime image.
-- Client-side routes fall back to `index.html`.
-- Hashed assets receive long-lived immutable caching.
-- HTML is not cached, allowing safe updates.
-- The health endpoint is `http://localhost:8080/healthz`.
-- No backend, database, volume, environment variable, or external service is required.
-
-## Important project files
-
-- `architecture.md` — product and system architecture.
-- `sprints.md` — development backlog.
-- `AGENTS.md` — coding-agent instructions.
-- `src/config/levels/` — the 30 deterministic level definitions.
-- `src/config/powerup.json` — power keys, costs, unlock scores, durations, effects, and sounds.
-- `src/config/gameConfig.json` — global input tuning, including pointer response speed.
-- `src/config/themeConfig.json` — visual and audio theme configuration.
-- `src/game/GameView.jsx` — gameplay state-machine and animation orchestrator.
-- `src/game/components/` — header, HUD, SVG arena, and bonus-dialog presentation.
-- `src/game/hooks/` and `src/game/runtime/` — input handling and pure runtime helpers.
-- `Dockerfile` — production image definition.
-- `docker-compose.yml` — local container deployment.
-- `docker/nginx.conf` — static server and security configuration.
+See [`PERFORMANCE.md`](PERFORMANCE.md), [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md),
+and [`RELEASE_CHECKLIST.md`](RELEASE_CHECKLIST.md) for release evidence.

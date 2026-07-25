@@ -1,8 +1,9 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "powerups": [
     {
       "id": "obstacle-shield",
+      "mediaId": "power-obstacle-shield",
       "name": "Obstacle Shield",
       "key": "1",
       "description": "Ignore obstacle contacts while the shield is active.",
@@ -10,11 +11,11 @@
       "coinCost": 4,
       "durationMs": 3000,
       "effect": "obstacleShield",
-      "sound": "powerObstacleShield",
-      "color": "#70f6ff"
+      "soundId": "power-obstacle-shield"
     },
     {
       "id": "full-shield",
+      "mediaId": "power-full-shield",
       "name": "Full Shield",
       "key": "2",
       "description": "Ignore obstacle and arena-boundary contacts.",
@@ -22,11 +23,11 @@
       "coinCost": 8,
       "durationMs": 2500,
       "effect": "fullShield",
-      "sound": "powerFullShield",
-      "color": "#a98bff"
+      "soundId": "power-full-shield"
     },
     {
       "id": "slow-field",
+      "mediaId": "power-slow-field",
       "name": "Slow Field",
       "key": "3",
       "description": "Reduce moving and tracking hazard speed.",
@@ -35,11 +36,11 @@
       "durationMs": 4000,
       "effect": "slowField",
       "slowMultiplier": 0.35,
-      "sound": "powerSlowField",
-      "color": "#43e5b0"
+      "soundId": "power-slow-field"
     },
     {
       "id": "coin-magnet",
+      "mediaId": "power-coin-magnet",
       "name": "Coin Magnet",
       "key": "4",
       "description": "Collect unclaimed course coins within range.",
@@ -48,11 +49,11 @@
       "durationMs": 3500,
       "effect": "coinMagnet",
       "radius": 190,
-      "sound": "powerCoinMagnet",
-      "color": "#ffd65a"
+      "soundId": "power-coin-magnet"
     },
     {
       "id": "route-scan",
+      "mediaId": "power-route-scan",
       "name": "Route Scan",
       "key": "5",
       "description": "Reveal a validated route to the active target.",
@@ -60,8 +61,7 @@
       "coinCost": 3,
       "durationMs": 4500,
       "effect": "routeScan",
-      "sound": "powerRouteScan",
-      "color": "#ff78e2"
+      "soundId": "power-route-scan"
     }
   ]
 }

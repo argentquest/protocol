@@ -1,7 +1,18 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
+  "world": {
+    "width": 1000,
+    "height": 1000
+  },
+  "simulation": {
+    "fixedStepHz": 60,
+    "maximumFrameDeltaMs": 250
+  },
   "input": {
     "pointerResponsePerSecond": 8,
     "keyboardSpeedUnitsPerSecond": 280
+  },
+  "collision": {
+    "tokenToleranceUnits": 4
   }
 }

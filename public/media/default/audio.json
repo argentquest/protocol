@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "sounds": {
+    "ambience": { "volume": 0.22, "cooldownMs": 0, "loop": true, "fadeInMs": 1200, "fadeOutMs": 800, "channel": "ambience" },
+    "drag-start": { "volume": 0.55, "cooldownMs": 80, "loop": false, "fadeInMs": 0, "fadeOutMs": 0, "channel": "effects" },
+    "collision": { "volume": 0.7, "cooldownMs": 180, "loop": false, "fadeInMs": 0, "fadeOutMs": 0, "channel": "effects" },
+    "attempt-failed": { "volume": 0.65, "cooldownMs": 250, "loop": false, "fadeInMs": 0, "fadeOutMs": 0, "channel": "effects" },
+    "target-reached": { "volume": 0.62, "cooldownMs": 120, "loop": false, "fadeInMs": 0, "fadeOutMs": 0, "channel": "effects" },
+    "bonus-offered": { "volume": 0.58, "cooldownMs": 120, "loop": false, "fadeInMs": 0, "fadeOutMs": 0, "channel": "effects" },
+    "bonus-accepted": { "volume": 0.58, "cooldownMs": 120, "loop": false, "fadeInMs": 0, "fadeOutMs": 0, "channel": "effects" },
+    "coin-collected": { "volume": 0.52, "cooldownMs": 60, "loop": false, "fadeInMs": 0, "fadeOutMs": 0, "channel": "effects" },
+    "power-obstacle-shield": { "volume": 0.62, "cooldownMs": 150, "loop": false, "fadeInMs": 0, "fadeOutMs": 0, "channel": "effects" },
+    "power-full-shield": { "volume": 0.62, "cooldownMs": 150, "loop": false, "fadeInMs": 0, "fadeOutMs": 0, "channel": "effects" },
+    "power-slow-field": { "volume": 0.62, "cooldownMs": 150, "loop": false, "fadeInMs": 0, "fadeOutMs": 0, "channel": "effects" },
+    "power-coin-magnet": { "volume": 0.62, "cooldownMs": 150, "loop": false, "fadeInMs": 0, "fadeOutMs": 0, "channel": "effects" },
+    "power-route-scan": { "volume": 0.62, "cooldownMs": 150, "loop": false, "fadeInMs": 0, "fadeOutMs": 0, "channel": "effects" },
+    "power-unavailable": { "volume": 0.5, "cooldownMs": 180, "loop": false, "fadeInMs": 0, "fadeOutMs": 0, "channel": "effects" },
+    "level-complete": { "volume": 0.68, "cooldownMs": 500, "loop": false, "fadeInMs": 0, "fadeOutMs": 0, "channel": "effects" }
+  }
+}

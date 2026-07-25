@@ -1,4 +1,4 @@
-import { formatDistance, formatTime } from '../runtime/gameRuntime.js'
+import { formatDistance, formatTime } from '../ui/formatters.js'
 
 function PowerTray({ powerups, activePowerIds, inventory, devMode, onActivate }) {
   return (
@@ -123,8 +123,8 @@ export default function GameHud({
         {message}
       </p>
       <p className="hud-hint">
-        Hold the mouse, or toggle keyboard control with Space and steer with the arrow keys.
-        The token’s full shape must clear every edge.
+        Click the token to start mouse control and click again to stop, or toggle
+        keyboard control with Space. The token’s full shape must clear every edge.
       </p>
       <PowerTray
         powerups={powerups}

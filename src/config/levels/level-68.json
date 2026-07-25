@@ -1,0 +1,214 @@
+{
+  "schemaVersion": 2,
+  "id": "level-68",
+  "number": 68,
+  "name": "Cascade Core",
+  "seed": "path-protocol-cascade-core-v1",
+  "difficulty": 15,
+  "briefing": "Apex-tier chamber 8: denser geometry and overclocked hazards demand complete control.",
+  "arena": {
+    "shape": "polygon",
+    "points": [
+      [
+        90,
+        170
+      ],
+      [
+        300,
+        65
+      ],
+      [
+        760,
+        70
+      ],
+      [
+        930,
+        260
+      ],
+      [
+        910,
+        760
+      ],
+      [
+        700,
+        925
+      ],
+      [
+        220,
+        900
+      ],
+      [
+        55,
+        650
+      ]
+    ],
+    "mediaId": "arena-polygon"
+  },
+  "token": {
+    "shape": "circle",
+    "size": 50,
+    "mediaId": "token-circle"
+  },
+  "start": {
+    "mode": "manual",
+    "x": 180,
+    "y": 500,
+    "mediaId": "start-pad"
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "x": 820,
+    "y": 500,
+    "size": 56,
+    "mediaId": "target-main"
+  },
+  "generation": {
+    "obstacleCount": 9,
+    "allowedShapes": [
+      "rect",
+      "circle",
+      "diamond"
+    ],
+    "minSize": 82,
+    "maxSize": 150,
+    "minimumGap": 70,
+    "pathGrid": 20,
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    }
+  },
+  "manualObstacles": [],
+  "movingObstacles": [],
+  "trackingObstacles": [
+    {
+      "id": "converge-a",
+      "shape": "circle",
+      "x": 300,
+      "y": 350,
+      "width": 58,
+      "height": 58,
+      "zone": {
+        "x": 170,
+        "y": 200,
+        "width": 400,
+        "height": 430
+      },
+      "maxSpeed": 142,
+      "acceleration": 203,
+      "mediaId": "obstacle-tracking-circle",
+      "turnRateDegreesPerSecond": 190
+    },
+    {
+      "id": "converge-b",
+      "shape": "diamond",
+      "x": 700,
+      "y": 350,
+      "width": 60,
+      "height": 60,
+      "zone": {
+        "x": 450,
+        "y": 180,
+        "width": 400,
+        "height": 440
+      },
+      "maxSpeed": 142,
+      "acceleration": 203,
+      "mediaId": "obstacle-tracking-diamond",
+      "turnRateDegreesPerSecond": 190
+    },
+    {
+      "id": "converge-c",
+      "shape": "rect",
+      "x": 520,
+      "y": 700,
+      "width": 66,
+      "height": 44,
+      "zone": {
+        "x": 250,
+        "y": 420,
+        "width": 520,
+        "height": 450
+      },
+      "maxSpeed": 135,
+      "acceleration": 192,
+      "mediaId": "obstacle-tracking-rect",
+      "turnRateDegreesPerSecond": 190
+    }
+  ],
+  "coins": [
+    {
+      "id": "coin-a",
+      "x": 280,
+      "y": 700,
+      "size": 30,
+      "value": 2,
+      "mediaId": "coin-standard"
+    },
+    {
+      "id": "coin-b",
+      "x": 520,
+      "y": 480,
+      "size": 30,
+      "value": 2,
+      "mediaId": "coin-standard"
+    },
+    {
+      "id": "coin-c",
+      "x": 740,
+      "y": 280,
+      "size": 30,
+      "value": 2,
+      "mediaId": "coin-standard"
+    }
+  ],
+  "rewards": {
+    "completionCoins": 10,
+    "bonusCoinsPerTarget": 5
+  },
+  "scoring": {
+    "baseMaximum": 34000,
+    "parTimeMs": 30475,
+    "parDistance": 2695,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 3,
+    "rewardPerTarget": 1800,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.2,
+    "targets": [
+      {
+        "id": "relay-a",
+        "x": 760,
+        "y": 780,
+        "size": 42,
+        "mediaId": "target-bonus"
+      },
+      {
+        "id": "relay-b",
+        "x": 500,
+        "y": 150,
+        "size": 40,
+        "mediaId": "target-bonus"
+      },
+      {
+        "id": "relay-c",
+        "x": 220,
+        "y": 280,
+        "size": 38,
+        "mediaId": "target-bonus"
+      }
+    ]
+  },
+  "movement": {
+    "maximumSpeed": 360,
+    "acceleration": 1400,
+    "deceleration": 1800,
+    "keyboardSpeed": 280
+  }
+}

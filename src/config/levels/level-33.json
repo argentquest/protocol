@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 2,
+  "id": "level-33",
+  "number": 33,
+  "name": "Needle Gate",
+  "seed": "path-protocol-needle-gate-v1",
+  "difficulty": 3,
+  "briefing": "Expansion chamber 33: a difficulty-3 variation with a new deterministic layout.",
+  "arena": {
+    "shape": "rect",
+    "margin": 38,
+    "cornerRadius": 54,
+    "mediaId": "arena-standard"
+  },
+  "token": {
+    "shape": "circle",
+    "size": 48,
+    "mediaId": "token-circle"
+  },
+  "start": {
+    "mode": "generated",
+    "region": {
+      "x": 90,
+      "y": 740,
+      "width": 160,
+      "height": 140
+    },
+    "mediaId": "start-pad"
+  },
+  "mainTarget": {
+    "mode": "generated",
+    "region": {
+      "x": 760,
+      "y": 110,
+      "width": 140,
+      "height": 150
+    },
+    "size": 54,
+    "mediaId": "target-main"
+  },
+  "generation": {
+    "obstacleCount": 6,
+    "allowedShapes": [
+      "rect",
+      "circle"
+    ],
+    "minSize": 95,
+    "maxSize": 180,
+    "minimumGap": 62,
+    "pathGrid": 20,
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    }
+  },
+  "manualObstacles": [],
+  "movingObstacles": [],
+  "coins": [
+    {
+      "id": "coin-a",
+      "x": 520,
+      "y": 540,
+      "size": 28,
+      "value": 1,
+      "mediaId": "coin-standard"
+    }
+  ],
+  "rewards": {
+    "completionCoins": 2,
+    "bonusCoinsPerTarget": 1
+  },
+  "scoring": {
+    "baseMaximum": 16500,
+    "parTimeMs": 8200,
+    "parDistance": 1080,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 1,
+    "rewardPerTarget": 300,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.2,
+    "targets": [
+      {
+        "id": "relay-a",
+        "x": 820,
+        "y": 720,
+        "size": 48,
+        "mediaId": "target-bonus"
+      }
+    ]
+  },
+  "movement": {
+    "maximumSpeed": 360,
+    "acceleration": 1400,
+    "deceleration": 1800,
+    "keyboardSpeed": 280
+  },
+  "trackingObstacles": []
+}

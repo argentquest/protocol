@@ -385,6 +385,27 @@ button:disabled {
   color: #ecfaff;
 }
 
+.dev-mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dev-mode-toggle b {
+  color: #89a8bf;
+  font-size: 0.72rem;
+}
+
+.dev-mode-toggle[aria-pressed='true'] {
+  border-color: rgba(67, 229, 176, 0.8);
+  color: #ecfaff;
+  background: rgba(67, 229, 176, 0.12);
+}
+
+.dev-mode-toggle[aria-pressed='true'] b {
+  color: #43e5b0;
+}
+
 .text-button {
   padding: 10px 0;
   border: 0;
@@ -747,6 +768,24 @@ button:disabled {
 
 .level-card.is-complete {
   border-color: rgba(67, 229, 176, 0.28);
+}
+
+.level-card.is-apex {
+  border-color: rgba(255, 85, 221, 0.42);
+  background:
+    linear-gradient(140deg, rgba(114, 24, 103, 0.3), transparent 58%),
+    rgba(13, 13, 35, 0.9);
+}
+
+.level-card.is-apex .level-number,
+.level-card.is-apex .level-state,
+.level-card.is-apex .level-card__meta b {
+  color: #ff8be8;
+}
+
+.level-card.is-apex .difficulty-bar i {
+  background: linear-gradient(90deg, #ff55dd, #ff7048);
+  box-shadow: 0 0 9px rgba(255, 85, 221, 0.55);
 }
 
 .level-card__top,
@@ -1449,6 +1488,31 @@ input[type='range'] {
   user-select: none;
 }
 
+.pixi-arena {
+  width: calc(100% - 36px);
+  height: calc(100% - 36px);
+  max-width: calc(100vh - 170px);
+  max-height: calc(100vh - 170px);
+  cursor: default;
+  touch-action: none;
+  user-select: none;
+}
+
+.pixi-arena canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: none;
+}
+
+.renderer-error {
+  max-width: 34rem;
+  padding: 1.25rem;
+  border: 1px solid rgba(255, 70, 100, 0.5);
+  color: var(--color-danger);
+  background: rgba(40, 8, 18, 0.92);
+}
+
 .game-arena.is-dragging {
   cursor: none;
 }
@@ -2053,4 +2117,41 @@ input[type='range'] {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
+}
+
+.startup-screen {
+  min-height: 100vh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 18px;
+  padding: 32px;
+  color: #e8fbff;
+  background:
+    radial-gradient(circle at 50% 35%, rgb(29 84 108 / 42%), transparent 38%),
+    #050914;
+  text-align: center;
+}
+
+.startup-screen h1 {
+  margin: 0;
+  font-size: clamp(2.4rem, 7vw, 5.5rem);
+}
+
+.startup-screen p {
+  max-width: 620px;
+  margin: 0;
+  color: #bcd2dd;
+  font-size: 1.15rem;
+}
+
+.startup-screen progress {
+  width: min(520px, 78vw);
+  height: 12px;
+  accent-color: #70f6ff;
+}
+
+.startup-screen [role='alert'] {
+  max-width: 620px;
+  color: #ff9fa7;
 }

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "mediaVersion": 1,
+  "media": [
+    { "mediaId": "arena-standard", "category": "arenas", "fileName": "arena-standard.svg", "renderMode": "vector", "sizing": "stretch" },
+    { "mediaId": "arena-ellipse", "category": "arenas", "fileName": "arena-ellipse.svg", "renderMode": "vector", "sizing": "stretch" },
+    { "mediaId": "arena-polygon", "category": "arenas", "fileName": "arena-polygon.svg", "renderMode": "vector", "sizing": "stretch" },
+    { "mediaId": "token-circle", "category": "tokens", "fileName": "token-circle.svg", "renderMode": "vector", "sizing": "contain" },
+    { "mediaId": "token-rect", "category": "tokens", "fileName": "token-rect.svg", "renderMode": "vector", "sizing": "contain" },
+    { "mediaId": "token-diamond", "category": "tokens", "fileName": "token-diamond.svg", "renderMode": "vector", "sizing": "contain" },
+    { "mediaId": "start-pad", "category": "targets", "fileName": "start-pad.svg", "renderMode": "vector", "sizing": "contain" },
+    { "mediaId": "target-main", "category": "targets", "fileName": "target-main.svg", "renderMode": "vector", "sizing": "contain" },
+    { "mediaId": "target-bonus", "category": "bonus", "fileName": "target-bonus.svg", "renderMode": "vector", "sizing": "contain" },
+    { "mediaId": "obstacle-static-circle", "category": "obstacles", "fileName": "obstacle-static-circle.svg", "renderMode": "vector", "sizing": "contain" },
+    { "mediaId": "obstacle-static-rect", "category": "obstacles", "fileName": "obstacle-static-rect.svg", "renderMode": "vector", "sizing": "stretch" },
+    { "mediaId": "obstacle-static-diamond", "category": "obstacles", "fileName": "obstacle-static-diamond.svg", "renderMode": "vector", "sizing": "contain" },
+    { "mediaId": "obstacle-moving-circle", "category": "obstacles", "fileName": "obstacle-moving-circle.svg", "renderMode": "vector", "sizing": "contain" },
+    { "mediaId": "obstacle-moving-rect", "category": "obstacles", "fileName": "obstacle-moving-rect.svg", "renderMode": "vector", "sizing": "stretch" },
+    { "mediaId": "obstacle-moving-diamond", "category": "obstacles", "fileName": "obstacle-moving-diamond.svg", "renderMode": "vector", "sizing": "contain" },
+    { "mediaId": "obstacle-tracking-circle", "category": "obstacles", "fileName": "obstacle-tracking-circle.svg", "renderMode": "vector", "sizing": "contain" },
+    { "mediaId": "obstacle-tracking-rect", "category": "obstacles", "fileName": "obstacle-tracking-rect.svg", "renderMode": "vector", "sizing": "stretch" },
+    { "mediaId": "obstacle-tracking-diamond", "category": "obstacles", "fileName": "obstacle-tracking-diamond.svg", "renderMode": "vector", "sizing": "contain" },
+    { "mediaId": "coin-standard", "category": "coins", "fileName": "coin-standard.svg", "renderMode": "vector", "sizing": "contain" },
+    { "mediaId": "power-obstacle-shield", "category": "powers", "fileName": "power-obstacle-shield.svg", "renderMode": "vector", "sizing": "contain" },
+    { "mediaId": "power-full-shield", "category": "powers", "fileName": "power-full-shield.svg", "renderMode": "vector", "sizing": "contain" },
+    { "mediaId": "power-slow-field", "category": "powers", "fileName": "power-slow-field.svg", "renderMode": "vector", "sizing": "contain" },
+    { "mediaId": "power-coin-magnet", "category": "powers", "fileName": "power-coin-magnet.svg", "renderMode": "vector", "sizing": "contain" },
+    { "mediaId": "power-route-scan", "category": "powers", "fileName": "power-route-scan.svg", "renderMode": "vector", "sizing": "contain" }
+  ]
+}

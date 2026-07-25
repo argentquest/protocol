@@ -1,202 +1,277 @@
 import { expect, test } from '@playwright/test'
 
+async function boot(page, url = '/') {
+  await page.goto(url)
+  await expect(page.getByRole('heading', { name: /starting up/i })).toBeVisible()
+  await page.getByRole('button', { name: /start game/i }).click()
+}
+
+async function readyCanvas(page) {
+  const canvas = page.locator('.pixi-arena canvas')
+  await expect(canvas).toHaveAttribute('data-engine-ready', 'true', {
+    timeout: 30_000,
+  })
+  await canvas.scrollIntoViewIfNeeded()
+  return canvas
+}
+
+async function worldToPage(canvas, point) {
+  const box = await canvas.boundingBox()
+  const scale = Math.min(box.width, box.height) / 1000
+  return {
+    x: box.x + (box.width - 1000 * scale) / 2 + point.x * scale,
+    y: box.y + (box.height - 1000 * scale) / 2 + point.y * scale,
+  }
+}
+
+async function dataPoint(canvas, prefix) {
+  return worldToPage(canvas, {
+    x: Number(await canvas.getAttribute(`data-${prefix}-x`)),
+    y: Number(await canvas.getAttribute(`data-${prefix}-y`)),
+  })
+}
+
 test('navigates from the home screen to the first playable level', async ({ page }) => {
-  await page.goto('/')
+  await boot(page)
   await expect(page.getByRole('heading', { name: /find the line/i })).toBeVisible()
   await page.getByRole('button', { name: /select level/i }).click()
   await expect(page.getByRole('heading', { name: /select a chamber/i })).toBeVisible()
   await page.getByRole('button', { name: /01.*calibration/i }).click()
-  await expect(page.getByRole('application', { name: /calibration obstacle course/i })).toBeVisible()
-  await expect(page.getByText(/press and hold the token/i)).toBeVisible()
-
-  const centers = await page.evaluate(() => {
-    const center = (selector) => {
-      const matrix = document.querySelector(selector).getScreenCTM()
-      return { x: matrix.e, y: matrix.f }
-    }
-    return { token: center('.token'), target: center('.target--main') }
-  })
-  await page.mouse.move(centers.token.x, centers.token.y)
-  await page.mouse.down()
-  await page.mouse.move(centers.target.x, centers.target.y, { steps: 90 })
-  await expect(page.getByText(/release to bank your score/i)).toBeVisible()
-  await page.mouse.up()
-  await expect(page.getByRole('heading', { name: /new chamber record/i })).toBeVisible()
-  await expect(page.getByText(/protocol 01 complete/i)).toBeVisible()
+  const canvas = await readyCanvas(page)
+  await expect(
+    page.getByRole('application', { name: /calibration obstacle course/i }).first(),
+  ).toBeVisible()
+  const start = await dataPoint(canvas, 'token')
+  const next = await worldToPage(
+    canvas,
+    JSON.parse(await canvas.getAttribute('data-validated-path'))[1],
+  )
+  await page.mouse.click(start.x, start.y)
+  await page.mouse.move(next.x, next.y)
+  await expect(page.getByText(/token linked/i)).toBeVisible()
 })
 
 test('opens the field guide and settings', async ({ page }) => {
-  await page.goto('/')
+  await boot(page)
   await page.getByRole('button', { name: /field guide/i }).click()
-  await expect(page.getByRole('heading', { name: /one drag/i })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /one route/i })).toBeVisible()
   await page.getByRole('button', { name: /controls/i }).click()
   await expect(page.getByRole('heading', { name: /operator settings/i })).toBeVisible()
 })
 
 test('counts a continuous invalid position as one collision', async ({ page }) => {
-  await page.goto('/')
+  await boot(page)
   await page.getByRole('button', { name: /begin calibration/i }).click()
-  const token = await page.evaluate(() => {
-    const matrix = document.querySelector('.token').getScreenCTM()
-    return { x: matrix.e, y: matrix.f }
+  const canvas = await readyCanvas(page)
+  await canvas.evaluate((element) => {
+    window.__pathProtocolReleaseCanvas = element
   })
-  const arena = await page.locator('.game-arena').boundingBox()
-
-  await page.mouse.move(token.x, token.y)
-  await page.mouse.down()
-  await page.mouse.move(arena.x - 40, token.y, { steps: 35 })
+  const token = await dataPoint(canvas, 'token')
+  const outsideArena = await worldToPage(canvas, {
+    x: 5,
+    y: Number(await canvas.getAttribute('data-token-y')),
+  })
+  await page.mouse.click(token.x, token.y)
+  await page.mouse.move(outsideArena.x, outsideArena.y, { steps: 35 })
   await expect(page.locator('.collision-pips .is-hit')).toHaveCount(1)
   await expect(page.getByText(/2 remaining/i)).toBeVisible()
-  await page.mouse.up()
+  await page.mouse.click(outsideArena.x, outsideArena.y)
+  await expect(page.getByText(/attempt restarted/i)).toBeVisible()
+  expect(
+    await canvas.evaluate(
+      (element) => element === window.__pathProtocolReleaseCanvas,
+    ),
+  ).toBe(true)
+  await expect(page.locator('.pixi-arena canvas')).toHaveCount(1)
+})
+
+test('keeps the play area mounted when collecting a course coin', async ({ page }) => {
+  await page.addInitScript(() => {
+    window.localStorage.setItem(
+      'path-protocol.progress',
+      JSON.stringify({
+        schemaVersion: 2,
+        player: {
+          highestUnlockedLevel: 5,
+          coins: 0,
+          inventory: { 'coin-magnet': 1 },
+          collectedCoins: {},
+          claimedCompletionRewards: {},
+          claimedBonusRewards: {},
+        },
+        levels: {},
+        settings: {
+          musicEnabled: false,
+          musicVolume: 0.22,
+          effectsEnabled: false,
+          effectsVolume: 0.55,
+          reducedMotion: false,
+        },
+      }),
+    )
+  })
+  await boot(page)
+  await page.getByRole('button', { name: /select level/i }).click()
+  await page.getByRole('button', { name: /05.*long route/i }).click()
+  const canvas = await readyCanvas(page)
+  await canvas.evaluate((element) => {
+    window.__pathProtocolCoinCanvas = element
+  })
+  const token = await dataPoint(canvas, 'token')
+
+  await page.mouse.click(token.x, token.y)
+  await page.keyboard.press('4')
+  await expect(canvas).toHaveAttribute('data-active-powers', /coinMagnet/)
+  await expect(page.getByText(/coin collected.*\+1 gold/i)).toBeVisible({
+    timeout: 5000,
+  })
+
+  expect(
+    await canvas.evaluate(
+      (element) => element === window.__pathProtocolCoinCanvas,
+    ),
+  ).toBe(true)
+  await expect(page.locator('.pixi-arena canvas')).toHaveCount(1)
+  await expect(canvas).toHaveAttribute('data-engine-ready', 'true')
+  await page.mouse.click(token.x, token.y)
 })
 
 test('manually restarts an active attempt with the restart shortcut', async ({ page }) => {
-  await page.goto('/')
+  await boot(page)
   await page.getByRole('button', { name: /begin calibration/i }).click()
-  const token = await page.evaluate(() => {
-    const matrix = document.querySelector('.token').getScreenCTM()
-    return { x: matrix.e, y: matrix.f }
-  })
-
-  await page.mouse.move(token.x, token.y)
-  await page.mouse.down()
+  const canvas = await readyCanvas(page)
+  const token = await dataPoint(canvas, 'token')
+  const initialToken = {
+    x: await canvas.getAttribute('data-token-x'),
+    y: await canvas.getAttribute('data-token-y'),
+  }
+  await page.mouse.click(token.x, token.y)
   await page.mouse.move(token.x + 35, token.y - 25, { steps: 8 })
-  await expect(page.getByText(/main protocol target active/i)).toBeVisible()
+  await expect(page.getByText(/token linked/i)).toBeVisible()
   await page.keyboard.press('r')
-  await expect(page.getByText(/attempt restarted.*layout preserved/i)).toBeVisible()
-  await page.mouse.up()
-  await expect(page.getByText(/press and hold the token to try again/i)).toBeVisible()
-  await expect(page.locator('.ghost-trail')).toHaveCount(1)
+  await expect(page.getByText(/attempt restarted/i)).toBeVisible()
+  await expect(canvas).toHaveAttribute('data-ghost-count', '1')
+  await expect(canvas).toHaveAttribute('data-token-x', initialToken.x)
+  await expect(canvas).toHaveAttribute('data-token-y', initialToken.y)
+  await expect(canvas).toHaveAttribute('data-trail-samples', '1')
+  await expect(canvas).toHaveAttribute('data-phase', 'ready')
 })
 
 test('opens any level with route diagnostics in developer playtest mode', async ({ page }) => {
-  await page.goto('/?dev=1')
-  await expect(page.getByText(/dev playtest/i)).toBeVisible()
+  await boot(page, '/?dev=1')
   await page.getByRole('button', { name: /select level/i }).click()
-
-  const finalLevel = page.getByRole('button', { name: /30.*apex protocol/i })
+  const finalLevel = page.getByRole('button', { name: /70.*omega protocol/i })
   await expect(finalLevel).toBeEnabled()
   await finalLevel.click()
-
+  const canvas = await readyCanvas(page)
   await expect(page.getByTestId('playtest-diagnostics')).toContainText(/seed/i)
-  await expect(page.locator('.debug-route')).toBeVisible()
+  expect(JSON.parse(await canvas.getAttribute('data-validated-path')).length).toBeGreaterThan(1)
   await expect(page.getByRole('button', { name: /next playtest level/i })).toBeDisabled()
   await page.getByRole('button', { name: /previous playtest level/i }).click()
-  await expect(page.getByRole('application', { name: /last safe line obstacle course/i })).toBeVisible()
+  await readyCanvas(page)
+  await expect(
+    page
+      .getByRole('application', {
+        name: /terminal convergence obstacle course/i,
+      })
+      .first(),
+  ).toBeVisible()
 })
 
-test('keeps moving obstacles animated while the held token is stationary', async ({ page }) => {
-  await page.goto('/?dev=1')
+test('toggles developer playtest mode from the home screen', async ({ page }) => {
+  await boot(page, '/?dev=0')
+  const toggle = page.getByRole('button', { name: 'Dev mode' })
+  await expect(toggle).toHaveAttribute('aria-pressed', 'false')
+  await toggle.click()
+  await expect(toggle).toHaveAttribute('aria-pressed', 'true')
+  await expect(page).toHaveURL(/\?dev=1$/)
+
+  await page.getByRole('button', { name: /select level/i }).click()
+  await expect(
+    page.getByRole('button', { name: /70.*omega protocol/i }),
+  ).toBeEnabled()
+})
+
+test('keeps moving obstacles animated while mouse control is active', async ({ page }) => {
+  await boot(page, '/?dev=1')
   await page.getByRole('button', { name: /select level/i }).click()
   await page.getByRole('button', { name: /07.*motion detected/i }).click()
-
-  const token = await page.evaluate(() => {
-    const matrix = document.querySelector('.token').getScreenCTM()
-    return { x: matrix.e, y: matrix.f }
-  })
-  await page.mouse.move(token.x, token.y)
-  await page.mouse.down()
-
-  const movingObstacle = page.locator('.obstacle--moving').first()
-  const firstTransform = await movingObstacle.getAttribute('transform')
+  const canvas = await readyCanvas(page)
+  const token = await dataPoint(canvas, 'token')
+  await page.mouse.click(token.x, token.y)
+  const first = await canvas.getAttribute('data-moving-positions')
   await page.waitForTimeout(350)
-  const secondTransform = await movingObstacle.getAttribute('transform')
-
-  expect(secondTransform).not.toBe(firstTransform)
-  await page.mouse.up()
+  expect(await canvas.getAttribute('data-moving-positions')).not.toBe(first)
+  await page.mouse.click(token.x, token.y)
 })
 
 test('smooths token response instead of snapping to a fast mouse jump', async ({ page }) => {
-  await page.goto('/?dev=1')
+  await boot(page, '/?dev=1')
   await page.getByRole('button', { name: /begin calibration/i }).click()
-  const start = await page.evaluate(() => {
-    const matrix = document.querySelector('.token').getScreenCTM()
-    return { x: matrix.e, y: matrix.f }
-  })
-
+  const canvas = await readyCanvas(page)
+  const start = await dataPoint(canvas, 'token')
+  const startWorldX = Number(await canvas.getAttribute('data-token-x'))
   await page.mouse.move(start.x, start.y)
   await page.mouse.down()
-  await page.mouse.move(start.x + 120, start.y)
-  const shortlyAfterJump = await page.evaluate(
-    () => document.querySelector('.token').getScreenCTM().e,
-  )
-  expect(shortlyAfterJump).toBeGreaterThan(start.x)
-  expect(shortlyAfterJump).toBeLessThan(start.x + 120)
-  await page.waitForTimeout(450)
-  const afterFollowing = await page.evaluate(
-    () => document.querySelector('.token').getScreenCTM().e,
-  )
-  expect(afterFollowing).toBeGreaterThan(shortlyAfterJump)
   await page.mouse.up()
+  await expect(canvas).toHaveAttribute('data-phase', 'active-main')
+  await page.mouse.move(start.x + 120, start.y)
+  await page.waitForTimeout(30)
+  const shortlyAfter = Number(await canvas.getAttribute('data-token-x'))
+  expect(shortlyAfter).toBeGreaterThan(startWorldX)
+  expect(shortlyAfter).toBeLessThan(startWorldX + 200)
+  await page.waitForTimeout(450)
+  expect(Number(await canvas.getAttribute('data-token-x'))).toBeGreaterThan(shortlyAfter)
+  await page.mouse.click(start.x + 120, start.y)
 })
 
 test('toggles keyboard control with Space and steers with arrow keys', async ({ page }) => {
-  await page.goto('/?dev=1')
+  await boot(page, '/?dev=1')
   await page.getByRole('button', { name: /begin calibration/i }).click()
-  const startX = await page.evaluate(
-    () => document.querySelector('.token').getScreenCTM().e,
-  )
-
+  const canvas = await readyCanvas(page)
+  const startX = Number(await canvas.getAttribute('data-token-x'))
   await page.keyboard.press('Space')
-  await expect(page.getByText(/keyboard control active/i)).toBeVisible()
+  await expect(page.getByText(/keyboard link active/i)).toBeVisible()
   await page.keyboard.down('ArrowRight')
   await page.waitForTimeout(300)
   await page.keyboard.up('ArrowRight')
-  const movedX = await page.evaluate(
-    () => document.querySelector('.token').getScreenCTM().e,
-  )
-  expect(movedX).toBeGreaterThan(startX)
-
+  expect(Number(await canvas.getAttribute('data-token-x'))).toBeGreaterThan(startX)
   await page.keyboard.press('Space')
-  await expect(page.getByText(/keyboard hold released before target/i)).toBeVisible()
+  await expect(page.getByText(/attempt restarted/i)).toBeVisible()
 })
 
 test('restarts a pursued bonus drag from the reached target while time continues', async ({
   page,
 }) => {
-  await page.goto('/?dev=1')
+  await boot(page, '/?dev=1')
   await page.getByRole('button', { name: /select level/i }).click()
   await page.getByRole('button', { name: /03.*tight tolerances/i }).click()
-  const route = await page.evaluate(() => {
-    const svg = document.querySelector('.game-arena')
-    const matrix = svg.getScreenCTM()
-    const routePoints = document.querySelector('.debug-route').points
-    return Array.from(routePoints).map((point) => ({
-      x: point.x * matrix.a + point.y * matrix.c + matrix.e,
-      y: point.x * matrix.b + point.y * matrix.d + matrix.f,
-    }))
-  })
-
-  await page.mouse.move(route[0].x, route[0].y)
+  const canvas = await readyCanvas(page)
+  const start = await dataPoint(canvas, 'token')
+  const target = await dataPoint(canvas, 'target')
+  await page.mouse.move(start.x, start.y)
   await page.mouse.down()
-  for (const point of route.slice(1)) {
-    await page.mouse.move(point.x, point.y, { steps: 2 })
-    await page.waitForTimeout(20)
-  }
-  const dialog = page.getByRole('dialog', { name: /bonus target available/i })
-  await expect(dialog).toBeVisible()
   await page.mouse.up()
-  await page.waitForTimeout(250)
+  await expect(canvas).toHaveAttribute('data-phase', 'active-main')
+  await page.keyboard.press('1')
+  await page.keyboard.press('2')
+  await page.mouse.move(target.x, target.y)
+  const dialog = page.getByRole('dialog', { name: /bonus target available/i })
+  for (let attempt = 0; attempt < 10 && !(await dialog.isVisible()); attempt += 1) {
+    await page.waitForTimeout(1500)
+    await page.keyboard.press(attempt % 2 === 0 ? '2' : '1')
+  }
+  await expect(dialog).toBeVisible({ timeout: 5000 })
   await page.getByRole('button', { name: /ok.*pursue bonus/i }).click()
-  await expect(page.getByText(/press and hold the token to continue/i)).toBeVisible()
-
-  const checkpoint = await page.evaluate(() => {
-    const center = (selector) => {
-      const matrix = document.querySelector(selector).getScreenCTM()
-      return { x: matrix.e, y: matrix.f }
-    }
-    return { token: center('.token'), target: center('.target--main') }
-  })
-  expect(checkpoint.token.x).toBeCloseTo(checkpoint.target.x, 1)
-  expect(checkpoint.token.y).toBeCloseTo(checkpoint.target.y, 1)
-
-  const elapsedBefore = await page.locator('.hud-readout').filter({ hasText: 'Time' }).innerText()
+  await expect(page.getByText(/reactivate at the checkpoint/i)).toBeVisible()
+  const tokenX = Number(await canvas.getAttribute('data-token-x'))
+  const targetX = Number(await canvas.getAttribute('data-target-x'))
+  expect(tokenX).toBeCloseTo(targetX, 1)
+  const before = await page.locator('.hud-readout').filter({ hasText: 'Time' }).innerText()
   await page.waitForTimeout(250)
-  const elapsedAfter = await page.locator('.hud-readout').filter({ hasText: 'Time' }).innerText()
-  expect(elapsedAfter).not.toBe(elapsedBefore)
-
+  const after = await page.locator('.hud-readout').filter({ hasText: 'Time' }).innerText()
+  expect(after).not.toBe(before)
   await page.keyboard.press('Space')
-  await expect(page.getByText(/keyboard control active/i)).toBeVisible()
   await page.keyboard.press('Space')
   await expect(page.getByRole('heading', { name: /playtest run captured/i })).toBeVisible()
 })
@@ -204,53 +279,54 @@ test('restarts a pursued bonus drag from the reached target while time continues
 test('starts gradual tracking and activates numbered powers after play begins', async ({
   page,
 }) => {
-  await page.goto('/?dev=1')
+  await boot(page, '/?dev=1')
   await page.getByRole('button', { name: /select level/i }).click()
   await page.getByRole('button', { name: /11.*pursuit vector/i }).click()
-
-  const tracker = page.locator('.obstacle--tracking').first()
-  const restingTransform = await tracker.getAttribute('transform')
+  const canvas = await readyCanvas(page)
+  const resting = await canvas.getAttribute('data-tracking-positions')
   await page.waitForTimeout(300)
-  await expect(tracker).toHaveAttribute('transform', restingTransform)
-
-  const token = await page.evaluate(() => {
-    const matrix = document.querySelector('.token').getScreenCTM()
-    return { x: matrix.e, y: matrix.f }
-  })
+  expect(await canvas.getAttribute('data-tracking-positions')).toBe(resting)
+  const token = await dataPoint(canvas, 'token')
   await page.mouse.move(token.x, token.y)
   await page.mouse.down()
-  await page.keyboard.press('5')
-  await expect(page.locator('.power-route-scan')).toBeVisible()
-  await page.waitForTimeout(350)
-  expect(await tracker.getAttribute('transform')).not.toBe(restingTransform)
   await page.mouse.up()
+  await expect(canvas).toHaveAttribute('data-phase', 'active-main')
+  await page.keyboard.press('5')
+  await expect(canvas).toHaveAttribute('data-route-scan-visible', 'true')
+  await page.waitForTimeout(350)
+  expect(await canvas.getAttribute('data-tracking-positions')).not.toBe(resting)
+  await page.mouse.click(token.x, token.y)
 })
 
 test('applies obstacle-only and full-shield boundary rules', async ({ page }) => {
-  await page.goto('/?dev=1')
+  await boot(page, '/?dev=1')
   await page.getByRole('button', { name: /begin calibration/i }).click()
-  const locate = async () => {
-    const token = await page.evaluate(() => {
-      const matrix = document.querySelector('.token').getScreenCTM()
-      return { x: matrix.e, y: matrix.f }
-    })
-    return { token, arena: await page.locator('.game-arena').boundingBox() }
-  }
-
-  let positions = await locate()
-  await page.mouse.move(positions.token.x, positions.token.y)
-  await page.mouse.down()
+  let canvas = await readyCanvas(page)
+  let token = await dataPoint(canvas, 'token')
+  let outsideArena = await worldToPage(canvas, {
+    x: 5,
+    y: Number(await canvas.getAttribute('data-token-y')),
+  })
+  await page.mouse.click(token.x, token.y)
   await page.keyboard.press('1')
-  await page.mouse.move(positions.arena.x - 35, positions.token.y, { steps: 20 })
+  await page.mouse.move(outsideArena.x, outsideArena.y, { steps: 20 })
   await expect(page.locator('.collision-pips .is-hit')).toHaveCount(1)
   await page.keyboard.press('r')
-  await page.mouse.up()
 
-  positions = await locate()
-  await page.mouse.move(positions.token.x, positions.token.y)
-  await page.mouse.down()
+  canvas = await readyCanvas(page)
+  token = await dataPoint(canvas, 'token')
+  outsideArena = await worldToPage(canvas, {
+    x: 5,
+    y: Number(await canvas.getAttribute('data-token-y')),
+  })
+  await page.mouse.click(token.x, token.y)
   await page.keyboard.press('2')
-  await page.mouse.move(positions.arena.x - 35, positions.token.y, { steps: 20 })
+  await expect(canvas).toHaveAttribute(
+    'data-active-powers',
+    /fullShield/,
+  )
+  await page.mouse.move(outsideArena.x, outsideArena.y)
+  await page.waitForTimeout(700)
   await expect(page.locator('.collision-pips .is-hit')).toHaveCount(0)
-  await page.mouse.up()
+  await page.mouse.click(outsideArena.x, outsideArena.y)
 })

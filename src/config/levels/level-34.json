@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 2,
+  "id": "level-34",
+  "number": 34,
+  "name": "Corner Logic",
+  "seed": "path-protocol-corner-logic-v1",
+  "difficulty": 4,
+  "briefing": "Expansion chamber 34: a difficulty-4 variation with a new deterministic layout.",
+  "arena": {
+    "shape": "polygon",
+    "points": [
+      [
+        70,
+        140
+      ],
+      [
+        300,
+        50
+      ],
+      [
+        750,
+        70
+      ],
+      [
+        940,
+        260
+      ],
+      [
+        900,
+        800
+      ],
+      [
+        680,
+        940
+      ],
+      [
+        190,
+        900
+      ],
+      [
+        55,
+        620
+      ]
+    ],
+    "mediaId": "arena-polygon"
+  },
+  "token": {
+    "shape": "circle",
+    "size": 44,
+    "mediaId": "token-circle"
+  },
+  "start": {
+    "mode": "generated",
+    "region": {
+      "x": 120,
+      "y": 120,
+      "width": 170,
+      "height": 140
+    },
+    "mediaId": "start-pad"
+  },
+  "mainTarget": {
+    "mode": "generated",
+    "region": {
+      "x": 680,
+      "y": 690,
+      "width": 150,
+      "height": 130
+    },
+    "size": 52,
+    "mediaId": "target-main"
+  },
+  "generation": {
+    "obstacleCount": 6,
+    "allowedShapes": [
+      "rect",
+      "circle",
+      "diamond"
+    ],
+    "minSize": 80,
+    "maxSize": 155,
+    "minimumGap": 66,
+    "pathGrid": 20,
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    }
+  },
+  "manualObstacles": [
+    {
+      "id": "angled-core",
+      "shape": "diamond",
+      "x": 470,
+      "y": 475,
+      "size": 135,
+      "mediaId": "obstacle-static-diamond"
+    }
+  ],
+  "movingObstacles": [],
+  "coins": [
+    {
+      "id": "coin-a",
+      "x": 520,
+      "y": 520,
+      "size": 28,
+      "value": 1,
+      "mediaId": "coin-standard"
+    }
+  ],
+  "rewards": {
+    "completionCoins": 2,
+    "bonusCoinsPerTarget": 1
+  },
+  "scoring": {
+    "baseMaximum": 17000,
+    "parTimeMs": 9000,
+    "parDistance": 1120,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 1,
+    "rewardPerTarget": 350,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.2,
+    "targets": [
+      {
+        "id": "relay-a",
+        "x": 260,
+        "y": 250,
+        "size": 46,
+        "mediaId": "target-bonus"
+      }
+    ]
+  },
+  "movement": {
+    "maximumSpeed": 360,
+    "acceleration": 1400,
+    "deceleration": 1800,
+    "keyboardSpeed": 280
+  },
+  "trackingObstacles": []
+}

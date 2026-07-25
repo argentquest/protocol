@@ -2,74 +2,123 @@
 
 ## Purpose
 
-This file provides instructions for coding agents working on **Path Protocol**.
+This file provides repository instructions for coding agents working on
+**Path Protocol V2**.
 
-Path Protocol is a desktop browser precision game built with React, Vite, JavaScript, and SVG. The player holds and drags a visible token through a deterministic obstacle course, avoids collisions, reaches a main target, and may pursue ordered bonus targets.
+Path Protocol is a 70-level desktop browser precision game. React owns the
+application UI, PixiJS renders the real-time arena through WebGL, a pure
+fixed-step engine owns gameplay, and Howler.js owns audio.
 
-The project does **not** currently contain NPCs, enemy AI, behavior trees, autonomous game agents, multiplayer simulation, or server-authoritative gameplay. Do not introduce those systems unless the product scope changes explicitly.
+V2 is a new architecture on `feature/pixijs-rearchitecture`. Do not preserve
+the V1 React/SVG renderer or synthesized Web Audio implementation for backward
+compatibility.
 
 ## Sources of truth
 
-Read these documents before making architectural or gameplay changes:
+Read these files before architectural or gameplay changes:
 
-1. [`architecture.md`](architecture.md) — product behavior, technical architecture, configuration models, scoring, and testing strategy.
-2. [`sprints.md`](sprints.md) — implementation sequence, task breakdown, and completion criteria.
-3. `src/config/schemas/*.json` — authoritative configuration contracts once they exist.
-4. `src/config/levels/*.json` — level-specific gameplay data once they exist.
-5. `src/config/themeConfig.json` — visual and audio theme data once it exists.
+1. [`architecturev2.md`](architecturev2.md) — authoritative V2 product and
+   technical architecture.
+2. [`sprintv2.md`](sprintv2.md) — live implementation sequence and task status.
+3. `src/config/schemas/*.json` — authoritative configuration contracts.
+4. `src/config/levels/*.json` — level-specific gameplay configuration.
+5. Generated media manifests — resolved default and theme asset contracts once
+   implemented.
 
-If code and documentation disagree, do not silently choose one. Determine whether the code contains an intentional later decision. Update the implementation and relevant documentation together.
+`architecture.md` and `sprints.md` describe V1 and are historical references.
+When V1 and V2 disagree, follow the V2 documents.
 
-## Project status
-
-The repository initially contains planning documents only. Build the application incrementally in the order described by `sprints.md`. Do not create all systems as one large implementation.
-
-The target source layout is documented in `architecture.md`. Follow it unless the existing code establishes a clearer convention.
+Update `sprintv2.md` in the same change that completes a tracked task. A sprint
+must pass its relevant automated checks and meet its exit criteria before work
+moves to the next sprint.
 
 ## Required technology
 
-- React for application screens and stateful UI.
+- React 19 for screens, navigation, dialogs, HUD, settings, and shops.
 - Vite for development and production builds.
 - Modern JavaScript with ES modules.
-- SVG and CSS for gameplay graphics and presentation.
-- Pointer Events for mouse and trackpad input.
-- `requestAnimationFrame` for high-frequency gameplay updates.
-- JSON for levels and themes.
-- `localStorage` for browser-local progress and settings.
+- PixiJS using WebGL only for gameplay rendering.
+- One imperative Pixi canvas mounted and disposed by React.
+- A framework-neutral fixed 60 Hz game engine.
+- External SVG source media loaded initially as Pixi vector
+  `GraphicsContext` objects.
+- Howler.js for effects and looping ambience.
+- WAV audio masters with generated WebM and MP3 delivery files.
+- JSON and versioned JSON Schema for levels, media, themes, audio, game settings,
+  and powers.
+- Versioned `localStorage` for browser-local progress and settings.
 - Vitest and React Testing Library for unit and component tests.
 - Playwright for critical browser journeys.
 
-Do not add TypeScript, a state-management library, a game engine, a physics engine, or a backend without an explicit project decision.
+Do not add TypeScript, a backend, multiplayer, a physics engine, WebGPU, touch
+gameplay, or another state-management library without an explicit product
+decision.
+
+## Architecture boundaries
+
+The engine:
+
+- Must not import React, PixiJS, Howler, browser DOM APIs, or persistence code.
+- Owns the gameplay state machine, fixed-step updates, movement, collision,
+  targets, bonuses, hazards, coins, powers, and score inputs.
+- Emits discrete gameplay events and throttled serializable HUD snapshots.
+
+The Pixi adapter:
+
+- Owns the WebGL application, viewport, scene graph, external SVG contexts,
+  entity display objects, trails, effects, and debug overlays.
+- Must not own scoring, progression, persistence, or gameplay decisions.
+- Must create stable display objects and update their transforms without
+  rebuilding the scene every frame.
+
+React:
+
+- Owns startup, menus, navigation, HUD presentation, dialogs, settings, results,
+  level selection, and the Power Lab.
+- Must not receive raw pointer movement or frame-by-frame entity transforms.
+- Mounts exactly one imperative Pixi canvas for the arena.
+
+Howler:
+
+- Is accessed through a renderer-independent audio manager.
+- Responds to logical game events rather than component details.
+- Starts only after a user interaction unlocks browser audio.
 
 ## Core gameplay contracts
 
-Preserve these rules unless the user changes them:
+Preserve these rules unless the user explicitly changes them:
 
-- The logical level grid is 1000 × 1000.
-- The play area may stretch, but tokens, targets, and obstacles must preserve their intended shapes.
-- The pointer controls the center of the token.
-- The token has real dimensions and fixed orientation.
-- The native cursor is hidden during an active drag.
-- The player must hold the mouse button throughout an attempt.
-- Releasing before the main target is reached restarts the level.
+- The logical world is 1000 × 1000.
+- The viewport scales uniformly and centers the world without distorting
+  gameplay objects.
+- The pointer controls the desired center position of the token.
+- The token moves toward the pointer using configured acceleration, maximum
+  speed, and deceleration; it does not snap to the pointer.
+- The token has real dimensions, fixed orientation, and no rotation.
+- Pointer play starts by pressing the token and finishes by releasing.
+- Keyboard play starts with Space, steers with arrow keys, and finishes with
+  Space.
+- Number keys activate configured consumable powers.
+- `R` restarts the same level layout.
 - A target is reached when any part of the token touches it.
-- The entire token must remain inside the arena.
-- Touching an obstacle or arena boundary is a collision.
-- A collision applies a configurable penalty, defaults to 20%, and snaps the token to its last safe position.
-- The timer continues after a collision.
+- The complete token must remain inside the arena.
+- The complete token is tested against every obstacle.
+- A collision applies a configured penalty, defaults to 20%, and restores the
+  last safe position.
+- One continuous overlap counts as one collision event.
+- The timer and traveled distance continue after a collision.
 - The third collision restarts the same level.
-- The generated layout does not change on restart.
-- The active trail remains visible throughout the attempt.
-- Failed attempts may remain as bounded, faint ghost trails.
-- Bonus targets are optional, ordered, and shown one at a time.
-- The player releases at a reached target to bank the current result.
-- Pursuing a bonus continues the same drag, timer, distance, and trail.
-- Every required generated course must be validated as solvable for the configured token.
-- All players use the same fixed seed for a given level version.
+- The deterministic layout does not regenerate on restart.
+- The actual token-center path remains visible.
+- Ordered bonus targets appear one at a time.
+- A pursued bonus restarts control from the target just reached while continuing
+  the attempt clock, distance, and trail.
+- All required generated courses must be solvable for the configured token.
+- All players use the same seed for a released level version.
 
 ## Scoring contract
 
-The default score uses equal time and route-efficiency weights:
+The default score is:
 
 ```text
 attainableMaximum = baseMaximum + earnedBonusMaximum
@@ -79,257 +128,216 @@ routeFactor = min(1, directDistance / actualDistance)
 
 performanceScore =
   attainableMaximum
-  * ((timeWeight * timeFactor) + (distanceWeight * routeFactor))
+  × ((timeWeight × timeFactor) + (distanceWeight × routeFactor))
 
-penalty =
+collisionPenalty =
   attainableMaximum
-  * penaltyRate
-  * penaltyEvents
+  × collisionPenaltyRate
+  × collisionCount
 
 finalScore =
-  round(clamp(performanceScore - penalty, 0, attainableMaximum))
+  round(clamp(
+    performanceScore - collisionPenalty - bonusFailurePenalty,
+    0,
+    attainableMaximum
+  ))
 ```
 
-Default values:
-
-- `timeWeight`: `0.5`
-- `distanceWeight`: `0.5`
-- `collisionPenaltyRate`: `0.2`
-- `maximumCollisions`: `3`
-
-For ordered targets, direct distance is the sum of straight-line segments from the start through each target actually reached.
-
-Do not duplicate scoring rules in components. Keep scoring in pure, testable modules and read tunable values from level configuration.
+Direct distance is the sum of straight segments from the start through every
+ordered target reached. Do not duplicate scoring formulas in UI or renderer
+modules.
 
 ## Configuration rules
 
-### General
+- Gameplay values belong in level, game, or power JSON.
+- Presentation and playback values belong in media, theme, or audio JSON.
+- JSON files contain data only.
+- Validate all configuration before creating a level session.
+- Reject invalid defaults with actionable development errors and a safe
+  production error screen.
+- Require stable unique IDs.
+- Require a registered theme-neutral `mediaId` for every renderable object.
+- Use the shared seeded random service; never use `Math.random()` for gameplay.
+- Manual level elements take priority over generated elements.
+- Authored coordinates use the 1000 × 1000 logical world.
 
-- Gameplay values belong in level JSON, not JSX or CSS.
-- Theme values belong in `themeConfig.json`, not level files.
-- Configuration files contain data only and must never contain executable JavaScript.
-- Validate configurations against versioned JSON Schemas.
-- Reject invalid configurations with useful development errors and a safe production error screen.
-- Use stable, unique IDs for levels and game objects.
-- Document schema changes and add migrations or compatibility handling where required.
+## Default and theme media rules
 
-### Coordinates
+The default media library is complete and mandatory. Themes contain optional
+per-element overrides.
 
-- Store authored coordinates in the logical 1000 × 1000 space.
-- Support manual, generated, and generated-with-fallback placement.
-- Manual objects take priority over generated objects.
-- Convert pointer positions to logical coordinates through the shared coordinate-transform module.
-- Do not calculate responsive transforms independently in individual components.
+Resolution occurs independently for each visual and sound:
 
-### Randomness
+```text
+valid theme override → valid default → fatal default-media error
+```
 
-- Use the shared seeded random-number service.
-- Do not use `Math.random()` for course generation, obstacle behavior, or bonus offers.
-- Identical level data, generator version, and seed must produce identical layouts.
-- Bump the relevant version when generator changes intentionally alter a released course.
+- Missing theme files use defaults.
+- Invalid theme files use defaults.
+- Invalid theme overrides warn only in development.
+- Missing or invalid default assets fail validation.
+- A theme never needs to duplicate a complete category.
+- Future Lab initially inherits defaults and adds only distinct overrides.
 
-## React and runtime-state rules
+Generated manifests are the result of scanning standardized filenames. Do not
+hand-maintain a second list that can drift from the files.
 
-React owns:
+## SVG rules
 
-- Menus and navigation.
-- Level loading.
-- Discrete gameplay states.
-- HUD and results.
-- Settings and persistence.
-
-The animation loop owns:
-
-- Current pointer position.
-- Token transform.
-- Moving-obstacle transforms.
-- Active trail samples.
-- Per-frame collision checks.
-
-Do not call React state setters for every raw pointer event. Use mutable runtime state and SVG element references inside `requestAnimationFrame`, then send throttled HUD updates and discrete events to React.
-
-Represent gameplay flow with explicit state transitions. Do not distribute conflicting boolean flags such as `isDragging`, `isComplete`, and `isFailed` across unrelated components.
-
-## SVG and rendering rules
-
-- Keep gameplay elements in ordered SVG layers.
-- Preserve geometric clarity; visual filters must not obscure collision boundaries.
-- Keep collision geometry separate from decorative effects.
-- Prefer CSS variables and theme tokens for colors and effects.
-- Use non-scaling strokes where appropriate.
-- Bound the number of trail and ghost-trail points.
-- Avoid embedding large base64 bitmap assets.
-- Do not use bitmaps for interactive collision geometry.
-- Decorative bitmap assets require a demonstrated need and an appropriate license.
-
-## Collision and movement rules
-
-- Collision detection uses the token's complete shape, not only its center.
-- Support circle, rectangle, polygon, and flattened SVG path geometry as required.
-- Test the swept movement between the last safe position and requested position to prevent tunneling.
-- Restore the last safe token transform after a collision.
-- Count a continuous overlap as one collision event.
-- Moving obstacles derive their position from elapsed level time, not accumulated frame movement.
-- Keep geometry calculations in pure modules wherever practical.
-- Path validation must account for token dimensions and fixed orientation.
-
-Never weaken collision rules merely to make a generated level pass. Fix the placement constraints, geometry, or configured fallback.
-
-## Persistence rules
-
-- Store progress in one versioned `localStorage` record.
-- Validate data read from storage.
-- Recover safely from malformed or obsolete values.
-- Add migration logic for schema changes.
-- Recalculate cumulative score from per-level best scores on load.
-- Replace a level's saved score only when a new completed score is higher.
-- Do not persist an in-progress drag or raw pointer history.
-- Confirm with the player before resetting progress.
+- Store gameplay artwork in external `.svg` files.
+- Use transparent backgrounds and centered `viewBox="0 0 100 100"` artwork.
+- Keep visual colors and supported effects inside each SVG.
+- Do not use global DOM CSS dependencies, embedded bitmaps, or SVG text.
+- Initial assets use explicit `renderMode: "vector"`.
+- Texture mode is reserved but unsupported until its planned sprint.
+- Vector assets must avoid SVG features unsupported by Pixi parsing, including
+  blur/drop-shadow filters and unsupported patterns.
+- Collision geometry comes from JSON, never from artwork bounds.
+- Rectangular objects may stretch to configured width and height. Tokens,
+  circles, coins, and other proportion-sensitive objects preserve aspect ratio.
 
 ## Audio rules
 
-- Respect browser autoplay restrictions; initialize or resume audio after user interaction.
-- Keep music and effects on separate volume channels.
-- Persist enablement and volume settings.
-- Rate-limit frequently triggered collision sounds.
-- Record the source and license of every third-party audio asset.
-- Prefer compressed web formats and seamless loops.
+- WAV is the canonical source.
+- Runtime order is WebM first and MP3 second.
+- Each logical sound uses separate files; do not introduce audio sprites before
+  profiling demonstrates a need.
+- Normal conversion creates only missing delivery files and never overwrites an
+  existing WebM or MP3.
+- `npm run media:audio:force` intentionally regenerates delivery files.
+- Playback behavior belongs in `audio.json`.
+- A theme playback entry must be complete; missing or invalid entries use the
+  complete default entry without property-level merging.
+- Default ambience is required, begins after Start Game, loops continuously,
+  and continues between levels.
+- Rate-limit collision and other frequently repeated effects.
+- Record the provenance and license of every audio asset.
 
-## Accessibility and input
+## Fixed-step and input rules
 
-- Gameplay targets desktop mouse and trackpad input in the initial release.
-- Do not add touch gameplay unless requested.
-- Menus must remain keyboard accessible.
-- Maintain visible focus states.
-- Do not communicate collisions, bonuses, or completion by color alone.
-- Respect reduced-motion preferences and the in-game reduced-motion setting.
-- Prevent browser-native text selection and drag behavior inside the arena.
-- Treat focus loss and pointer-capture loss according to the gameplay state machine.
+- Run game simulation at exactly 60 updates per second.
+- Use a clamped accumulator so an inactive tab cannot create an update spiral.
+- Render independently through the Pixi ticker.
+- Use a monotonic real-time clock for scoring.
+- Raw pointer and keyboard handlers only update input state.
+- Never perform collision, hazard updates, score calculation, or React state
+  updates directly in pointer-move handlers.
+- Convert canvas coordinates through one shared viewport module.
+
+## Collision and movement rules
+
+- Test the complete token shape, not only its center.
+- Support circle, rectangle, polygon/diamond, and later flattened-path geometry.
+- Use swept tests between safe and requested positions to prevent tunneling.
+- Restore the last safe transform after collision.
+- Derive moving hazards from simulation time.
+- Tracking hazards start only after the attempt starts, accelerate and turn
+  gradually, and remain inside their configured zones.
+- Path validation must account for token dimensions.
+- Never weaken collision rules just to make a level pass; correct the level,
+  placement, geometry, or fallback route.
+
+## Persistence rules
+
+- Store progress in one versioned local-storage record.
+- Validate and migrate stored data.
+- Recalculate cumulative score from per-level best scores.
+- Replace a saved level score only when a new completed score is higher.
+- Prevent repeat farming of course coins and one-time rewards.
+- Persist power inventory and audio settings.
+- Do not persist active attempts or raw pointer history.
+- Confirm before resetting progress.
 
 ## Performance expectations
 
-- Target 60 frames per second on a typical current desktop.
-- Process pointer movement no more than once per animation frame.
+- Target 60 rendered frames per second on a representative current desktop.
+- Parse each resolved vector SVG once and reuse its `GraphicsContext`.
 - Precompute static collision geometry.
-- Avoid per-frame object and array allocation in hot paths where practical.
-- Reuse transient effect objects or nodes.
-- Simplify rendered trails while retaining accurate scoring distance.
-- Keep SVG blur and glow filters modest.
-- Add spatial indexing only when profiling demonstrates a need.
-- Do not add Web Workers before measuring a main-thread bottleneck.
+- Avoid hot-loop allocation where practical.
+- Reuse Pixi display objects and effects.
+- Bound trail and ghost-trail samples.
+- Do not add workers, spatial indexes, texture mode, or audio sprites before
+  profiling identifies a need.
 
-## Testing requirements
+## Accessibility
 
-Every feature change must include tests proportional to its risk.
+- Keep React menus and dialogs keyboard accessible.
+- Maintain visible focus.
+- Provide Space and arrow-key gameplay.
+- Never use sound or color as the sole feedback for important events.
+- Respect reduced-motion settings without changing gameplay rules.
+- Give the Pixi canvas an accessible name and nearby instructions.
 
-### Unit tests
+## Testing and sprint gates
 
-Prioritize tests for:
+Every task needs tests proportional to its risk. Prioritize:
 
-- Coordinate transforms.
-- Seeded random generation.
-- Score calculations and caps.
-- Direct-distance calculations.
-- Collision and containment geometry.
-- Swept collision behavior.
-- State transitions.
+- JSON Schema and media validation.
+- Manifest determinism and fallback.
+- Audio conversion skip and force behavior.
+- Fixed-step accumulation and state transitions.
+- Movement, collision, containment, and swept geometry.
+- Scoring, direct distance, bonuses, and score caps.
+- Moving/tracking hazard determinism.
+- Coin non-farmability and power consumption.
+- Viewport transforms and undistorted sizing.
+- Audio unlock, cooldown, fallback, and ambience looping.
 - Persistence validation and migration.
 
-### Generation tests
+Critical Playwright journeys include startup, mouse play, keyboard play, restart,
+collisions, bonuses, powers, progression, and reload.
 
-For every level, verify:
+Before moving to the next sprint:
 
-- Stable output for the configured seed.
-- No invalid initial overlap.
-- Valid token and target placement.
-- Preservation of manual elements.
-- Required target reachability.
-- Valid movement envelopes for moving hazards.
-
-### Browser tests
-
-Cover critical player journeys:
-
-- Begin a valid drag.
-- Reject a drag that does not start on the token.
-- Reach a target by edge contact.
-- Release early and restart.
-- Apply a collision penalty and snap back.
-- Restart after the third collision.
-- Pursue, bank, and fail bonus targets.
-- Save only improved scores.
-- Unlock and replay levels.
-- Restore progress and settings after reload.
-
-Do not rely only on snapshot tests for geometry or gameplay behavior.
-
-## Expected commands
-
-Inspect `package.json` before running commands because scripts may evolve. Once the application is initialized, the project should provide commands equivalent to:
-
-```powershell
-npm install
-npm run dev
-npm run lint
-npm run test
-npm run test:e2e
-npm run build
-```
-
-Before handing off an implementation:
-
-1. Run the most relevant focused tests.
-2. Run the full unit-test suite when practical.
-3. Run linting.
-4. Run the production build.
-5. Run critical browser tests for changes to gameplay flow or persistence.
-
-If a command cannot run, report the exact limitation instead of claiming verification.
+1. Complete every task required by the sprint exit criteria.
+2. Update task and sprint status in `sprintv2.md`.
+3. Run focused tests while implementing.
+4. Run the full unit suite.
+5. Run lint and production build when the sprint changes executable code.
+6. Run relevant browser tests for gameplay or integration changes.
+7. Do not mark the sprint complete if a required check is failing.
 
 ## Repository hygiene
 
 - Preserve unrelated user changes.
-- Keep commits and patches focused on the requested task.
-- Do not commit build output, test reports, browser profiles, or local environment files.
-- Do not store secrets or machine-specific absolute paths.
-- Avoid adding dependencies for functionality that can be implemented clearly with existing browser APIs.
-- Record third-party dependency and asset licenses.
-- Update documentation when behavior, schema, scripts, or architecture changes.
-
-## Change discipline
-
-When implementing a task:
-
-1. Read the relevant architecture and sprint sections.
-2. Inspect existing implementation and tests.
-3. Make the smallest coherent change.
-4. Add or update tests.
-5. Validate configuration and responsive behavior.
-6. Run appropriate checks.
-7. Update documentation if the contract changed.
-
-Ask for direction before making a change that would:
-
-- Alter agreed gameplay rules.
-- Change the score formula.
-- Add a backend or online account system.
-- Add touch support.
-- Add multiplayer or autonomous NPC agents.
-- Replace SVG gameplay with Canvas, WebGL, or bitmap rendering.
-- Change released seeds or generated layouts.
-- Introduce a major framework or game engine.
+- Use `apply_patch` for hand-authored edits.
+- Keep generated outputs reproducible.
+- Do not commit secrets, machine-specific paths, build output, browser profiles,
+  or test reports.
+- Record new dependency and asset licenses.
+- Update documentation and schemas with contract changes.
+- Avoid destructive Git or filesystem commands unless explicitly requested.
 
 ## Definition of done
 
-Work is complete when:
+V2 work is complete when:
 
-- It matches the agreed gameplay and architecture.
-- Values that belong in configuration are not hard-coded.
-- Relevant tests pass.
-- The production build succeeds when applicable.
-- Pointer movement remains smooth.
-- Responsive object geometry remains undistorted.
-- Error, interruption, and restart states are handled.
-- Documentation and schemas reflect any contract changes.
-- New dependencies and assets have compatible recorded licenses.
+- PixiJS WebGL is the only gameplay renderer.
+- React owns no frame-by-frame gameplay state.
+- The engine is deterministic and framework-neutral.
+- All 70 levels and every default media asset validate.
+- Theme overrides resolve one element at a time.
+- External vector media preload and reuse cached contexts.
+- Howler uses WebM first with MP3 fallback and looping default ambience.
+- Pointer and keyboard controls are smooth and consistent.
+- Score, progression, coins, powers, and persistence match the architecture.
+- Unit, browser, production build, and Docker checks pass.
+- `architecturev2.md`, `sprintv2.md`, README, schemas, and license records match
+  the implementation.
 
+## Documentation
+- KSDoc Annotation Guidelines: All non-trivial functions, custom hooks, utilities, and entity behaviors must be documented with JSDoc comments.
+
+- Key Rules
+- Specify Units: Always state physical units in comments (e.g., pixels/sec, ms, radians).
+- Define Custom Types: Use @typedef for complex structures like entity configs, state snapshots, or collision bounds.
+- Pure Functions First: Mark pure functions or side-effect-free math helpers where applicable.
+
+### README.md Structure Template
+- Every major game module or root repository should maintain a README.md using the following sections:
+- Title & Banner – Short description and status badge.
+- Quickstart – Commands to install, run locally (npm run dev), and build.
+- Architecture Overview – High-level diagram or description of how the React UI communicates with the game engine loop.
+- Controls & Gameplay – Key bindings and supported input devices (Keyboard, Touch, Gamepad).
+- Directory Map – Brief summary of where key features reside.
+- Performance & Profiling – Notes on memory management, asset preloading, and target FPS.

@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 2,
+  "id": "level-45",
+  "number": 45,
+  "name": "Extended Relay",
+  "seed": "path-protocol-extended-relay-v1",
+  "difficulty": 5,
+  "briefing": "Expansion chamber 45: a difficulty-5 variation with a new deterministic layout.",
+  "arena": {
+    "shape": "rect",
+    "margin": 32,
+    "cornerRadius": 32,
+    "mediaId": "arena-standard"
+  },
+  "token": {
+    "shape": "circle",
+    "size": 42,
+    "mediaId": "token-circle"
+  },
+  "start": {
+    "mode": "generated",
+    "region": {
+      "x": 80,
+      "y": 760,
+      "width": 150,
+      "height": 120
+    },
+    "mediaId": "start-pad"
+  },
+  "mainTarget": {
+    "mode": "generated",
+    "region": {
+      "x": 780,
+      "y": 90,
+      "width": 120,
+      "height": 150
+    },
+    "size": 50,
+    "mediaId": "target-main"
+  },
+  "generation": {
+    "obstacleCount": 8,
+    "allowedShapes": [
+      "rect",
+      "circle",
+      "diamond"
+    ],
+    "minSize": 80,
+    "maxSize": 170,
+    "minimumGap": 62,
+    "pathGrid": 18,
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    }
+  },
+  "manualObstacles": [
+    {
+      "id": "spine-a",
+      "shape": "rect",
+      "x": 310,
+      "y": 240,
+      "width": 70,
+      "height": 320,
+      "mediaId": "obstacle-static-rect"
+    },
+    {
+      "id": "spine-b",
+      "shape": "rect",
+      "x": 650,
+      "y": 500,
+      "width": 70,
+      "height": 310,
+      "mediaId": "obstacle-static-rect"
+    }
+  ],
+  "movingObstacles": [],
+  "coins": [
+    {
+      "id": "coin-a",
+      "x": 350,
+      "y": 650,
+      "size": 28,
+      "value": 1,
+      "mediaId": "coin-standard"
+    },
+    {
+      "id": "coin-b",
+      "x": 720,
+      "y": 350,
+      "size": 28,
+      "value": 1,
+      "mediaId": "coin-standard"
+    }
+  ],
+  "rewards": {
+    "completionCoins": 3,
+    "bonusCoinsPerTarget": 2
+  },
+  "scoring": {
+    "baseMaximum": 22500,
+    "parTimeMs": 10500,
+    "parDistance": 1250,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 2,
+    "rewardPerTarget": 400,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.2,
+    "targets": [
+      {
+        "id": "relay-a",
+        "x": 820,
+        "y": 740,
+        "size": 46,
+        "mediaId": "target-bonus"
+      },
+      {
+        "id": "relay-b",
+        "x": 190,
+        "y": 210,
+        "size": 44,
+        "mediaId": "target-bonus"
+      }
+    ]
+  },
+  "movement": {
+    "maximumSpeed": 360,
+    "acceleration": 1400,
+    "deceleration": 1800,
+    "keyboardSpeed": 280
+  },
+  "trackingObstacles": []
+}

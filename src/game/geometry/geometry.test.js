@@ -2,12 +2,22 @@ import { describe, expect, it } from 'vitest'
 import {
   advanceTrackingObstacle,
   followPointer,
+  insetShape,
   shapeInsideArena,
   shapesIntersect,
   sweepShape,
 } from './geometry.js'
 
 describe('geometry', () => {
+  it('insets token collision geometry by the configured world-unit tolerance', () => {
+    expect(
+      insetShape(
+        { shape: 'diamond', x: 50, y: 50, width: 34, height: 34 },
+        4,
+      ),
+    ).toMatchObject({ x: 50, y: 50, width: 26, height: 26 })
+  })
+
   it('detects circle contact at the exact edge', () => {
     expect(
       shapesIntersect(

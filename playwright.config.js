@@ -6,7 +6,7 @@ export default defineConfig({
   workers: 2,
   timeout: 60_000,
   use: {
-    baseURL: 'http://127.0.0.1:4173',
+    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? 'http://127.0.0.1:4173',
     trace: 'retain-on-failure',
   },
   webServer: process.env.PLAYWRIGHT_EXTERNAL_SERVER
@@ -16,5 +16,10 @@ export default defineConfig({
         port: 4173,
         reuseExistingServer: true,
       },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    { name: 'edge', use: { ...devices['Desktop Edge'], channel: 'msedge' } },
+    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
+    { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+  ],
 })

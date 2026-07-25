@@ -14,8 +14,9 @@ export default function BonusDialog({ reward, onBank, onPursue }) {
           {reward.toLocaleString()} extra points.
         </p>
         <p className="bonus-dialog__warning">
-          Pursuing restarts your drag at this target. The clock keeps running, and releasing
-          before the bonus target applies a 20% penalty.
+          Pursuing restarts mouse or keyboard control at this target. The clock
+          keeps running, and toggling control off before the bonus target applies
+          a 20% penalty.
         </p>
         <div className="bonus-dialog__actions">
           <button className="secondary-button" type="button" onClick={onBank}>

@@ -1,29 +1,156 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "level-22",
   "number": 22,
   "name": "Compression Field",
   "seed": "path-protocol-compression-field-v1",
   "difficulty": 9,
   "briefing": "A wide token crosses contracting lanes under steady pursuit.",
-  "arena": { "shape": "ellipse", "margin": 38 },
-  "token": { "shape": "rect", "size": 54 },
-  "start": { "mode": "manual", "x": 500, "y": 820 },
-  "mainTarget": { "mode": "manual", "x": 500, "y": 180, "size": 58 },
-  "generation": { "obstacleCount": 6, "allowedShapes": ["rect", "circle"], "minSize": 85, "maxSize": 150, "minimumGap": 86, "pathGrid": 22 },
+  "arena": {
+    "shape": "ellipse",
+    "margin": 38,
+    "mediaId": "arena-ellipse"
+  },
+  "token": {
+    "shape": "rect",
+    "size": 54,
+    "mediaId": "token-rect"
+  },
+  "start": {
+    "mode": "manual",
+    "x": 500,
+    "y": 820,
+    "mediaId": "start-pad"
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "x": 500,
+    "y": 180,
+    "size": 58,
+    "mediaId": "target-main"
+  },
+  "generation": {
+    "obstacleCount": 6,
+    "allowedShapes": [
+      "rect",
+      "circle"
+    ],
+    "minSize": 85,
+    "maxSize": 150,
+    "minimumGap": 86,
+    "pathGrid": 22,
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    }
+  },
   "manualObstacles": [],
   "movingObstacles": [
-    { "id": "compress-a", "shape": "rect", "x": 430, "y": 400, "width": 150, "height": 40, "axis": "y", "amplitude": 140, "periodMs": 4700, "phase": 0 },
-    { "id": "compress-b", "shape": "rect", "x": 650, "y": 600, "width": 150, "height": 40, "axis": "y", "amplitude": 140, "periodMs": 4700, "phase": 3.14 }
+    {
+      "id": "compress-a",
+      "shape": "rect",
+      "x": 430,
+      "y": 400,
+      "width": 150,
+      "height": 40,
+      "axis": "y",
+      "amplitude": 140,
+      "periodMs": 4700,
+      "phase": 0,
+      "mediaId": "obstacle-moving-rect"
+    },
+    {
+      "id": "compress-b",
+      "shape": "rect",
+      "x": 650,
+      "y": 600,
+      "width": 150,
+      "height": 40,
+      "axis": "y",
+      "amplitude": 140,
+      "periodMs": 4700,
+      "phase": 3.14,
+      "mediaId": "obstacle-moving-rect"
+    }
   ],
   "trackingObstacles": [
-    { "id": "compress-hunter", "shape": "circle", "x": 500, "y": 520, "width": 60, "height": 60, "zone": { "x": 240, "y": 240, "width": 520, "height": 520 }, "maxSpeed": 88, "acceleration": 120 }
+    {
+      "id": "compress-hunter",
+      "shape": "circle",
+      "x": 500,
+      "y": 520,
+      "width": 60,
+      "height": 60,
+      "zone": {
+        "x": 240,
+        "y": 240,
+        "width": 520,
+        "height": 520
+      },
+      "maxSpeed": 88,
+      "acceleration": 120,
+      "mediaId": "obstacle-tracking-circle",
+      "turnRateDegreesPerSecond": 160
+    }
   ],
   "coins": [
-    { "id": "coin-a", "x": 300, "y": 640, "size": 34, "value": 2 },
-    { "id": "coin-b", "x": 700, "y": 360, "size": 34, "value": 2 }
+    {
+      "id": "coin-a",
+      "x": 300,
+      "y": 640,
+      "size": 34,
+      "value": 2,
+      "mediaId": "coin-standard"
+    },
+    {
+      "id": "coin-b",
+      "x": 700,
+      "y": 360,
+      "size": 34,
+      "value": 2,
+      "mediaId": "coin-standard"
+    }
   ],
-  "rewards": { "completionCoins": 4, "bonusCoinsPerTarget": 2 },
-  "scoring": { "baseMaximum": 9000, "parTimeMs": 22000, "parDistance": 2050, "timeWeight": 0.5, "distanceWeight": 0.5, "collisionPenaltyRate": 0.2, "maximumCollisions": 3 },
-  "bonuses": { "maximumTargets": 2, "rewardPerTarget": 1100, "offerChanceMode": "currentScorePercent", "failurePenaltyRate": 0.2, "targets": [{ "id": "relay-a", "x": 520, "y": 170, "size": 46 }, { "id": "relay-b", "x": 260, "y": 420, "size": 44 }] }
+  "rewards": {
+    "completionCoins": 4,
+    "bonusCoinsPerTarget": 2
+  },
+  "scoring": {
+    "baseMaximum": 9000,
+    "parTimeMs": 22000,
+    "parDistance": 2050,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 2,
+    "rewardPerTarget": 1100,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.2,
+    "targets": [
+        {
+          "id": "relay-a",
+          "x": 740,
+          "y": 200,
+        "size": 46,
+        "mediaId": "target-bonus"
+      },
+      {
+        "id": "relay-b",
+        "x": 260,
+        "y": 420,
+        "size": 44,
+        "mediaId": "target-bonus"
+      }
+    ]
+  },
+  "movement": {
+    "maximumSpeed": 360,
+    "acceleration": 1400,
+    "deceleration": 1800,
+    "keyboardSpeed": 280
+  }
 }

@@ -1,13 +1,52 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "path-protocol-theme.schema.json",
-  "title": "Path Protocol themes",
+  "$id": "https://path-protocol.local/schemas/theme.schema.json",
+  "title": "Path Protocol V2 themes",
   "type": "object",
-  "required": ["schemaVersion", "activeTheme", "themes"],
+  "additionalProperties": false,
+  "required": ["schemaVersion", "mediaVersion", "defaultMediaRoot", "activeTheme", "themes"],
   "properties": {
-    "schemaVersion": { "const": 1 },
-    "activeTheme": { "type": "string" },
-    "themes": { "type": "object", "minProperties": 1 }
-  },
-  "additionalProperties": false
+    "schemaVersion": { "const": 2 },
+    "mediaVersion": { "type": "integer", "minimum": 1 },
+    "defaultMediaRoot": { "type": "string", "pattern": "^/media/default$" },
+    "activeTheme": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "themes": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "mediaRoot", "colors", "effects"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "mediaRoot": { "type": "string", "pattern": "^/media/themes/[a-z0-9]+(?:-[a-z0-9]+)*$" },
+          "colors": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" }
+          },
+          "effects": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "glowIntensity",
+              "trailWidth",
+              "collisionGuideWidth",
+              "ghostTrailOpacity",
+              "targetPulseDurationMs",
+              "collisionFlashDurationMs"
+            ],
+            "properties": {
+              "glowIntensity": { "type": "number", "minimum": 0, "maximum": 1 },
+              "trailWidth": { "type": "number", "exclusiveMinimum": 0, "maximum": 50 },
+              "collisionGuideWidth": { "type": "number", "exclusiveMinimum": 0, "maximum": 5 },
+              "ghostTrailOpacity": { "type": "number", "minimum": 0, "maximum": 1 },
+              "targetPulseDurationMs": { "type": "integer", "minimum": 0, "maximum": 60000 },
+              "collisionFlashDurationMs": { "type": "integer", "minimum": 0, "maximum": 60000 }
+            }
+          }
+        }
+      }
+    }
+  }
 }

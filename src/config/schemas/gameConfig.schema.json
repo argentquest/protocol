@@ -1,12 +1,30 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://path-protocol.local/schemas/gameConfig.schema.json",
-  "title": "Path Protocol game configuration",
+  "title": "Path Protocol V2 game configuration",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "input"],
+  "required": ["schemaVersion", "world", "simulation", "input", "collision"],
   "properties": {
-    "schemaVersion": { "const": 1 },
+    "schemaVersion": { "const": 2 },
+    "world": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width", "height"],
+      "properties": {
+        "width": { "const": 1000 },
+        "height": { "const": 1000 }
+      }
+    },
+    "simulation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fixedStepHz", "maximumFrameDeltaMs"],
+      "properties": {
+        "fixedStepHz": { "const": 60 },
+        "maximumFrameDeltaMs": { "type": "integer", "minimum": 17, "maximum": 1000 }
+      }
+    },
     "input": {
       "type": "object",
       "additionalProperties": false,
@@ -20,7 +38,19 @@
         "keyboardSpeedUnitsPerSecond": {
           "type": "number",
           "minimum": 50,
-          "maximum": 800
+          "maximum": 2000
+        }
+      }
+    },
+    "collision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tokenToleranceUnits"],
+      "properties": {
+        "tokenToleranceUnits": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
         }
       }
     }

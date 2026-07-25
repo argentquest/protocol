@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://path-protocol.local/schemas/mediaManifest.schema.json",
+  "title": "Path Protocol generated media manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "mediaVersion", "scope", "assets"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "mediaVersion": { "type": "integer", "minimum": 1 },
+    "scope": { "type": "string", "pattern": "^(default|[a-z0-9]+(?:-[a-z0-9]+)*)$" },
+    "assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["mediaId", "category", "src", "renderMode", "sizing"],
+        "properties": {
+          "mediaId": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+          "category": { "type": "string", "minLength": 1 },
+          "src": { "type": "string", "pattern": "\\.svg(?:\\?v=[0-9]+)?$" },
+          "renderMode": { "const": "vector" },
+          "sizing": { "enum": ["contain", "stretch"] }
+        }
+      }
+    }
+  }
+}

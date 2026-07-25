@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 2,
+  "id": "level-62",
+  "number": 62,
+  "name": "Overclock Grid",
+  "seed": "path-protocol-overclock-grid-v1",
+  "difficulty": 15,
+  "briefing": "Apex-tier chamber 2: denser geometry and overclocked hazards demand complete control.",
+  "arena": {
+    "shape": "ellipse",
+    "margin": 38,
+    "mediaId": "arena-ellipse"
+  },
+  "token": {
+    "shape": "rect",
+    "size": 54,
+    "mediaId": "token-rect"
+  },
+  "start": {
+    "mode": "manual",
+    "x": 500,
+    "y": 820,
+    "mediaId": "start-pad"
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "x": 500,
+    "y": 180,
+    "size": 58,
+    "mediaId": "target-main"
+  },
+  "generation": {
+    "obstacleCount": 8,
+    "allowedShapes": [
+      "rect",
+      "circle"
+    ],
+    "minSize": 85,
+    "maxSize": 150,
+    "minimumGap": 78,
+    "pathGrid": 22,
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    }
+  },
+  "manualObstacles": [],
+  "movingObstacles": [
+    {
+      "id": "compress-a",
+      "shape": "rect",
+      "x": 430,
+      "y": 400,
+      "width": 150,
+      "height": 40,
+      "axis": "y",
+      "amplitude": 140,
+      "periodMs": 3666,
+      "phase": 0,
+      "mediaId": "obstacle-moving-rect"
+    },
+    {
+      "id": "compress-b",
+      "shape": "rect",
+      "x": 650,
+      "y": 600,
+      "width": 150,
+      "height": 40,
+      "axis": "y",
+      "amplitude": 140,
+      "periodMs": 3666,
+      "phase": 3.14,
+      "mediaId": "obstacle-moving-rect"
+    }
+  ],
+  "trackingObstacles": [
+    {
+      "id": "compress-hunter",
+      "shape": "circle",
+      "x": 500,
+      "y": 520,
+      "width": 60,
+      "height": 60,
+      "zone": {
+        "x": 240,
+        "y": 240,
+        "width": 520,
+        "height": 520
+      },
+      "maxSpeed": 119,
+      "acceleration": 162,
+      "mediaId": "obstacle-tracking-circle",
+      "turnRateDegreesPerSecond": 190
+    }
+  ],
+  "coins": [
+    {
+      "id": "coin-a",
+      "x": 300,
+      "y": 640,
+      "size": 34,
+      "value": 2,
+      "mediaId": "coin-standard"
+    },
+    {
+      "id": "coin-b",
+      "x": 700,
+      "y": 360,
+      "size": 34,
+      "value": 2,
+      "mediaId": "coin-standard"
+    }
+  ],
+  "rewards": {
+    "completionCoins": 10,
+    "bonusCoinsPerTarget": 5
+  },
+  "scoring": {
+    "baseMaximum": 31000,
+    "parTimeMs": 25300,
+    "parDistance": 2255,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 2,
+    "rewardPerTarget": 1800,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.2,
+    "targets": [
+      {
+        "id": "relay-a",
+        "x": 740,
+        "y": 200,
+        "size": 46,
+        "mediaId": "target-bonus"
+      },
+      {
+        "id": "relay-b",
+        "x": 260,
+        "y": 420,
+        "size": 44,
+        "mediaId": "target-bonus"
+      }
+    ]
+  },
+  "movement": {
+    "maximumSpeed": 360,
+    "acceleration": 1400,
+    "deceleration": 1800,
+    "keyboardSpeed": 280
+  }
+}
