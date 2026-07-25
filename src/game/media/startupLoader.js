@@ -5,6 +5,61 @@ const defaultPhases = [
   { id: 'audio', label: 'Loading audio', weight: 2 },
 ]
 
+/**
+ * Normalizes a root-relative deployment prefix.
+ *
+ * @param {string} value Deployment base path.
+ * @returns {string} Base path with leading and trailing slashes.
+ */
+function normalizeBaseUrl(value) {
+  const path = String(value || '/').trim()
+  if (path === '/') return '/'
+  return `/${path.replace(/^\/+|\/+$/g, '')}/`
+}
+
+function resolveAssetUrl(source, baseUrl) {
+  if (typeof source !== 'string' || !source.startsWith('/')) return source
+  return `${baseUrl}${source.slice(1)}`
+}
+
+/**
+ * Rewrites root-relative manifest sources beneath a configured deployment
+ * prefix while preserving external and already-relative URLs.
+ *
+ * @param {object} manifest Resolved media manifest.
+ * @param {string} requestedBaseUrl Deployment base path.
+ * @returns {object} Manifest whose runtime URLs match the deployed location.
+ */
+export function resolveManifestUrls(manifest, requestedBaseUrl = '/') {
+  const baseUrl = normalizeBaseUrl(requestedBaseUrl)
+  if (baseUrl === '/') return manifest
+  return {
+    ...manifest,
+    pixi: manifest.pixi
+      ? {
+          ...manifest.pixi,
+          bundles: (manifest.pixi.bundles ?? []).map((bundle) => ({
+            ...bundle,
+            assets: (bundle.assets ?? []).map((asset) => ({
+              ...asset,
+              src: resolveAssetUrl(asset.src, baseUrl),
+            })),
+          })),
+        }
+      : manifest.pixi,
+    visuals: manifest.visuals.map((entry) => ({
+      ...entry,
+      src: resolveAssetUrl(entry.src, baseUrl),
+    })),
+    audio: manifest.audio.map((entry) => ({
+      ...entry,
+      sources: entry.sources.map((source) =>
+        resolveAssetUrl(source, baseUrl),
+      ),
+    })),
+  }
+}
+
 export function createStartupProgressReporter(
   onProgress = () => {},
   phases = defaultPhases,
@@ -41,11 +96,16 @@ export async function loadStartupMedia({
   loadAudio,
   validateConfiguration,
   onProgress,
+  baseUrl = '/',
 }) {
   const reporter = createStartupProgressReporter(onProgress)
   await validateConfiguration()
   reporter.report('configuration', 1)
-  const manifest = await fetchManifest(`/media/manifests/${themeName}.json`)
+  const normalizedBaseUrl = normalizeBaseUrl(baseUrl)
+  const fetchedManifest = await fetchManifest(
+    `${normalizedBaseUrl}media/manifests/${themeName}.json`,
+  )
+  const manifest = resolveManifestUrls(fetchedManifest, normalizedBaseUrl)
   reporter.report('manifest', 1)
 
   const visualCount = Math.max(1, manifest.visuals.length)

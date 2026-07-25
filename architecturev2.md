@@ -860,6 +860,11 @@ validate JSON
 The Docker build stage includes Node, npm, and FFmpeg. The runtime stage contains
 only the built static site and Nginx.
 
+Production builds accept a normalized `VITE_BASE_PATH` so every Vite asset,
+media manifest, SVG, and audio URL can be served from a reverse-proxy subpath.
+The runtime Nginx configuration maps the supported `/protocol/` prefix back to
+the static root, while root deployment remains the default.
+
 Generated delivery media may be committed or produced during the build according
 to repository policy established during implementation. Existing converted
 files are never regenerated during normal builds.

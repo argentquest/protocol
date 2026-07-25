@@ -221,11 +221,35 @@ Stop it with:
 docker compose down
 ```
 
+### Linux reverse-proxy subpath deployment
+
+When the public URL includes a path prefix such as
+`https://app.example.com/protocol/`, persist the Vite build prefix beside the
+Compose file:
+
+```bash
+printf 'VITE_BASE_PATH=/protocol/\n' > .env
+docker compose up --build -d
+docker compose ps
+curl -f http://127.0.0.1:8080/healthz
+curl -f http://127.0.0.1:8080/protocol/media/manifests/future-lab.json
+```
+
+Configure the external reverse proxy to forward `/protocol/` to
+`http://127.0.0.1:8080`. The runtime Nginx image accepts the prefixed path
+whether the proxy preserves or strips the prefix. Rebuilding is required after
+changing `VITE_BASE_PATH` because Vite writes the prefix into the production
+bundle.
+
 ## Troubleshooting
 
 - If startup reports a missing default asset, run `npm run media:prepare` and
   inspect the exact asset named by the error. Theme overrides may fall back;
   defaults may not.
+- If startup cannot resolve the Future Lab manifest behind a path-based proxy,
+  verify that `VITE_BASE_PATH` matches the public prefix including its trailing
+  slash, rebuild the image, and request
+  `<public-url>/media/manifests/future-lab.json` directly.
 - If audio is silent, press **Start Game** once, confirm the two audio switches
   in **Controls**, and check browser autoplay permissions.
 - If WebGL initialization fails, update the browser and graphics driver and

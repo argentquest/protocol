@@ -13,6 +13,18 @@ describe('production deployment contract', () => {
     )
   })
 
+  it('supports a configurable Vite base and the protocol proxy prefix', () => {
+    const dockerfile = readFileSync('Dockerfile', 'utf8')
+    const compose = readFileSync('docker-compose.yml', 'utf8')
+    const nginx = readFileSync('docker/nginx.conf', 'utf8')
+    const vite = readFileSync('vite.config.js', 'utf8')
+
+    expect(dockerfile).toContain('ARG VITE_BASE_PATH=/')
+    expect(compose).toContain('VITE_BASE_PATH: ${VITE_BASE_PATH:-/}')
+    expect(vite).toContain('base: normalizeBasePath(process.env.VITE_BASE_PATH)')
+    expect(nginx).toMatch(/location \^~ \/protocol\/[\s\S]*rewrite/)
+  })
+
   it('separates immutable application/media caching from mutable manifests', () => {
     const nginx = readFileSync('docker/nginx.conf', 'utf8')
     expect(nginx).toMatch(/location \/assets\/[\s\S]*expires 1y/)

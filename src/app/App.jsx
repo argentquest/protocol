@@ -662,6 +662,7 @@ function PathProtocolApp() {
         if (!response.ok) throw new Error('Unable to resolve the Future Lab media.')
         return response.json()
       },
+      baseUrl: import.meta.env.BASE_URL,
       loadVisual: (entry) => sharedVectorAssetCache.load(entry),
       loadAudio: (entry) => audioRef.current.loadSound(entry),
       onProgress: (snapshot) => {
