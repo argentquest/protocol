@@ -106,6 +106,51 @@ test('keeps moving obstacles animated while the held token is stationary', async
   await page.mouse.up()
 })
 
+test('smooths token response instead of snapping to a fast mouse jump', async ({ page }) => {
+  await page.goto('/?dev=1')
+  await page.getByRole('button', { name: /begin calibration/i }).click()
+  const start = await page.evaluate(() => {
+    const matrix = document.querySelector('.token').getScreenCTM()
+    return { x: matrix.e, y: matrix.f }
+  })
+
+  await page.mouse.move(start.x, start.y)
+  await page.mouse.down()
+  await page.mouse.move(start.x + 120, start.y)
+  const shortlyAfterJump = await page.evaluate(
+    () => document.querySelector('.token').getScreenCTM().e,
+  )
+  expect(shortlyAfterJump).toBeGreaterThan(start.x)
+  expect(shortlyAfterJump).toBeLessThan(start.x + 120)
+  await page.waitForTimeout(450)
+  const afterFollowing = await page.evaluate(
+    () => document.querySelector('.token').getScreenCTM().e,
+  )
+  expect(afterFollowing).toBeGreaterThan(shortlyAfterJump)
+  await page.mouse.up()
+})
+
+test('toggles keyboard control with Space and steers with arrow keys', async ({ page }) => {
+  await page.goto('/?dev=1')
+  await page.getByRole('button', { name: /begin calibration/i }).click()
+  const startX = await page.evaluate(
+    () => document.querySelector('.token').getScreenCTM().e,
+  )
+
+  await page.keyboard.press('Space')
+  await expect(page.getByText(/keyboard control active/i)).toBeVisible()
+  await page.keyboard.down('ArrowRight')
+  await page.waitForTimeout(300)
+  await page.keyboard.up('ArrowRight')
+  const movedX = await page.evaluate(
+    () => document.querySelector('.token').getScreenCTM().e,
+  )
+  expect(movedX).toBeGreaterThan(startX)
+
+  await page.keyboard.press('Space')
+  await expect(page.getByText(/keyboard hold released before target/i)).toBeVisible()
+})
+
 test('restarts a pursued bonus drag from the reached target while time continues', async ({
   page,
 }) => {
@@ -125,12 +170,12 @@ test('restarts a pursued bonus drag from the reached target while time continues
   await page.mouse.move(route[0].x, route[0].y)
   await page.mouse.down()
   for (const point of route.slice(1)) {
-    await page.mouse.move(point.x, point.y)
+    await page.mouse.move(point.x, point.y, { steps: 2 })
+    await page.waitForTimeout(20)
   }
-  await page.mouse.up()
-
   const dialog = page.getByRole('dialog', { name: /bonus target available/i })
   await expect(dialog).toBeVisible()
+  await page.mouse.up()
   await page.waitForTimeout(250)
   await page.getByRole('button', { name: /ok.*pursue bonus/i }).click()
   await expect(page.getByText(/press and hold the token to continue/i)).toBeVisible()
@@ -150,9 +195,9 @@ test('restarts a pursued bonus drag from the reached target while time continues
   const elapsedAfter = await page.locator('.hud-readout').filter({ hasText: 'Time' }).innerText()
   expect(elapsedAfter).not.toBe(elapsedBefore)
 
-  await page.mouse.move(checkpoint.token.x, checkpoint.token.y)
-  await page.mouse.down()
-  await page.mouse.up()
+  await page.keyboard.press('Space')
+  await expect(page.getByText(/keyboard control active/i)).toBeVisible()
+  await page.keyboard.press('Space')
   await expect(page.getByRole('heading', { name: /playtest run captured/i })).toBeVisible()
 })
 

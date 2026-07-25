@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { activeTheme, levels as levelConfigs, powerups } from '../config/loadConfig.js'
+import {
+  activeTheme,
+  gameplayConfig,
+  levels as levelConfigs,
+  powerups,
+} from '../config/loadConfig.js'
 import GameView from '../game/GameView.jsx'
 import { createAudioManager } from '../game/audio/audioManager.js'
 import { recordPlaytestRun } from '../game/debug/playtestLog.js'
@@ -71,7 +76,15 @@ function ShellHeader({
   )
 }
 
-function HomeScreen({ progress, totalScore, onPlay, onLevels, onInstructions, devMode }) {
+function HomeScreen({
+  progress,
+  totalScore,
+  onPlay,
+  onLevels,
+  onPowers,
+  onInstructions,
+  devMode,
+}) {
   const completedCount = Object.values(progress.levels).filter((level) => level.completed).length
   const hasProgress = completedCount > 0
 
@@ -102,6 +115,9 @@ function HomeScreen({ progress, totalScore, onPlay, onLevels, onInstructions, de
           </button>
           <button className="secondary-button" type="button" onClick={onLevels}>
             Select level
+          </button>
+          <button className="secondary-button" type="button" onClick={onPowers}>
+            Buy power-ups · {progress.player.coins} coins
           </button>
         </div>
         <button className="text-button" type="button" onClick={onInstructions}>
@@ -176,13 +192,18 @@ function HomeScreen({ progress, totalScore, onPlay, onLevels, onInstructions, de
   )
 }
 
-function LevelSelect({ levels, progress, onSelect, devMode }) {
+function LevelSelect({ levels, progress, onSelect, onPowers, devMode }) {
   return (
     <main className="content-screen">
       <div className="screen-heading">
         <p className="eyebrow">Protocol archive</p>
         <h1>Select a chamber</h1>
         <p>Each level uses a shared deterministic seed. Replay any cleared chamber to improve its score.</p>
+        <div className="screen-heading__actions">
+          <button className="secondary-button" type="button" onClick={onPowers}>
+            Buy power-ups · {progress.player.coins} coins
+          </button>
+        </div>
       </div>
       <section className="level-grid" aria-label="Available levels">
         {levels.map((level) => {
@@ -302,14 +323,14 @@ function Instructions() {
       <div className="screen-heading">
         <p className="eyebrow">Operator field guide</p>
         <h1>One drag. No shortcuts.</h1>
-        <p>Your mouse controls the center of a physical token. Its complete outline must clear the chamber.</p>
+        <p>Your mouse or the arrow keys control the center of a physical token. Its complete outline must clear the chamber.</p>
       </div>
       <section className="guide-grid">
         <article>
           <span className="guide-index">01</span>
           <div className="guide-icon guide-icon--token"><i /></div>
           <h2>Press and hold</h2>
-          <p>Begin on the glowing token and keep the mouse button held until you decide to bank your run.</p>
+          <p>Begin on the glowing token and hold the mouse, or press Space to toggle keyboard control and steer with the arrow keys.</p>
         </article>
         <article>
           <span className="guide-index">02</span>
@@ -678,6 +699,7 @@ export default function App() {
           totalScore={totalScore}
           onPlay={continuePlay}
           onLevels={() => navigate('levels')}
+          onPowers={() => navigate('powers')}
           onInstructions={() => navigate('instructions')}
           devMode={devMode}
         />
@@ -687,6 +709,7 @@ export default function App() {
           levels={levelConfigs}
           progress={progress}
           onSelect={playLevel}
+          onPowers={() => navigate('powers')}
           devMode={devMode}
         />
       )}
@@ -724,6 +747,10 @@ export default function App() {
           collectedCoins={progress.player.collectedCoins}
           onUsePowerup={handleUsePowerup}
           onCoinCollected={handleCoinCollected}
+          pointerResponsePerSecond={gameplayConfig.input.pointerResponsePerSecond}
+          keyboardSpeedUnitsPerSecond={
+            gameplayConfig.input.keyboardSpeedUnitsPerSecond
+          }
         />
       )}
       {screen === 'results' && lastResult && (

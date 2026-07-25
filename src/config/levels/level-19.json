@@ -7,9 +7,9 @@
   "difficulty": 9,
   "briefing": "A large circular token leaves little room between pursuit and the wall.",
   "arena": { "shape": "polygon", "points": [[80,150],[360,60],[810,90],[940,300],[900,790],[650,930],[190,870],[55,590]] },
-  "token": { "shape": "circle", "size": 72 },
-  "start": { "mode": "manual", "x": 170, "y": 730 },
-  "mainTarget": { "mode": "manual", "x": 810, "y": 210, "size": 60 },
+  "token": { "shape": "circle", "size": 56 },
+  "start": { "mode": "manual", "x": 190, "y": 200 },
+  "mainTarget": { "mode": "manual", "x": 780, "y": 760, "size": 60 },
   "generation": { "obstacleCount": 6, "allowedShapes": ["rect", "circle"], "minSize": 90, "maxSize": 155, "minimumGap": 88, "pathGrid": 22 },
   "manualObstacles": [],
   "movingObstacles": [

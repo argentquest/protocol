@@ -20,6 +20,10 @@ body,
   margin: 0;
 }
 
+html {
+  font-size: 140%;
+}
+
 body {
   min-height: 100vh;
   overflow-x: hidden;
@@ -585,11 +589,16 @@ button:disabled {
   letter-spacing: -0.055em;
 }
 
-.screen-heading > p:last-child {
+.screen-heading > p:not(.eyebrow) {
   max-width: 670px;
   margin: 18px 0 0;
   color: #88a2b6;
   line-height: 1.65;
+}
+
+.screen-heading__actions {
+  display: flex;
+  margin-top: 20px;
 }
 
 .level-grid {

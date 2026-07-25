@@ -218,6 +218,15 @@ export function currentMovingObstacle(obstacle, elapsedMs) {
   }
 }
 
+export function followPointer(from, target, deltaMs, responsePerSecond) {
+  const boundedDelta = Math.max(0, Math.min(deltaMs, 50))
+  const blend = 1 - Math.exp(-responsePerSecond * (boundedDelta / 1000))
+  return {
+    x: from.x + (target.x - from.x) * blend,
+    y: from.y + (target.y - from.y) * blend,
+  }
+}
+
 export function advanceTrackingObstacle(obstacle, previousState, target, deltaMs) {
   const state = {
     x: previousState?.x ?? obstacle.x,

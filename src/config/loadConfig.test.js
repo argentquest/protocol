@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { levels, powerups } from './loadConfig.js'
+import { gameplayConfig, levels, powerups } from './loadConfig.js'
 
 describe('game configuration', () => {
   it('loads a contiguous 30-level campaign', () => {
@@ -14,5 +14,11 @@ describe('game configuration', () => {
     expect(new Set(powerups.map((powerup) => powerup.key)).size).toBe(5)
     expect(new Set(powerups.map((powerup) => powerup.sound)).size).toBe(5)
     expect(powerups.every((powerup) => powerup.durationMs > 0)).toBe(true)
+  })
+
+  it('uses a bounded pointer response so the token follows rather than snaps', () => {
+    expect(gameplayConfig.input.pointerResponsePerSecond).toBeGreaterThan(0)
+    expect(gameplayConfig.input.pointerResponsePerSecond).toBeLessThanOrEqual(12)
+    expect(gameplayConfig.input.keyboardSpeedUnitsPerSecond).toBeGreaterThan(0)
   })
 })

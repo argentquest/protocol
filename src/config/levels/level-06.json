@@ -11,8 +11,8 @@
     "points": [[90, 90], [850, 55], [950, 300], [870, 910], [520, 950], [75, 820], [45, 360]]
   },
   "token": { "shape": "diamond", "size": 58 },
-  "start": { "mode": "generated", "region": { "x": 110, "y": 690, "width": 140, "height": 120 } },
-  "mainTarget": { "mode": "generated", "region": { "x": 730, "y": 130, "width": 130, "height": 140 }, "size": 52 },
+  "start": { "mode": "generated", "region": { "x": 420, "y": 760, "width": 160, "height": 110 } },
+  "mainTarget": { "mode": "generated", "region": { "x": 410, "y": 100, "width": 180, "height": 120 }, "size": 52 },
   "generation": { "obstacleCount": 8, "allowedShapes": ["rect", "circle", "diamond"], "minSize": 75, "maxSize": 155, "minimumGap": 70, "pathGrid": 18 },
   "manualObstacles": [],
   "movingObstacles": [],

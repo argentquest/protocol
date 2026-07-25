@@ -8,8 +8,8 @@
   "briefing": "A diamond token changes the clearance calculation under pursuit.",
   "arena": { "shape": "polygon", "points": [[90,180],[380,70],[820,110],[930,390],[850,850],[470,930],[100,790],[55,430]] },
   "token": { "shape": "diamond", "size": 56 },
-  "start": { "mode": "manual", "x": 160, "y": 730 },
-  "mainTarget": { "mode": "manual", "x": 820, "y": 210, "size": 52 },
+  "start": { "mode": "manual", "x": 850, "y": 500 },
+  "mainTarget": { "mode": "manual", "x": 150, "y": 500, "size": 52 },
   "generation": { "obstacleCount": 7, "allowedShapes": ["diamond", "circle"], "minSize": 80, "maxSize": 145, "minimumGap": 74, "pathGrid": 20 },
   "manualObstacles": [],
   "movingObstacles": [

@@ -8,8 +8,8 @@
   "briefing": "Read the field and choose the shortest safe deflection.",
   "arena": { "shape": "rect", "margin": 34, "cornerRadius": 42 },
   "token": { "shape": "circle", "size": 38 },
-  "start": { "mode": "generated", "region": { "x": 80, "y": 760, "width": 150, "height": 120 } },
-  "mainTarget": { "mode": "generated", "region": { "x": 770, "y": 90, "width": 130, "height": 160 }, "size": 56 },
+  "start": { "mode": "generated", "region": { "x": 760, "y": 720, "width": 150, "height": 140 } },
+  "mainTarget": { "mode": "generated", "region": { "x": 90, "y": 100, "width": 150, "height": 160 }, "size": 56 },
   "generation": { "obstacleCount": 5, "allowedShapes": ["rect", "circle"], "minSize": 85, "maxSize": 165, "minimumGap": 68, "pathGrid": 22 },
   "manualObstacles": [
     { "id": "deflector", "shape": "rect", "x": 430, "y": 430, "width": 160, "height": 62 }

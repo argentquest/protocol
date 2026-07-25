@@ -8,8 +8,8 @@
   "briefing": "Separate pursuit sectors force a commitment between two lanes.",
   "arena": { "shape": "rect", "margin": 32, "cornerRadius": 40 },
   "token": { "shape": "rect", "size": 36 },
-  "start": { "mode": "manual", "x": 120, "y": 860 },
-  "mainTarget": { "mode": "manual", "x": 870, "y": 130, "size": 50 },
+  "start": { "mode": "manual", "x": 860, "y": 820 },
+  "mainTarget": { "mode": "manual", "x": 140, "y": 160, "size": 50 },
   "generation": { "obstacleCount": 8, "allowedShapes": ["rect", "diamond"], "minSize": 72, "maxSize": 140, "minimumGap": 65, "pathGrid": 18 },
   "manualObstacles": [],
   "movingObstacles": [

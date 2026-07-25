@@ -8,8 +8,8 @@
   "briefing": "A thin token faces fast hunters and the narrowest safe line.",
   "arena": { "shape": "rect", "margin": 26, "cornerRadius": 20 },
   "token": { "shape": "rect", "size": 28 },
-  "start": { "mode": "manual", "x": 100, "y": 900 },
-  "mainTarget": { "mode": "manual", "x": 900, "y": 100, "size": 46 },
+  "start": { "mode": "manual", "x": 880, "y": 880 },
+  "mainTarget": { "mode": "manual", "x": 120, "y": 120, "size": 46 },
   "generation": { "obstacleCount": 10, "allowedShapes": ["rect", "diamond"], "minSize": 68, "maxSize": 132, "minimumGap": 58, "pathGrid": 16 },
   "manualObstacles": [],
   "movingObstacles": [

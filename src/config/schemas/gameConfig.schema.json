@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://path-protocol.local/schemas/gameConfig.schema.json",
+  "title": "Path Protocol game configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "input"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pointerResponsePerSecond", "keyboardSpeedUnitsPerSecond"],
+      "properties": {
+        "pointerResponsePerSecond": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 30
+        },
+        "keyboardSpeedUnitsPerSecond": {
+          "type": "number",
+          "minimum": 50,
+          "maximum": 800
+        }
+      }
+    }
+  }
+}

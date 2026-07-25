@@ -8,8 +8,8 @@
   "briefing": "Every system converges: irregular walls, moving gates, trackers, coins, and relays.",
   "arena": { "shape": "polygon", "points": [[110,140],[400,45],[800,90],[945,330],[900,800],[620,940],[210,890],[55,610],[70,300]] },
   "token": { "shape": "diamond", "size": 52 },
-  "start": { "mode": "manual", "x": 190, "y": 720 },
-  "mainTarget": { "mode": "manual", "x": 760, "y": 220, "size": 58 },
+  "start": { "mode": "manual", "x": 500, "y": 800 },
+  "mainTarget": { "mode": "manual", "x": 500, "y": 200, "size": 58 },
   "generation": { "obstacleCount": 8, "allowedShapes": ["rect", "circle", "diamond"], "minSize": 80, "maxSize": 150, "minimumGap": 78, "pathGrid": 20 },
   "manualObstacles": [],
   "movingObstacles": [

@@ -36,6 +36,12 @@ describe('App', () => {
     expect(screen.getAllByRole('article')).toHaveLength(5)
   })
 
+  it('offers a visible power-up purchase action on the home screen', () => {
+    render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: /buy power-ups/i }))
+    expect(screen.getByRole('heading', { name: /convert coins/i })).toBeInTheDocument()
+  })
+
   it('unlocks every level and exposes diagnostics in developer playtest mode', () => {
     window.history.replaceState({}, '', '/?dev=1')
     render(<App />)

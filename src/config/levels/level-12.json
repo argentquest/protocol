@@ -8,8 +8,8 @@
   "briefing": "A watcher steers through the central grid while a scanner crosses.",
   "arena": { "shape": "rect", "margin": 34, "cornerRadius": 28 },
   "token": { "shape": "rect", "size": 42 },
-  "start": { "mode": "manual", "x": 120, "y": 850 },
-  "mainTarget": { "mode": "manual", "x": 870, "y": 140, "size": 50 },
+  "start": { "mode": "manual", "x": 870, "y": 820 },
+  "mainTarget": { "mode": "manual", "x": 130, "y": 150, "size": 50 },
   "generation": { "obstacleCount": 7, "allowedShapes": ["rect", "diamond"], "minSize": 75, "maxSize": 140, "minimumGap": 66, "pathGrid": 20 },
   "manualObstacles": [],
   "movingObstacles": [

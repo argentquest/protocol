@@ -2,7 +2,7 @@
 
 ## 1. Purpose
 
-Path Protocol is a desktop, browser-based precision game built with React, Vite, JavaScript, and web-optimized vector graphics. The player clicks and holds a visible token, drags it through a generated obstacle course, and reaches one or more targets without releasing the mouse.
+Path Protocol is a desktop, browser-based precision game built with React, Vite, JavaScript, and web-optimized vector graphics. The player controls a visible token with a held mouse drag or Space-toggled arrow-key mode, moves through a generated obstacle course, and reaches one or more targets before releasing the active control mode.
 
 The game rewards:
 
@@ -33,7 +33,7 @@ The initial release will include:
 - A futuristic laboratory theme.
 - SVG or equivalent web-native vector graphics.
 - Sound effects and looping background music.
-- Desktop mouse and trackpad support.
+- Desktop mouse, trackpad, and arrow-key support.
 
 ### 2.2 Not included in the initial release
 
@@ -57,7 +57,7 @@ These features may be added later without changing the core level-data model.
 | Gameplay graphics | SVG and web-native vector effects |
 | Menus and HUD | React and CSS |
 | Animation loop | `requestAnimationFrame` |
-| Input | Pointer Events restricted to mouse/trackpad |
+| Input | Pointer Events for mouse/trackpad plus Space-toggled arrow-key control |
 | Audio | Web Audio API and optimized audio files |
 | Configuration | JSON |
 | Persistence | `localStorage` |
@@ -74,15 +74,20 @@ No game framework is required initially. The game has a focused interaction mode
 2. The generator creates the arena, start, main target, obstacles, and any configured manual elements.
 3. The validator confirms that the token has at least one valid path to the main target.
 4. The player presses and holds the center of the token at the start point.
-5. The timer and distance tracking start on valid mouse-down.
+5. The timer and distance tracking start on valid mouse-down or when Space enables keyboard control.
 6. The normal cursor is hidden inside the play area; the token becomes the visible cursor.
-7. The token follows the pointer while the mouse button remains held.
+7. The token follows the pointer through frame-rate-independent smoothing while the mouse button
+   remains held. The response rate is configured in `gameConfig.json`.
 8. The player reaches the main target by touching it with any part of the token.
 9. If a bonus is offered, the game releases pointer capture and presents a bank-or-pursue popup.
 10. Choosing pursue anchors the token at the target just reached and requires a new press-and-drag from that checkpoint.
 11. Releasing before the main target is reached ends the attempt and restarts the level.
 
 The same generated course remains in place for retries. A retry must not silently create an easier or harder layout.
+
+Start and main-target placement varies across the campaign. Level definitions deliberately mix
+forward and reverse diagonals, horizontal crossings, vertical climbs, vertical drops, and
+center-edge routes rather than repeating one corner-to-corner orientation.
 
 The level header provides a visible Restart control. Pressing it, or the `R` keyboard shortcut, releases pointer capture, ends the current attempt, preserves its route as a ghost trail when available, and resets the token, timer, collisions, and score without regenerating the course.
 
@@ -137,6 +142,8 @@ A continuous overlap must count as only one collision. Another collision can be 
 ### 4.6 Bonus targets
 
 - A level can configure zero or more possible bonus targets.
+- Every bonus target reserves obstacle-free space during generation, stays inside the arena, and
+  remains reachable in order with the full configured token geometry.
 - Bonus targets are optional.
 - Only one bonus target is displayed at a time.
 - Bonus targets are ordered.
@@ -494,6 +501,10 @@ Increasing complexity raises the level's base maximum score. Difficulty is produ
 
 Manual elements always take priority. Generated elements must respect their reserved space and configured clearance.
 
+The reserved set includes the start, main target, every ordered bonus target, course coins, manual
+obstacles, and dynamic-hazard starting geometry. Generation fails rather than accepting a bonus
+target that overlaps a hazard or cannot be reached in sequence.
+
 ### 10.3 Solvability
 
 Every generated course must have a valid route for its configured token.
@@ -786,6 +797,8 @@ The production game can run as a static Nginx container:
 Although gameplay is mouse-based, menus should support keyboard navigation.
 
 - Provide high contrast between token, hazards, arena, and targets.
+- Render interface copy at 140% of the browser default text scale so instructions, cards, labels,
+  and HUD status remain comfortably readable on desktop displays.
 - Never communicate state through color alone.
 - Include visible collision-count and target-state indicators.
 - Provide independent music and effects controls.

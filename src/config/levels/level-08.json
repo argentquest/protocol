@@ -8,8 +8,8 @@
   "briefing": "Two scanner cycles intersect. Timing is now geometry.",
   "arena": { "shape": "rect", "margin": 32, "cornerRadius": 30 },
   "token": { "shape": "rect", "size": 52 },
-  "start": { "mode": "generated", "region": { "x": 80, "y": 760, "width": 140, "height": 120 } },
-  "mainTarget": { "mode": "generated", "region": { "x": 770, "y": 100, "width": 130, "height": 140 }, "size": 50 },
+  "start": { "mode": "generated", "region": { "x": 760, "y": 410, "width": 130, "height": 170 } },
+  "mainTarget": { "mode": "generated", "region": { "x": 90, "y": 400, "width": 140, "height": 180 }, "size": 50 },
   "generation": { "obstacleCount": 8, "allowedShapes": ["rect", "circle", "diamond"], "minSize": 75, "maxSize": 145, "minimumGap": 66, "pathGrid": 18 },
   "manualObstacles": [],
   "movingObstacles": [

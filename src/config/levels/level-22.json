@@ -7,9 +7,9 @@
   "difficulty": 9,
   "briefing": "A wide token crosses contracting lanes under steady pursuit.",
   "arena": { "shape": "ellipse", "margin": 38 },
-  "token": { "shape": "rect", "size": 70 },
-  "start": { "mode": "manual", "x": 180, "y": 700 },
-  "mainTarget": { "mode": "manual", "x": 810, "y": 290, "size": 58 },
+  "token": { "shape": "rect", "size": 54 },
+  "start": { "mode": "manual", "x": 500, "y": 820 },
+  "mainTarget": { "mode": "manual", "x": 500, "y": 180, "size": 58 },
   "generation": { "obstacleCount": 6, "allowedShapes": ["rect", "circle"], "minSize": 85, "maxSize": 150, "minimumGap": 86, "pathGrid": 22 },
   "manualObstacles": [],
   "movingObstacles": [

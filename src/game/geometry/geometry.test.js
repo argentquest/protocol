@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   advanceTrackingObstacle,
+  followPointer,
   shapeInsideArena,
   shapesIntersect,
   sweepShape,
@@ -64,5 +65,13 @@ describe('geometry', () => {
     expect(constrained.x).toBeLessThanOrEqual(260)
     expect(constrained.y).toBeGreaterThanOrEqual(100)
     expect(constrained.y).toBeLessThanOrEqual(260)
+  })
+
+  it('smooths pointer movement instead of snapping the token to the cursor', () => {
+    const next = followPointer({ x: 100, y: 100 }, { x: 900, y: 500 }, 16.67, 8)
+    expect(next.x).toBeGreaterThan(100)
+    expect(next.x).toBeLessThan(250)
+    expect(next.y).toBeGreaterThan(100)
+    expect(next.y).toBeLessThan(200)
   })
 })

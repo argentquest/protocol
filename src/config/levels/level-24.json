@@ -7,9 +7,9 @@
   "difficulty": 10,
   "briefing": "A large diamond token leaves a wake for fast steering sentinels.",
   "arena": { "shape": "polygon", "points": [[120,120],[500,45],[880,120],[950,500],[860,880],[500,950],[120,870],[50,500]] },
-  "token": { "shape": "diamond", "size": 74 },
-  "start": { "mode": "manual", "x": 160, "y": 780 },
-  "mainTarget": { "mode": "manual", "x": 830, "y": 220, "size": 58 },
+  "token": { "shape": "diamond", "size": 56 },
+  "start": { "mode": "manual", "x": 820, "y": 180 },
+  "mainTarget": { "mode": "manual", "x": 180, "y": 820, "size": 58 },
   "generation": { "obstacleCount": 6, "allowedShapes": ["diamond", "circle"], "minSize": 90, "maxSize": 155, "minimumGap": 90, "pathGrid": 22 },
   "manualObstacles": [],
   "movingObstacles": [

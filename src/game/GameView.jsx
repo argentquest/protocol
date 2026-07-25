@@ -3,6 +3,7 @@ import {
   advanceTrackingObstacle,
   currentMovingObstacle,
   distance,
+  followPointer,
   shapeInsideArena,
   shapesIntersect,
   sweepShape,
@@ -48,7 +49,12 @@ function buildInitialRuntime(level, attemptNumber) {
     mode: 'ready',
     dragging: false,
     pointerId: null,
+    inputMode: null,
+    pressedDirections: new Set(),
     pendingPoint: null,
+    pointerTarget: null,
+    pointerRevision: 0,
+    collisionPointerRevision: -1,
     lastPointerPosition: { ...level.startPoint },
     tokenPosition: { ...level.startPoint },
     lastSafe: { ...level.startPoint },
@@ -70,6 +76,7 @@ function buildInitialRuntime(level, attemptNumber) {
     hazardElapsedMs: 0,
     lastFrameAt: 0,
     activePowers: {},
+    shieldExpired: false,
   }
 }
 
@@ -90,6 +97,8 @@ export default function GameView({
   collectedCoins = {},
   onUsePowerup = () => false,
   onCoinCollected = () => false,
+  pointerResponsePerSecond = 8,
+  keyboardSpeedUnitsPerSecond = 280,
 }) {
   const svgRef = useRef(null)
   const tokenRef = useRef(null)
@@ -292,6 +301,8 @@ export default function GameView({
           svgRef.current.releasePointerCapture(runtime.pointerId)
         }
         runtime.pointerId = null
+        runtime.inputMode = null
+        runtime.pressedDirections.clear()
         updateTokenElement(checkpoint)
         updateTrailElement(runtime.trail)
         setPhase('bonus-prompt')
@@ -432,6 +443,7 @@ export default function GameView({
         updateTokenElement(runtime.lastSafe)
         if (!runtime.collisionLatched) {
           runtime.collisionLatched = true
+          runtime.collisionPointerRevision = runtime.pointerRevision
           runtime.trail.push({ ...swept.point }, { ...runtime.lastSafe })
           runtime.collisions += 1
           updateTrailElement(runtime.trail)
@@ -563,9 +575,17 @@ export default function GameView({
         .map(([effect]) => effect)
       const activeSignature = activeEffects.sort().join('|')
       if (activeSignature !== (runtime.activePowerSignature ?? '')) {
+        const previousEffects = Object.keys(runtime.activePowers)
         runtime.activePowers = Object.fromEntries(
           Object.entries(runtime.activePowers).filter(([, power]) => power.expiresAt > now),
         )
+        runtime.shieldExpired =
+          previousEffects.some(
+            (effect) => effect === 'fullShield' || effect === 'obstacleShield',
+          ) &&
+          !activeEffects.some(
+            (effect) => effect === 'fullShield' || effect === 'obstacleShield',
+          )
         runtime.activePowerSignature = activeSignature
         setActivePowerIds(activeEffects)
         if (!activeEffects.includes('routeScan')) setRouteScanPath(null)
@@ -586,8 +606,53 @@ export default function GameView({
           frameDelta * speedMultiplier,
           runtime.tokenPosition,
         )
+        if (runtime.shieldExpired) {
+          const token = { ...level.token, ...runtime.tokenPosition }
+          const safelyPlaced =
+            shapeInsideArena(token, level.arena) &&
+            ![...staticObstacles, ...hazards].some((obstacle) =>
+              shapesIntersect(token, obstacle),
+            )
+          if (!safelyPlaced) {
+            runtime.tokenPosition = { ...runtime.lastSafe }
+            runtime.pointerTarget = { ...runtime.lastSafe }
+            runtime.pendingPoint = null
+            runtime.collisionLatched = false
+            runtime.trail.push({ ...runtime.lastSafe })
+            updateTokenElement(runtime.lastSafe)
+            updateTrailElement(runtime.trail)
+            setMessage('Shield expired — token returned to the last safe point')
+          }
+          runtime.shieldExpired = false
+        }
         if (runtime.dragging) {
-          if (!runtime.pendingPoint && !runtime.collisionLatched) {
+          const horizontal =
+            Number(runtime.pressedDirections.has('ArrowRight')) -
+            Number(runtime.pressedDirections.has('ArrowLeft'))
+          const vertical =
+            Number(runtime.pressedDirections.has('ArrowDown')) -
+            Number(runtime.pressedDirections.has('ArrowUp'))
+          if (runtime.inputMode === 'keyboard' && (horizontal || vertical)) {
+            const magnitude = Math.hypot(horizontal, vertical)
+            const movement =
+              keyboardSpeedUnitsPerSecond * (Math.min(frameDelta, 50) / 1000)
+            runtime.pendingPoint = {
+              x: runtime.tokenPosition.x + (horizontal / magnitude) * movement,
+              y: runtime.tokenPosition.y + (vertical / magnitude) * movement,
+            }
+            runtime.pointerRevision += 1
+          } else if (
+            runtime.pointerTarget &&
+            (!runtime.collisionLatched ||
+              runtime.pointerRevision !== runtime.collisionPointerRevision)
+          ) {
+            runtime.pendingPoint = followPointer(
+              runtime.tokenPosition,
+              runtime.pointerTarget,
+              frameDelta,
+              pointerResponsePerSecond,
+            )
+          } else if (!runtime.pendingPoint && !runtime.collisionLatched) {
             runtime.pendingPoint = { ...runtime.tokenPosition }
           }
           processMovement(now, hazards)
@@ -610,36 +675,18 @@ export default function GameView({
     collectCoinsAt,
     devMode,
     isPowerActive,
+    level.arena,
     level.token,
+    keyboardSpeedUnitsPerSecond,
     powerups,
+    pointerResponsePerSecond,
     processMovement,
     publishHud,
     setHazardTransforms,
+    staticObstacles,
+    updateTokenElement,
+    updateTrailElement,
   ])
-
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (
-        event.repeat ||
-        event.target instanceof HTMLInputElement ||
-        event.target instanceof HTMLTextAreaElement
-      ) {
-        return
-      }
-      if (event.key.toLowerCase() === 'r') {
-        event.preventDefault()
-        handleManualRestart()
-        return
-      }
-      const powerup = powerups.find((candidate) => candidate.key === event.key)
-      if (!powerup) return
-      event.preventDefault()
-      activatePowerup(powerup)
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [activatePowerup, handleManualRestart, powerups])
 
   useEffect(() => {
     const runtime = buildInitialRuntime(level, 1)
@@ -664,20 +711,13 @@ export default function GameView({
     updateTrailElement,
   ])
 
-  const handlePointerDown = (event) => {
-    if (event.button !== 0 || (event.pointerType && event.pointerType !== 'mouse')) return
+  const beginAttempt = useCallback((point, pointerId, inputMode) => {
     const runtime = runtimeRef.current
     if (runtime.mode !== 'ready' && runtime.mode !== 'bonus-ready') return
-    event.preventDefault()
     audio.ensureContext()
     audio.startMusic()
-    const point = pointerToLogical(event, svgRef.current)
-    const token = { ...level.token, ...runtime.tokenPosition }
-    const pointerMarker = { shape: 'circle', x: point.x, y: point.y, size: 2 }
-    if (!shapesIntersect(token, pointerMarker)) return
-
-    svgRef.current.setPointerCapture(event.pointerId)
-    runtime.pointerId = event.pointerId
+    runtime.pointerId = pointerId
+    runtime.inputMode = inputMode
     runtime.dragging = true
     const pursuingBonus = runtime.mode === 'bonus-ready'
     runtime.mode = pursuingBonus ? 'dragging-bonus' : 'dragging-main'
@@ -687,30 +727,118 @@ export default function GameView({
     }
     runtime.lastPointerPosition = { ...point }
     runtime.pendingPoint = point
+    runtime.pointerTarget = inputMode === 'mouse' ? point : null
+    runtime.pointerRevision += 1
     setPhase(pursuingBonus ? 'dragging-bonus' : 'dragging-main')
     setMessage(pursuingBonus ? 'Bonus relay committed' : 'Main protocol target active')
     audio.play('dragStart')
-  }
+  }, [audio])
 
-  const handlePointerMove = (event) => {
+  const finishAttempt = useCallback((releaseLabel) => {
     const runtime = runtimeRef.current
-    if (!runtime.dragging || event.pointerId !== runtime.pointerId) return
-    event.preventDefault()
-    runtime.pendingPoint = pointerToLogical(event, svgRef.current)
-  }
-
-  const handlePointerUp = (event) => {
-    const runtime = runtimeRef.current
-    if (!runtime.dragging || event.pointerId !== runtime.pointerId) return
-    event.preventDefault()
+    if (!runtime.dragging) return
+    runtime.pressedDirections.clear()
     if (runtime.mode === 'target-reached') {
       completeAttempt(false)
     } else if (runtime.mode === 'dragging-bonus') {
       completeAttempt(true)
     } else {
-      resetAttempt('Mouse released before target — recalibrating level')
+      resetAttempt(`${releaseLabel} before target — recalibrating level`)
     }
+  }, [completeAttempt, resetAttempt])
+
+  const handlePointerDown = (event) => {
+    if (event.button !== 0 || (event.pointerType && event.pointerType !== 'mouse')) return
+    const runtime = runtimeRef.current
+    if (runtime.mode !== 'ready' && runtime.mode !== 'bonus-ready') return
+    event.preventDefault()
+    const point = pointerToLogical(event, svgRef.current)
+    const token = { ...level.token, ...runtime.tokenPosition }
+    const pointerMarker = { shape: 'circle', x: point.x, y: point.y, size: 2 }
+    if (!shapesIntersect(token, pointerMarker)) return
+
+    svgRef.current.setPointerCapture(event.pointerId)
+    beginAttempt(point, event.pointerId, 'mouse')
   }
+
+  const handlePointerMove = (event) => {
+    const runtime = runtimeRef.current
+    if (
+      !runtime.dragging ||
+      runtime.inputMode !== 'mouse' ||
+      event.pointerId !== runtime.pointerId
+    ) return
+    event.preventDefault()
+    runtime.pointerTarget = pointerToLogical(event, svgRef.current)
+    runtime.pointerRevision += 1
+  }
+
+  const handlePointerUp = (event) => {
+    const runtime = runtimeRef.current
+    if (
+      !runtime.dragging ||
+      runtime.inputMode !== 'mouse' ||
+      event.pointerId !== runtime.pointerId
+    ) return
+    event.preventDefault()
+    finishAttempt('Mouse released')
+  }
+
+  useEffect(() => {
+    const isTypingTarget = (event) =>
+      event.target instanceof HTMLInputElement ||
+      event.target instanceof HTMLTextAreaElement
+
+    const handleKeyDown = (event) => {
+      if (isTypingTarget(event)) return
+      const runtime = runtimeRef.current
+      if (event.key.startsWith('Arrow')) {
+        event.preventDefault()
+        if (runtime.dragging && runtime.inputMode === 'keyboard') {
+          runtime.pressedDirections.add(event.key)
+        }
+        return
+      }
+      if (event.repeat) return
+      if (event.code === 'Space') {
+        event.preventDefault()
+        if (runtime.dragging && runtime.inputMode === 'keyboard') {
+          finishAttempt('Keyboard hold released')
+        } else if (runtime.mode === 'ready' || runtime.mode === 'bonus-ready') {
+          beginAttempt(runtime.tokenPosition, null, 'keyboard')
+          setMessage('Keyboard control active — steer with the arrow keys, Space to release')
+        }
+        return
+      }
+      if (event.key.toLowerCase() === 'r') {
+        event.preventDefault()
+        handleManualRestart()
+        return
+      }
+      const powerup = powerups.find((candidate) => candidate.key === event.key)
+      if (!powerup) return
+      event.preventDefault()
+      activatePowerup(powerup)
+    }
+
+    const handleKeyUp = (event) => {
+      if (!event.key.startsWith('Arrow')) return
+      runtimeRef.current.pressedDirections.delete(event.key)
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('keyup', handleKeyUp)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keyup', handleKeyUp)
+    }
+  }, [
+    activatePowerup,
+    beginAttempt,
+    finishAttempt,
+    handleManualRestart,
+    powerups,
+  ])
 
   const arenaPoints = useMemo(
     () => (level.arena.shape === 'polygon' ? level.arena.points : null),
@@ -815,7 +943,10 @@ export default function GameView({
             <span className="status-dot" />
             {message}
           </p>
-          <p className="hud-hint">Hold the mouse. The token’s full shape must clear every edge.</p>
+          <p className="hud-hint">
+            Hold the mouse, or toggle keyboard control with Space and steer with the arrow keys.
+            The token’s full shape must clear every edge.
+          </p>
           <div className="power-tray" aria-label="Power-up inventory">
             {powerups.map((powerup) => {
               const active = activePowerIds.includes(powerup.effect)

@@ -4,11 +4,14 @@ Path Protocol is a 30-level desktop browser precision game built with React, Vit
 
 The campaign includes deterministic generated courses, varied token geometry, moving and player-tracking hazards, ordered bonus relays, one-time coin collectibles, and five consumable keyboard power-ups.
 
+Use the prominent **Buy power-ups** action on the home or level-selection screen to open the Power
+Lab. Purchases use collected coins and may require a configured cumulative-score unlock.
+
 ## Requirements
 
 - Node.js 20.19 or newer.
 - npm.
-- A desktop mouse or trackpad.
+- A desktop mouse, trackpad, or keyboard.
 - Docker Desktop only if running the containerized build.
 
 ## Run locally for development
@@ -163,6 +166,7 @@ Open `http://localhost:8080`. Press `Ctrl+C` to stop the foreground container.
 - `AGENTS.md` — coding-agent instructions.
 - `src/config/levels/` — the 30 deterministic level definitions.
 - `src/config/powerup.json` — power keys, costs, unlock scores, durations, effects, and sounds.
+- `src/config/gameConfig.json` — global input tuning, including pointer response speed.
 - `src/config/themeConfig.json` — visual and audio theme configuration.
 - `Dockerfile` — production image definition.
 - `docker-compose.yml` — local container deployment.

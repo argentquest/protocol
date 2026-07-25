@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "input": {
+    "pointerResponsePerSecond": 8,
+    "keyboardSpeedUnitsPerSecond": 280
+  }
+}

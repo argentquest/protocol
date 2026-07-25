@@ -8,8 +8,8 @@
   "briefing": "Pulsing barriers and accelerating sentinels share a circular chamber.",
   "arena": { "shape": "ellipse", "margin": 28 },
   "token": { "shape": "diamond", "size": 38 },
-  "start": { "mode": "manual", "x": 170, "y": 710 },
-  "mainTarget": { "mode": "manual", "x": 820, "y": 290, "size": 50 },
+  "start": { "mode": "manual", "x": 820, "y": 220 },
+  "mainTarget": { "mode": "manual", "x": 180, "y": 780, "size": 50 },
   "generation": { "obstacleCount": 8, "allowedShapes": ["circle", "diamond"], "minSize": 70, "maxSize": 135, "minimumGap": 64, "pathGrid": 18 },
   "manualObstacles": [],
   "movingObstacles": [

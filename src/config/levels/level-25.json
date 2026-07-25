@@ -8,8 +8,8 @@
   "briefing": "A valuable side corridor tests whether risk is worth the currency.",
   "arena": { "shape": "rect", "margin": 36, "cornerRadius": 46 },
   "token": { "shape": "circle", "size": 40 },
-  "start": { "mode": "manual", "x": 130, "y": 850 },
-  "mainTarget": { "mode": "manual", "x": 860, "y": 140, "size": 52 },
+  "start": { "mode": "manual", "x": 140, "y": 150 },
+  "mainTarget": { "mode": "manual", "x": 850, "y": 850, "size": 52 },
   "generation": { "obstacleCount": 8, "allowedShapes": ["rect", "circle"], "minSize": 75, "maxSize": 145, "minimumGap": 66, "pathGrid": 18 },
   "manualObstacles": [],
   "movingObstacles": [

@@ -179,6 +179,9 @@ export function generateLevel(level) {
     x: targetPoint.x,
     y: targetPoint.y,
   })
+  const bonusTargets = level.bonuses.targets.map((target) =>
+    normalizeShape({ ...target, shape: 'circle', width: target.size, height: target.size }),
+  )
   const manualObstacles = (level.manualObstacles ?? []).map(normalizeObstacle)
   const movingObstacles = (level.movingObstacles ?? []).map(normalizeObstacle)
   const trackingObstacles = (level.trackingObstacles ?? []).map(normalizeObstacle)
@@ -189,6 +192,11 @@ export function generateLevel(level) {
   const reserved = [
     { ...token, width: token.width * 3.5, height: token.height * 3.5 },
     { ...mainTarget, width: mainTarget.width * 2.7, height: mainTarget.height * 2.7 },
+    ...bonusTargets.map((target) => ({
+      ...target,
+      width: target.width * 2.7,
+      height: target.height * 2.7,
+    })),
     ...manualObstacles,
     ...coins.map((coin) => ({
       ...coin,
@@ -233,6 +241,28 @@ export function generateLevel(level) {
   }
 
   const obstacles = [...manualObstacles, ...generatedObstacles]
+  const configuredHazards = [...obstacles, ...movingObstacles, ...trackingObstacles]
+  if (
+    !shapeInsideArena(token, level.arena) ||
+    configuredHazards.some((obstacle) => shapesIntersect(token, obstacle))
+  ) {
+    throw new Error(`${level.id}: start point overlaps a hazard or arena boundary.`)
+  }
+  if (
+    !shapeInsideArena(mainTarget, level.arena) ||
+    configuredHazards.some((obstacle) => shapesIntersect(mainTarget, obstacle))
+  ) {
+    throw new Error(`${level.id}: main target overlaps a hazard or arena boundary.`)
+  }
+  for (const target of bonusTargets) {
+    if (!shapeInsideArena(target, level.arena)) {
+      throw new Error(`${level.id}: bonus target ${target.id} is outside the arena.`)
+    }
+    if (configuredHazards.some((obstacle) => shapesIntersect(target, obstacle))) {
+      throw new Error(`${level.id}: bonus target ${target.id} overlaps an obstacle.`)
+    }
+  }
+
   const solvable = pathExists({
     arena: level.arena,
     token,
@@ -244,6 +274,25 @@ export function generateLevel(level) {
 
   if (!solvable) {
     throw new Error(`${level.id}: configured manual course is not solvable.`)
+  }
+
+  let previousTarget = mainTarget
+  for (const bonusTarget of bonusTargets) {
+    if (
+      !pathExists({
+        arena: level.arena,
+        token,
+        start: previousTarget,
+        target: bonusTarget,
+        obstacles,
+        gridSize: level.generation.pathGrid,
+      })
+    ) {
+      throw new Error(
+        `${level.id}: bonus target ${bonusTarget.id} is not reachable with the configured token.`,
+      )
+    }
+    previousTarget = bonusTarget
   }
 
   const validatedPath = findPath({
@@ -264,9 +313,7 @@ export function generateLevel(level) {
     movingObstacles,
     trackingObstacles,
     coins,
-    bonusTargets: level.bonuses.targets.map((target) =>
-      normalizeShape({ ...target, shape: 'circle', width: target.size, height: target.size }),
-    ),
+    bonusTargets,
     validatedPath,
     generationSummary: {
       requestedObstacles: level.generation.obstacleCount,
