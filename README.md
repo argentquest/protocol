@@ -168,6 +168,9 @@ Open `http://localhost:8080`. Press `Ctrl+C` to stop the foreground container.
 - `src/config/powerup.json` — power keys, costs, unlock scores, durations, effects, and sounds.
 - `src/config/gameConfig.json` — global input tuning, including pointer response speed.
 - `src/config/themeConfig.json` — visual and audio theme configuration.
+- `src/game/GameView.jsx` — gameplay state-machine and animation orchestrator.
+- `src/game/components/` — header, HUD, SVG arena, and bonus-dialog presentation.
+- `src/game/hooks/` and `src/game/runtime/` — input handling and pure runtime helpers.
 - `Dockerfile` — production image definition.
 - `docker-compose.yml` — local container deployment.
 - `docker/nginx.conf` — static server and security configuration.

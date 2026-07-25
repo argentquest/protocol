@@ -724,15 +724,17 @@ path-protocol/
       results/
     game/
       GameView.jsx
-      engine/
-        gameStateMachine.js
-        inputController.js
-        animationLoop.js
+      components/
+        BonusDialog.jsx
+        GameArena.jsx
+        GameHeader.jsx
+        GameHud.jsx
+      hooks/
+        useGameInput.js
+      runtime/
+        gameRuntime.js
       geometry/
-        shapes.js
-        collisions.js
-        sweptCollision.js
-        coordinateTransform.js
+        geometry.js
       generation/
         seededRandom.js
         levelGenerator.js
@@ -743,8 +745,7 @@ path-protocol/
         distanceTracker.js
       rendering/
         SvgArena.jsx
-        SvgLayers.jsx
-        trailRenderer.js
+        SvgShape.jsx
       audio/
         audioManager.js
     config/
