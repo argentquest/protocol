@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "level-29",
+  "number": 29,
+  "name": "Last Safe Line",
+  "seed": "path-protocol-last-safe-line-v1",
+  "difficulty": 10,
+  "briefing": "A thin token faces fast hunters and the narrowest safe line.",
+  "arena": { "shape": "rect", "margin": 26, "cornerRadius": 20 },
+  "token": { "shape": "rect", "size": 28 },
+  "start": { "mode": "manual", "x": 100, "y": 900 },
+  "mainTarget": { "mode": "manual", "x": 900, "y": 100, "size": 46 },
+  "generation": { "obstacleCount": 10, "allowedShapes": ["rect", "diamond"], "minSize": 68, "maxSize": 132, "minimumGap": 58, "pathGrid": 16 },
+  "manualObstacles": [],
+  "movingObstacles": [
+    { "id": "last-line-x", "shape": "rect", "x": 500, "y": 510, "width": 160, "height": 30, "axis": "x", "amplitude": 230, "periodMs": 3800, "phase": 0.4 }
+  ],
+  "trackingObstacles": [
+    { "id": "last-a", "shape": "diamond", "x": 280, "y": 330, "width": 48, "height": 48, "zone": { "x": 70, "y": 100, "width": 430, "height": 460 }, "maxSpeed": 125, "acceleration": 185 },
+    { "id": "last-b", "shape": "diamond", "x": 720, "y": 330, "width": 48, "height": 48, "zone": { "x": 500, "y": 100, "width": 430, "height": 460 }, "maxSpeed": 125, "acceleration": 185 },
+    { "id": "last-c", "shape": "circle", "x": 500, "y": 720, "width": 46, "height": 46, "zone": { "x": 260, "y": 520, "width": 480, "height": 410 }, "maxSpeed": 120, "acceleration": 178 }
+  ],
+  "coins": [
+    { "id": "coin-a", "x": 220, "y": 820, "size": 24, "value": 1 },
+    { "id": "coin-b", "x": 500, "y": 500, "size": 24, "value": 3 },
+    { "id": "coin-c", "x": 820, "y": 220, "size": 24, "value": 1 }
+  ],
+  "rewards": { "completionCoins": 6, "bonusCoinsPerTarget": 3 },
+  "scoring": { "baseMaximum": 13600, "parTimeMs": 27000, "parDistance": 2500, "timeWeight": 0.5, "distanceWeight": 0.5, "collisionPenaltyRate": 0.2, "maximumCollisions": 3 },
+  "bonuses": { "maximumTargets": 3, "rewardPerTarget": 1450, "offerChanceMode": "currentScorePercent", "failurePenaltyRate": 0.2, "targets": [{ "id": "relay-a", "x": 880, "y": 850, "size": 36 }, { "id": "relay-b", "x": 500, "y": 120, "size": 34 }, { "id": "relay-c", "x": 140, "y": 260, "size": 34 }] }
+}

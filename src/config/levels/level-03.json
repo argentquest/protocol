@@ -13,6 +13,8 @@
   "generation": { "obstacleCount": 6, "allowedShapes": ["rect", "circle"], "minSize": 95, "maxSize": 180, "minimumGap": 62, "pathGrid": 20 },
   "manualObstacles": [],
   "movingObstacles": [],
+  "coins": [{ "id": "coin-a", "x": 520, "y": 540, "size": 28, "value": 1 }],
+  "rewards": { "completionCoins": 1, "bonusCoinsPerTarget": 1 },
   "scoring": { "baseMaximum": 1450, "parTimeMs": 8200, "parDistance": 1080, "timeWeight": 0.5, "distanceWeight": 0.5, "collisionPenaltyRate": 0.2, "maximumCollisions": 3 },
   "bonuses": {
     "maximumTargets": 1,

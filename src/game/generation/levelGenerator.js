@@ -151,6 +151,11 @@ export function validateLevel(level) {
   if (level.bonuses.maximumTargets > level.bonuses.targets.length) {
     errors.push('Bonus maximum exceeds configured targets.')
   }
+  for (const tracker of level.trackingObstacles ?? []) {
+    if (!tracker.zone || tracker.maxSpeed <= 0 || tracker.acceleration <= 0) {
+      errors.push(`Tracking obstacle ${tracker.id ?? 'unknown'} is missing motion settings.`)
+    }
+  }
   return errors
 }
 
@@ -175,11 +180,23 @@ export function generateLevel(level) {
     y: targetPoint.y,
   })
   const manualObstacles = (level.manualObstacles ?? []).map(normalizeObstacle)
+  const movingObstacles = (level.movingObstacles ?? []).map(normalizeObstacle)
+  const trackingObstacles = (level.trackingObstacles ?? []).map(normalizeObstacle)
+  const coins = (level.coins ?? []).map((coin) =>
+    normalizeShape({ ...coin, shape: 'circle', width: coin.size, height: coin.size }),
+  )
   const generatedObstacles = []
   const reserved = [
     { ...token, width: token.width * 3.5, height: token.height * 3.5 },
     { ...mainTarget, width: mainTarget.width * 2.7, height: mainTarget.height * 2.7 },
     ...manualObstacles,
+    ...coins.map((coin) => ({
+      ...coin,
+      width: coin.width * 2.2,
+      height: coin.height * 2.2,
+    })),
+    ...trackingObstacles,
+    ...movingObstacles,
   ]
 
   for (let index = 0; index < level.generation.obstacleCount; index += 1) {
@@ -244,7 +261,9 @@ export function generateLevel(level) {
     token,
     mainTarget,
     obstacles,
-    movingObstacles: (level.movingObstacles ?? []).map(normalizeObstacle),
+    movingObstacles,
+    trackingObstacles,
+    coins,
     bonusTargets: level.bonuses.targets.map((target) =>
       normalizeShape({ ...target, shape: 'circle', width: target.size, height: target.size }),
     ),

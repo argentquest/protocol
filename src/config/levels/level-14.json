@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "level-14",
+  "number": 14,
+  "name": "Twin Hunters",
+  "seed": "path-protocol-twin-hunters-v1",
+  "difficulty": 8,
+  "briefing": "Two sentinels steer from separate containment sectors.",
+  "arena": { "shape": "rect", "margin": 40, "cornerRadius": 60 },
+  "token": { "shape": "circle", "size": 52 },
+  "start": { "mode": "manual", "x": 130, "y": 850 },
+  "mainTarget": { "mode": "manual", "x": 860, "y": 130, "size": 54 },
+  "generation": { "obstacleCount": 7, "allowedShapes": ["rect", "circle", "diamond"], "minSize": 80, "maxSize": 150, "minimumGap": 72, "pathGrid": 20 },
+  "manualObstacles": [],
+  "movingObstacles": [],
+  "trackingObstacles": [
+    { "id": "hunter-left", "shape": "circle", "x": 330, "y": 430, "width": 56, "height": 56, "zone": { "x": 100, "y": 180, "width": 430, "height": 520 }, "maxSpeed": 84, "acceleration": 118 },
+    { "id": "hunter-right", "shape": "circle", "x": 690, "y": 560, "width": 56, "height": 56, "zone": { "x": 470, "y": 300, "width": 430, "height": 520 }, "maxSpeed": 84, "acceleration": 118 }
+  ],
+  "coins": [
+    { "id": "coin-a", "x": 270, "y": 760, "size": 30, "value": 1 },
+    { "id": "coin-b", "x": 500, "y": 500, "size": 30, "value": 2 },
+    { "id": "coin-c", "x": 760, "y": 260, "size": 30, "value": 1 }
+  ],
+  "rewards": { "completionCoins": 3, "bonusCoinsPerTarget": 1 },
+  "scoring": { "baseMaximum": 5300, "parTimeMs": 16500, "parDistance": 1580, "timeWeight": 0.5, "distanceWeight": 0.5, "collisionPenaltyRate": 0.2, "maximumCollisions": 3 },
+  "bonuses": { "maximumTargets": 2, "rewardPerTarget": 700, "offerChanceMode": "currentScorePercent", "failurePenaltyRate": 0.2, "targets": [{ "id": "relay-a", "x": 820, "y": 760, "size": 44 }, { "id": "relay-b", "x": 180, "y": 220, "size": 42 }] }
+}

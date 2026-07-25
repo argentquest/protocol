@@ -286,6 +286,55 @@
 
 ---
 
+## Sprint 11 — Pursuit, Coins, and Consumable Powers
+
+| ID | Task | Size | Description |
+|---|---|---:|---|
+| S11-01 | Add tracking-hazard configuration | M | Define rectangular zones, acceleration, maximum speed, shape, and start position in level JSON. |
+| S11-02 | Implement gradual steering | L | Advance velocity and direction on the animation loop while clamping trackers to their zones. |
+| S11-03 | Integrate tracker collisions | M | Apply continuous collision handling when a tracker reaches a moving or stationary token. |
+| S11-04 | Add one-time course coins | M | Render pickups and persist a per-player claim ledger that prevents replay farming. |
+| S11-05 | Add completion and bonus rewards | M | Award configured coins once for completed levels and ordered bonus relays. |
+| S11-06 | Create `powerup.json` | S | Configure five power keys, prices, score gates, durations, visuals, parameters, and sound IDs. |
+| S11-07 | Build Power Lab | M | Show unlock progress, currency, inventory quantities, and one-charge purchases. |
+| S11-08 | Implement shield powers | L | Add obstacle-only and full boundary immunity with immediate charge consumption. |
+| S11-09 | Implement utility powers | L | Add Slow Field, Coin Magnet, and Route Scan. |
+| S11-10 | Add power audio and feedback | M | Give every activation a distinct synthesized sound and visible HUD/SVG state. |
+| S11-11 | Test economy and powers | L | Cover non-farmable rewards, purchasing, consumption, key activation, shield scope, and timing. |
+
+### Sprint 11 exit criteria
+
+- Tracking starts only after the attempt begins and remains inside configured zones.
+- Coins and rewards cannot be collected twice.
+- All five powers are purchasable, consumable, keyboard-accessible, and configuration-driven.
+- Existing saves load with safe defaults for the new progression fields.
+
+---
+
+## Sprint 12 — Levels 11–30 and Expansion Verification
+
+| ID | Task | Size | Description |
+|---|---|---:|---|
+| S12-01 | Author Levels 11–15 | L | Introduce single and twin trackers with varied token shapes. |
+| S12-02 | Author Levels 16–20 | L | Combine large tokens, moving gates, and overlapping pursuit zones. |
+| S12-03 | Author Levels 21–25 | L | Add swarms, compression routes, and optional high-value coin lines. |
+| S12-04 | Author Levels 26–30 | XL | Combine advanced tracking, irregular arenas, moving hazards, coins, powers, and relay chains. |
+| S12-05 | Validate all seeds | L | Confirm deterministic generation and a valid main-target route for all 30 configurations. |
+| S12-06 | Extend playtest diagnostics | M | Display tracker zones and allow instant navigation across all 30 levels. |
+| S12-07 | Tune progression economy | L | Balance score gates, coin awards, course pickups, prices, and power durations. |
+| S12-08 | Profile tracker performance | M | Verify multi-tracker steering, collision sampling, and SVG updates at target frame rate. |
+| S12-09 | Complete expansion browser tests | L | Cover tracking activation, power keys, moving hazards, bonus checkpoints, and shield rules. |
+| S12-10 | Publish expansion | M | Rebuild Docker, smoke-test production, deploy, and record the saved site version. |
+
+### Sprint 12 exit criteria
+
+- All 30 levels are selectable, deterministic, and solvable.
+- Token size and shape vary across the expansion.
+- Tracking, coins, power inventory, and unique activation sounds work in production.
+- Unit, component, browser, Docker, and visual checks pass.
+
+---
+
 ## Cross-sprint definition of done
 
 A task is complete only when:
@@ -312,6 +361,8 @@ Sprint 1: Foundation
             -> Sprint 8: Moving hazards and Levels 6–10
               -> Sprint 9: Presentation and audio
                 -> Sprint 10: Release hardening
+                  -> Sprint 11: Pursuit, coins, and powers
+                    -> Sprint 12: Levels 11–30 expansion
 ```
 
 Some work can overlap after its dependencies are stable. For example, persistence work can begin while generation is developed, and audio asset selection can begin before final level authoring.

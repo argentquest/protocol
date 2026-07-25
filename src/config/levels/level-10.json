@@ -23,6 +23,8 @@
     { "id": "scanner-b", "shape": "rect", "x": 720, "y": 500, "width": 34, "height": 135, "axis": "y", "amplitude": 180, "periodMs": 3900, "phase": 1.4 },
     { "id": "scanner-c", "shape": "circle", "x": 300, "y": 650, "size": 68, "axis": "x", "amplitude": 150, "periodMs": 3600, "phase": 2.6 }
   ],
+  "coins": [{ "id": "coin-a", "x": 280, "y": 720, "size": 30, "value": 1 }, { "id": "coin-b", "x": 500, "y": 500, "size": 30, "value": 2 }, { "id": "coin-c", "x": 720, "y": 280, "size": 30, "value": 1 }],
+  "rewards": { "completionCoins": 3, "bonusCoinsPerTarget": 1 },
   "scoring": { "baseMaximum": 4000, "parTimeMs": 16000, "parDistance": 1680, "timeWeight": 0.5, "distanceWeight": 0.5, "collisionPenaltyRate": 0.2, "maximumCollisions": 3 },
   "bonuses": {
     "maximumTargets": 3,

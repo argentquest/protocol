@@ -1,6 +1,8 @@
 # Path Protocol
 
-Path Protocol is a desktop browser precision game built with React, Vite, JavaScript, and SVG.
+Path Protocol is a 30-level desktop browser precision game built with React, Vite, JavaScript, and SVG.
+
+The campaign includes deterministic generated courses, varied token geometry, moving and player-tracking hazards, ordered bonus relays, one-time coin collectibles, and five consumable keyboard power-ups.
 
 ## Requirements
 
@@ -42,7 +44,7 @@ http://localhost:5173/?dev=1
 http://localhost:8080/?dev=1
 ```
 
-Playtest mode unlocks all ten levels, adds previous/next level controls, and displays the deterministic seed, validated route, collision geometry, moving-obstacle envelopes, live scoring factors, and frame rate. The **Overlay** button hides or restores the SVG diagnostics.
+Playtest mode unlocks all 30 levels, adds previous/next level controls, gives unlimited power-up charges, and displays the deterministic seed, validated route, collision geometry, moving/tracking zones, live scoring factors, and frame rate. The **Overlay** button hides or restores the SVG diagnostics.
 
 Completed developer runs are stored separately in browser storage under `path-protocol.playtest-runs`. They do not unlock levels or replace the player's normal best scores. Remove `?dev=1` to return to the regular game.
 
@@ -159,7 +161,8 @@ Open `http://localhost:8080`. Press `Ctrl+C` to stop the foreground container.
 - `architecture.md` — product and system architecture.
 - `sprints.md` — development backlog.
 - `AGENTS.md` — coding-agent instructions.
-- `src/config/levels/` — the ten level definitions.
+- `src/config/levels/` — the 30 deterministic level definitions.
+- `src/config/powerup.json` — power keys, costs, unlock scores, durations, effects, and sounds.
 - `src/config/themeConfig.json` — visual and audio theme configuration.
 - `Dockerfile` — production image definition.
 - `docker-compose.yml` — local container deployment.

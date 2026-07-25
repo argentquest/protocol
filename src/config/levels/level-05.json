@@ -16,6 +16,8 @@
     { "id": "spine-b", "shape": "rect", "x": 650, "y": 500, "width": 70, "height": 310 }
   ],
   "movingObstacles": [],
+  "coins": [{ "id": "coin-a", "x": 350, "y": 650, "size": 28, "value": 1 }, { "id": "coin-b", "x": 680, "y": 350, "size": 28, "value": 1 }],
+  "rewards": { "completionCoins": 2, "bonusCoinsPerTarget": 1 },
   "scoring": { "baseMaximum": 2000, "parTimeMs": 10500, "parDistance": 1250, "timeWeight": 0.5, "distanceWeight": 0.5, "collisionPenaltyRate": 0.2, "maximumCollisions": 3 },
   "bonuses": {
     "maximumTargets": 2,

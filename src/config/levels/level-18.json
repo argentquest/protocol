@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "level-18",
+  "number": 18,
+  "name": "Sentinel Square",
+  "seed": "path-protocol-sentinel-square-v1",
+  "difficulty": 9,
+  "briefing": "Square containment fields give two sentinels room to steer.",
+  "arena": { "shape": "rect", "margin": 30, "cornerRadius": 18 },
+  "token": { "shape": "diamond", "size": 44 },
+  "start": { "mode": "manual", "x": 110, "y": 880 },
+  "mainTarget": { "mode": "manual", "x": 890, "y": 110, "size": 52 },
+  "generation": { "obstacleCount": 8, "allowedShapes": ["rect", "diamond"], "minSize": 75, "maxSize": 145, "minimumGap": 67, "pathGrid": 18 },
+  "manualObstacles": [],
+  "movingObstacles": [],
+  "trackingObstacles": [
+    { "id": "square-a", "shape": "rect", "x": 330, "y": 370, "width": 58, "height": 58, "zone": { "x": 120, "y": 140, "width": 440, "height": 440 }, "maxSpeed": 94, "acceleration": 132 },
+    { "id": "square-b", "shape": "rect", "x": 680, "y": 650, "width": 58, "height": 58, "zone": { "x": 440, "y": 420, "width": 440, "height": 440 }, "maxSpeed": 94, "acceleration": 132 }
+  ],
+  "coins": [
+    { "id": "coin-a", "x": 230, "y": 790, "size": 28, "value": 1 },
+    { "id": "coin-b", "x": 500, "y": 500, "size": 28, "value": 2 },
+    { "id": "coin-c", "x": 780, "y": 230, "size": 28, "value": 1 }
+  ],
+  "rewards": { "completionCoins": 3, "bonusCoinsPerTarget": 2 },
+  "scoring": { "baseMaximum": 7000, "parTimeMs": 19000, "parDistance": 1820, "timeWeight": 0.5, "distanceWeight": 0.5, "collisionPenaltyRate": 0.2, "maximumCollisions": 3 },
+  "bonuses": { "maximumTargets": 2, "rewardPerTarget": 900, "offerChanceMode": "currentScorePercent", "failurePenaltyRate": 0.2, "targets": [{ "id": "relay-a", "x": 850, "y": 800, "size": 42 }, { "id": "relay-b", "x": 160, "y": 200, "size": 40 }] }
+}

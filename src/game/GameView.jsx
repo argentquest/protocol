@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
+  advanceTrackingObstacle,
   currentMovingObstacle,
   distance,
+  shapeInsideArena,
   shapesIntersect,
   sweepShape,
 } from './geometry/geometry.js'
+import { findPath } from './generation/levelGenerator.js'
 import { createSeededRandom } from './generation/seededRandom.js'
 import { calculateScore, directDistance } from './scoring/scoreCalculator.js'
 import SvgArena from './rendering/SvgArena.jsx'
@@ -64,6 +67,9 @@ function buildInitialRuntime(level, attemptNumber) {
     fps: 0,
     fpsFrames: 0,
     fpsWindowStartedAt: 0,
+    hazardElapsedMs: 0,
+    lastFrameAt: 0,
+    activePowers: {},
   }
 }
 
@@ -78,11 +84,19 @@ export default function GameView({
   devMode = false,
   onPreviousLevel,
   onNextLevel,
+  totalLevels = 10,
+  powerups = [],
+  inventory = {},
+  collectedCoins = {},
+  onUsePowerup = () => false,
+  onCoinCollected = () => false,
 }) {
   const svgRef = useRef(null)
   const tokenRef = useRef(null)
   const trailRef = useRef(null)
   const movingRefs = useRef(new Map())
+  const trackingRefs = useRef(new Map())
+  const trackingStatesRef = useRef(new Map())
   const frameRef = useRef(null)
   const attemptNumberRef = useRef(1)
   const runtimeRef = useRef(buildInitialRuntime(level, 1))
@@ -96,9 +110,50 @@ export default function GameView({
   const [flash, setFlash] = useState(false)
   const [visibleBonus, setVisibleBonus] = useState(null)
   const [bonusPrompt, setBonusPrompt] = useState(false)
+  const [activePowerIds, setActivePowerIds] = useState([])
+  const [routeScanPath, setRouteScanPath] = useState(null)
+  const [availableCoins, setAvailableCoins] = useState(() =>
+    level.coins.filter((coin) => !collectedCoins[`${level.id}:${coin.id}`]),
+  )
+  const availableCoinsRef = useRef(availableCoins)
   const [debugVisible, setDebugVisible] = useState(devMode)
 
   const staticObstacles = level.obstacles
+
+  const updateAvailableCoins = useCallback((coins) => {
+    availableCoinsRef.current = coins
+    setAvailableCoins(coins)
+  }, [])
+
+  const collectCoinsAt = useCallback(
+    (token, magnetRadius = 0) => {
+      const collected = availableCoinsRef.current.filter(
+        (coin) =>
+          shapesIntersect(token, coin) ||
+          (magnetRadius > 0 && distance(token, coin) <= magnetRadius),
+      )
+      if (!collected.length) return
+      const collectedIds = new Set()
+      for (const coin of collected) {
+        if (onCoinCollected(coin)) {
+          collectedIds.add(coin.id)
+          audio.play('coinCollected')
+        }
+      }
+      if (collectedIds.size) {
+        updateAvailableCoins(
+          availableCoinsRef.current.filter((coin) => !collectedIds.has(coin.id)),
+        )
+      }
+    },
+    [audio, onCoinCollected, updateAvailableCoins],
+  )
+
+  const isPowerActive = useCallback(
+    (runtime, effect, now = performance.now()) =>
+      Number(runtime.activePowers[effect]?.expiresAt) > now,
+    [],
+  )
 
   const updateTokenElement = useCallback((position) => {
     tokenRef.current?.setAttribute('transform', `translate(${position.x} ${position.y})`)
@@ -149,17 +204,32 @@ export default function GameView({
     [scoreRuntime],
   )
 
-  const setMovingTransforms = useCallback(
-    (elapsedMs) => {
-      return level.movingObstacles.map((obstacle) => {
+  const setHazardTransforms = useCallback(
+    (elapsedMs, deltaMs, tokenPosition) => {
+      const moving = level.movingObstacles.map((obstacle) => {
         const current = currentMovingObstacle(obstacle, elapsedMs)
         movingRefs.current
           .get(obstacle.id)
           ?.setAttribute('transform', `translate(${current.x} ${current.y})`)
         return current
       })
+      const tracking = level.trackingObstacles.map((obstacle) => {
+        const state = advanceTrackingObstacle(
+          obstacle,
+          trackingStatesRef.current.get(obstacle.id),
+          tokenPosition,
+          deltaMs,
+        )
+        trackingStatesRef.current.set(obstacle.id, state)
+        const current = { ...obstacle, x: state.x, y: state.y }
+        trackingRefs.current
+          .get(obstacle.id)
+          ?.setAttribute('transform', `translate(${current.x} ${current.y})`)
+        return current
+      })
+      return [...moving, ...tracking]
     },
-    [level.movingObstacles],
+    [level.movingObstacles, level.trackingObstacles],
   )
 
   const offerNextBonus = useCallback(
@@ -255,6 +325,9 @@ export default function GameView({
       audio.play('attemptFailed')
       setVisibleBonus(null)
       setBonusPrompt(false)
+      setActivePowerIds([])
+      setRouteScanPath(null)
+      trackingStatesRef.current.clear()
       publishHud(runtime, performance.now(), true)
 
       attemptNumberRef.current += 1
@@ -349,7 +422,12 @@ export default function GameView({
       runtime.actualDistance += traveled
       runtime.lastPointerPosition = { ...desired }
 
-      if (!swept.safe) {
+      const collisionShielded =
+        isPowerActive(runtime, 'fullShield', now) ||
+        (swept.collisionType === 'obstacle' &&
+          isPowerActive(runtime, 'obstacleShield', now))
+
+      if (!swept.safe && !collisionShielded) {
         runtime.tokenPosition = { ...runtime.lastSafe }
         updateTokenElement(runtime.lastSafe)
         if (!runtime.collisionLatched) {
@@ -375,12 +453,20 @@ export default function GameView({
 
       runtime.collisionLatched = false
       runtime.tokenPosition = { ...desired }
-      runtime.lastSafe = { ...desired }
+      const token = { ...level.token, ...desired }
+      const actuallySafe =
+        shapeInsideArena(token, level.arena) &&
+        !allObstacles.some((obstacle) => shapesIntersect(token, obstacle))
+      if (actuallySafe) runtime.lastSafe = { ...desired }
       runtime.trail.push({ ...desired })
       updateTokenElement(desired)
       updateTrailElement(runtime.trail)
 
-      const token = { ...level.token, ...desired }
+      const magnet = powerups.find((powerup) => powerup.effect === 'coinMagnet')
+      collectCoinsAt(
+        token,
+        magnet && isPowerActive(runtime, 'coinMagnet', now) ? magnet.radius : 0,
+      )
       if (runtime.mode === 'dragging-main' && shapesIntersect(token, level.mainTarget)) {
         targetReached(runtime, level.mainTarget, false)
       } else if (runtime.mode === 'target-reached' && runtime.activeBonus) {
@@ -401,7 +487,10 @@ export default function GameView({
     },
     [
       audio,
+      collectCoinsAt,
+      isPowerActive,
       level,
+      powerups,
       publishHud,
       resetAttempt,
       staticObstacles,
@@ -409,6 +498,50 @@ export default function GameView({
       updateTokenElement,
       updateTrailElement,
     ],
+  )
+
+  const activatePowerup = useCallback(
+    (powerup) => {
+      const runtime = runtimeRef.current
+      const now = performance.now()
+      if (runtime.startedAt <= 0 || runtime.mode === 'restarting') {
+        audio.play('powerUnavailable')
+        setMessage('Power unavailable until the attempt begins')
+        return
+      }
+      if (isPowerActive(runtime, powerup.effect, now)) {
+        audio.play('powerUnavailable')
+        setMessage(`${powerup.name} is already active`)
+        return
+      }
+      if (!onUsePowerup(powerup.id)) {
+        audio.play('powerUnavailable')
+        setMessage(`No ${powerup.name} charges available`)
+        return
+      }
+      runtime.activePowers[powerup.effect] = {
+        id: powerup.id,
+        expiresAt: now + powerup.durationMs,
+      }
+      runtime.activePowerSignature = Object.keys(runtime.activePowers).sort().join('|')
+      setActivePowerIds(Object.keys(runtime.activePowers))
+      if (powerup.effect === 'routeScan') {
+        const target = runtime.activeBonus ?? level.mainTarget
+        setRouteScanPath(
+          findPath({
+            arena: level.arena,
+            token: level.token,
+            start: runtime.tokenPosition,
+            target,
+            obstacles: staticObstacles,
+            gridSize: level.generation.pathGrid,
+          }),
+        )
+      }
+      audio.play(powerup.sound)
+      setMessage(`${powerup.name} activated`)
+    },
+    [audio, isPowerActive, level, onUsePowerup, staticObstacles],
   )
 
   useEffect(() => {
@@ -425,16 +558,47 @@ export default function GameView({
           setHud((current) => ({ ...current, fps: runtime.fps }))
         }
       }
-      if (runtime.dragging) {
+      const activeEffects = Object.entries(runtime.activePowers)
+        .filter(([, power]) => power.expiresAt > now)
+        .map(([effect]) => effect)
+      const activeSignature = activeEffects.sort().join('|')
+      if (activeSignature !== (runtime.activePowerSignature ?? '')) {
+        runtime.activePowers = Object.fromEntries(
+          Object.entries(runtime.activePowers).filter(([, power]) => power.expiresAt > now),
+        )
+        runtime.activePowerSignature = activeSignature
+        setActivePowerIds(activeEffects)
+        if (!activeEffects.includes('routeScan')) setRouteScanPath(null)
+      }
+
+      if (runtime.dragging || runtime.startedAt > 0) {
         runtime.elapsedMs = now - runtime.startedAt
-        const movingObstacles = setMovingTransforms(runtime.elapsedMs)
-        processMovement(now, movingObstacles)
+        const frameDelta = runtime.lastFrameAt ? now - runtime.lastFrameAt : 0
+        runtime.lastFrameAt = now
+        const slowField = powerups.find((powerup) => powerup.effect === 'slowField')
+        const speedMultiplier =
+          slowField && isPowerActive(runtime, 'slowField', now)
+            ? slowField.slowMultiplier
+            : 1
+        runtime.hazardElapsedMs += frameDelta * speedMultiplier
+        const hazards = setHazardTransforms(
+          runtime.hazardElapsedMs,
+          frameDelta * speedMultiplier,
+          runtime.tokenPosition,
+        )
+        if (runtime.dragging) {
+          if (!runtime.pendingPoint && !runtime.collisionLatched) {
+            runtime.pendingPoint = { ...runtime.tokenPosition }
+          }
+          processMovement(now, hazards)
+        }
+        const magnet = powerups.find((powerup) => powerup.effect === 'coinMagnet')
+        if (magnet && isPowerActive(runtime, 'coinMagnet', now)) {
+          collectCoinsAt({ ...level.token, ...runtime.tokenPosition }, magnet.radius)
+        }
+        if (!runtime.dragging) publishHud(runtime, now)
       } else if (runtime.mode === 'ready') {
-        setMovingTransforms(0)
-      } else if (runtime.startedAt > 0) {
-        runtime.elapsedMs = now - runtime.startedAt
-        setMovingTransforms(runtime.elapsedMs)
-        publishHud(runtime, now)
+        setHazardTransforms(0, 0, runtime.tokenPosition)
       }
       frameRef.current = requestAnimationFrame(animate)
     }
@@ -442,25 +606,40 @@ export default function GameView({
     return () => {
       cancelAnimationFrame(frameRef.current)
     }
-  }, [devMode, processMovement, publishHud, setMovingTransforms])
+  }, [
+    collectCoinsAt,
+    devMode,
+    isPowerActive,
+    level.token,
+    powerups,
+    processMovement,
+    publishHud,
+    setHazardTransforms,
+  ])
 
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (
-        event.key.toLowerCase() !== 'r' ||
         event.repeat ||
         event.target instanceof HTMLInputElement ||
         event.target instanceof HTMLTextAreaElement
       ) {
         return
       }
+      if (event.key.toLowerCase() === 'r') {
+        event.preventDefault()
+        handleManualRestart()
+        return
+      }
+      const powerup = powerups.find((candidate) => candidate.key === event.key)
+      if (!powerup) return
       event.preventDefault()
-      handleManualRestart()
+      activatePowerup(powerup)
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [handleManualRestart])
+  }, [activatePowerup, handleManualRestart, powerups])
 
   useEffect(() => {
     const runtime = buildInitialRuntime(level, 1)
@@ -469,6 +648,9 @@ export default function GameView({
     setGhostTrails([])
     setVisibleBonus(null)
     setBonusPrompt(false)
+    setActivePowerIds([])
+    setRouteScanPath(null)
+    trackingStatesRef.current.clear()
     setHud({ ...EMPTY_HUD, attainableMaximum: level.scoring.baseMaximum })
     setPhase('ready')
     setMessage('Press and hold the token to begin')
@@ -476,7 +658,11 @@ export default function GameView({
       updateTokenElement(runtime.tokenPosition)
       updateTrailElement([])
     })
-  }, [level, updateTokenElement, updateTrailElement])
+  }, [
+    level,
+    updateTokenElement,
+    updateTrailElement,
+  ])
 
   const handlePointerDown = (event) => {
     if (event.button !== 0 || (event.pointerType && event.pointerType !== 'mouse')) return
@@ -564,7 +750,7 @@ export default function GameView({
                 className="dev-step-button"
                 type="button"
                 onClick={onNextLevel}
-                disabled={level.number === 10}
+                disabled={level.number === totalLevels}
                 aria-label="Next playtest level"
               >
                 ›
@@ -630,6 +816,26 @@ export default function GameView({
             {message}
           </p>
           <p className="hud-hint">Hold the mouse. The token’s full shape must clear every edge.</p>
+          <div className="power-tray" aria-label="Power-up inventory">
+            {powerups.map((powerup) => {
+              const active = activePowerIds.includes(powerup.effect)
+              const quantity = devMode ? '∞' : Number(inventory[powerup.id]) || 0
+              return (
+                <button
+                  key={powerup.id}
+                  type="button"
+                  className={`power-slot ${active ? 'is-active' : ''}`}
+                  style={{ '--power-color': powerup.color }}
+                  onClick={() => activatePowerup(powerup)}
+                  aria-label={`${powerup.name}, ${quantity} available`}
+                >
+                  <kbd>{powerup.key}</kbd>
+                  <span>{powerup.name}</span>
+                  <strong>{quantity}</strong>
+                </button>
+              )
+            })}
+          </div>
           {devMode && (
             <div className="debug-panel" data-testid="playtest-diagnostics">
               <div className="debug-panel__heading">
@@ -651,6 +857,14 @@ export default function GameView({
                 <div>
                   <dt>Route nodes</dt>
                   <dd>{level.validatedPath?.length ?? 0}</dd>
+                </div>
+                <div>
+                  <dt>Trackers</dt>
+                  <dd>{level.trackingObstacles.length}</dd>
+                </div>
+                <div>
+                  <dt>Coins left</dt>
+                  <dd>{availableCoins.length}</dd>
                 </div>
                 <div>
                   <dt>Time factor</dt>
@@ -747,6 +961,16 @@ export default function GameView({
                       className="debug-motion-envelope"
                     />
                   ))}
+                  {level.trackingObstacles.map((obstacle) => (
+                    <rect
+                      key={`tracking-zone-${obstacle.id}`}
+                      className="debug-tracking-zone"
+                      x={obstacle.zone.x}
+                      y={obstacle.zone.y}
+                      width={obstacle.zone.width}
+                      height={obstacle.zone.height}
+                    />
+                  ))}
                   <circle
                     className="debug-center"
                     cx={level.startPoint.x}
@@ -769,6 +993,13 @@ export default function GameView({
                   </text>
                 </g>
               )}
+              {routeScanPath && (
+                <polyline
+                  className="power-route-scan"
+                  points={routeScanPath.map((point) => `${point.x},${point.y}`).join(' ')}
+                  aria-hidden="true"
+                />
+              )}
 
               <g className="obstacle-layer">
                 {staticObstacles.map((obstacle) => (
@@ -786,6 +1017,19 @@ export default function GameView({
                     item={obstacle}
                     className="obstacle obstacle--moving"
                   />
+                ))}
+                {level.trackingObstacles.map((obstacle) => (
+                  <SvgShape
+                    key={obstacle.id}
+                    ref={(element) => {
+                      if (element) trackingRefs.current.set(obstacle.id, element)
+                      else trackingRefs.current.delete(obstacle.id)
+                    }}
+                    item={obstacle}
+                    className="obstacle obstacle--tracking"
+                  >
+                    <circle className="tracking-eye" r={Math.min(obstacle.width, obstacle.height) * 0.16} />
+                  </SvgShape>
                 ))}
               </g>
 
@@ -816,8 +1060,22 @@ export default function GameView({
                 )}
               </g>
 
+              <g className="coin-layer">
+                {availableCoins.map((coin) => (
+                  <SvgShape key={coin.id} item={coin} className="course-coin">
+                    <circle className="coin-core" r={coin.width * 0.18} />
+                  </SvgShape>
+                ))}
+              </g>
+
               <g className="token-layer">
                 <SvgShape ref={tokenRef} item={level.token} className="token">
+                  {activePowerIds.includes('obstacleShield') && (
+                    <circle className="power-aura power-aura--obstacle" r={level.token.width * 0.78} />
+                  )}
+                  {activePowerIds.includes('fullShield') && (
+                    <circle className="power-aura power-aura--full" r={level.token.width * 0.9} />
+                  )}
                   <circle className="token-core" r={Math.max(5, level.token.width * 0.13)} />
                 </SvgShape>
               </g>

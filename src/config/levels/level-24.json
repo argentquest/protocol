@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "level-24",
+  "number": 24,
+  "name": "Diamond Wake",
+  "seed": "path-protocol-diamond-wake-v1",
+  "difficulty": 10,
+  "briefing": "A large diamond token leaves a wake for fast steering sentinels.",
+  "arena": { "shape": "polygon", "points": [[120,120],[500,45],[880,120],[950,500],[860,880],[500,950],[120,870],[50,500]] },
+  "token": { "shape": "diamond", "size": 74 },
+  "start": { "mode": "manual", "x": 160, "y": 780 },
+  "mainTarget": { "mode": "manual", "x": 830, "y": 220, "size": 58 },
+  "generation": { "obstacleCount": 6, "allowedShapes": ["diamond", "circle"], "minSize": 90, "maxSize": 155, "minimumGap": 90, "pathGrid": 22 },
+  "manualObstacles": [],
+  "movingObstacles": [
+    { "id": "wake-bar", "shape": "rect", "x": 500, "y": 500, "width": 170, "height": 42, "axis": "x", "amplitude": 190, "periodMs": 5000, "phase": 0.5 }
+  ],
+  "trackingObstacles": [
+    { "id": "wake-a", "shape": "diamond", "x": 360, "y": 360, "width": 64, "height": 64, "zone": { "x": 140, "y": 140, "width": 520, "height": 520 }, "maxSpeed": 90, "acceleration": 122 },
+    { "id": "wake-b", "shape": "diamond", "x": 680, "y": 650, "width": 64, "height": 64, "zone": { "x": 380, "y": 340, "width": 480, "height": 500 }, "maxSpeed": 90, "acceleration": 122 }
+  ],
+  "coins": [
+    { "id": "coin-a", "x": 300, "y": 700, "size": 34, "value": 2 },
+    { "id": "coin-b", "x": 700, "y": 300, "size": 34, "value": 2 }
+  ],
+  "rewards": { "completionCoins": 5, "bonusCoinsPerTarget": 2 },
+  "scoring": { "baseMaximum": 10200, "parTimeMs": 23500, "parDistance": 2180, "timeWeight": 0.5, "distanceWeight": 0.5, "collisionPenaltyRate": 0.2, "maximumCollisions": 3 },
+  "bonuses": { "maximumTargets": 2, "rewardPerTarget": 1200, "offerChanceMode": "currentScorePercent", "failurePenaltyRate": 0.2, "targets": [{ "id": "relay-a", "x": 760, "y": 780, "size": 44 }, { "id": "relay-b", "x": 250, "y": 260, "size": 42 }] }
+}

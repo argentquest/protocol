@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "level-28",
+  "number": 28,
+  "name": "Convergent Threat",
+  "seed": "path-protocol-convergent-threat-v1",
+  "difficulty": 10,
+  "briefing": "Three broad tracking sectors converge on the shortest route.",
+  "arena": { "shape": "polygon", "points": [[90,170],[300,65],[760,70],[930,260],[910,760],[700,925],[220,900],[55,650]] },
+  "token": { "shape": "circle", "size": 50 },
+  "start": { "mode": "manual", "x": 190, "y": 720 },
+  "mainTarget": { "mode": "manual", "x": 760, "y": 220, "size": 56 },
+  "generation": { "obstacleCount": 7, "allowedShapes": ["rect", "circle", "diamond"], "minSize": 82, "maxSize": 150, "minimumGap": 78, "pathGrid": 20 },
+  "manualObstacles": [],
+  "movingObstacles": [],
+  "trackingObstacles": [
+    { "id": "converge-a", "shape": "circle", "x": 300, "y": 350, "width": 58, "height": 58, "zone": { "x": 100, "y": 140, "width": 500, "height": 520 }, "maxSpeed": 105, "acceleration": 150 },
+    { "id": "converge-b", "shape": "diamond", "x": 700, "y": 350, "width": 60, "height": 60, "zone": { "x": 400, "y": 140, "width": 480, "height": 520 }, "maxSpeed": 105, "acceleration": 150 },
+    { "id": "converge-c", "shape": "rect", "x": 520, "y": 700, "width": 66, "height": 44, "zone": { "x": 250, "y": 420, "width": 520, "height": 450 }, "maxSpeed": 100, "acceleration": 142 }
+  ],
+  "coins": [
+    { "id": "coin-a", "x": 280, "y": 700, "size": 30, "value": 2 },
+    { "id": "coin-b", "x": 520, "y": 480, "size": 30, "value": 2 },
+    { "id": "coin-c", "x": 740, "y": 280, "size": 30, "value": 2 }
+  ],
+  "rewards": { "completionCoins": 6, "bonusCoinsPerTarget": 3 },
+  "scoring": { "baseMaximum": 12800, "parTimeMs": 26500, "parDistance": 2450, "timeWeight": 0.5, "distanceWeight": 0.5, "collisionPenaltyRate": 0.2, "maximumCollisions": 3 },
+  "bonuses": { "maximumTargets": 3, "rewardPerTarget": 1400, "offerChanceMode": "currentScorePercent", "failurePenaltyRate": 0.2, "targets": [{ "id": "relay-a", "x": 760, "y": 780, "size": 42 }, { "id": "relay-b", "x": 500, "y": 150, "size": 40 }, { "id": "relay-c", "x": 220, "y": 280, "size": 38 }] }
+}

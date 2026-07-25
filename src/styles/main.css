@@ -221,6 +221,13 @@ button:disabled {
   font-family: var(--mono);
 }
 
+.total-score small {
+  color: #ffd65a;
+  font-family: var(--mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.06em;
+}
+
 .total-score span {
   color: #728da3;
   font-size: 0.62rem;
@@ -589,6 +596,101 @@ button:disabled {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 14px;
+}
+
+.power-lab-summary {
+  display: inline-grid;
+  gap: 4px;
+  min-width: 250px;
+  margin-bottom: 24px;
+  padding: 16px 20px;
+  border: 1px solid rgba(255, 214, 90, 0.3);
+  background: rgba(255, 214, 90, 0.05);
+  font-family: var(--mono);
+}
+
+.power-lab-summary span,
+.power-lab-summary small {
+  color: #7f98a8;
+  font-size: 0.58rem;
+}
+
+.power-lab-summary strong {
+  color: #ffd65a;
+  font-size: 1.25rem;
+}
+
+.power-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.power-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid rgba(113, 185, 211, 0.14);
+  background: rgba(8, 19, 33, 0.78);
+  opacity: 0.7;
+}
+
+.power-card.is-unlocked {
+  border-color: color-mix(in srgb, var(--power-color, #70f6ff) 36%, transparent);
+  opacity: 1;
+}
+
+.power-card__key {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border: 1px solid var(--power-color);
+  color: var(--power-color);
+  font-family: var(--mono);
+  font-size: 1.15rem;
+  box-shadow: 0 0 18px color-mix(in srgb, var(--power-color) 15%, transparent);
+}
+
+.power-card h2 {
+  margin: 4px 0 8px;
+  font-size: 1.1rem;
+}
+
+.power-card p:not(.eyebrow) {
+  color: #8ba4b4;
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+.power-card dl {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 0;
+  font-family: var(--mono);
+}
+
+.power-card dl div {
+  display: grid;
+  gap: 4px;
+}
+
+.power-card dt {
+  color: #637d8f;
+  font-size: 0.5rem;
+  text-transform: uppercase;
+}
+
+.power-card dd {
+  margin: 0;
+  color: #d7e9f1;
+  font-size: 0.65rem;
+}
+
+.power-card .secondary-button {
+  grid-column: 1 / -1;
 }
 
 .level-card {
@@ -1218,6 +1320,45 @@ input[type='range'] {
   font-family: var(--mono);
 }
 
+.power-tray {
+  display: grid;
+  gap: 5px;
+}
+
+.power-slot {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  gap: 7px;
+  align-items: center;
+  padding: 6px 8px;
+  border: 1px solid rgba(113, 185, 211, 0.14);
+  color: #7892a2;
+  background: rgba(5, 13, 24, 0.75);
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 0.5rem;
+  text-align: left;
+}
+
+.power-slot kbd {
+  display: grid;
+  height: 22px;
+  place-items: center;
+  border: 1px solid var(--power-color);
+  color: var(--power-color);
+  background: transparent;
+}
+
+.power-slot strong {
+  color: #d5e8ef;
+}
+
+.power-slot.is-active {
+  border-color: var(--power-color);
+  color: var(--power-color);
+  box-shadow: inset 0 0 16px color-mix(in srgb, var(--power-color) 11%, transparent);
+}
+
 .debug-panel__heading {
   display: flex;
   justify-content: space-between;
@@ -1367,6 +1508,25 @@ input[type='range'] {
   vector-effect: non-scaling-stroke;
 }
 
+.debug-tracking-zone {
+  fill: rgba(255, 70, 100, 0.025);
+  stroke: rgba(255, 99, 130, 0.7);
+  stroke-dasharray: 18 9 3 9;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.power-route-scan {
+  fill: none;
+  stroke: #ff78e2;
+  stroke-dasharray: 8 7;
+  stroke-linecap: round;
+  stroke-width: 5;
+  filter: url('#soft-glow');
+  pointer-events: none;
+  vector-effect: non-scaling-stroke;
+}
+
 .debug-center {
   fill: none;
   stroke: #ffffff;
@@ -1441,6 +1601,49 @@ input[type='range'] {
   stroke: #ffad37;
   stroke-width: 3;
   vector-effect: non-scaling-stroke;
+}
+
+.obstacle--tracking > :first-child {
+  fill: rgba(255, 70, 100, 0.2);
+  stroke: #ff4664;
+  stroke-width: 3;
+  vector-effect: non-scaling-stroke;
+}
+
+.tracking-eye {
+  fill: #ffdfeb;
+  stroke: #ff4664;
+  stroke-width: 3;
+  vector-effect: non-scaling-stroke;
+}
+
+.course-coin > :first-child {
+  fill: rgba(255, 214, 90, 0.18);
+  stroke: #ffd65a;
+  stroke-width: 3;
+  vector-effect: non-scaling-stroke;
+}
+
+.course-coin .coin-core {
+  fill: #fff2a6;
+  stroke: none;
+}
+
+.power-aura {
+  fill: rgba(112, 246, 255, 0.05);
+  pointer-events: none;
+  stroke-width: 4;
+  vector-effect: non-scaling-stroke;
+}
+
+.power-aura--obstacle {
+  stroke: #70f6ff;
+  stroke-dasharray: 8 5;
+}
+
+.power-aura--full {
+  stroke: #a98bff;
+  stroke-dasharray: 3 4;
 }
 
 .obstacle--moving > * {

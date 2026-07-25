@@ -73,11 +73,29 @@ export function createAudioManager(themeAudio, initialSettings) {
     const baseFrequency = themeAudio.effects[name] ?? 440
     const oscillator = audioContext.createOscillator()
     const gain = audioContext.createGain()
-    const duration = name === 'levelComplete' ? 0.45 : 0.16
-    oscillator.type = name === 'collision' || name === 'attemptFailed' ? 'sawtooth' : 'sine'
+    const powerSound = name.startsWith('power')
+    const duration = name === 'levelComplete' ? 0.45 : powerSound ? 0.28 : 0.16
+    const powerWaveforms = {
+      powerObstacleShield: 'triangle',
+      powerFullShield: 'sine',
+      powerSlowField: 'sawtooth',
+      powerCoinMagnet: 'square',
+      powerRouteScan: 'triangle',
+    }
+    oscillator.type =
+      powerWaveforms[name] ??
+      (name === 'collision' || name === 'attemptFailed' ? 'sawtooth' : 'sine')
     oscillator.frequency.setValueAtTime(baseFrequency, audioContext.currentTime)
+    const targetMultiplier =
+      name === 'powerSlowField'
+        ? 0.5
+        : name === 'powerCoinMagnet'
+          ? 1.8
+          : name === 'collision'
+            ? 0.45
+            : 1.35
     oscillator.frequency.exponentialRampToValueAtTime(
-      Math.max(45, baseFrequency * (name === 'collision' ? 0.45 : 1.35)),
+      Math.max(45, baseFrequency * targetMultiplier),
       audioContext.currentTime + duration,
     )
     gain.gain.setValueAtTime(0.0001, audioContext.currentTime)

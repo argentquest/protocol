@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "level-21",
+  "number": 21,
+  "name": "Split Decision",
+  "seed": "path-protocol-split-decision-v1",
+  "difficulty": 9,
+  "briefing": "Separate pursuit sectors force a commitment between two lanes.",
+  "arena": { "shape": "rect", "margin": 32, "cornerRadius": 40 },
+  "token": { "shape": "rect", "size": 36 },
+  "start": { "mode": "manual", "x": 120, "y": 860 },
+  "mainTarget": { "mode": "manual", "x": 870, "y": 130, "size": 50 },
+  "generation": { "obstacleCount": 8, "allowedShapes": ["rect", "diamond"], "minSize": 72, "maxSize": 140, "minimumGap": 65, "pathGrid": 18 },
+  "manualObstacles": [],
+  "movingObstacles": [
+    { "id": "split-gate", "shape": "rect", "x": 500, "y": 500, "width": 170, "height": 34, "axis": "x", "amplitude": 190, "periodMs": 4600, "phase": 0.3 }
+  ],
+  "trackingObstacles": [
+    { "id": "split-left", "shape": "diamond", "x": 300, "y": 420, "width": 54, "height": 54, "zone": { "x": 90, "y": 170, "width": 430, "height": 520 }, "maxSpeed": 102, "acceleration": 145 },
+    { "id": "split-right", "shape": "diamond", "x": 700, "y": 580, "width": 54, "height": 54, "zone": { "x": 480, "y": 300, "width": 430, "height": 520 }, "maxSpeed": 102, "acceleration": 145 }
+  ],
+  "coins": [
+    { "id": "coin-a", "x": 250, "y": 780, "size": 27, "value": 1 },
+    { "id": "coin-b", "x": 500, "y": 300, "size": 27, "value": 2 },
+    { "id": "coin-c", "x": 760, "y": 230, "size": 27, "value": 1 }
+  ],
+  "rewards": { "completionCoins": 4, "bonusCoinsPerTarget": 2 },
+  "scoring": { "baseMaximum": 8500, "parTimeMs": 21000, "parDistance": 1980, "timeWeight": 0.5, "distanceWeight": 0.5, "collisionPenaltyRate": 0.2, "maximumCollisions": 3 },
+  "bonuses": { "maximumTargets": 2, "rewardPerTarget": 1050, "offerChanceMode": "currentScorePercent", "failurePenaltyRate": 0.2, "targets": [{ "id": "relay-a", "x": 840, "y": 800, "size": 40 }, { "id": "relay-b", "x": 170, "y": 180, "size": 38 }] }
+}

@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { activeTheme, levels as levelConfigs } from '../config/loadConfig.js'
+import { activeTheme, levels as levelConfigs, powerups } from '../config/loadConfig.js'
 import GameView from '../game/GameView.jsx'
 import { createAudioManager } from '../game/audio/audioManager.js'
 import { recordPlaytestRun } from '../game/debug/playtestLog.js'
 import { generateLevel } from '../game/generation/levelGenerator.js'
 import {
   cumulativeScore,
+  collectCourseCoin,
+  consumePowerup,
   loadProgress,
+  purchasePowerup,
   recordFailedAttempt,
   recordLevelResult,
   resetProgress,
@@ -26,7 +29,16 @@ function ProtocolMark({ compact = false }) {
   )
 }
 
-function ShellHeader({ onHome, onLevels, onInstructions, onSettings, score, devMode }) {
+function ShellHeader({
+  onHome,
+  onLevels,
+  onPowers,
+  onInstructions,
+  onSettings,
+  score,
+  coins,
+  devMode,
+}) {
   return (
     <header className="shell-header">
       <button className="brand-button" type="button" onClick={onHome}>
@@ -39,6 +51,9 @@ function ShellHeader({ onHome, onLevels, onInstructions, onSettings, score, devM
         <button type="button" onClick={onLevels}>
           Protocols
         </button>
+        <button type="button" onClick={onPowers}>
+          Power lab
+        </button>
         <button type="button" onClick={onInstructions}>
           Field guide
         </button>
@@ -50,6 +65,7 @@ function ShellHeader({ onHome, onLevels, onInstructions, onSettings, score, devM
       <div className="total-score">
         <span>Total score</span>
         <strong>{score.toLocaleString()}</strong>
+        <small>{coins.toLocaleString()} coins</small>
       </div>
     </header>
   )
@@ -148,7 +164,7 @@ function HomeScreen({ progress, totalScore, onPlay, onLevels, onInstructions, de
         <div className="hero-stat hero-stat--score">
           <span>Current record</span>
           <strong>{totalScore.toLocaleString()}</strong>
-          <small>{completedCount}/10 protocols complete</small>
+          <small>{completedCount}/{levelConfigs.length} protocols complete</small>
         </div>
         <div className="hero-stat hero-stat--efficiency">
           <span>Scoring model</span>
@@ -215,6 +231,71 @@ function LevelSelect({ levels, progress, onSelect, devMode }) {
   )
 }
 
+function PowerLab({ progress, totalScore, onPurchase }) {
+  return (
+    <main className="content-screen">
+      <div className="screen-heading">
+        <p className="eyebrow">Power laboratory</p>
+        <h1>Convert coins into powers</h1>
+        <p>
+          Powers unlock through cumulative score. Each purchased charge is permanently consumed
+          when activated with its number key.
+        </p>
+      </div>
+      <div className="power-lab-summary">
+        <span>Available currency</span>
+        <strong>{progress.player.coins.toLocaleString()} coins</strong>
+        <small>{totalScore.toLocaleString()} cumulative score</small>
+      </div>
+      <section className="power-grid" aria-label="Available power-ups">
+        {powerups.map((powerup) => {
+          const unlocked = totalScore >= powerup.unlockScore
+          const owned = Number(progress.player.inventory[powerup.id]) || 0
+          const affordable = progress.player.coins >= powerup.coinCost
+          return (
+            <article
+              className={`power-card ${unlocked ? 'is-unlocked' : ''}`}
+              key={powerup.id}
+              style={{ '--power-color': powerup.color }}
+            >
+              <div className="power-card__key">
+                {powerup.key}
+              </div>
+              <div>
+                <p className="eyebrow">{unlocked ? 'Power online' : 'Power encrypted'}</p>
+                <h2>{powerup.name}</h2>
+                <p>{powerup.description}</p>
+              </div>
+              <dl>
+                <div>
+                  <dt>Owned</dt>
+                  <dd>{owned}</dd>
+                </div>
+                <div>
+                  <dt>Cost</dt>
+                  <dd>{powerup.coinCost} coins</dd>
+                </div>
+                <div>
+                  <dt>Unlock</dt>
+                  <dd>{powerup.unlockScore.toLocaleString()} score</dd>
+                </div>
+              </dl>
+              <button
+                className="secondary-button"
+                type="button"
+                disabled={!unlocked || !affordable}
+                onClick={() => onPurchase(powerup)}
+              >
+                {!unlocked ? 'Score locked' : affordable ? 'Purchase charge' : 'Need more coins'}
+              </button>
+            </article>
+          )
+        })}
+      </section>
+    </main>
+  )
+}
+
 function Instructions() {
   return (
     <main className="content-screen guide-screen">
@@ -240,13 +321,25 @@ function Instructions() {
           <span className="guide-index">03</span>
           <div className="guide-icon guide-icon--target"><i /></div>
           <h2>Touch the target</h2>
-          <p>Any token contact activates the target. Release to bank, or continue if a magenta bonus relay appears.</p>
+          <p>Any token contact activates it. A relay popup lets you bank or begin a new bonus drag from that checkpoint.</p>
         </article>
         <article>
           <span className="guide-index">04</span>
           <div className="guide-icon guide-icon--score"><i /></div>
           <h2>Optimize the vector</h2>
           <p>Half your score comes from time and half from travel efficiency. The direct line is your benchmark.</p>
+        </article>
+        <article>
+          <span className="guide-index">05</span>
+          <div className="guide-icon guide-icon--route"><i /></div>
+          <h2>Break pursuit</h2>
+          <p>Red tracking hazards wake after your first press, accelerate gradually, and steer within their marked sector.</p>
+        </article>
+        <article>
+          <span className="guide-index">06</span>
+          <div className="guide-icon guide-icon--score"><i /></div>
+          <h2>Collect and power up</h2>
+          <p>Touch one-time coins, purchase charges in the Power Lab, and activate them anytime with number keys 1–5.</p>
         </article>
       </section>
       <div className="guide-callout">
@@ -397,11 +490,15 @@ function Results({
         <div>
           <span>Bonus relays</span>
           <strong>{result.earnedBonuses}</strong>
-          <small>Total score {cumulative.toLocaleString()}</small>
+          <small>
+            {result.coinsEarned
+              ? `+${result.coinsEarned} reward coins`
+              : `Total score ${cumulative.toLocaleString()}`}
+          </small>
         </div>
       </div>
       <div className="results-actions">
-        {level.number < 10 && (
+        {level.number < levelConfigs.length && (
           <button className="primary-button" type="button" onClick={onNext}>
             <span>Next protocol</span>
             <b aria-hidden="true">→</b>
@@ -427,11 +524,13 @@ export default function App() {
   const [screen, setScreen] = useState('home')
   const [selectedLevelId, setSelectedLevelId] = useState('level-01')
   const [lastResult, setLastResult] = useState(null)
-  const generatedLevels = useMemo(() => levelConfigs.map(generateLevel), [])
-  const currentLevel =
-    generatedLevels.find((level) => level.id === selectedLevelId) ?? generatedLevels[0]
+  const selectedConfig =
+    levelConfigs.find((level) => level.id === selectedLevelId) ?? levelConfigs[0]
+  const currentLevel = useMemo(() => generateLevel(selectedConfig), [selectedConfig])
   const totalScore = cumulativeScore(progress)
   const audioRef = useRef(null)
+  const progressRef = useRef(progress)
+  progressRef.current = progress
 
   if (!audioRef.current) {
     audioRef.current = createAudioManager(activeTheme.audio, progress.settings)
@@ -457,7 +556,7 @@ export default function App() {
   }
 
   const continuePlay = () => {
-    const nextNumber = Math.min(progress.player.highestUnlockedLevel, 10)
+    const nextNumber = Math.min(progress.player.highestUnlockedLevel, levelConfigs.length)
     playLevel(`level-${String(nextNumber).padStart(2, '0')}`)
   }
 
@@ -468,10 +567,16 @@ export default function App() {
       setScreen('results')
       return
     }
-    const recorded = recordLevelResult(progress, currentLevel, result)
+    const coinsBefore = progressRef.current.player.coins
+    const recorded = recordLevelResult(progressRef.current, currentLevel, result)
+    const recordedResult = {
+      ...result,
+      coinsEarned: recorded.progress.player.coins - coinsBefore,
+    }
+    progressRef.current = recorded.progress
     saveProgress(recorded.progress)
     setProgress(recorded.progress)
-    setLastResult({ result, improved: recorded.improved, level: currentLevel })
+    setLastResult({ result: recordedResult, improved: recorded.improved, level: currentLevel })
     setScreen('results')
   }
 
@@ -491,6 +596,35 @@ export default function App() {
     audioRef.current.updateSettings(settings)
   }
 
+  const handlePurchasePowerup = (powerup) => {
+    const purchased = purchasePowerup(progressRef.current, powerup)
+    if (!purchased.purchased) return
+    progressRef.current = purchased.progress
+    setProgress(purchased.progress)
+    saveProgress(purchased.progress)
+    audioRef.current.play(powerup.sound)
+  }
+
+  const handleUsePowerup = (powerupId) => {
+    if (devMode) return true
+    const consumed = consumePowerup(progressRef.current, powerupId)
+    if (!consumed.consumed) return false
+    progressRef.current = consumed.progress
+    setProgress(consumed.progress)
+    saveProgress(consumed.progress)
+    return true
+  }
+
+  const handleCoinCollected = (coin) => {
+    if (devMode) return true
+    const collection = collectCourseCoin(progressRef.current, currentLevel.id, coin)
+    if (!collection.collected) return false
+    progressRef.current = collection.progress
+    setProgress(collection.progress)
+    saveProgress(collection.progress)
+    return true
+  }
+
   const handleReset = () => {
     if (!window.confirm('Reset every local score, unlock, and setting? This cannot be undone.')) return
     const initial = resetProgress()
@@ -500,7 +634,7 @@ export default function App() {
   }
 
   const nextLevel = () => {
-    const nextNumber = Math.min(10, currentLevel.number + 1)
+    const nextNumber = Math.min(levelConfigs.length, currentLevel.number + 1)
     playLevel(`level-${String(nextNumber).padStart(2, '0')}`)
   }
 
@@ -528,8 +662,10 @@ export default function App() {
       {showShell && (
         <ShellHeader
           score={totalScore}
+          coins={progress.player.coins}
           onHome={() => navigate('home')}
           onLevels={() => navigate('levels')}
+          onPowers={() => navigate('powers')}
           onInstructions={() => navigate('instructions')}
           onSettings={() => navigate('settings')}
           devMode={devMode}
@@ -548,10 +684,17 @@ export default function App() {
       )}
       {screen === 'levels' && (
         <LevelSelect
-          levels={generatedLevels}
+          levels={levelConfigs}
           progress={progress}
           onSelect={playLevel}
           devMode={devMode}
+        />
+      )}
+      {screen === 'powers' && (
+        <PowerLab
+          progress={progress}
+          totalScore={totalScore}
+          onPurchase={handlePurchasePowerup}
         />
       )}
       {screen === 'instructions' && <Instructions />}
@@ -575,6 +718,12 @@ export default function App() {
           devMode={devMode}
           onPreviousLevel={previousLevel}
           onNextLevel={nextLevel}
+          totalLevels={levelConfigs.length}
+          powerups={powerups}
+          inventory={progress.player.inventory}
+          collectedCoins={progress.player.collectedCoins}
+          onUsePowerup={handleUsePowerup}
+          onCoinCollected={handleCoinCollected}
         />
       )}
       {screen === 'results' && lastResult && (

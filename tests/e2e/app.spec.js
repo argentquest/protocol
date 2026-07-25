@@ -74,7 +74,7 @@ test('opens any level with route diagnostics in developer playtest mode', async 
   await expect(page.getByText(/dev playtest/i)).toBeVisible()
   await page.getByRole('button', { name: /select level/i }).click()
 
-  const finalLevel = page.getByRole('button', { name: /10.*final protocol/i })
+  const finalLevel = page.getByRole('button', { name: /30.*apex protocol/i })
   await expect(finalLevel).toBeEnabled()
   await finalLevel.click()
 
@@ -82,7 +82,7 @@ test('opens any level with route diagnostics in developer playtest mode', async 
   await expect(page.locator('.debug-route')).toBeVisible()
   await expect(page.getByRole('button', { name: /next playtest level/i })).toBeDisabled()
   await page.getByRole('button', { name: /previous playtest level/i }).click()
-  await expect(page.getByRole('application', { name: /containment obstacle course/i })).toBeVisible()
+  await expect(page.getByRole('application', { name: /last safe line obstacle course/i })).toBeVisible()
 })
 
 test('keeps moving obstacles animated while the held token is stationary', async ({ page }) => {
@@ -154,4 +154,58 @@ test('restarts a pursued bonus drag from the reached target while time continues
   await page.mouse.down()
   await page.mouse.up()
   await expect(page.getByRole('heading', { name: /playtest run captured/i })).toBeVisible()
+})
+
+test('starts gradual tracking and activates numbered powers after play begins', async ({
+  page,
+}) => {
+  await page.goto('/?dev=1')
+  await page.getByRole('button', { name: /select level/i }).click()
+  await page.getByRole('button', { name: /11.*pursuit vector/i }).click()
+
+  const tracker = page.locator('.obstacle--tracking').first()
+  const restingTransform = await tracker.getAttribute('transform')
+  await page.waitForTimeout(300)
+  await expect(tracker).toHaveAttribute('transform', restingTransform)
+
+  const token = await page.evaluate(() => {
+    const matrix = document.querySelector('.token').getScreenCTM()
+    return { x: matrix.e, y: matrix.f }
+  })
+  await page.mouse.move(token.x, token.y)
+  await page.mouse.down()
+  await page.keyboard.press('5')
+  await expect(page.locator('.power-route-scan')).toBeVisible()
+  await page.waitForTimeout(350)
+  expect(await tracker.getAttribute('transform')).not.toBe(restingTransform)
+  await page.mouse.up()
+})
+
+test('applies obstacle-only and full-shield boundary rules', async ({ page }) => {
+  await page.goto('/?dev=1')
+  await page.getByRole('button', { name: /begin calibration/i }).click()
+  const locate = async () => {
+    const token = await page.evaluate(() => {
+      const matrix = document.querySelector('.token').getScreenCTM()
+      return { x: matrix.e, y: matrix.f }
+    })
+    return { token, arena: await page.locator('.game-arena').boundingBox() }
+  }
+
+  let positions = await locate()
+  await page.mouse.move(positions.token.x, positions.token.y)
+  await page.mouse.down()
+  await page.keyboard.press('1')
+  await page.mouse.move(positions.arena.x - 35, positions.token.y, { steps: 20 })
+  await expect(page.locator('.collision-pips .is-hit')).toHaveCount(1)
+  await page.keyboard.press('r')
+  await page.mouse.up()
+
+  positions = await locate()
+  await page.mouse.move(positions.token.x, positions.token.y)
+  await page.mouse.down()
+  await page.keyboard.press('2')
+  await page.mouse.move(positions.arena.x - 35, positions.token.y, { steps: 20 })
+  await expect(page.locator('.collision-pips .is-hit')).toHaveCount(0)
+  await page.mouse.up()
 })

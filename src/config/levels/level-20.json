@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "level-20",
+  "number": 20,
+  "name": "Hunter's Loop",
+  "seed": "path-protocol-hunters-loop-v1",
+  "difficulty": 9,
+  "briefing": "Three steering hunters overlap their sectors around the central loop.",
+  "arena": { "shape": "rect", "margin": 34, "cornerRadius": 70 },
+  "token": { "shape": "diamond", "size": 50 },
+  "start": { "mode": "manual", "x": 130, "y": 840 },
+  "mainTarget": { "mode": "manual", "x": 860, "y": 150, "size": 56 },
+  "generation": { "obstacleCount": 7, "allowedShapes": ["rect", "circle", "diamond"], "minSize": 78, "maxSize": 145, "minimumGap": 72, "pathGrid": 20 },
+  "manualObstacles": [],
+  "movingObstacles": [],
+  "trackingObstacles": [
+    { "id": "loop-a", "shape": "circle", "x": 300, "y": 350, "width": 54, "height": 54, "zone": { "x": 100, "y": 140, "width": 430, "height": 470 }, "maxSpeed": 96, "acceleration": 136 },
+    { "id": "loop-b", "shape": "circle", "x": 690, "y": 350, "width": 54, "height": 54, "zone": { "x": 470, "y": 140, "width": 430, "height": 470 }, "maxSpeed": 96, "acceleration": 136 },
+    { "id": "loop-c", "shape": "diamond", "x": 500, "y": 690, "width": 58, "height": 58, "zone": { "x": 270, "y": 430, "width": 460, "height": 450 }, "maxSpeed": 90, "acceleration": 128 }
+  ],
+  "coins": [
+    { "id": "coin-a", "x": 260, "y": 760, "size": 30, "value": 1 },
+    { "id": "coin-b", "x": 500, "y": 500, "size": 30, "value": 2 },
+    { "id": "coin-c", "x": 760, "y": 260, "size": 30, "value": 1 }
+  ],
+  "rewards": { "completionCoins": 4, "bonusCoinsPerTarget": 2 },
+  "scoring": { "baseMaximum": 8000, "parTimeMs": 20500, "parDistance": 1950, "timeWeight": 0.5, "distanceWeight": 0.5, "collisionPenaltyRate": 0.2, "maximumCollisions": 3 },
+  "bonuses": { "maximumTargets": 2, "rewardPerTarget": 1000, "offerChanceMode": "currentScorePercent", "failurePenaltyRate": 0.2, "targets": [{ "id": "relay-a", "x": 830, "y": 790, "size": 44 }, { "id": "relay-b", "x": 170, "y": 220, "size": 42 }] }
+}

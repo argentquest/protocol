@@ -12,7 +12,7 @@ The game rewards:
 - Judiciously pursuing optional bonus targets.
 - Improving previous scores on replayed levels.
 
-This document is the source of truth for the initial ten-level version. Gameplay values belong in configuration files so that levels and themes can be tuned without rewriting the game engine.
+This document is the source of truth for the 30-level campaign. Gameplay values belong in configuration files so that levels, powers, rewards, and themes can be tuned without rewriting the game engine.
 
 ## 2. Product Scope
 
@@ -20,7 +20,7 @@ This document is the source of truth for the initial ten-level version. Gameplay
 
 The initial release will include:
 
-- Ten progressively more difficult levels.
+- Thirty progressively more difficult levels.
 - Deterministically generated courses.
 - Optional manually placed elements within generated levels.
 - Stationary obstacles in early levels.
@@ -429,7 +429,7 @@ At application startup and in automated tests:
 
 Invalid production levels should show a safe error screen rather than crashing the application.
 
-## 9. Ten-Level Progression
+## 9. Thirty-Level Progression
 
 Exact counts and values will be tuned through playtesting.
 
@@ -445,6 +445,26 @@ Exact counts and values will be tuned through playtesting.
 | 8 — Crossing Signals | Multiple moving obstacles with configured paths and timing offsets. |
 | 9 — Containment | Complex irregular arena, tight static geometry, moving hazards, and bonus-risk decisions. |
 | 10 — Final Protocol | Combines token shape, irregular boundary, static and moving obstacles, and the largest bonus chain. |
+| 11 — Pursuit Vector | Introduces a gradually steering tracker constrained to a rectangular zone. |
+| 12 — Watcher Grid | Combines one tracker with a crossing scanner. |
+| 13 — Narrow Signal | Uses a compact rectangular token and guarded lane. |
+| 14 — Twin Hunters | Introduces overlapping tracking sectors. |
+| 15 — Prism Run | Combines a diamond token, irregular arena, tracker, and moving gate. |
+| 16 — Lockstep | Uses a broad token against coordinated trackers. |
+| 17 — Crosswind | Mixes two moving axes with active pursuit. |
+| 18 — Sentinel Square | Makes square tracking zones central to route choice. |
+| 19 — Edge Pressure | Uses a large token near an irregular boundary. |
+| 20 — Hunter's Loop | Overlaps three steering sectors. |
+| 21 — Split Decision | Separates pursuit into competing route lanes. |
+| 22 — Compression Field | Combines a broad token with contracting moving lanes. |
+| 23 — Vector Swarm | Introduces four small high-acceleration trackers. |
+| 24 — Diamond Wake | Uses a large diamond token with multiple sentinels. |
+| 25 — Coin Corridor | Adds a valuable but hazardous optional currency route. |
+| 26 — Reactive Maze | Combines three tracking sectors and a three-relay chain. |
+| 27 — Pulse Chamber | Mixes fast pulsing gates with steering hazards. |
+| 28 — Convergent Threat | Converges three broad pursuit zones on the main route. |
+| 29 — Last Safe Line | Uses the smallest token, tightest grid, and fastest hunters. |
+| 30 — Apex Protocol | Combines every established hazard, economy, and relay system. |
 
 Increasing complexity raises the level's base maximum score. Difficulty is produced through configuration rather than special-case level code.
 
@@ -720,11 +740,12 @@ path-protocol/
       levels/
         level-01.json
         ...
-        level-10.json
+        level-30.json
       schemas/
         level.schema.json
         theme.schema.json
       themeConfig.json
+      powerup.json
     persistence/
       progressStore.js
       migrations.js
@@ -843,7 +864,7 @@ Although gameplay is mouse-based, menus should support keyboard navigation.
 
 ### Milestone 4 — Progression
 
-- Author all ten JSON level definitions.
+- Author all 30 JSON level definitions.
 - Add irregular arenas, token variants, ordered bonus targets, and level unlocks.
 - Add moving obstacles for later levels.
 
@@ -876,8 +897,40 @@ Although gameplay is mouse-based, menus should support keyboard navigation.
 Developer playtest mode is enabled with the `?dev=1` query parameter. It is a local browser capability and requires no server or alternate build.
 
 - All configured levels are selectable without mutating the player's unlock state.
-- Previous and next controls allow immediate movement through the ten-level sequence.
-- The SVG overlay exposes the generated valid route, static collision shapes, moving-obstacle envelopes, and authored start and target centers.
+- Previous and next controls allow immediate movement through the 30-level sequence.
+- The SVG overlay exposes the generated valid route, static collision shapes, moving-obstacle envelopes, tracking zones, and authored start and target centers.
 - A diagnostics panel reports the shared seed, generated-obstacle count, route-node count, FPS, live time factor, route factor, and total penalty.
 - Completed playtest runs use the separate `path-protocol.playtest-runs` storage key and never update normal best scores or cumulative score.
 - The overlay is diagnostic only; it does not affect input, collision checks, timing, scoring, or deterministic generation.
+
+## 23. Tracking Hazards
+
+Tracking hazards are configured separately from periodic moving obstacles.
+
+- They remain stationary until the player's first valid mouse-down starts the attempt.
+- Each tracker moves freely in two dimensions but is clamped to its configured rectangular `zone`.
+- Trackers steer toward the token using velocity, maximum speed, and acceleration. Direction changes are gradual rather than instantaneous.
+- Tracking continues while the attempt is active, including bonus decisions and checkpoint waits.
+- Slow Field scales both tracker simulation time and ordinary moving-obstacle time.
+- Trackers use the same obstacle collision penalty rules as static and periodic hazards.
+
+## 24. Coins and Consumable Powers
+
+- Course coins are collected by token contact and are permanently claimable only once per player.
+- Level-completion and bonus-relay coin rewards are also claimable only once.
+- Coins never reduce cumulative score and cannot be farmed by replaying completed content.
+- Cumulative score unlocks powers; coins purchase individual consumable charges in the Power Lab.
+- A charge is removed immediately on activation and is not restored by attempt or level restart.
+- Power keys work anytime after an attempt starts.
+
+The initial `powerup.json` catalog is:
+
+| Key | Power | Effect |
+|---|---|---|
+| 1 | Obstacle Shield | Temporarily ignores obstacle contacts but not arena boundaries. |
+| 2 | Full Shield | Temporarily ignores obstacle and arena-boundary contacts. |
+| 3 | Slow Field | Temporarily reduces moving and tracking hazard speed. |
+| 4 | Coin Magnet | Collects unclaimed course coins inside a configured radius. |
+| 5 | Route Scan | Temporarily renders a validated route to the active target. |
+
+Each entry configures its unlock score, coin price, duration, optional effect parameters, color, and unique activation sound identifier.

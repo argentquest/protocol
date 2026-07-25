@@ -15,6 +15,8 @@
     { "id": "deflector", "shape": "rect", "x": 430, "y": 430, "width": 160, "height": 62 }
   ],
   "movingObstacles": [],
+  "coins": [{ "id": "coin-a", "x": 500, "y": 500, "size": 30, "value": 1 }],
+  "rewards": { "completionCoins": 1, "bonusCoinsPerTarget": 0 },
   "scoring": { "baseMaximum": 1200, "parTimeMs": 7200, "parDistance": 980, "timeWeight": 0.5, "distanceWeight": 0.5, "collisionPenaltyRate": 0.2, "maximumCollisions": 3 },
   "bonuses": { "maximumTargets": 0, "rewardPerTarget": 0, "offerChanceMode": "currentScorePercent", "failurePenaltyRate": 0.2, "targets": [] }
 }

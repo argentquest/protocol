@@ -40,7 +40,14 @@
           "bonusOffered": 980,
           "collision": 130,
           "attemptFailed": 90,
-          "levelComplete": 620
+          "levelComplete": 620,
+          "coinCollected": 1180,
+          "powerObstacleShield": 520,
+          "powerFullShield": 610,
+          "powerSlowField": 240,
+          "powerCoinMagnet": 1320,
+          "powerRouteScan": 860,
+          "powerUnavailable": 170
         },
         "effectsDefaultVolume": 0.55
       }

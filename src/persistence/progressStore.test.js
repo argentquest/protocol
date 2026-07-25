@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import {
   STORAGE_KEY,
+  collectCourseCoin,
+  consumePowerup,
   createInitialProgress,
   cumulativeScore,
   loadProgress,
+  purchasePowerup,
   recordLevelResult,
   saveProgress,
 } from './progressStore.js'
@@ -49,5 +52,34 @@ describe('progressStore', () => {
     const storage = memoryStorage()
     storage.setItem(STORAGE_KEY, '{broken')
     expect(loadProgress(storage)).toEqual(createInitialProgress())
+  })
+
+  it('collects each configured course coin only once', () => {
+    const initial = createInitialProgress()
+    const coin = { id: 'coin-a', value: 2 }
+    const first = collectCourseCoin(initial, 'level-11', coin)
+    const replay = collectCourseCoin(first.progress, 'level-11', coin)
+
+    expect(first.collected).toBe(true)
+    expect(first.progress.player.coins).toBe(2)
+    expect(replay.collected).toBe(false)
+    expect(replay.progress.player.coins).toBe(2)
+  })
+
+  it('purchases and permanently consumes a power-up charge', () => {
+    const initial = createInitialProgress()
+    initial.player.coins = 10
+    initial.levels['level-01'] = { bestScore: 6000 }
+    const powerup = { id: 'obstacle-shield', coinCost: 4, unlockScore: 5000 }
+
+    const purchase = purchasePowerup(initial, powerup)
+    const use = consumePowerup(purchase.progress, powerup.id)
+    const secondUse = consumePowerup(use.progress, powerup.id)
+
+    expect(purchase.purchased).toBe(true)
+    expect(purchase.progress.player.coins).toBe(6)
+    expect(use.consumed).toBe(true)
+    expect(use.progress.player.inventory[powerup.id]).toBe(0)
+    expect(secondUse.consumed).toBe(false)
   })
 })

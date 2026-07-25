@@ -18,6 +18,8 @@
     { "id": "angled-core", "shape": "diamond", "x": 470, "y": 475, "size": 135 }
   ],
   "movingObstacles": [],
+  "coins": [{ "id": "coin-a", "x": 520, "y": 520, "size": 28, "value": 1 }],
+  "rewards": { "completionCoins": 1, "bonusCoinsPerTarget": 1 },
   "scoring": { "baseMaximum": 1700, "parTimeMs": 9000, "parDistance": 1120, "timeWeight": 0.5, "distanceWeight": 0.5, "collisionPenaltyRate": 0.2, "maximumCollisions": 3 },
   "bonuses": {
     "maximumTargets": 1,

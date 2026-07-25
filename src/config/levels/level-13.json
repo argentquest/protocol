@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "level-13",
+  "number": 13,
+  "name": "Narrow Signal",
+  "seed": "path-protocol-narrow-signal-v1",
+  "difficulty": 8,
+  "briefing": "A compact rectangular token slips through a guarded signal lane.",
+  "arena": { "shape": "ellipse", "margin": 42 },
+  "token": { "shape": "rect", "size": 30 },
+  "start": { "mode": "manual", "x": 170, "y": 710 },
+  "mainTarget": { "mode": "manual", "x": 820, "y": 300, "size": 48 },
+  "generation": { "obstacleCount": 8, "allowedShapes": ["rect", "circle"], "minSize": 70, "maxSize": 135, "minimumGap": 60, "pathGrid": 18 },
+  "manualObstacles": [],
+  "movingObstacles": [],
+  "trackingObstacles": [
+    { "id": "signal-guard", "shape": "rect", "x": 500, "y": 500, "width": 68, "height": 38, "zone": { "x": 250, "y": 270, "width": 500, "height": 460 }, "maxSpeed": 92, "acceleration": 135 }
+  ],
+  "coins": [
+    { "id": "coin-a", "x": 330, "y": 650, "size": 26, "value": 1 },
+    { "id": "coin-b", "x": 650, "y": 390, "size": 26, "value": 1 }
+  ],
+  "rewards": { "completionCoins": 2, "bonusCoinsPerTarget": 1 },
+  "scoring": { "baseMaximum": 4900, "parTimeMs": 15800, "parDistance": 1480, "timeWeight": 0.5, "distanceWeight": 0.5, "collisionPenaltyRate": 0.2, "maximumCollisions": 3 },
+  "bonuses": { "maximumTargets": 1, "rewardPerTarget": 700, "offerChanceMode": "currentScorePercent", "failurePenaltyRate": 0.2, "targets": [{ "id": "relay-a", "x": 400, "y": 170, "size": 40 }] }
+}

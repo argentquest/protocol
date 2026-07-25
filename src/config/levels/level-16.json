@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "level-16",
+  "number": 16,
+  "name": "Lockstep",
+  "seed": "path-protocol-lockstep-v1",
+  "difficulty": 8,
+  "briefing": "A broad token and coordinated trackers punish abrupt reversals.",
+  "arena": { "shape": "rect", "margin": 36, "cornerRadius": 36 },
+  "token": { "shape": "rect", "size": 66 },
+  "start": { "mode": "manual", "x": 140, "y": 820 },
+  "mainTarget": { "mode": "manual", "x": 850, "y": 180, "size": 58 },
+  "generation": { "obstacleCount": 6, "allowedShapes": ["rect", "circle"], "minSize": 90, "maxSize": 155, "minimumGap": 82, "pathGrid": 22 },
+  "manualObstacles": [],
+  "movingObstacles": [],
+  "trackingObstacles": [
+    { "id": "lock-a", "shape": "rect", "x": 360, "y": 390, "width": 72, "height": 44, "zone": { "x": 120, "y": 150, "width": 480, "height": 500 }, "maxSpeed": 76, "acceleration": 105 },
+    { "id": "lock-b", "shape": "rect", "x": 680, "y": 620, "width": 72, "height": 44, "zone": { "x": 400, "y": 350, "width": 480, "height": 500 }, "maxSpeed": 76, "acceleration": 105 }
+  ],
+  "coins": [
+    { "id": "coin-a", "x": 280, "y": 760, "size": 32, "value": 1 },
+    { "id": "coin-b", "x": 500, "y": 500, "size": 32, "value": 2 },
+    { "id": "coin-c", "x": 760, "y": 260, "size": 32, "value": 1 }
+  ],
+  "rewards": { "completionCoins": 3, "bonusCoinsPerTarget": 1 },
+  "scoring": { "baseMaximum": 6100, "parTimeMs": 18000, "parDistance": 1700, "timeWeight": 0.5, "distanceWeight": 0.5, "collisionPenaltyRate": 0.2, "maximumCollisions": 3 },
+  "bonuses": { "maximumTargets": 1, "rewardPerTarget": 850, "offerChanceMode": "currentScorePercent", "failurePenaltyRate": 0.2, "targets": [{ "id": "relay-a", "x": 820, "y": 790, "size": 48 }] }
+}

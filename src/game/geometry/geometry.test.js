@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  advanceTrackingObstacle,
   shapeInsideArena,
   shapesIntersect,
   sweepShape,
@@ -39,5 +40,29 @@ describe('geometry', () => {
       [{ shape: 'rect', x: 500, y: 500, width: 20, height: 200 }],
     )
     expect(result.safe).toBe(false)
+  })
+
+  it('steers tracking obstacles gradually and keeps them inside their configured zone', () => {
+    const obstacle = {
+      x: 100,
+      y: 100,
+      width: 40,
+      height: 40,
+      zone: { x: 80, y: 80, width: 200, height: 200 },
+      maxSpeed: 100,
+      acceleration: 50,
+    }
+    const first = advanceTrackingObstacle(obstacle, null, { x: 900, y: 100 }, 50)
+    expect(first.velocityX).toBeCloseTo(2.5)
+    expect(first.velocityY).toBeCloseTo(0)
+
+    let constrained = first
+    for (let index = 0; index < 300; index += 1) {
+      constrained = advanceTrackingObstacle(obstacle, constrained, { x: 900, y: 900 }, 50)
+    }
+    expect(constrained.x).toBeGreaterThanOrEqual(100)
+    expect(constrained.x).toBeLessThanOrEqual(260)
+    expect(constrained.y).toBeGreaterThanOrEqual(100)
+    expect(constrained.y).toBeLessThanOrEqual(260)
   })
 })

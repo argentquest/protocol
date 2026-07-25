@@ -15,6 +15,8 @@
   "movingObstacles": [
     { "id": "scanner-a", "shape": "rect", "x": 500, "y": 500, "width": 150, "height": 42, "axis": "x", "amplitude": 210, "periodMs": 4200, "phase": 0 }
   ],
+  "coins": [{ "id": "coin-a", "x": 320, "y": 680, "size": 28, "value": 1 }, { "id": "coin-b", "x": 690, "y": 320, "size": 28, "value": 1 }],
+  "rewards": { "completionCoins": 2, "bonusCoinsPerTarget": 1 },
   "scoring": { "baseMaximum": 2700, "parTimeMs": 12000, "parDistance": 1360, "timeWeight": 0.5, "distanceWeight": 0.5, "collisionPenaltyRate": 0.2, "maximumCollisions": 3 },
   "bonuses": {
     "maximumTargets": 2,

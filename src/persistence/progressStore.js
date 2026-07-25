@@ -1,11 +1,17 @@
 const STORAGE_KEY = 'path-protocol.progress'
 const SCHEMA_VERSION = 1
+const MAX_LEVEL = 30
 
 export function createInitialProgress() {
   return {
     schemaVersion: SCHEMA_VERSION,
     player: {
       highestUnlockedLevel: 1,
+      coins: 0,
+      inventory: {},
+      collectedCoins: {},
+      claimedCompletionRewards: {},
+      claimedBonusRewards: {},
     },
     levels: {},
     settings: {
@@ -29,8 +35,27 @@ function sanitizeProgress(value) {
     player: {
       highestUnlockedLevel: Math.max(
         1,
-        Math.min(10, Number(value.player?.highestUnlockedLevel) || 1),
+        Math.min(MAX_LEVEL, Number(value.player?.highestUnlockedLevel) || 1),
       ),
+      coins: Math.max(0, Number(value.player?.coins) || 0),
+      inventory:
+        value.player?.inventory && typeof value.player.inventory === 'object'
+          ? value.player.inventory
+          : {},
+      collectedCoins:
+        value.player?.collectedCoins && typeof value.player.collectedCoins === 'object'
+          ? value.player.collectedCoins
+          : {},
+      claimedCompletionRewards:
+        value.player?.claimedCompletionRewards &&
+        typeof value.player.claimedCompletionRewards === 'object'
+          ? value.player.claimedCompletionRewards
+          : {},
+      claimedBonusRewards:
+        value.player?.claimedBonusRewards &&
+        typeof value.player.claimedBonusRewards === 'object'
+          ? value.player.claimedBonusRewards
+          : {},
     },
     levels: value.levels && typeof value.levels === 'object' ? value.levels : {},
     settings: {
@@ -75,15 +100,35 @@ export function recordLevelResult(progress, level, result) {
         : Math.min(previous.bestDistance, result.actualDistance),
     attempts: previous.attempts + 1,
   }
+  const completionAlreadyClaimed = Boolean(
+    progress.player.claimedCompletionRewards[level.id],
+  )
+  const completionCoins = completionAlreadyClaimed
+    ? 0
+    : Number(level.rewards?.completionCoins) || 0
+  const claimedBonusRewards = { ...progress.player.claimedBonusRewards }
+  let bonusCoins = 0
+  for (const target of (level.bonusTargets ?? []).slice(0, result.earnedBonuses ?? 0)) {
+    const rewardKey = `${level.id}:${target.id}`
+    if (claimedBonusRewards[rewardKey]) continue
+    claimedBonusRewards[rewardKey] = true
+    bonusCoins += Number(level.rewards?.bonusCoinsPerTarget) || 0
+  }
 
   return {
     progress: {
       ...progress,
       player: {
+        ...progress.player,
         highestUnlockedLevel: Math.max(
           progress.player.highestUnlockedLevel,
-          Math.min(10, level.number + 1),
+          Math.min(MAX_LEVEL, level.number + 1),
         ),
+        coins: progress.player.coins + completionCoins + bonusCoins,
+        claimedCompletionRewards: completionAlreadyClaimed
+          ? progress.player.claimedCompletionRewards
+          : { ...progress.player.claimedCompletionRewards, [level.id]: true },
+        claimedBonusRewards,
       },
       levels: {
         ...progress.levels,
@@ -91,6 +136,66 @@ export function recordLevelResult(progress, level, result) {
       },
     },
     improved,
+  }
+}
+
+export function collectCourseCoin(progress, levelId, coin) {
+  const collectionKey = `${levelId}:${coin.id}`
+  if (progress.player.collectedCoins[collectionKey]) {
+    return { progress, collected: false }
+  }
+  return {
+    collected: true,
+    progress: {
+      ...progress,
+      player: {
+        ...progress.player,
+        coins: progress.player.coins + (Number(coin.value) || 1),
+        collectedCoins: {
+          ...progress.player.collectedCoins,
+          [collectionKey]: true,
+        },
+      },
+    },
+  }
+}
+
+export function purchasePowerup(progress, powerup, score = cumulativeScore(progress)) {
+  const owned = Number(progress.player.inventory[powerup.id]) || 0
+  if (score < powerup.unlockScore || progress.player.coins < powerup.coinCost) {
+    return { progress, purchased: false }
+  }
+  return {
+    purchased: true,
+    progress: {
+      ...progress,
+      player: {
+        ...progress.player,
+        coins: progress.player.coins - powerup.coinCost,
+        inventory: {
+          ...progress.player.inventory,
+          [powerup.id]: owned + 1,
+        },
+      },
+    },
+  }
+}
+
+export function consumePowerup(progress, powerupId) {
+  const owned = Number(progress.player.inventory[powerupId]) || 0
+  if (owned <= 0) return { progress, consumed: false }
+  return {
+    consumed: true,
+    progress: {
+      ...progress,
+      player: {
+        ...progress.player,
+        inventory: {
+          ...progress.player.inventory,
+          [powerupId]: owned - 1,
+        },
+      },
+    },
   }
 }
 

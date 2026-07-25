@@ -197,8 +197,11 @@ export function sweepShape(from, to, shape, arena, obstacles) {
       x: from.x + (to.x - from.x) * amount,
       y: from.y + (to.y - from.y) * amount,
     }
-    if (!isSafePosition(candidate, arena, obstacles)) {
-      return { safe: false, point: candidate }
+    if (!shapeInsideArena(candidate, arena)) {
+      return { safe: false, point: candidate, collisionType: 'boundary' }
+    }
+    if (obstacles.some((obstacle) => shapesIntersect(candidate, obstacle))) {
+      return { safe: false, point: candidate, collisionType: 'obstacle' }
     }
   }
 
@@ -213,4 +216,46 @@ export function currentMovingObstacle(obstacle, elapsedMs) {
     x: obstacle.x + (obstacle.axis === 'x' ? offset : 0),
     y: obstacle.y + (obstacle.axis === 'y' ? offset : 0),
   }
+}
+
+export function advanceTrackingObstacle(obstacle, previousState, target, deltaMs) {
+  const state = {
+    x: previousState?.x ?? obstacle.x,
+    y: previousState?.y ?? obstacle.y,
+    velocityX: previousState?.velocityX ?? 0,
+    velocityY: previousState?.velocityY ?? 0,
+  }
+  const seconds = Math.min(0.05, Math.max(0, deltaMs / 1000))
+  if (seconds <= 0) return state
+
+  const dx = target.x - state.x
+  const dy = target.y - state.y
+  const magnitude = Math.hypot(dx, dy) || 1
+  const desiredX = (dx / magnitude) * obstacle.maxSpeed
+  const desiredY = (dy / magnitude) * obstacle.maxSpeed
+  const changeX = desiredX - state.velocityX
+  const changeY = desiredY - state.velocityY
+  const changeMagnitude = Math.hypot(changeX, changeY) || 1
+  const maximumChange = obstacle.acceleration * seconds
+  const steeringScale = Math.min(1, maximumChange / changeMagnitude)
+  state.velocityX += changeX * steeringScale
+  state.velocityY += changeY * steeringScale
+  state.x += state.velocityX * seconds
+  state.y += state.velocityY * seconds
+
+  const halfWidth = obstacle.width / 2
+  const halfHeight = obstacle.height / 2
+  const minimumX = obstacle.zone.x + halfWidth
+  const maximumX = obstacle.zone.x + obstacle.zone.width - halfWidth
+  const minimumY = obstacle.zone.y + halfHeight
+  const maximumY = obstacle.zone.y + obstacle.zone.height - halfHeight
+  if (state.x <= minimumX || state.x >= maximumX) {
+    state.x = clamp(state.x, minimumX, maximumX)
+    state.velocityX *= -0.35
+  }
+  if (state.y <= minimumY || state.y >= maximumY) {
+    state.y = clamp(state.y, minimumY, maximumY)
+    state.velocityY *= -0.35
+  }
+  return state
 }

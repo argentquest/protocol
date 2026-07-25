@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "level-27",
+  "number": 27,
+  "name": "Pulse Chamber",
+  "seed": "path-protocol-pulse-chamber-v1",
+  "difficulty": 10,
+  "briefing": "Pulsing barriers and accelerating sentinels share a circular chamber.",
+  "arena": { "shape": "ellipse", "margin": 28 },
+  "token": { "shape": "diamond", "size": 38 },
+  "start": { "mode": "manual", "x": 170, "y": 710 },
+  "mainTarget": { "mode": "manual", "x": 820, "y": 290, "size": 50 },
+  "generation": { "obstacleCount": 8, "allowedShapes": ["circle", "diamond"], "minSize": 70, "maxSize": 135, "minimumGap": 64, "pathGrid": 18 },
+  "manualObstacles": [],
+  "movingObstacles": [
+    { "id": "pulse-x", "shape": "rect", "x": 500, "y": 390, "width": 160, "height": 34, "axis": "x", "amplitude": 220, "periodMs": 3900, "phase": 0 },
+    { "id": "pulse-y", "shape": "rect", "x": 610, "y": 610, "width": 34, "height": 160, "axis": "y", "amplitude": 190, "periodMs": 4300, "phase": 1.4 }
+  ],
+  "trackingObstacles": [
+    { "id": "pulse-a", "shape": "circle", "x": 350, "y": 500, "width": 50, "height": 50, "zone": { "x": 170, "y": 220, "width": 500, "height": 540 }, "maxSpeed": 116, "acceleration": 172 },
+    { "id": "pulse-b", "shape": "circle", "x": 680, "y": 520, "width": 50, "height": 50, "zone": { "x": 350, "y": 220, "width": 480, "height": 540 }, "maxSpeed": 116, "acceleration": 172 }
+  ],
+  "coins": [
+    { "id": "coin-a", "x": 300, "y": 650, "size": 26, "value": 2 },
+    { "id": "coin-b", "x": 500, "y": 220, "size": 26, "value": 2 },
+    { "id": "coin-c", "x": 700, "y": 370, "size": 26, "value": 2 }
+  ],
+  "rewards": { "completionCoins": 5, "bonusCoinsPerTarget": 3 },
+  "scoring": { "baseMaximum": 12100, "parTimeMs": 25500, "parDistance": 2360, "timeWeight": 0.5, "distanceWeight": 0.5, "collisionPenaltyRate": 0.2, "maximumCollisions": 3 },
+  "bonuses": { "maximumTargets": 3, "rewardPerTarget": 1350, "offerChanceMode": "currentScorePercent", "failurePenaltyRate": 0.2, "targets": [{ "id": "relay-a", "x": 500, "y": 820, "size": 38 }, { "id": "relay-b", "x": 250, "y": 350, "size": 36 }, { "id": "relay-c", "x": 720, "y": 620, "size": 36 }] }
+}

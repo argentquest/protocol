@@ -1,8 +1,10 @@
-import { fireEvent, render, screen } from '@testing-library/react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App.jsx'
 
 describe('App', () => {
+  afterEach(cleanup)
+
   beforeEach(() => {
     window.localStorage.clear()
     window.confirm = vi.fn(() => true)
@@ -24,13 +26,23 @@ describe('App', () => {
     expect(screen.getByRole('heading', { name: /one drag/i })).toBeInTheDocument()
   })
 
+  it('opens the power lab with five numbered consumable powers', () => {
+    render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: /power lab/i }))
+
+    expect(screen.getByRole('heading', { name: /convert coins/i })).toBeInTheDocument()
+    expect(screen.getByText(/obstacle shield/i)).toBeInTheDocument()
+    expect(screen.getByText(/route scan/i)).toBeInTheDocument()
+    expect(screen.getAllByRole('article')).toHaveLength(5)
+  })
+
   it('unlocks every level and exposes diagnostics in developer playtest mode', () => {
     window.history.replaceState({}, '', '/?dev=1')
     render(<App />)
 
     expect(screen.getByText(/dev playtest/i)).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: /select level/i }))
-    const finalLevel = screen.getByRole('button', { name: /10.*final protocol/i })
+    const finalLevel = screen.getByRole('button', { name: /30.*apex protocol/i })
     expect(finalLevel).toBeEnabled()
     fireEvent.click(finalLevel)
 

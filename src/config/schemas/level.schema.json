@@ -32,6 +32,9 @@
     "generation": { "type": "object" },
     "manualObstacles": { "type": "array" },
     "movingObstacles": { "type": "array" },
+    "trackingObstacles": { "type": "array" },
+    "coins": { "type": "array" },
+    "rewards": { "type": "object" },
     "scoring": { "type": "object" },
     "bonuses": { "type": "object" }
   },

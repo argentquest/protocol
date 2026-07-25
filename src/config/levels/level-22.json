@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "level-22",
+  "number": 22,
+  "name": "Compression Field",
+  "seed": "path-protocol-compression-field-v1",
+  "difficulty": 9,
+  "briefing": "A wide token crosses contracting lanes under steady pursuit.",
+  "arena": { "shape": "ellipse", "margin": 38 },
+  "token": { "shape": "rect", "size": 70 },
+  "start": { "mode": "manual", "x": 180, "y": 700 },
+  "mainTarget": { "mode": "manual", "x": 810, "y": 290, "size": 58 },
+  "generation": { "obstacleCount": 6, "allowedShapes": ["rect", "circle"], "minSize": 85, "maxSize": 150, "minimumGap": 86, "pathGrid": 22 },
+  "manualObstacles": [],
+  "movingObstacles": [
+    { "id": "compress-a", "shape": "rect", "x": 430, "y": 400, "width": 150, "height": 40, "axis": "y", "amplitude": 140, "periodMs": 4700, "phase": 0 },
+    { "id": "compress-b", "shape": "rect", "x": 650, "y": 600, "width": 150, "height": 40, "axis": "y", "amplitude": 140, "periodMs": 4700, "phase": 3.14 }
+  ],
+  "trackingObstacles": [
+    { "id": "compress-hunter", "shape": "circle", "x": 500, "y": 520, "width": 60, "height": 60, "zone": { "x": 240, "y": 240, "width": 520, "height": 520 }, "maxSpeed": 88, "acceleration": 120 }
+  ],
+  "coins": [
+    { "id": "coin-a", "x": 300, "y": 640, "size": 34, "value": 2 },
+    { "id": "coin-b", "x": 700, "y": 360, "size": 34, "value": 2 }
+  ],
+  "rewards": { "completionCoins": 4, "bonusCoinsPerTarget": 2 },
+  "scoring": { "baseMaximum": 9000, "parTimeMs": 22000, "parDistance": 2050, "timeWeight": 0.5, "distanceWeight": 0.5, "collisionPenaltyRate": 0.2, "maximumCollisions": 3 },
+  "bonuses": { "maximumTargets": 2, "rewardPerTarget": 1100, "offerChanceMode": "currentScorePercent", "failurePenaltyRate": 0.2, "targets": [{ "id": "relay-a", "x": 520, "y": 170, "size": 46 }, { "id": "relay-b", "x": 260, "y": 420, "size": 44 }] }
+}

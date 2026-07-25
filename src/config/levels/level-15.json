@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "level-15",
+  "number": 15,
+  "name": "Prism Run",
+  "seed": "path-protocol-prism-run-v1",
+  "difficulty": 8,
+  "briefing": "A diamond token changes the clearance calculation under pursuit.",
+  "arena": { "shape": "polygon", "points": [[90,180],[380,70],[820,110],[930,390],[850,850],[470,930],[100,790],[55,430]] },
+  "token": { "shape": "diamond", "size": 56 },
+  "start": { "mode": "manual", "x": 160, "y": 730 },
+  "mainTarget": { "mode": "manual", "x": 820, "y": 210, "size": 52 },
+  "generation": { "obstacleCount": 7, "allowedShapes": ["diamond", "circle"], "minSize": 80, "maxSize": 145, "minimumGap": 74, "pathGrid": 20 },
+  "manualObstacles": [],
+  "movingObstacles": [
+    { "id": "prism-bar", "shape": "rect", "x": 560, "y": 580, "width": 150, "height": 38, "axis": "y", "amplitude": 150, "periodMs": 4800, "phase": 0.8 }
+  ],
+  "trackingObstacles": [
+    { "id": "prism-hunter", "shape": "diamond", "x": 420, "y": 400, "width": 62, "height": 62, "zone": { "x": 180, "y": 180, "width": 560, "height": 560 }, "maxSpeed": 90, "acceleration": 126 }
+  ],
+  "coins": [
+    { "id": "coin-a", "x": 280, "y": 690, "size": 28, "value": 1 },
+    { "id": "coin-b", "x": 720, "y": 330, "size": 28, "value": 2 }
+  ],
+  "rewards": { "completionCoins": 3, "bonusCoinsPerTarget": 1 },
+  "scoring": { "baseMaximum": 5700, "parTimeMs": 17000, "parDistance": 1620, "timeWeight": 0.5, "distanceWeight": 0.5, "collisionPenaltyRate": 0.2, "maximumCollisions": 3 },
+  "bonuses": { "maximumTargets": 2, "rewardPerTarget": 750, "offerChanceMode": "currentScorePercent", "failurePenaltyRate": 0.2, "targets": [{ "id": "relay-a", "x": 720, "y": 760, "size": 42 }, { "id": "relay-b", "x": 260, "y": 250, "size": 40 }] }
+}
