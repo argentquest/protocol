@@ -4,6 +4,7 @@ import { createArenaMask } from './ArenaMask.js'
 import { createVectorEntity } from './EntityFactory.js'
 import { createSceneLayers } from './SceneLayers.js'
 import { calculateViewport } from './Viewport.js'
+import { isSwitchActive } from '../../engine/SwitchSystem.js'
 
 function mediaCategory(cacheDefinitions, mediaId) {
   return cacheDefinitions.get(mediaId)?.category ?? 'obstacles'
@@ -61,7 +62,15 @@ function drawCollisionGuide(
   })
 }
 
+/**
+ * Owns stable Pixi display objects and applies engine state imperatively.
+ */
 export class PixiSceneRenderer {
+  /**
+   * Creates stable Pixi scene objects for one generated level.
+   *
+   * @param {object} options Renderer dependencies and debug settings.
+   */
   constructor({
     app,
     level,
@@ -97,6 +106,14 @@ export class PixiSceneRenderer {
     app.stage.addChild(this.mask, this.root)
   }
 
+  /**
+   * Adds one cached vector entity to a named scene layer.
+   *
+   * @param {string} layerName Stable scene-layer name.
+   * @param {object} item Entity in logical world units.
+   * @param {string} [mediaId=item.mediaId] Theme-neutral media ID.
+   * @returns {Promise<object>} Created Pixi display object.
+   */
   async addEntity(layerName, item, mediaId = item.mediaId) {
     const context = await this.assetCache.get(mediaId)
     const entity = createVectorEntity({
@@ -105,11 +122,17 @@ export class PixiSceneRenderer {
       category: mediaCategory(this.media, mediaId),
       GraphicsClass: this.GraphicsClass,
     })
+    entity.baseScale = { x: entity.scale.x, y: entity.scale.y }
     this.layers[layerName].addChild(entity)
     this.entities.set(item.id ?? mediaId, entity)
     return entity
   }
 
+  /**
+   * Builds all stable arena, hazard, target, coin, effect, and token objects.
+   *
+   * @returns {Promise<PixiSceneRenderer>} This initialized renderer.
+   */
   async build() {
     await this.addEntity('arena', {
       id: 'arena',
@@ -129,6 +152,12 @@ export class PixiSceneRenderer {
       ...this.level.obstacles.map((item) => this.addEntity('obstacles', item)),
       ...this.level.movingObstacles.map((item) => this.addEntity('obstacles', item)),
       ...this.level.trackingObstacles.map((item) => this.addEntity('obstacles', item)),
+      ...(this.level.dynamicObstacles ?? []).map((item) =>
+        this.addEntity('obstacles', item),
+      ),
+      ...(this.level.switches ?? []).map((item) =>
+        this.addEntity('targets', item),
+      ),
       ...this.level.coins.map((item) => this.addEntity('coins', item)),
     ])
     await this.addEntity('token', {
@@ -159,6 +188,13 @@ export class PixiSceneRenderer {
     return this
   }
 
+  /**
+   * Applies uniform centered viewport scaling.
+   *
+   * @param {number} [width] Canvas width in CSS pixels.
+   * @param {number} [height] Canvas height in CSS pixels.
+   * @returns {void}
+   */
   resize(width = this.app.renderer.width, height = this.app.renderer.height) {
     this.viewport = calculateViewport(width, height)
     this.root.position.set(this.viewport.offsetX, this.viewport.offsetY)
@@ -168,6 +204,13 @@ export class PixiSceneRenderer {
     return this.viewport
   }
 
+  /**
+   * Updates stable display transforms from current engine session state.
+   *
+   * @param {object} session Active engine session.
+   * @param {string} [phase='active-main'] State-machine phase.
+   * @returns {void}
+   */
   update(session, phase = 'active-main') {
     this.app.canvas.dataset.tokenX = String(session.token.position.x)
     this.app.canvas.dataset.tokenY = String(session.token.position.y)
@@ -190,15 +233,51 @@ export class PixiSceneRenderer {
     for (const obstacle of session.trackingObstacles) {
       this.entities.get(obstacle.id)?.position.set(obstacle.x, obstacle.y)
     }
+    for (const obstacle of session.dynamicObstacles ?? []) {
+      const entity = this.entities.get(obstacle.id)
+      if (!entity) continue
+      const configured = this.level.dynamicObstacles.find(
+        (item) => item.id === obstacle.id,
+      )
+      entity.position.set(obstacle.x, obstacle.y)
+      entity.scale.set(
+        entity.baseScale.x * (obstacle.width / configured.width),
+        entity.baseScale.y * (obstacle.height / configured.height),
+      )
+      entity.alpha =
+        obstacle.state === 'open'
+          ? 0.18
+          : obstacle.state === 'warning'
+            ? 0.55
+            : 1
+    }
     this.app.canvas.dataset.movingPositions = JSON.stringify(
       session.movingObstacles.map((item) => [item.id, item.currentX, item.currentY]),
     )
     this.app.canvas.dataset.trackingPositions = JSON.stringify(
       session.trackingObstacles.map((item) => [item.id, item.x, item.y]),
     )
+    this.app.canvas.dataset.dynamicStates = JSON.stringify(
+      (session.dynamicObstacles ?? []).map((item) => [
+        item.id,
+        item.state,
+        item.x,
+        item.y,
+        item.width,
+        item.height,
+      ]),
+    )
     for (const coin of this.level.coins) {
       const entity = this.entities.get(coin.id)
       if (entity) entity.visible = !session.collectedCoinIds.has(coin.id)
+    }
+    for (const item of this.level.switches ?? []) {
+      const entity = this.entities.get(item.id)
+      const active = isSwitchActive(
+        session.switchStates?.get(item.id),
+        session.hazardTimeMs,
+      )
+      if (entity) entity.alpha = active ? 1 : 0.55
     }
     for (let index = 0; index < this.bonusEntityIds.length; index += 1) {
       const entity = this.entities.get(this.bonusEntityIds[index])
@@ -244,6 +323,12 @@ export class PixiSceneRenderer {
     this.app.renderer.render(this.app.stage)
   }
 
+  /**
+   * Draws development-only collision shapes and tracking zones.
+   *
+   * @param {object} session Active engine session.
+   * @returns {void}
+   */
   drawDiagnostics(session) {
     const graphics = this.debugGraphics
     graphics.clear()
@@ -275,6 +360,7 @@ export class PixiSceneRenderer {
     }
   }
 
+  /** Releases scene graph references owned by this renderer. */
   destroy() {
     this.entities.clear()
     this.root.destroy({ children: true })

@@ -5,6 +5,24 @@ const directionKeys = new Set([
   'ArrowRight',
 ])
 
+/**
+ * @typedef {object} InputCallbacks
+ * @property {(mode: 'pointer'|'keyboard') => void} [onActivate] Attempt-start callback.
+ * @property {(reason: string) => void} [onRelease] Attempt-release callback.
+ * @property {() => void} [onRestart] Manual-restart callback.
+ * @property {(key: string) => void} [onPower] Power-key callback.
+ * @property {(reason: string, wasActive: boolean) => void} [onInterrupt] Focus-loss callback.
+ */
+
+/**
+ * Translates raw pointer and keyboard intent into mutable engine input state.
+ *
+ * No simulation, collision, scoring, or rendering work occurs in this layer.
+ *
+ * @param {import('../types.js').GameInputState|(() => import('../types.js').GameInputState)} inputState State or current-state accessor.
+ * @param {InputCallbacks} [callbacks] Intent callbacks.
+ * @returns {object} Input-controller operations.
+ */
 export function createInputController(inputState, callbacks = {}) {
   const getInputState =
     typeof inputState === 'function' ? inputState : () => inputState

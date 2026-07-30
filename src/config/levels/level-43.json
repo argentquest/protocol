@@ -5,7 +5,7 @@
   "name": "Fine Margin",
   "seed": "path-protocol-fine-margin-v1",
   "difficulty": 3,
-  "briefing": "Expansion chamber 43: a difficulty-3 variation with a new deterministic layout.",
+  "briefing": "An elliptical orbiter turns the center line into a prediction lesson.",
   "arena": {
     "shape": "rect",
     "margin": 38,
@@ -59,7 +59,7 @@
   "coins": [
     {
       "id": "coin-a",
-      "x": 520,
+      "x": 560,
       "y": 540,
       "size": 28,
       "value": 1,
@@ -100,5 +100,22 @@
     "deceleration": 1800,
     "keyboardSpeed": 280
   },
-  "trackingObstacles": []
+  "trackingObstacles": [],
+  "dynamicObstacles": [
+    {
+      "id": "orbiter-a",
+      "mediaId": "obstacle-orbiter",
+      "shape": "circle",
+      "x": 520,
+      "y": 500,
+      "size": 36,
+      "behavior": {
+        "type": "orbit",
+        "radiusX": 25,
+        "radiusY": 80,
+        "periodMs": 4400,
+        "phase": 0.8
+      }
+    }
+  ]
 }

@@ -36,6 +36,18 @@
             "src": "/media/default/obstacles/obstacle-moving-rect.svg?v=1"
           },
           {
+            "alias": "future-lab:obstacle-orbiter:v1",
+            "src": "/media/default/obstacles/obstacle-orbiter.svg?v=1"
+          },
+          {
+            "alias": "future-lab:obstacle-phase-gate:v1",
+            "src": "/media/default/obstacles/obstacle-phase-gate.svg?v=1"
+          },
+          {
+            "alias": "future-lab:obstacle-pulse-block:v1",
+            "src": "/media/default/obstacles/obstacle-pulse-block.svg?v=1"
+          },
+          {
             "alias": "future-lab:obstacle-static-circle:v1",
             "src": "/media/default/obstacles/obstacle-static-circle.svg?v=1"
           },
@@ -46,6 +58,10 @@
           {
             "alias": "future-lab:obstacle-static-rect:v1",
             "src": "/media/default/obstacles/obstacle-static-rect.svg?v=1"
+          },
+          {
+            "alias": "future-lab:obstacle-switch-barrier:v1",
+            "src": "/media/default/obstacles/obstacle-switch-barrier.svg?v=1"
           },
           {
             "alias": "future-lab:obstacle-tracking-circle:v1",
@@ -82,6 +98,10 @@
           {
             "alias": "future-lab:start-pad:v1",
             "src": "/media/default/targets/start-pad.svg?v=1"
+          },
+          {
+            "alias": "future-lab:switch-pad:v1",
+            "src": "/media/default/targets/switch-pad.svg?v=1"
           },
           {
             "alias": "future-lab:target-bonus:v1",
@@ -172,6 +192,33 @@
       "sourceScope": "default"
     },
     {
+      "mediaId": "obstacle-orbiter",
+      "alias": "future-lab:obstacle-orbiter:v1",
+      "src": "/media/default/obstacles/obstacle-orbiter.svg?v=1",
+      "category": "obstacles",
+      "renderMode": "vector",
+      "sizing": "contain",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "obstacle-phase-gate",
+      "alias": "future-lab:obstacle-phase-gate:v1",
+      "src": "/media/default/obstacles/obstacle-phase-gate.svg?v=1",
+      "category": "obstacles",
+      "renderMode": "vector",
+      "sizing": "stretch",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "obstacle-pulse-block",
+      "alias": "future-lab:obstacle-pulse-block:v1",
+      "src": "/media/default/obstacles/obstacle-pulse-block.svg?v=1",
+      "category": "obstacles",
+      "renderMode": "vector",
+      "sizing": "stretch",
+      "sourceScope": "default"
+    },
+    {
       "mediaId": "obstacle-static-circle",
       "alias": "future-lab:obstacle-static-circle:v1",
       "src": "/media/default/obstacles/obstacle-static-circle.svg?v=1",
@@ -193,6 +240,15 @@
       "mediaId": "obstacle-static-rect",
       "alias": "future-lab:obstacle-static-rect:v1",
       "src": "/media/default/obstacles/obstacle-static-rect.svg?v=1",
+      "category": "obstacles",
+      "renderMode": "vector",
+      "sizing": "stretch",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "obstacle-switch-barrier",
+      "alias": "future-lab:obstacle-switch-barrier:v1",
+      "src": "/media/default/obstacles/obstacle-switch-barrier.svg?v=1",
       "category": "obstacles",
       "renderMode": "vector",
       "sizing": "stretch",
@@ -274,6 +330,15 @@
       "mediaId": "start-pad",
       "alias": "future-lab:start-pad:v1",
       "src": "/media/default/targets/start-pad.svg?v=1",
+      "category": "targets",
+      "renderMode": "vector",
+      "sizing": "contain",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "switch-pad",
+      "alias": "future-lab:switch-pad:v1",
+      "src": "/media/default/targets/switch-pad.svg?v=1",
       "category": "targets",
       "renderMode": "vector",
       "sizing": "contain",

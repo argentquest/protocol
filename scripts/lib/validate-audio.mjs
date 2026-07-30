@@ -1,6 +1,14 @@
 import { readFile, stat } from 'node:fs/promises'
 import path from 'node:path'
 
+/**
+ * Validates the minimum RIFF/WAVE structure of a canonical audio master.
+ *
+ * @pure
+ * @param {Buffer} buffer WAV file bytes.
+ * @param {string} [label='WAV'] Diagnostic asset label.
+ * @returns {string[]} Validation errors.
+ */
 export function validateWavBuffer(buffer, label = 'WAV') {
   const errors = []
   if (buffer.length < 44) errors.push(`${label}: WAV file is smaller than its header`)
@@ -28,6 +36,12 @@ async function validateNonEmptyFile(filePath, label) {
   }
 }
 
+/**
+ * Validates all required WAV, WebM, MP3, and playback entries.
+ *
+ * @param {object} options Default audio-library paths and registry.
+ * @returns {Promise<string[]>} Validation errors.
+ */
 export async function validateDefaultAudioLibrary({
   audioRoot,
   registry,

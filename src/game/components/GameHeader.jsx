@@ -1,3 +1,9 @@
+/**
+ * Displays persistent level identity, scoring, and attempt actions.
+ *
+ * @param {object} props Header properties.
+ * @returns {import('react').JSX.Element} Game header.
+ */
 export default function GameHeader({
   level,
   levelBest,
@@ -10,6 +16,7 @@ export default function GameHeader({
   onPreviousLevel,
   onNextLevel,
   onToggleDebug,
+  microProtocol = null,
 }) {
   return (
     <header className="game-header">
@@ -28,7 +35,7 @@ export default function GameHeader({
           Restart
           <kbd>R</kbd>
         </button>
-        {devMode && (
+        {devMode && !microProtocol && (
           <>
             <button
               className="dev-step-button"
@@ -60,7 +67,11 @@ export default function GameHeader({
         )}
       </div>
       <div>
-        <p className="eyebrow">Protocol {String(level.number).padStart(2, '0')}</p>
+        <p className="eyebrow">
+          {microProtocol
+            ? `Micro Protocol // ${microProtocol.kind}`
+            : `Protocol ${String(level.number).padStart(2, '0')}`}
+        </p>
         <h1>{level.name}</h1>
       </div>
       <div className="game-header__scores">

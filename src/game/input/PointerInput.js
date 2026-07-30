@@ -1,3 +1,16 @@
+/**
+ * Registers lightweight pointer listeners that only update input intent.
+ *
+ * @param {object} options Pointer dependencies and callbacks.
+ * @param {HTMLElement} options.element Arena canvas.
+ * @param {(point: import('../types.js').Point) => import('../types.js').Point} options.toWorld CSS-pixel to world transform.
+ * @param {Function} options.onPress Press callback.
+ * @param {Function} options.onMove Move callback.
+ * @param {Function} options.onRelease Toggle-release callback.
+ * @param {Function} options.onInterrupt Cancellation callback.
+ * @param {() => boolean} [options.isActive] Active-attempt accessor.
+ * @returns {() => void} Listener cleanup function.
+ */
 export function attachPointerInput({
   element,
   toWorld,

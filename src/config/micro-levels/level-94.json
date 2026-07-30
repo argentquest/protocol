@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 2,
+  "id": "level-94",
+  "number": 94,
+  "name": "Switchback",
+  "seed": "micro-switchback-v1",
+  "difficulty": 7,
+  "briefing": "Touch the switch pad, then cross the barrier before its six-second window closes.",
+  "arena": {
+    "shape": "rect",
+    "mediaId": "arena-standard",
+    "margin": 40,
+    "cornerRadius": 30
+  },
+  "token": {
+    "shape": "circle",
+    "size": 36,
+    "mediaId": "token-circle"
+  },
+  "movement": {
+    "maximumSpeed": 390,
+    "acceleration": 1600,
+    "deceleration": 1900,
+    "keyboardSpeed": 300
+  },
+  "start": {
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 120,
+    "y": 500
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 880,
+    "y": 500,
+    "size": 48
+  },
+  "generation": {
+    "obstacleCount": 0,
+    "allowedShapes": ["rect"],
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    },
+    "minSize": 80,
+    "maxSize": 120,
+    "minimumGap": 50,
+    "pathGrid": 18
+  },
+  "manualObstacles": [
+    {
+      "id": "switch-deflector",
+      "mediaId": "obstacle-static-rect",
+      "shape": "rect",
+      "x": 300,
+      "y": 500,
+      "width": 120,
+      "height": 300
+    }
+  ],
+  "movingObstacles": [],
+  "trackingObstacles": [],
+  "dynamicObstacles": [
+    {
+      "id": "switch-barrier-a",
+      "mediaId": "obstacle-switch-barrier",
+      "shape": "rect",
+      "x": 590,
+      "y": 500,
+      "width": 32,
+      "height": 850,
+      "behavior": {
+        "type": "switch",
+        "switchId": "switch-a",
+        "initiallySolid": true
+      }
+    }
+  ],
+  "switches": [
+    {
+      "id": "switch-a",
+      "mediaId": "switch-pad",
+      "x": 300,
+      "y": 250,
+      "size": 52,
+      "activation": "timed",
+      "durationMs": 6000
+    }
+  ],
+  "coins": [],
+  "rewards": {
+    "completionCoins": 0,
+    "bonusCoinsPerTarget": 0
+  },
+  "scoring": {
+    "baseMaximum": 1200,
+    "parTimeMs": 13000,
+    "parDistance": 980,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 0,
+    "rewardPerTarget": 0,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.2,
+    "targets": []
+  }
+}

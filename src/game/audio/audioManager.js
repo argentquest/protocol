@@ -7,6 +7,24 @@ const defaults = {
   effectsVolume: 0.55,
 }
 
+/**
+ * @typedef {object} AudioSettings
+ * @property {boolean} musicEnabled Whether ambience is audible.
+ * @property {number} musicVolume Ambience gain from 0 to 1.
+ * @property {boolean} effectsEnabled Whether effects are audible.
+ * @property {number} effectsVolume Effects gain from 0 to 1.
+ */
+
+/**
+ * Creates the renderer-independent Howler audio service.
+ *
+ * @param {AudioSettings} [initialSettings] Initial persisted settings.
+ * @param {object} [dependencies] Injectable browser and test dependencies.
+ * @param {typeof Howl} [dependencies.HowlClass] Howler sound constructor.
+ * @param {typeof Howler} [dependencies.howler] Shared Howler context.
+ * @param {() => number} [dependencies.now] Monotonic clock in milliseconds.
+ * @returns {object} Audio preload, unlock, playback, settings, and disposal API.
+ */
 export function createAudioManager(
   initialSettings = defaults,
   { HowlClass = Howl, howler = Howler, now = () => performance.now() } = {},

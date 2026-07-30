@@ -1,5 +1,6 @@
 import { generateLevel } from '../generation/levelGenerator.js'
 import { currentMovingObstacle } from '../geometry/geometry.js'
+import { resolveDynamicObstacles } from './DynamicObstacleSystem.js'
 
 function copyPoint(point) {
   return { x: point.x, y: point.y }
@@ -16,6 +17,17 @@ function createTrackingState(obstacle) {
   }
 }
 
+/**
+ * Creates all mutable engine-owned state for one deterministic level attempt.
+ *
+ * @param {object} levelConfig Validated authored level configuration.
+ * @param {object} [options] Session options.
+ * @param {number} [options.attemptNumber=1] One-based attempt number.
+ * @param {object|null} [options.generatedLevel=null] Existing deterministic layout for restart.
+ * @param {(level: object) => object} [options.generate] Deterministic generator.
+ * @param {number} [options.tokenCollisionTolerance=0] Edge inset in logical world units.
+ * @returns {object} Mutable framework-neutral level session.
+ */
 export function createLevelSession(
   levelConfig,
   {
@@ -88,6 +100,16 @@ export function createLevelSession(
       }
     }),
     trackingObstacles: level.trackingObstacles.map(createTrackingState),
+    dynamicObstacles: resolveDynamicObstacles(
+      level.dynamicObstacles ?? [],
+      0,
+    ),
+    switchStates: new Map(
+      (level.switches ?? []).map((item) => [
+        item.id,
+        { active: false, openUntilMs: null, contacting: false },
+      ]),
+    ),
     activePowers: new Map(),
     powerInventory: new Map(),
     routeScanPath: null,

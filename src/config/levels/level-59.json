@@ -5,7 +5,7 @@
   "name": "Pursuit Vault",
   "seed": "path-protocol-pursuit-vault-v1",
   "difficulty": 9,
-  "briefing": "Expansion chamber 59: a difficulty-9 variation with a new deterministic layout.",
+  "briefing": "A remote switch opens the direct upper passage while pursuit hazards close in.",
   "arena": {
     "shape": "polygon",
     "points": [
@@ -198,5 +198,32 @@
     "deceleration": 1800,
     "keyboardSpeed": 280
   },
-  "trackingObstacles": []
+  "trackingObstacles": [],
+  "dynamicObstacles": [
+    {
+      "id": "switch-barrier-a",
+      "mediaId": "obstacle-switch-barrier",
+      "shape": "rect",
+      "x": 550,
+      "y": 300,
+      "width": 240,
+      "height": 28,
+      "behavior": {
+        "type": "switch",
+        "switchId": "switch-a",
+        "initiallySolid": true
+      }
+    }
+  ],
+  "switches": [
+    {
+      "id": "switch-a",
+      "mediaId": "switch-pad",
+      "x": 300,
+      "y": 650,
+      "size": 48,
+      "activation": "once",
+      "durationMs": 0
+    }
+  ]
 }

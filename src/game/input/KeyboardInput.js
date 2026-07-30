@@ -1,3 +1,12 @@
+/**
+ * Registers keyboard, focus, and visibility listeners for gameplay intent.
+ *
+ * @param {object} options Keyboard dependencies.
+ * @param {Window|HTMLElement} options.target Keyboard event target.
+ * @param {object} options.controller Input controller.
+ * @param {Document|null} [options.visibilityTarget=null] Visibility event source.
+ * @returns {() => void} Listener cleanup function.
+ */
 export function attachKeyboardInput({
   target,
   controller,

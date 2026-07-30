@@ -9,6 +9,14 @@ function tokenShape(session) {
   }
 }
 
+/**
+ * Selects the currently reachable target for a game phase.
+ *
+ * @pure
+ * @param {object} session Active engine session.
+ * @param {string} phase Current state-machine phase.
+ * @returns {object|null} Main or active bonus target.
+ */
 export function activeTarget(session, phase) {
   if (phase === 'active-main') return session.level.mainTarget
   if (phase === 'active-bonus') {
@@ -17,6 +25,14 @@ export function activeTarget(session, phase) {
   return null
 }
 
+/**
+ * Sweeps the token's traveled segment for contact with the active target.
+ *
+ * @pure
+ * @param {object} session Active engine session.
+ * @param {string} phase Current state-machine phase.
+ * @returns {boolean} Whether any part of the token touched the target.
+ */
 export function touchesActiveTarget(session, phase) {
   const target = activeTarget(session, phase)
   if (!target) return false
@@ -40,6 +56,14 @@ export function touchesActiveTarget(session, phase) {
   return false
 }
 
+/**
+ * Moves the token center to a reached target and records the checkpoint.
+ *
+ * @param {object} session Active engine session.
+ * @param {object} target Reached target in logical world coordinates.
+ * @param {boolean} isBonus Whether the checkpoint is an optional bonus.
+ * @returns {import('../types.js').Point} New token checkpoint.
+ */
 export function checkpointAtTarget(session, target, isBonus) {
   const checkpoint = { x: target.x, y: target.y }
   session.token.position = { ...checkpoint }
@@ -55,6 +79,13 @@ export function checkpointAtTarget(session, target, isBonus) {
   return checkpoint
 }
 
+/**
+ * Deterministically offers the next ordered bonus from achieved score quality.
+ *
+ * @param {object} session Active engine session.
+ * @param {import('../scoring/scoreCalculator.js').ScoreResult} score Current score breakdown.
+ * @returns {object|null} Offered bonus target, if selected.
+ */
 export function selectBonusOffer(session, score) {
   const bonusIndex = session.targets.earnedBonuses
   const maximum = Math.min(

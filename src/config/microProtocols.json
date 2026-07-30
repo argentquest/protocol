@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "protocols": [
+    {
+      "id": "phase-window",
+      "levelId": "level-91",
+      "name": "Phase Window",
+      "description": "Cross two synchronized gates during their open states.",
+      "rewardCoins": 3,
+      "kind": "timing"
+    },
+    {
+      "id": "orbit-lock",
+      "levelId": "level-92",
+      "name": "Orbit Lock",
+      "description": "Thread the center while two orbiters cross the direct line.",
+      "rewardCoins": 3,
+      "kind": "prediction"
+    },
+    {
+      "id": "pulse-thread",
+      "levelId": "level-93",
+      "name": "Pulse Thread",
+      "description": "Pass a corridor before its pulse blocks reach full size.",
+      "rewardCoins": 3,
+      "kind": "precision"
+    },
+    {
+      "id": "switchback",
+      "levelId": "level-94",
+      "name": "Switchback",
+      "description": "Trigger the remote pad and cross its barrier before the timer closes.",
+      "rewardCoins": 4,
+      "kind": "switching"
+    }
+  ]
+}

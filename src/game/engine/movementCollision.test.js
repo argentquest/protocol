@@ -132,6 +132,32 @@ describe('V2 movement and collision', () => {
     expect(session.collisions.count).toBe(1)
   })
 
+  it('detects a dynamic obstacle crossing the token between fixed steps', () => {
+    const previousObstacle = {
+      id: 'fast-sweeper',
+      shape: 'circle',
+      x: 50,
+      y: 20,
+      width: 8,
+      height: 8,
+    }
+    const currentObstacle = {
+      ...previousObstacle,
+      y: 80,
+    }
+    const session = createSession({ position: { x: 50, y: 50 } })
+    session.input.desiredPosition = { x: 50, y: 50 }
+
+    const result = advanceTokenWithCollisions(session, 1000 / 60, {
+      obstacles: [currentObstacle],
+      previousObstacles: [previousObstacle],
+    })
+
+    expect(result.collision).toBe(true)
+    expect(result.collisionType).toBe('obstacle')
+    expect(session.collisions.count).toBe(1)
+  })
+
   it('uses the configured inset as collision tolerance', () => {
     const obstacle = {
       shape: 'circle',

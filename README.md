@@ -1,19 +1,47 @@
 # Path Protocol
 
+[![Status: Playable](https://img.shields.io/badge/status-playable-36d7ff)](https://app.inkandquill.io/protocol/)
+[![Renderer: PixiJS WebGL](https://img.shields.io/badge/renderer-PixiJS%20WebGL-8b5cf6)](https://pixijs.com/)
+[![Tests: Vitest + Playwright](https://img.shields.io/badge/tests-Vitest%20%2B%20Playwright-22c55e)](#testing)
+
 Path Protocol is a 70-level desktop browser precision game. The player guides a
 dimensioned token through deterministic obstacle courses, avoids stationary and
 moving hazards, collects one-time coins, reaches ordered targets, and uses
 consumable powers to improve a per-level and cumulative score.
 
-## V2 rearchitecture
+Play the current release at
+[app.inkandquill.io/protocol](https://app.inkandquill.io/protocol/).
 
-Active V2 development takes place on:
+## Quickstart
 
-```text
-feature/pixijs-rearchitecture
+Requirements:
+
+- Node.js 20.19 or newer.
+- npm.
+- A current desktop browser with WebGL.
+
+Install and start the local development server:
+
+```powershell
+npm install
+npm run dev
 ```
 
-V2 is treated as a new codebase inside this repository. Its architecture uses:
+Open the URL printed by Vite, normally `http://localhost:5173`.
+
+The local server enables **Dev mode** by default so all 70 levels are available
+for playtesting. The home-screen toggle restores normal progression.
+
+Create and preview a production build:
+
+```powershell
+npm run build
+npm run preview
+```
+
+## Architecture Overview
+
+Path Protocol V2 uses:
 
 - React 19 for screens, menus, dialogs, HUD, settings, and the Power Lab.
 - PixiJS with WebGL only for the real-time arena.
@@ -24,6 +52,16 @@ V2 is treated as a new codebase inside this repository. Its architecture uses:
 - WAV audio masters with WebM preferred and MP3 fallback delivery.
 - JSON Schema-validated levels, media, themes, audio, and powers.
 - Browser-local versioned progress storage.
+
+```text
+React screens and HUD
+        │ player intent / throttled snapshots
+        ▼
+Framework-neutral fixed 60 Hz game engine
+        │ stable session transforms / logical events
+        ├──────────────► PixiJS WebGL renderer
+        └──────────────► Howler.js audio manager
+```
 
 See:
 
@@ -45,30 +83,7 @@ is built.
   `ffmpeg-static`, so normal npm builds do not depend on a machine-wide install.
 - Docker Desktop only for containerized production testing.
 
-## Current development commands
-
-Install dependencies:
-
-```powershell
-npm install
-```
-
-Start Vite:
-
-```powershell
-npm run dev
-```
-
-Open the URL printed by Vite, normally:
-
-```text
-http://localhost:5173
-```
-
-The local Vite server starts with **Dev mode** enabled so all 70 levels are
-available for playtesting. Use the **Dev mode** button on the home screen to
-switch back to normal progression. `?dev=1` and `?dev=0` remain available as
-explicit URL overrides.
+## Testing
 
 Run unit and component tests:
 
@@ -103,6 +118,35 @@ npm run test:browser-compat
 Firefox can be selected with `--project=firefox` on a runner where Playwright
 Firefox launches successfully. Safari must be verified on macOS; Playwright
 WebKit on Windows does not provide Safari's production audio stack.
+
+## Controls & Gameplay
+
+Guide the complete token through each deterministic course, avoid boundaries
+and hazards, and touch ordered targets. Speed and route efficiency improve the
+score; collisions apply penalties and the third collision restarts the level.
+
+| Input | Support | Controls |
+| --- | --- | --- |
+| Mouse or trackpad | Supported | Click the token to start, move the pointer to steer, and click again to stop. |
+| Keyboard | Supported | `Space` toggles play, arrow keys steer, number keys activate powers, and `R` restarts. |
+| Touch | Not supported | Desktop precision gameplay is the current product scope. |
+| Gamepad | Not supported | No gamepad mapping has been approved or implemented. |
+
+The token accelerates toward input rather than snapping to it. The complete
+token geometry participates in obstacle and arena collision, and the actual
+token-center trail remains visible.
+
+Dynamic obstacles add four deterministic decisions beyond static placement:
+
+- Phase gates alternate between solid, warning, and open states.
+- Orbiters travel around configured elliptical paths.
+- Pulse blocks grow and contract using authoritative collision dimensions.
+- Contact switches open barriers once, temporarily, or as toggles.
+
+After completing a campaign chamber, the results screen offers optional Micro
+Protocols. These short challenges teach one dynamic behavior, keep separate
+records, grant only one-time rewards, and never affect campaign score or
+unlocks.
 
 ## V2 configuration and media commands
 
@@ -258,18 +302,34 @@ bundle.
   course visually and update the locked fingerprint in the same change.
 - If Docker cannot start, verify Docker Desktop is running before rebuilding.
 
-## Repository map
+## Directory Map
 
 ```text
 architecturev2.md       V2 product and technical architecture
 sprintv2.md             live V2 implementation tracker
 AGENTS.md               repository instructions
 src/config/             levels, schemas, powers, and game configuration
+src/config/micro-levels optional short-challenge level configurations
 src/game/               engine, geometry, generation, audio, and rendering
 public/media/            complete default media, theme overrides, and manifests
 scripts/                build, validation, media, and test helpers
 tests/e2e/              Playwright browser journeys
 ```
+
+## Performance & Profiling
+
+- The simulation advances at a fixed 60 Hz using a clamped accumulator.
+- Rendering runs independently through `requestAnimationFrame` and PixiJS.
+- Resolved SVG sources are parsed once and reused as cached `GraphicsContext`
+  objects.
+- Static collision geometry is precomputed and Pixi display objects are reused.
+- Trail and ghost samples are bounded to prevent unbounded memory growth.
+- The development HUD exposes rolling rendered FPS and collision diagnostics.
+- The target is 60 rendered frames per second on a representative current
+  desktop browser.
+
+See [PERFORMANCE.md](PERFORMANCE.md) for profiling procedures, acceptance
+thresholds, and captured evidence.
 
 ## Project rules
 

@@ -2,6 +2,12 @@ import { access, mkdir, readdir, stat } from 'node:fs/promises'
 import path from 'node:path'
 import { spawn } from 'node:child_process'
 
+/**
+ * Tests whether a filesystem path exists.
+ *
+ * @param {string} filePath Absolute or workspace-relative path.
+ * @returns {Promise<boolean>} Whether the path is accessible.
+ */
 export async function fileExists(filePath) {
   try {
     await access(filePath)
@@ -11,6 +17,12 @@ export async function fileExists(filePath) {
   }
 }
 
+/**
+ * Builds deterministic missing-only or forced audio conversion jobs.
+ *
+ * @param {object} options Audio source and output options.
+ * @returns {Promise<object[]>} Ordered FFmpeg conversion jobs.
+ */
 export async function buildConversionPlan({
   sourceDirectory,
   outputDirectory,
@@ -35,6 +47,13 @@ export async function buildConversionPlan({
   return { jobs, missingSources }
 }
 
+/**
+ * Creates FFmpeg arguments for one WebM or MP3 delivery job.
+ *
+ * @pure
+ * @param {object} job Conversion job.
+ * @returns {string[]} Process arguments.
+ */
 export function ffmpegArguments(job) {
   const codecArguments =
     job.format === 'webm'
@@ -53,6 +72,13 @@ export function ffmpegArguments(job) {
   ]
 }
 
+/**
+ * Executes one FFmpeg conversion job.
+ *
+ * @param {string} ffmpegPath FFmpeg executable path.
+ * @param {object} job Conversion job.
+ * @returns {Promise<void>} Resolves when conversion succeeds.
+ */
 export function runFfmpeg(ffmpegPath, job) {
   return new Promise((resolve, reject) => {
     const child = spawn(ffmpegPath, ffmpegArguments(job), {
@@ -77,6 +103,12 @@ export function runFfmpeg(ffmpegPath, job) {
   })
 }
 
+/**
+ * Converts WAV masters into missing WebM and MP3 browser delivery files.
+ *
+ * @param {object} options Directory, registry, FFmpeg, and force options.
+ * @returns {Promise<object[]>} Completed conversion jobs.
+ */
 export async function convertAudioDirectory({
   ffmpegPath,
   sourceDirectory,
@@ -112,6 +144,12 @@ export async function convertAudioDirectory({
   return plan
 }
 
+/**
+ * Discovers theme directories in stable lexical order.
+ *
+ * @param {string} themeRoot Theme-library root path.
+ * @returns {Promise<string[]>} Theme directory names.
+ */
 export async function discoverThemeNames(themeRoot) {
   try {
     const entries = await readdir(themeRoot, { withFileTypes: true })

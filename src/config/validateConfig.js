@@ -4,6 +4,7 @@ import gameConfigSchema from './schemas/gameConfig.schema.json'
 import levelSchema from './schemas/level.schema.json'
 import mediaManifestSchema from './schemas/mediaManifest.schema.json'
 import mediaRegistrySchema from './schemas/mediaRegistry.schema.json'
+import microProtocolsSchema from './schemas/microProtocols.schema.json'
 import powerupSchema from './schemas/powerup.schema.json'
 import resolvedMediaManifestSchema from './schemas/resolvedMediaManifest.schema.json'
 import soundRegistrySchema from './schemas/soundRegistry.schema.json'
@@ -15,6 +16,7 @@ const schemaEntries = {
   level: levelSchema,
   mediaManifest: mediaManifestSchema,
   mediaRegistry: mediaRegistrySchema,
+  microProtocols: microProtocolsSchema,
   powerups: powerupSchema,
   resolvedMediaManifest: resolvedMediaManifestSchema,
   soundRegistry: soundRegistrySchema,
@@ -39,6 +41,11 @@ function getValidators() {
   return validators
 }
 
+/**
+ * Returns the lazily compiled AJV validators keyed by schema name.
+ *
+ * @returns {Record<string, import('ajv').ValidateFunction>} Compiled validators.
+ */
 export function getSchemaValidators() {
   return getValidators()
 }
@@ -70,6 +77,8 @@ function levelMediaIds(level) {
     ...(level.manualObstacles ?? []).map((item) => item.mediaId),
     ...(level.movingObstacles ?? []).map((item) => item.mediaId),
     ...(level.trackingObstacles ?? []).map((item) => item.mediaId),
+    ...(level.dynamicObstacles ?? []).map((item) => item.mediaId),
+    ...(level.switches ?? []).map((item) => item.mediaId),
     ...(level.coins ?? []).map((item) => item.mediaId),
     ...(level.bonuses?.targets ?? []).map((item) => item.mediaId),
   ].filter(Boolean)
@@ -100,7 +109,12 @@ function validateRegistries(mediaRegistry, soundRegistry, errors) {
   }
 }
 
-function validateLevelRelationships(levels, mediaIds, errors) {
+function validateLevelRelationships(
+  levels,
+  mediaIds,
+  errors,
+  { requireContiguous = true } = {},
+) {
   const levelIds = levels.map((level) => level.id)
   const levelNumbers = levels.map((level) => level.number)
   for (const duplicate of duplicateValues(levelIds)) {
@@ -111,11 +125,13 @@ function validateLevelRelationships(levels, mediaIds, errors) {
   }
 
   const sortedNumbers = [...levelNumbers].sort((a, b) => a - b)
-  sortedNumbers.forEach((number, index) => {
-    if (number !== index + 1) {
-      errors.push(`levels: campaign numbers must be contiguous from 1`)
-    }
-  })
+  if (requireContiguous) {
+    sortedNumbers.forEach((number, index) => {
+      if (number !== index + 1) {
+        errors.push(`levels: campaign numbers must be contiguous from 1`)
+      }
+    })
+  }
 
   for (const level of levels) {
     if (level.id !== `level-${String(level.number).padStart(2, '0')}`) {
@@ -132,6 +148,30 @@ function validateLevelRelationships(levels, mediaIds, errors) {
     if (level.bonuses?.maximumTargets > level.bonuses?.targets?.length) {
       errors.push(`${level.id}: maximumTargets exceeds configured bonus targets`)
     }
+    const switchIds = new Set((level.switches ?? []).map((item) => item.id))
+    for (const obstacle of level.dynamicObstacles ?? []) {
+      const behavior = obstacle.behavior
+      if (
+        behavior.type === 'phase' &&
+        behavior.solidMs + behavior.warningMs >= behavior.cycleMs
+      ) {
+        errors.push(`${level.id}/${obstacle.id}: phase requires an open window`)
+      }
+      if (
+        behavior.type === 'pulse' &&
+        behavior.minScale > behavior.maxScale
+      ) {
+        errors.push(`${level.id}/${obstacle.id}: pulse scales are inverted`)
+      }
+      if (
+        behavior.type === 'switch' &&
+        !switchIds.has(behavior.switchId)
+      ) {
+        errors.push(
+          `${level.id}/${obstacle.id}: unknown switch "${behavior.switchId}"`,
+        )
+      }
+    }
     for (const mediaId of levelMediaIds(level)) {
       if (!mediaIds.has(mediaId)) {
         errors.push(`${level.id}: unknown mediaId "${mediaId}"`)
@@ -142,6 +182,8 @@ function validateLevelRelationships(levels, mediaIds, errors) {
       ...(level.manualObstacles ?? []),
       ...(level.movingObstacles ?? []),
       ...(level.trackingObstacles ?? []),
+      ...(level.dynamicObstacles ?? []),
+      ...(level.switches ?? []),
       ...(level.coins ?? []),
       ...(level.bonuses?.targets ?? []),
     ].map((item) => item.id)
@@ -169,8 +211,16 @@ function validatePowerRelationships(powerupConfig, mediaIds, soundIds, errors) {
   }
 }
 
+/**
+ * Validates schema compliance and cross-registry relationships for all config.
+ *
+ * @param {object} configuration Complete imported configuration set.
+ * @returns {{valid: boolean, errors: string[]}} Validation status and actionable errors.
+ */
 export function validateConfiguration({
   levels,
+  microLevels = [],
+  microProtocolConfig = null,
   gameConfig,
   powerupConfig,
   themeConfig,
@@ -190,8 +240,14 @@ export function validateConfiguration({
   validate('powerups', 'powerups', powerupConfig)
   validate('themes', 'themes', themeConfig)
   validate('mediaRegistry', 'mediaRegistry', mediaRegistry)
+  if (microProtocolConfig) {
+    validate('microProtocols', 'microProtocols', microProtocolConfig)
+  }
   validate('soundRegistry', 'soundRegistry', soundRegistry)
   levels.forEach((level) => validate('level', level.id ?? 'unknown-level', level))
+  microLevels.forEach((level) =>
+    validate('level', level.id ?? 'unknown-micro-level', level),
+  )
 
   if (!themeConfig.themes?.[themeConfig.activeTheme]) {
     errors.push(`themes: active theme "${themeConfig.activeTheme}" is not defined`)
@@ -207,6 +263,17 @@ export function validateConfiguration({
   const mediaIds = new Set(mediaRegistry.media.map((entry) => entry.mediaId))
   const soundIds = new Set(soundRegistry.sounds.map((entry) => entry.soundId))
   validateLevelRelationships(levels, mediaIds, errors)
+  validateLevelRelationships(microLevels, mediaIds, errors, {
+    requireContiguous: false,
+  })
+  const microLevelIds = new Set(microLevels.map((level) => level.id))
+  for (const protocol of microProtocolConfig?.protocols ?? []) {
+    if (!microLevelIds.has(protocol.levelId)) {
+      errors.push(
+        `microProtocols/${protocol.id}: unknown levelId "${protocol.levelId}"`,
+      )
+    }
+  }
   validatePowerRelationships(powerupConfig, mediaIds, soundIds, errors)
 
   return {

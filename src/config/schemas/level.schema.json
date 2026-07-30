@@ -55,6 +55,14 @@
       "type": "array",
       "items": { "$ref": "#/$defs/trackingObstacle" }
     },
+    "dynamicObstacles": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/dynamicObstacle" }
+    },
+    "switches": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/switch" }
+    },
     "coins": {
       "type": "array",
       "items": { "$ref": "#/$defs/coin" }
@@ -341,6 +349,98 @@
           "exclusiveMinimum": 0,
           "maximum": 1440
         }
+      }
+    },
+    "dynamicObstacle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "mediaId", "shape", "x", "y", "behavior"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "mediaId": { "$ref": "#/$defs/mediaId" },
+        "shape": { "enum": ["circle", "rect", "diamond"] },
+        "x": { "$ref": "#/$defs/coordinate" },
+        "y": { "$ref": "#/$defs/coordinate" },
+        "size": { "$ref": "#/$defs/positiveDimension" },
+        "width": { "$ref": "#/$defs/positiveDimension" },
+        "height": { "$ref": "#/$defs/positiveDimension" },
+        "behavior": {
+          "oneOf": [
+            { "$ref": "#/$defs/phaseBehavior" },
+            { "$ref": "#/$defs/orbitBehavior" },
+            { "$ref": "#/$defs/pulseBehavior" },
+            { "$ref": "#/$defs/switchBehavior" }
+          ]
+        }
+      },
+      "allOf": [{ "$ref": "#/$defs/shapeDimensions" }]
+    },
+    "phaseBehavior": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "cycleMs", "solidMs", "warningMs", "offsetMs"],
+      "properties": {
+        "type": { "const": "phase" },
+        "cycleMs": { "type": "integer", "minimum": 400, "maximum": 120000 },
+        "solidMs": { "type": "integer", "minimum": 100, "maximum": 120000 },
+        "warningMs": { "type": "integer", "minimum": 100, "maximum": 120000 },
+        "offsetMs": { "type": "integer", "minimum": 0, "maximum": 120000 }
+      }
+    },
+    "orbitBehavior": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "radiusX", "radiusY", "periodMs", "phase"],
+      "properties": {
+        "type": { "const": "orbit" },
+        "radiusX": { "type": "number", "minimum": 0, "maximum": 1000 },
+        "radiusY": { "type": "number", "minimum": 0, "maximum": 1000 },
+        "periodMs": { "type": "integer", "minimum": 400, "maximum": 120000 },
+        "phase": { "type": "number" }
+      }
+    },
+    "pulseBehavior": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "minScale", "maxScale", "periodMs", "phase"],
+      "properties": {
+        "type": { "const": "pulse" },
+        "minScale": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "maxScale": { "type": "number", "minimum": 1, "maximum": 4 },
+        "periodMs": { "type": "integer", "minimum": 400, "maximum": 120000 },
+        "phase": { "type": "number" }
+      }
+    },
+    "switchBehavior": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "switchId", "initiallySolid"],
+      "properties": {
+        "type": { "const": "switch" },
+        "switchId": { "type": "string", "minLength": 1 },
+        "initiallySolid": { "type": "boolean" }
+      }
+    },
+    "switch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "mediaId",
+        "x",
+        "y",
+        "size",
+        "activation",
+        "durationMs"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "mediaId": { "$ref": "#/$defs/mediaId" },
+        "x": { "$ref": "#/$defs/coordinate" },
+        "y": { "$ref": "#/$defs/coordinate" },
+        "size": { "$ref": "#/$defs/positiveDimension" },
+        "activation": { "enum": ["once", "timed", "toggle"] },
+        "durationMs": { "type": "integer", "minimum": 0, "maximum": 120000 }
       }
     },
     "coin": {

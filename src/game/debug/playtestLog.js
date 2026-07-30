@@ -1,6 +1,12 @@
 export const PLAYTEST_STORAGE_KEY = 'path-protocol.playtest-runs'
 const MAX_RUNS = 200
 
+/**
+ * Loads bounded development playtest telemetry from browser storage.
+ *
+ * @param {Storage} [storage=window.localStorage] Storage implementation.
+ * @returns {object[]} Most recent playtest records.
+ */
 export function loadPlaytestRuns(storage = window.localStorage) {
   try {
     const value = JSON.parse(storage.getItem(PLAYTEST_STORAGE_KEY) ?? '[]')
@@ -10,6 +16,14 @@ export function loadPlaytestRuns(storage = window.localStorage) {
   }
 }
 
+/**
+ * Appends one development-only playtest result.
+ *
+ * @param {object} level Played level configuration.
+ * @param {object} result Final score, time in milliseconds, and world distance.
+ * @param {Storage} [storage=window.localStorage] Storage implementation.
+ * @returns {object} Newly persisted run.
+ */
 export function recordPlaytestRun(level, result, storage = window.localStorage) {
   const run = {
     recordedAt: new Date().toISOString(),

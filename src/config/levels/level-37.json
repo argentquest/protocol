@@ -5,7 +5,7 @@
   "name": "Sweep Entry",
   "seed": "path-protocol-sweep-entry-v1",
   "difficulty": 7,
-  "briefing": "Expansion chamber 37: a difficulty-7 variation with a new deterministic layout.",
+  "briefing": "An offset phase gate interrupts the scanner route and rewards deliberate timing.",
   "arena": {
     "shape": "rect",
     "margin": 34,
@@ -129,5 +129,23 @@
     "deceleration": 1800,
     "keyboardSpeed": 280
   },
-  "trackingObstacles": []
+  "trackingObstacles": [],
+  "dynamicObstacles": [
+    {
+      "id": "phase-gate-a",
+      "mediaId": "obstacle-phase-gate",
+      "shape": "rect",
+      "x": 400,
+      "y": 650,
+      "width": 200,
+      "height": 28,
+      "behavior": {
+        "type": "phase",
+        "cycleMs": 3600,
+        "solidMs": 1600,
+        "warningMs": 500,
+        "offsetMs": 2100
+      }
+    }
+  ]
 }

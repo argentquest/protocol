@@ -1,3 +1,14 @@
+/**
+ * @typedef {object} GameEvent
+ * @property {string} type Stable logical event type.
+ * @property {object} payload Serializable event data.
+ */
+
+/**
+ * Creates an engine-local synchronous event bus.
+ *
+ * @returns {{subscribe: (type: string, listener: (event: GameEvent) => void) => (() => void), emit: (type: string, payload?: object) => void, dispose: () => void, readonly disposed: boolean}}
+ */
 export function createGameEventBus() {
   const listeners = new Map()
   let disposed = false

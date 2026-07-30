@@ -5,10 +5,28 @@ import {
   shapesIntersect,
 } from '../geometry/geometry.js'
 
+/**
+ * Tests a timed power against a monotonic real-time timestamp.
+ *
+ * @pure
+ * @param {object} session Active engine session.
+ * @param {string} effect Stable power effect ID.
+ * @param {number} nowMs Monotonic time in milliseconds.
+ * @returns {boolean} Whether the effect has not expired.
+ */
 export function isPowerActive(session, effect, nowMs) {
   return Number(session.activePowers.get(effect)?.expiresAtMs) > nowMs
 }
 
+/**
+ * Consumes one inventory charge and activates its timed effect.
+ *
+ * @param {object} session Active engine session.
+ * @param {object[]} definitions Validated power definitions.
+ * @param {string} key Numeric power key.
+ * @param {number} nowMs Monotonic activation time in milliseconds.
+ * @returns {object} Activation result and remaining charge count.
+ */
 export function activatePower(session, definitions, key, nowMs) {
   const power = definitions.find((item) => item.key === String(key))
   if (!power) return { activated: false, reason: 'unknown-key' }
@@ -29,6 +47,14 @@ export function activatePower(session, definitions, key, nowMs) {
   return { activated: true, power, remaining: charges - 1 }
 }
 
+/**
+ * Removes expired effects and restores safety after full-shield expiry.
+ *
+ * @param {object} session Active engine session.
+ * @param {number} nowMs Monotonic time in milliseconds.
+ * @param {object[]} obstacles Current obstacle shapes.
+ * @returns {object[]} Power definitions that expired.
+ */
 export function expirePowers(session, nowMs, obstacles) {
   const expired = []
   for (const [effect, power] of session.activePowers) {
@@ -55,6 +81,13 @@ export function expirePowers(session, nowMs, obstacles) {
   return expired
 }
 
+/**
+ * Claims all uncollected coins touching the token or magnet radius.
+ *
+ * @param {object} session Active engine session.
+ * @param {number} [magnetRadius=0] Extra collection radius in logical world units.
+ * @returns {object[]} Newly claimed coin definitions.
+ */
 export function collectContactCoins(session, magnetRadius = 0) {
   const token = { ...session.level.token, ...session.token.position }
   const claimed = []

@@ -5,7 +5,7 @@
   "name": "Precision Slot",
   "seed": "path-protocol-precision-slot-v1",
   "difficulty": 3,
-  "briefing": "Expansion chamber 53: a difficulty-3 variation with a new deterministic layout.",
+  "briefing": "A fast phase gate tests whether the shortest route is worth waiting for.",
   "arena": {
     "shape": "rect",
     "margin": 38,
@@ -100,5 +100,23 @@
     "deceleration": 1800,
     "keyboardSpeed": 280
   },
-  "trackingObstacles": []
+  "trackingObstacles": [],
+  "dynamicObstacles": [
+    {
+      "id": "phase-gate-a",
+      "mediaId": "obstacle-phase-gate",
+      "shape": "rect",
+      "x": 520,
+      "y": 500,
+      "width": 180,
+      "height": 28,
+      "behavior": {
+        "type": "phase",
+        "cycleMs": 3000,
+        "solidMs": 1350,
+        "warningMs": 450,
+        "offsetMs": 1500
+      }
+    }
+  ]
 }

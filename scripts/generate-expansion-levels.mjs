@@ -103,6 +103,167 @@ function retuneApexHazards(level) {
   }))
 }
 
+function phaseGate(x, y, width, height, cycleMs, solidMs, warningMs, offsetMs) {
+  return {
+    id: 'phase-gate-a',
+    mediaId: 'obstacle-phase-gate',
+    shape: 'rect',
+    x,
+    y,
+    width,
+    height,
+    behavior: {
+      type: 'phase',
+      cycleMs,
+      solidMs,
+      warningMs,
+      offsetMs,
+    },
+  }
+}
+
+/**
+ * Applies authored mechanic overrides that distinguish selected expansion
+ * chambers from their original seed templates.
+ *
+ * @param {object} level Generated expansion configuration.
+ * @param {number} number Campaign level number.
+ * @returns {void}
+ */
+function applyExpansionVariety(level, number) {
+  if (number === 33) {
+    level.briefing =
+      'A phase gate alternates between a solid barrier and a brief crossing window.'
+    level.dynamicObstacles = [
+      phaseGate(500, 500, 190, 30, 4000, 1700, 600, 1900),
+    ]
+  } else if (number === 37) {
+    level.briefing =
+      'An offset phase gate interrupts the scanner route and rewards deliberate timing.'
+    level.dynamicObstacles = [
+      phaseGate(400, 650, 200, 28, 3600, 1600, 500, 2100),
+    ]
+  } else if (number === 43) {
+    level.briefing =
+      'An elliptical orbiter turns the center line into a prediction lesson.'
+    level.dynamicObstacles = [
+      {
+        id: 'orbiter-a',
+        mediaId: 'obstacle-orbiter',
+        shape: 'circle',
+        x: 560,
+        y: 500,
+        size: 36,
+        behavior: {
+          type: 'orbit',
+          radiusX: 25,
+          radiusY: 80,
+          periodMs: 4400,
+          phase: 0.8,
+        },
+      },
+    ]
+  } else if (number === 47) {
+    level.briefing =
+      'A pulsing vertical block changes the scanner crossing from wide to exact.'
+    level.dynamicObstacles = [
+      {
+        id: 'pulse-block-a',
+        mediaId: 'obstacle-pulse-block',
+        shape: 'rect',
+        x: 400,
+        y: 590,
+        width: 30,
+        height: 180,
+        behavior: {
+          type: 'pulse',
+          minScale: 0.45,
+          maxScale: 1.25,
+          periodMs: 3400,
+          phase: -Math.PI / 2,
+        },
+      },
+    ]
+  } else if (number === 53) {
+    level.briefing =
+      'A fast phase gate tests whether the shortest route is worth waiting for.'
+    level.dynamicObstacles = [
+      phaseGate(520, 500, 180, 28, 3000, 1350, 450, 1500),
+    ]
+  } else if (number === 54) {
+    level.briefing =
+      'An orbiter circles the final approach and turns a static route into a prediction test.'
+    level.dynamicObstacles = [
+      {
+        id: 'orbiter-a',
+        mediaId: 'obstacle-orbiter',
+        shape: 'circle',
+        x: 620,
+        y: 650,
+        size: 36,
+        behavior: {
+          type: 'orbit',
+          radiusX: 70,
+          radiusY: 60,
+          periodMs: 4400,
+          phase: 0.5,
+        },
+      },
+    ]
+  } else if (number === 56) {
+    level.briefing =
+      'A pulse block repeatedly narrows the direct center passage.'
+    level.dynamicObstacles = [
+      {
+        id: 'pulse-block-a',
+        mediaId: 'obstacle-pulse-block',
+        shape: 'rect',
+        x: 480,
+        y: 540,
+        width: 140,
+        height: 24,
+        behavior: {
+          type: 'pulse',
+          minScale: 0.45,
+          maxScale: 1.4,
+          periodMs: 3600,
+          phase: -Math.PI / 2,
+        },
+      },
+    ]
+  } else if (number === 59) {
+    level.briefing =
+      'A remote switch opens the direct upper passage while pursuit hazards close in.'
+    level.dynamicObstacles = [
+      {
+        id: 'switch-barrier-a',
+        mediaId: 'obstacle-switch-barrier',
+        shape: 'rect',
+        x: 550,
+        y: 300,
+        width: 240,
+        height: 28,
+        behavior: {
+          type: 'switch',
+          switchId: 'switch-a',
+          initiallySolid: true,
+        },
+      },
+    ]
+    level.switches = [
+      {
+        id: 'switch-a',
+        mediaId: 'switch-pad',
+        x: 300,
+        y: 650,
+        size: 48,
+        activation: 'once',
+        durationMs: 0,
+      },
+    ]
+  }
+}
+
 /**
  * Creates a released expansion level from an existing validated archetype.
  *
@@ -137,6 +298,7 @@ function createExpansionLevel(template, number, name, difficulty) {
       level.bonuses.rewardPerTarget,
     )
   }
+  applyExpansionVariety(level, number)
   return level
 }
 

@@ -1,5 +1,6 @@
 import { formatDistance, formatTime } from '../ui/formatters.js'
 
+/** Renders consumable powers and their numeric-key assignments. */
 function PowerTray({ powerups, activePowerIds, inventory, devMode, onActivate }) {
   return (
     <div className="power-tray" aria-label="Power-up inventory">
@@ -25,6 +26,7 @@ function PowerTray({ powerups, activePowerIds, inventory, devMode, onActivate })
   )
 }
 
+/** Renders development-only simulation and geometry diagnostics. */
 function DebugPanel({ hud, level, availableCoinCount }) {
   return (
     <div className="debug-panel" data-testid="playtest-diagnostics">
@@ -73,6 +75,12 @@ function DebugPanel({ hud, level, availableCoinCount }) {
   )
 }
 
+/**
+ * Projects throttled engine snapshots into player-facing HUD controls.
+ *
+ * @param {object} props HUD properties.
+ * @returns {import('react').JSX.Element} HUD overlay.
+ */
 export default function GameHud({
   hud,
   level,

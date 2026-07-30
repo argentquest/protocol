@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 2,
+  "id": "level-91",
+  "number": 91,
+  "name": "Phase Window",
+  "seed": "micro-phase-window-v1",
+  "difficulty": 5,
+  "briefing": "Cross both phase gates. Warning state is safe, but solid state is not.",
+  "arena": {
+    "shape": "rect",
+    "mediaId": "arena-standard",
+    "margin": 40,
+    "cornerRadius": 30
+  },
+  "token": {
+    "shape": "circle",
+    "size": 36,
+    "mediaId": "token-circle"
+  },
+  "movement": {
+    "maximumSpeed": 390,
+    "acceleration": 1600,
+    "deceleration": 1900,
+    "keyboardSpeed": 300
+  },
+  "start": {
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 110,
+    "y": 500
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 890,
+    "y": 500,
+    "size": 48
+  },
+  "generation": {
+    "obstacleCount": 0,
+    "allowedShapes": ["rect"],
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    },
+    "minSize": 80,
+    "maxSize": 120,
+    "minimumGap": 50,
+    "pathGrid": 18
+  },
+  "manualObstacles": [],
+  "movingObstacles": [],
+  "trackingObstacles": [],
+  "dynamicObstacles": [
+    {
+      "id": "phase-left",
+      "mediaId": "obstacle-phase-gate",
+      "shape": "rect",
+      "x": 360,
+      "y": 500,
+      "width": 30,
+      "height": 850,
+      "behavior": {
+        "type": "phase",
+        "cycleMs": 3600,
+        "solidMs": 1500,
+        "warningMs": 600,
+        "offsetMs": 1700
+      }
+    },
+    {
+      "id": "phase-right",
+      "mediaId": "obstacle-phase-gate",
+      "shape": "rect",
+      "x": 640,
+      "y": 500,
+      "width": 30,
+      "height": 850,
+      "behavior": {
+        "type": "phase",
+        "cycleMs": 3600,
+        "solidMs": 1500,
+        "warningMs": 600,
+        "offsetMs": 2600
+      }
+    }
+  ],
+  "switches": [],
+  "coins": [],
+  "rewards": {
+    "completionCoins": 0,
+    "bonusCoinsPerTarget": 0
+  },
+  "scoring": {
+    "baseMaximum": 1000,
+    "parTimeMs": 12000,
+    "parDistance": 780,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 0,
+    "rewardPerTarget": 0,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.2,
+    "targets": []
+  }
+}

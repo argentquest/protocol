@@ -205,6 +205,39 @@ test('keeps moving obstacles animated while mouse control is active', async ({ p
   await page.mouse.click(token.x, token.y)
 })
 
+test('offers a Micro Protocol after completion and loads it in one Pixi canvas', async ({
+  page,
+}) => {
+  await boot(page, '/?dev=1')
+  await page.getByRole('button', { name: /begin calibration/i }).click()
+  let canvas = await readyCanvas(page)
+  const token = await dataPoint(canvas, 'token')
+  const target = await dataPoint(canvas, 'target')
+
+  await page.mouse.click(token.x, token.y)
+  await page.keyboard.press('2')
+  await page.mouse.move(target.x, target.y)
+  await expect(
+    page.getByRole('heading', { name: /playtest run captured/i }),
+  ).toBeVisible({ timeout: 15_000 })
+
+  await expect(
+    page.getByRole('heading', { name: /micro protocols/i }),
+  ).toBeVisible()
+  await page.getByRole('button', { name: /phase window/i }).click()
+  canvas = await readyCanvas(page)
+
+  await expect(page.getByText(/micro protocol.*timing/i)).toBeVisible()
+  await expect(page.locator('.pixi-arena canvas')).toHaveCount(1)
+  const dynamicStates = JSON.parse(
+    await canvas.getAttribute('data-dynamic-states'),
+  )
+  expect(dynamicStates.map((item) => item[0])).toEqual([
+    'phase-left',
+    'phase-right',
+  ])
+})
+
 test('smooths token response instead of snapping to a fast mouse jump', async ({ page }) => {
   await boot(page, '/?dev=1')
   await page.getByRole('button', { name: /begin calibration/i }).click()

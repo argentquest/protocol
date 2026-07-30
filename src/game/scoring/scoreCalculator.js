@@ -1,5 +1,12 @@
 import { clamp, distance } from '../geometry/geometry.js'
 
+/**
+ * Adds straight-line segments through reached ordered targets.
+ *
+ * @pure
+ * @param {import('../types.js').Point[]} points Ordered reached points.
+ * @returns {number} Benchmark distance in logical world units.
+ */
 export function directDistance(points) {
   let total = 0
   for (let index = 1; index < points.length; index += 1) {
@@ -8,6 +15,32 @@ export function directDistance(points) {
   return total
 }
 
+/**
+ * @typedef {object} ScoreResult
+ * @property {number} attainableMaximum Maximum available score in points.
+ * @property {number} timeFactor Clamped time-performance ratio from 0 to 1.
+ * @property {number} routeFactor Clamped route-efficiency ratio from 0 to 1.
+ * @property {number} performanceScore Unrounded performance points.
+ * @property {number} collisionPenalty Collision deduction in points.
+ * @property {number} bonusPenalty Bonus-failure deduction in points.
+ * @property {number} finalScore Rounded and clamped score in points.
+ */
+
+/**
+ * Calculates score from real elapsed time and actual token-center travel.
+ *
+ * @pure
+ * @param {object} inputs Score inputs.
+ * @param {object} inputs.scoring Validated level scoring configuration.
+ * @param {number} inputs.elapsedMs Elapsed real time in milliseconds.
+ * @param {number} inputs.actualDistance Traveled distance in logical world units.
+ * @param {number} inputs.benchmarkDistance Direct distance in logical world units.
+ * @param {number} [inputs.earnedBonusMaximum=0] Earned bonus ceiling in points.
+ * @param {number} [inputs.collisions=0] Discrete collision count.
+ * @param {number} [inputs.bonusFailures=0] Failed pursued-bonus count.
+ * @param {number} [inputs.bonusFailurePenaltyRate=0.2] Fraction of maximum deducted per failure.
+ * @returns {ScoreResult} Complete score breakdown.
+ */
 export function calculateScore({
   scoring,
   elapsedMs,

@@ -21,8 +21,26 @@ import {
   expirePowers,
   isPowerActive,
 } from './PowerSystem.js'
+import { updateContactSwitches } from './SwitchSystem.js'
 
+/**
+ * Owns one deterministic level session and exposes intent-oriented game actions.
+ *
+ * The engine is framework-neutral: callers supply real-time clock values in
+ * milliseconds and render the resulting session state independently.
+ */
 export class GameEngine {
+  /**
+   * @param {object} levelConfig Validated level configuration.
+   * @param {object} [options] Session dependencies and persisted player state.
+   * @param {() => number} [options.clock] Monotonic real-time clock returning milliseconds.
+   * @param {(level: object) => object} [options.generate] Deterministic level generator.
+   * @param {object[]} [options.powerups] Validated consumable-power definitions.
+   * @param {Record<string, number>} [options.inventory] Power quantities by ID.
+   * @param {string[]} [options.claimedCourseCoinIds] Previously collected course-coin IDs.
+   * @param {string[]} [options.claimedRewardKeys] Previously awarded reward keys.
+   * @param {number} [options.tokenCollisionTolerance=0] Collision inset in logical world units.
+   */
   constructor(
     levelConfig,
     {
@@ -62,6 +80,12 @@ export class GameEngine {
     this.events.emit('level.ready', { levelId: this.session.levelId })
   }
 
+  /**
+   * Activates movement for the current attempt.
+   *
+   * @param {'pointer'|'keyboard'} inputMode Active control mode.
+   * @returns {void}
+   */
   startAttempt(inputMode) {
     if (!['pointer', 'keyboard'].includes(inputMode)) {
       throw new Error(`Unsupported input mode "${inputMode}".`)
@@ -79,12 +103,20 @@ export class GameEngine {
     })
   }
 
+  /** Updates elapsed attempt time from the monotonic clock, in milliseconds. */
   updateElapsed() {
     if (this.session.startedAtMs !== null) {
       this.session.elapsedMs = Math.max(0, this.clock() - this.session.startedAtMs)
     }
   }
 
+  /**
+   * Advances gameplay by one fixed simulation step.
+   *
+   * @param {number} stepMs Fixed duration in milliseconds.
+   * @param {object} [collisionOptions] Test-only or power-derived collision overrides.
+   * @returns {object} Serializable movement, collision, and target outcome flags.
+   */
   step(stepMs, collisionOptions = {}) {
     if (!Number.isFinite(stepMs) || stepMs <= 0) {
       throw new Error('Engine step must be a positive number of milliseconds.')
@@ -106,6 +138,7 @@ export class GameEngine {
         x: state.x,
         y: state.y,
       })),
+      ...this.session.dynamicObstacles.filter((obstacle) => obstacle.solid),
     ]
     for (const power of expirePowers(this.session, nowMs, [
       ...this.session.level.obstacles,
@@ -119,6 +152,10 @@ export class GameEngine {
       : 1
     const hazards = advanceHazards(this.session, stepMs, slowScale)
     const allObstacles = [...this.session.level.obstacles, ...hazards.current]
+    const previousObstacles = [
+      ...this.session.level.obstacles,
+      ...hazards.previous,
+    ]
     const obstacleShield =
       Boolean(collisionOptions.obstacleShield) ||
       isPowerActive(this.session, 'obstacleShield', nowMs)
@@ -131,6 +168,9 @@ export class GameEngine {
       {
         ...collisionOptions,
         obstacles: collisionOptions.obstacles ?? allObstacles,
+        previousObstacles:
+          collisionOptions.previousObstacles ??
+          (collisionOptions.obstacles ? collisionOptions.obstacles : previousObstacles),
         obstacleShield,
         fullShield,
       },
@@ -184,6 +224,12 @@ export class GameEngine {
         coin,
       })
     }
+    for (const change of updateContactSwitches(this.session)) {
+      this.events.emit('switch.activated', {
+        levelId: this.session.levelId,
+        ...change,
+      })
+    }
     if (!result.collision && touchesActiveTarget(this.session, this.machine.state)) {
       const phase = this.machine.state
       const target = activeTarget(this.session, phase)
@@ -226,6 +272,12 @@ export class GameEngine {
     return { ...result, updated: true, restarted: false }
   }
 
+  /**
+   * Consumes the power assigned to a numeric key when it is available.
+   *
+   * @param {string} key Numeric keyboard key.
+   * @returns {object} Activation result and optional failure reason.
+   */
   activatePowerByKey(key) {
     if (this.session.startedAtMs === null) {
       return { activated: false, reason: 'attempt-not-started' }
@@ -243,6 +295,7 @@ export class GameEngine {
     return result
   }
 
+  /** Accepts the currently offered bonus and prepares its control checkpoint. */
   pursueBonus() {
     this.machine.transition('pursue')
     this.events.emit('bonus.accepted', {
@@ -251,6 +304,11 @@ export class GameEngine {
     })
   }
 
+  /**
+   * Ends bonus pursuit voluntarily and preserves the current score.
+   *
+   * @returns {number} Banked score in points.
+   */
   bankBonus() {
     this.updateElapsed()
     const score = calculateSessionScore(this.session)
@@ -260,6 +318,12 @@ export class GameEngine {
     return score
   }
 
+  /**
+   * Ends active input, restarting main play or failing active bonus pursuit.
+   *
+   * @param {string} [reason='released'] Stable release reason for events and diagnostics.
+   * @returns {object} Completion or restart outcome.
+   */
   releaseAttempt(reason = 'released') {
     this.session.input.active = false
     this.session.input.mode = null
@@ -279,6 +343,13 @@ export class GameEngine {
     return { restarted: false, completed: this.machine.state === 'completed' }
   }
 
+  /**
+   * Emits completion and one-time reward events.
+   *
+   * @param {number} score Final score in points.
+   * @param {boolean} bonusFailed Whether optional bonus pursuit failed.
+   * @returns {void}
+   */
   finishCompletion(score, bonusFailed) {
     const rewards = []
     const completionKey = `${this.session.levelId}:completion`
@@ -313,6 +384,12 @@ export class GameEngine {
     })
   }
 
+  /**
+   * Recreates the current deterministic layout while retaining eligible state.
+   *
+   * @param {string} [reason='manual'] Stable restart reason.
+   * @returns {void}
+   */
   restart(reason = 'manual') {
     const previous = this.session
     const attemptNumber = previous.attemptNumber + 1
@@ -355,11 +432,17 @@ export class GameEngine {
     })
   }
 
+  /**
+   * Produces the throttled, serializable React HUD view.
+   *
+   * @returns {import('../types.js').HudSnapshot} Current HUD snapshot.
+   */
   snapshot() {
     this.updateElapsed()
     return createHudSnapshot(this.session, this.machine.state)
   }
 
+  /** Permanently releases event subscriptions for this engine instance. */
   dispose() {
     if (this.session.disposed) return
     this.session.disposed = true

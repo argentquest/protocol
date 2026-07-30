@@ -5,7 +5,7 @@
   "name": "Angled Passage",
   "seed": "path-protocol-angled-passage-v1",
   "difficulty": 4,
-  "briefing": "Expansion chamber 54: a difficulty-4 variation with a new deterministic layout.",
+  "briefing": "An orbiter circles the final approach and turns a static route into a prediction test.",
   "arena": {
     "shape": "polygon",
     "points": [
@@ -142,5 +142,22 @@
     "deceleration": 1800,
     "keyboardSpeed": 280
   },
-  "trackingObstacles": []
+  "trackingObstacles": [],
+  "dynamicObstacles": [
+    {
+      "id": "orbiter-a",
+      "mediaId": "obstacle-orbiter",
+      "shape": "circle",
+      "x": 620,
+      "y": 650,
+      "size": 36,
+      "behavior": {
+        "type": "orbit",
+        "radiusX": 70,
+        "radiusY": 60,
+        "periodMs": 4400,
+        "phase": 0.5
+      }
+    }
+  ]
 }

@@ -1896,6 +1896,102 @@ input[type='range'] {
   font-size: 1.3rem;
 }
 
+.micro-protocol-panel {
+  display: grid;
+  width: min(1040px, 100%);
+  grid-template-columns: minmax(220px, 0.75fr) minmax(0, 2fr);
+  gap: 24px;
+  align-items: stretch;
+  margin: 0 0 34px;
+  padding: 22px;
+  border: 1px solid rgba(255, 85, 221, 0.2);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 85, 221, 0.06),
+    rgba(112, 246, 255, 0.035)
+  );
+  text-align: left;
+}
+
+.micro-protocol-panel h2 {
+  margin: 4px 0 8px;
+  font-size: 1.35rem;
+  font-weight: 500;
+}
+
+.micro-protocol-panel p {
+  margin: 0;
+  color: #7894a5;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.micro-protocol-notice {
+  margin-top: 14px !important;
+  padding-left: 10px;
+  border-left: 2px solid #43e5b0;
+  color: #9af7d8 !important;
+  font-family: var(--mono);
+  font-size: 0.66rem !important;
+}
+
+.micro-protocol-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.micro-protocol-card {
+  display: grid;
+  min-height: 145px;
+  gap: 8px;
+  align-content: start;
+  padding: 16px;
+  border: 1px solid rgba(112, 246, 255, 0.16);
+  color: #d8edf4;
+  background: rgba(6, 17, 31, 0.82);
+  cursor: pointer;
+  text-align: left;
+}
+
+.micro-protocol-card:hover,
+.micro-protocol-card:focus-visible {
+  border-color: #70f6ff;
+  background: rgba(112, 246, 255, 0.07);
+  outline: none;
+  transform: translateY(-2px);
+}
+
+.micro-protocol-card > span,
+.micro-protocol-card > b {
+  color: #70f6ff;
+  font-family: var(--mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.micro-protocol-card > strong {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.micro-protocol-card > small {
+  color: #6f8b9d;
+  font-size: 0.7rem;
+  line-height: 1.4;
+}
+
+.micro-protocol-card--prediction > span,
+.micro-protocol-card--prediction > b {
+  color: #ffb224;
+}
+
+.micro-protocol-card--precision > span,
+.micro-protocol-card--precision > b {
+  color: #ff79df;
+}
+
 .results-orbit {
   position: absolute;
   z-index: -1;
@@ -2032,6 +2128,10 @@ input[type='range'] {
   .results-metrics > div:nth-child(-n + 2) {
     border-bottom: 1px solid rgba(119, 189, 212, 0.11);
   }
+
+  .micro-protocol-panel {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 600px) {
@@ -2047,6 +2147,10 @@ input[type='range'] {
   .content-screen,
   .home-screen {
     width: calc(100% - 32px);
+  }
+
+  .micro-protocol-grid {
+    grid-template-columns: 1fr;
   }
 
   .hero-copy h1 {

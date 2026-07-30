@@ -5,6 +5,7 @@ import {
   shapesIntersect,
 } from '../geometry/geometry.js'
 import { createSeededRandom, randomBetween, randomItem } from './seededRandom.js'
+import { dynamicObstacleEnvelope } from '../engine/DynamicObstacleSystem.js'
 
 function resolvePoint(specification, random) {
   if (specification.mode !== 'generated') {
@@ -138,10 +139,24 @@ function searchPath(
   return null
 }
 
+/**
+ * Tests whether a collision-safe route exists for the complete token.
+ *
+ * @pure
+ * @param {object} options Arena, token, endpoints, obstacles, and grid size.
+ * @returns {boolean} Whether the grid search reaches the target.
+ */
 export function pathExists(options) {
   return searchPath(options, false) !== null
 }
 
+/**
+ * Finds a collision-safe grid route for the complete configured token.
+ *
+ * @pure
+ * @param {object} options Arena, token, endpoints, obstacles, and grid size.
+ * @returns {import('../types.js').Point[]|null} Route in logical world units.
+ */
 export function findPath(options) {
   return searchPath(options, true)
 }
@@ -166,6 +181,13 @@ function makeGeneratedObstacle(level, random, index) {
   })
 }
 
+/**
+ * Performs fast semantic validation before deterministic generation.
+ *
+ * @pure
+ * @param {object} level Authored level configuration.
+ * @returns {string[]} Validation errors.
+ */
 export function validateLevel(level) {
   const errors = []
   if (level.schemaVersion !== 2) errors.push('Unsupported schema version.')
@@ -184,22 +206,60 @@ export function validateLevel(level) {
       errors.push(`Tracking obstacle ${tracker.id ?? 'unknown'} is missing motion settings.`)
     }
   }
+  for (const obstacle of level.dynamicObstacles ?? []) {
+    const behavior = obstacle.behavior
+    if (
+      behavior.type === 'phase' &&
+      behavior.solidMs + behavior.warningMs >= behavior.cycleMs
+    ) {
+      errors.push(
+        `Dynamic obstacle ${obstacle.id} requires a non-zero open phase.`,
+      )
+    }
+    if (
+      behavior.type === 'pulse' &&
+      behavior.minScale > behavior.maxScale
+    ) {
+      errors.push(
+        `Dynamic obstacle ${obstacle.id} has an inverted pulse scale.`,
+      )
+    }
+  }
+  const switchIds = new Set((level.switches ?? []).map((item) => item.id))
+  for (const obstacle of level.dynamicObstacles ?? []) {
+    if (
+      obstacle.behavior.type === 'switch' &&
+      !switchIds.has(obstacle.behavior.switchId)
+    ) {
+      errors.push(
+        `Dynamic obstacle ${obstacle.id} references unknown switch ${obstacle.behavior.switchId}.`,
+      )
+    }
+  }
   return errors
 }
 
+/**
+ * Validates generated entity containment, overlap, and hazard envelopes.
+ *
+ * @pure
+ * @param {object} level Generated runtime level.
+ * @returns {string[]} Unique placement errors.
+ */
 export function validateGeneratedPlacement(level) {
   const errors = []
   const hazards = [
     ...level.obstacles,
     ...level.movingObstacles,
     ...level.trackingObstacles,
+    ...(level.dynamicObstacles ?? []).flatMap(dynamicObstacleEnvelope),
   ]
   const orderedTargets = [
     level.token,
     level.mainTarget,
     ...level.bonusTargets,
   ]
-  const pickups = [...orderedTargets, ...level.coins]
+  const pickups = [...orderedTargets, ...level.coins, ...(level.switches ?? [])]
   for (const entity of [...hazards, ...pickups]) {
     if (!shapeInsideArena(entity, level.arena)) {
       errors.push(`${entity.id ?? entity.mediaId} is outside the arena`)
@@ -222,6 +282,12 @@ export function validateGeneratedPlacement(level) {
   const uniqueEntities = [...hazards, ...level.coins]
   for (let first = 0; first < uniqueEntities.length; first += 1) {
     for (let second = first + 1; second < uniqueEntities.length; second += 1) {
+      if (
+        uniqueEntities[first].dynamicEnvelope ||
+        uniqueEntities[second].dynamicEnvelope
+      ) {
+        continue
+      }
       if (shapesIntersect(uniqueEntities[first], uniqueEntities[second])) {
         errors.push(`${uniqueEntities[first].id} overlaps ${uniqueEntities[second].id}`)
       }
@@ -270,6 +336,15 @@ export function validateGeneratedPlacement(level) {
   return [...new Set(errors)]
 }
 
+/**
+ * Builds one deterministic, solvable runtime level from authored configuration.
+ *
+ * Coordinates and dimensions use the 1000 × 1000 logical world.
+ *
+ * @param {object} level Validated authored level.
+ * @returns {object} Generated runtime level with a validated route.
+ * @throws {Error} When configuration or generated placement is invalid.
+ */
 export function generateLevel(level) {
   const errors = validateLevel(level)
   if (errors.length) throw new Error(`${level.id}: ${errors.join(' ')}`)
@@ -296,6 +371,15 @@ export function generateLevel(level) {
   const manualObstacles = (level.manualObstacles ?? []).map(normalizeObstacle)
   const movingObstacles = (level.movingObstacles ?? []).map(normalizeObstacle)
   const trackingObstacles = (level.trackingObstacles ?? []).map(normalizeObstacle)
+  const dynamicObstacles = (level.dynamicObstacles ?? []).map(normalizeObstacle)
+  const switches = (level.switches ?? []).map((item) =>
+    normalizeShape({
+      ...item,
+      shape: 'circle',
+      width: item.size,
+      height: item.size,
+    }),
+  )
   const coins = (level.coins ?? []).map((coin) =>
     normalizeShape({ ...coin, shape: 'circle', width: coin.size, height: coin.size }),
   )
@@ -316,6 +400,8 @@ export function generateLevel(level) {
     })),
     ...trackingObstacles,
     ...movingObstacles,
+    ...dynamicObstacles.flatMap(dynamicObstacleEnvelope),
+    ...switches,
   ]
 
   for (let index = 0; index < level.generation.obstacleCount; index += 1) {
@@ -352,7 +438,12 @@ export function generateLevel(level) {
   }
 
   const obstacles = [...manualObstacles, ...generatedObstacles]
-  const configuredHazards = [...obstacles, ...movingObstacles, ...trackingObstacles]
+  const configuredHazards = [
+    ...obstacles,
+    ...movingObstacles,
+    ...trackingObstacles,
+    ...dynamicObstacles.flatMap(dynamicObstacleEnvelope),
+  ]
   if (
     !shapeInsideArena(token, level.arena) ||
     configuredHazards.some((obstacle) => shapesIntersect(token, obstacle))
@@ -382,7 +473,9 @@ export function generateLevel(level) {
     obstacles,
     movingObstacles,
     trackingObstacles,
+    dynamicObstacles,
     coins,
+    switches,
   })
   if (placementErrors.length) {
     throw new Error(`${level.id}: ${placementErrors.join('; ')}.`)
@@ -437,7 +530,9 @@ export function generateLevel(level) {
     obstacles,
     movingObstacles,
     trackingObstacles,
+    dynamicObstacles,
     coins,
+    switches,
     bonusTargets,
     validatedPath,
     generationSummary: {

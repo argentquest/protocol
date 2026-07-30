@@ -1,5 +1,12 @@
 import { calculateScore, directDistance } from '../scoring/scoreCalculator.js'
 
+/**
+ * Maps mutable engine session state into the canonical scoring formula.
+ *
+ * @pure
+ * @param {object} session Active engine session.
+ * @returns {object} Complete score breakdown in points.
+ */
 export function calculateSessionScore(session) {
   const benchmarkDistance = Math.max(
     1,

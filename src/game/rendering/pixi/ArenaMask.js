@@ -1,5 +1,12 @@
 import { Graphics } from 'pixi.js'
 
+/**
+ * Creates the Pixi mask matching the configured logical arena boundary.
+ *
+ * @param {object} arena Arena shape in the 1000 × 1000 logical world.
+ * @param {typeof Graphics} [GraphicsClass] Injectable Pixi class.
+ * @returns {Graphics} Filled arena mask.
+ */
 export function createArenaMask(arena, GraphicsClass = Graphics) {
   const mask = new GraphicsClass()
   if (arena.shape === 'ellipse') {

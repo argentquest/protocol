@@ -4,6 +4,12 @@ import {
   destroyWebGLApplication,
 } from './PixiApplication.js'
 
+/**
+ * Mounts exactly one imperative Pixi canvas and disposes it with React.
+ *
+ * @param {object} props Engine, media cache, level, and lifecycle callbacks.
+ * @returns {import('react').JSX.Element} Accessible arena host.
+ */
 export default function PixiCanvas({
   onReady,
   onError = () => {},

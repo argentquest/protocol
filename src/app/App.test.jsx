@@ -18,7 +18,7 @@ vi.mock('howler', () => {
   return { Howl: MockHowl, Howler: {} }
 })
 
-import App, { ConfigurationErrorScreen } from './App.jsx'
+import App, { ConfigurationErrorScreen, Results } from './App.jsx'
 
 describe('App', () => {
   afterEach(cleanup)
@@ -114,5 +114,49 @@ describe('App', () => {
       screen.getByRole('heading', { name: /could not initialize/i }),
     ).toBeInTheDocument()
     expect(screen.getByText(/mediaId is required/i)).toBeInTheDocument()
+  })
+
+  it('offers optional Micro Protocols from the completion screen', () => {
+    const onMicro = vi.fn()
+    render(
+      <Results
+        level={{ id: 'level-01', number: 1 }}
+        result={{
+          routeFactor: 0.9,
+          timeFactor: 0.8,
+          finalScore: 900,
+          attainableMaximum: 1000,
+          elapsedMs: 6000,
+          actualDistance: 800,
+          collisions: 0,
+          collisionPenalty: 0,
+          earnedBonuses: 0,
+        }}
+        improved
+        cumulative={900}
+        onReplay={() => {}}
+        onNext={() => {}}
+        onLevels={() => {}}
+        devMode={false}
+        protocols={[
+          {
+            id: 'phase-window',
+            name: 'Phase Window',
+            description: 'Cross two synchronized gates.',
+            rewardCoins: 3,
+            kind: 'timing',
+          },
+        ]}
+        microRecords={{}}
+        microNotice={null}
+        onMicro={onMicro}
+      />,
+    )
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /phase window/i }),
+    )
+    expect(onMicro).toHaveBeenCalledWith('phase-window')
+    expect(screen.getByText(/separate from campaign score/i)).toBeInTheDocument()
   })
 })

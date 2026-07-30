@@ -95,7 +95,7 @@ describe('V2 hazards, coins, and powers', () => {
     expect(bounded.y).toBeLessThanOrEqual(90)
   })
 
-  it('collides with a moving hazard only at its current position', () => {
+  it('collides across the complete moving-hazard sweep for each fixed step', () => {
     const level = poweredLevel()
     level.startPoint = { x: 500, y: 500 }
     level.movingObstacles = [
@@ -120,7 +120,7 @@ describe('V2 hazards, coins, and powers', () => {
 
     const clearResult = clearEngine.step(100)
     expect(clearEngine.session.movingObstacles[0].currentX).toBeCloseTo(600)
-    expect(clearResult.collision).toBe(false)
+    expect(clearResult.collision).toBe(true)
 
     const contactEngine = new GameEngine(level, { generate: (value) => value })
     contactEngine.startAttempt('pointer')

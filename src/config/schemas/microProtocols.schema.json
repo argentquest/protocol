@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://path-protocol.local/schemas/microProtocols.schema.json",
+  "title": "Path Protocol micro-protocol registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "protocols"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "protocols": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "levelId",
+          "name",
+          "description",
+          "rewardCoins",
+          "kind"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "levelId": { "type": "string", "pattern": "^level-9[0-9]$" },
+          "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+          "description": { "type": "string", "minLength": 1, "maxLength": 180 },
+          "rewardCoins": { "type": "integer", "minimum": 0, "maximum": 1000 },
+          "kind": {
+            "enum": ["timing", "prediction", "precision", "switching"]
+          }
+        }
+      }
+    }
+  }
+}

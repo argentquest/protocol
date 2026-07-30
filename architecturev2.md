@@ -296,6 +296,25 @@ Tracking obstacles:
 - Never rotate their visual or collision shape unless a future level explicitly
   introduces rotation.
 
+### 10.1 Dynamic obstacle behaviors
+
+Configuration-driven dynamic obstacles extend the fixed-step hazard system
+without moving gameplay rules into Pixi or React. The initial behavior set is:
+
+- `phase`: alternates through solid, open, and warning states.
+- `orbit`: moves the obstacle center around an elliptical path.
+- `pulse`: changes authoritative width and height within validated bounds.
+- `switch`: becomes solid or open from engine-owned contact-switch state.
+
+Collision and rendering consume the same time-resolved obstacle state. Dynamic
+collision uses both previous and current transforms so fast hazards cannot
+tunnel through the complete token between 60 Hz updates. Phase warnings remain
+legible when reduced motion is enabled.
+
+Contact switches support one-shot, timed, and toggle activation. Raw input never
+activates a switch directly; activation occurs during the fixed engine update
+after complete-token contact is evaluated.
+
 ## 11. Trail rendering and scoring distance
 
 The player's actual path remains visible.
@@ -816,9 +835,23 @@ One versioned local-storage record contains:
 - Power inventory.
 - Audio preferences.
 - Reduced-motion preference.
+- Micro Protocol best scores, best times, attempts, and one-time reward claims.
 
 Malformed or obsolete records are validated and migrated safely. An in-progress
 attempt and raw path samples are never persisted.
+
+### 21.1 Micro Protocols
+
+Micro Protocols are optional short challenges offered from the completion
+screen. They reuse the normal validated level, engine, Pixi, input, and audio
+pipeline and therefore never mount multiple live gameplay canvases.
+
+- Micro scores do not contribute to campaign cumulative score or unlocks.
+- First clears may grant a small configured one-time coin reward.
+- Failure or exit returns to the parent campaign result.
+- Power charges and course-coin progress are not consumed.
+- Their compact layouts teach phase, orbit, pulse, and switch behaviors before
+  those behaviors are combined in later campaign levels.
 
 ## 22. Development diagnostics
 

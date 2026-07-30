@@ -1,3 +1,9 @@
+/**
+ * Presents the bank-or-pursue decision for one ordered bonus target.
+ *
+ * @param {object} props Dialog properties.
+ * @returns {import('react').JSX.Element} Accessible modal content.
+ */
 export default function BonusDialog({ reward, onBank, onPursue }) {
   return (
     <div className="bonus-dialog-backdrop">

@@ -13,6 +13,12 @@ export const SCENE_LAYER_ORDER = Object.freeze([
   'collisionGuide',
 ])
 
+/**
+ * Creates stable Pixi containers in deterministic back-to-front order.
+ *
+ * @param {typeof Container} [ContainerClass] Injectable Pixi class.
+ * @returns {{root: Container, layers: Record<string, Container>}} Scene graph.
+ */
 export function createSceneLayers(ContainerClass = Container) {
   const root = new ContainerClass()
   root.label = 'world'

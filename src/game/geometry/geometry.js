@@ -1,13 +1,37 @@
 const EPSILON = 0.0001
 
+/**
+ * Computes Euclidean separation between two world points.
+ *
+ * @pure
+ * @param {import('../types.js').Point} a First point.
+ * @param {import('../types.js').Point} b Second point.
+ * @returns {number} Distance in logical world units.
+ */
 export function distance(a, b) {
   return Math.hypot(b.x - a.x, b.y - a.y)
 }
 
+/**
+ * Restricts a scalar to an inclusive range.
+ *
+ * @pure
+ * @param {number} value Input value.
+ * @param {number} minimum Inclusive minimum.
+ * @param {number} maximum Inclusive maximum.
+ * @returns {number} Bounded value.
+ */
 export function clamp(value, minimum, maximum) {
   return Math.max(minimum, Math.min(maximum, value))
 }
 
+/**
+ * Normalizes shorthand size into explicit logical width and height.
+ *
+ * @pure
+ * @param {object} shape Source geometry.
+ * @returns {object} Shape with explicit dimensions in logical world units.
+ */
 export function normalizeShape(shape) {
   const size = shape.size ?? 0
   return {
@@ -35,6 +59,13 @@ export function insetShape(shapeInput, toleranceUnits = 0) {
   }
 }
 
+/**
+ * Converts rectangle, diamond, or polygon geometry to world-space vertices.
+ *
+ * @pure
+ * @param {object} input Shape in logical world coordinates.
+ * @returns {import('../types.js').Point[]} Polygon vertices.
+ */
 export function polygonForShape(input) {
   const shape = normalizeShape(input)
   const halfWidth = shape.width / 2
@@ -61,6 +92,14 @@ export function polygonForShape(input) {
   ]
 }
 
+/**
+ * Tests whether a world point lies inside a polygon.
+ *
+ * @pure
+ * @param {import('../types.js').Point} point Point in logical world units.
+ * @param {import('../types.js').Point[]} polygon Polygon vertices.
+ * @returns {boolean} Whether the point is inside.
+ */
 export function pointInPolygon(point, polygon) {
   let inside = false
   for (let current = 0, previous = polygon.length - 1; current < polygon.length; previous = current, current += 1) {
@@ -130,6 +169,14 @@ function polygonsIntersect(first, second) {
   return true
 }
 
+/**
+ * Tests two complete collision shapes for overlap.
+ *
+ * @pure
+ * @param {object} firstInput First collision shape.
+ * @param {object} secondInput Second collision shape.
+ * @returns {boolean} Whether the shapes touch or overlap.
+ */
 export function shapesIntersect(firstInput, secondInput) {
   const first = normalizeShape(firstInput)
   const second = normalizeShape(secondInput)
@@ -168,6 +215,14 @@ function sampleCircle(shape, count = 20) {
   })
 }
 
+/**
+ * Tests whether an entire shape is contained by the configured arena.
+ *
+ * @pure
+ * @param {object} shapeInput Collision shape in logical world coordinates.
+ * @param {object} arena Arena boundary configuration.
+ * @returns {boolean} Whether every sampled edge point remains inside.
+ */
 export function shapeInsideArena(shapeInput, arena) {
   const shape = normalizeShape(shapeInput)
   const samples = shape.shape === 'circle' ? sampleCircle(shape) : polygonForShape(shape)
@@ -198,15 +253,65 @@ export function shapeInsideArena(shapeInput, arena) {
   )
 }
 
+/**
+ * Tests arena containment and obstacle clearance at one position.
+ *
+ * @pure
+ * @param {object} token Token collision shape.
+ * @param {object} arena Arena boundary.
+ * @param {object[]} obstacles Static or time-resolved obstacle shapes.
+ * @returns {boolean} Whether the token position is safe.
+ */
 export function isSafePosition(token, arena, obstacles) {
   if (!shapeInsideArena(token, arena)) return false
   return !obstacles.some((obstacle) => shapesIntersect(token, obstacle))
 }
 
-export function sweepShape(from, to, shape, arena, obstacles) {
-  const travel = distance(from, to)
-  const sampleDistance = Math.max(4, Math.min(shape.width, shape.height) / 4)
-  const steps = Math.max(1, Math.ceil(travel / sampleDistance))
+/**
+ * Samples movement between two positions to prevent collision tunneling.
+ *
+ * @pure
+ * @param {import('../types.js').Point} from Safe starting position.
+ * @param {import('../types.js').Point} to Requested ending position.
+ * @param {object} shape Token geometry at the starting position.
+ * @param {object} arena Arena boundary.
+ * @param {object[]} obstacles Obstacle shapes at the end of the fixed step.
+ * @param {object[]} [previousObstacles=obstacles] Matching obstacle shapes at the start of the fixed step.
+ * @returns {{safe: boolean, point: import('../types.js').Point, collisionType?: string}} Sweep result.
+ */
+export function sweepShape(
+  from,
+  to,
+  shape,
+  arena,
+  obstacles,
+  previousObstacles = obstacles,
+) {
+  const tokenTravel = distance(from, to)
+  const previousById = new Map(
+    previousObstacles.map((obstacle, index) => [
+      obstacle.id ?? `obstacle-${index}`,
+      obstacle,
+    ]),
+  )
+  let maximumRelativeTravel = tokenTravel
+  let smallestDimension = Math.min(shape.width, shape.height)
+  for (let index = 0; index < obstacles.length; index += 1) {
+    const obstacle = obstacles[index]
+    const previous =
+      previousById.get(obstacle.id ?? `obstacle-${index}`) ?? obstacle
+    maximumRelativeTravel = Math.max(
+      maximumRelativeTravel,
+      tokenTravel + distance(previous, obstacle),
+    )
+    smallestDimension = Math.min(
+      smallestDimension,
+      obstacle.width,
+      obstacle.height,
+    )
+  }
+  const sampleDistance = Math.max(2, smallestDimension / 4)
+  const steps = Math.max(1, Math.ceil(maximumRelativeTravel / sampleDistance))
 
   for (let step = 1; step <= steps; step += 1) {
     const amount = step / steps
@@ -218,7 +323,24 @@ export function sweepShape(from, to, shape, arena, obstacles) {
     if (!shapeInsideArena(candidate, arena)) {
       return { safe: false, point: candidate, collisionType: 'boundary' }
     }
-    if (obstacles.some((obstacle) => shapesIntersect(candidate, obstacle))) {
+    const resolvedObstacles = obstacles.map((obstacle, index) => {
+      const previous =
+        previousById.get(obstacle.id ?? `obstacle-${index}`) ?? obstacle
+      return {
+        ...obstacle,
+        x: previous.x + (obstacle.x - previous.x) * amount,
+        y: previous.y + (obstacle.y - previous.y) * amount,
+        width:
+          previous.width + (obstacle.width - previous.width) * amount,
+        height:
+          previous.height + (obstacle.height - previous.height) * amount,
+      }
+    })
+    if (
+      resolvedObstacles.some((obstacle) =>
+        shapesIntersect(candidate, obstacle),
+      )
+    ) {
       return { safe: false, point: candidate, collisionType: 'obstacle' }
     }
   }
@@ -226,6 +348,14 @@ export function sweepShape(from, to, shape, arena, obstacles) {
   return { safe: true, point: to }
 }
 
+/**
+ * Resolves a sinusoidal moving obstacle at simulation time.
+ *
+ * @pure
+ * @param {object} obstacle Moving-obstacle configuration.
+ * @param {number} elapsedMs Hazard simulation time in milliseconds.
+ * @returns {object} Obstacle with current world coordinates.
+ */
 export function currentMovingObstacle(obstacle, elapsedMs) {
   const angle = (elapsedMs / obstacle.periodMs) * Math.PI * 2 + (obstacle.phase ?? 0)
   const offset = Math.sin(angle) * obstacle.amplitude
@@ -236,6 +366,16 @@ export function currentMovingObstacle(obstacle, elapsedMs) {
   }
 }
 
+/**
+ * Smoothly follows a pointer target with frame-rate-independent response.
+ *
+ * @pure
+ * @param {import('../types.js').Point} from Current position in world units.
+ * @param {import('../types.js').Point} target Desired position in world units.
+ * @param {number} deltaMs Step duration in milliseconds.
+ * @param {number} responsePerSecond Exponential response rate per second.
+ * @returns {import('../types.js').Point} Next position.
+ */
 export function followPointer(from, target, deltaMs, responsePerSecond) {
   const boundedDelta = Math.max(0, Math.min(deltaMs, 50))
   const blend = 1 - Math.exp(-responsePerSecond * (boundedDelta / 1000))
@@ -245,6 +385,16 @@ export function followPointer(from, target, deltaMs, responsePerSecond) {
   }
 }
 
+/**
+ * Advances a tracking hazard with bounded acceleration, turn rate, and zone.
+ *
+ * @pure
+ * @param {object} obstacle Tracking-obstacle configuration; speed uses world units/second.
+ * @param {object|null} previousState Previous position, velocity, and heading.
+ * @param {import('../types.js').Point} target Token center in world units.
+ * @param {number} deltaMs Step duration in milliseconds.
+ * @returns {object} Next tracking state with heading in radians.
+ */
 export function advanceTrackingObstacle(obstacle, previousState, target, deltaMs) {
   const state = {
     x: previousState?.x ?? obstacle.x,

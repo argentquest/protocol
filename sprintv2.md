@@ -59,6 +59,7 @@ Sizes express relative complexity and risk, not calendar estimates.
 | Sprint 11 | Campaign migration and validation | `DONE` |
 | Sprint 12 | Quality, Docker, and release readiness | `IN PROGRESS` |
 | Sprint 13 | Campaign expansion to 70 levels | `DONE` |
+| Sprint 14 | Dynamic obstacle variety and Micro Protocols | `DONE` |
 
 ---
 
@@ -479,6 +480,35 @@ levels with a balanced standard tier and a new apex tier.
 
 ---
 
+## Sprint 14 — Dynamic Obstacle Variety and Micro Protocols
+
+**Outcome:** Repeated expansion layouts gain distinct timing, prediction,
+precision, and route-planning decisions, while optional post-completion
+challenges teach each behavior in isolation.
+
+| ID | Task | Size | Status | Short description |
+|---|---|---:|---|---|
+| V2-S14-01 | Sweep dynamic collision relatively | L | `DONE` | Test token and hazard movement across the complete fixed-step interval. |
+| V2-S14-02 | Add dynamic behavior contract | L | `DONE` | Validate and resolve phase, orbit, pulse, and switch obstacle behaviors. |
+| V2-S14-03 | Implement phase gates | L | `DONE` | Add solid, warning, and open states with shared engine/renderer geometry. |
+| V2-S14-04 | Implement orbit and pulse hazards | L | `DONE` | Add elliptical movement and time-varying authoritative dimensions. |
+| V2-S14-05 | Implement contact switches | L | `DONE` | Support once, timed, and toggle switches with linked barriers. |
+| V2-S14-06 | Add default visual media | M | `DONE` | Add phase, orbit, pulse, barrier, and switch-pad SVG assets and manifests. |
+| V2-S14-07 | Add Micro Protocol flow | XL | `DONE` | Offer optional short challenges from results through the single Pixi canvas. |
+| V2-S14-08 | Persist Micro Protocol records | M | `DONE` | Migrate storage and retain separate bests and one-time rewards. |
+| V2-S14-09 | Diversify expansion chambers | L | `DONE` | Replace repeated seeded-only variants with new obstacle decisions. |
+| V2-S14-10 | Complete release verification | XL | `DONE` | Run full unit, lint, build, and relevant browser gates. |
+
+### Sprint 14 exit criteria
+
+- Dynamic obstacles remain deterministic at the fixed 60 Hz simulation rate.
+- Collision covers complete token and hazard motion between updates.
+- Phase, orbit, pulse, and switch behavior share validated configuration.
+- Micro Protocol records never alter cumulative campaign score.
+- Default media, configuration, unit, build, and browser checks pass.
+
+---
+
 ## 4. Dependency sequence
 
 ```text
@@ -496,6 +526,7 @@ Sprint 0: Decisions and branch
                   → Sprint 11: Campaign migration
                     → Sprint 12: Quality and release
                       → Sprint 13: Campaign expansion
+                        → Sprint 14: Dynamic obstacles and Micro Protocols
 ```
 
 Some tasks may overlap after their contracts stabilize. For example, WAV asset

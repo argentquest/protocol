@@ -1,5 +1,12 @@
 import { calculateSessionScore } from './ScoringSystem.js'
 
+/**
+ * Creates an immutable, serializable HUD projection of engine state.
+ *
+ * @param {object} session Active engine session.
+ * @param {string} phase Current state-machine phase.
+ * @returns {import('../types.js').HudSnapshot} React-safe HUD snapshot.
+ */
 export function createHudSnapshot(session, phase) {
   const score = calculateSessionScore(session)
   return Object.freeze({

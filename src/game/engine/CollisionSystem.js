@@ -14,6 +14,14 @@ function currentToken(session, position) {
   )
 }
 
+/**
+ * Tests whether the complete token shape contains a world point.
+ *
+ * @pure
+ * @param {object} token Token collision geometry.
+ * @param {import('../types.js').Point} point Point in logical world units.
+ * @returns {boolean} Whether the point touches the token.
+ */
 export function tokenContainsPoint(token, point) {
   return shapesIntersect(token, {
     shape: 'circle',
@@ -24,11 +32,24 @@ export function tokenContainsPoint(token, point) {
   })
 }
 
+/**
+ * Advances token motion, performs swept collision, and mutates session state.
+ *
+ * @param {object} session Active engine session.
+ * @param {number} stepMs Fixed-step duration in milliseconds.
+ * @param {object} [options] Time-resolved collision inputs.
+ * @param {object[]} [options.obstacles] Current obstacle shapes.
+ * @param {object[]} [options.previousObstacles=options.obstacles] Obstacle shapes from the previous fixed step.
+ * @param {boolean} [options.obstacleShield=false] Ignore obstacle collisions.
+ * @param {boolean} [options.fullShield=false] Ignore obstacle and boundary collisions.
+ * @returns {object} Movement and discrete collision outcome.
+ */
 export function advanceTokenWithCollisions(
   session,
   stepMs,
   {
     obstacles = session.level.obstacles,
+    previousObstacles = obstacles,
     obstacleShield = false,
     fullShield = false,
   } = {},
@@ -58,6 +79,7 @@ export function advanceTokenWithCollisions(
     currentToken(session, session.token.lastSafePosition),
     session.level.arena,
     obstacles,
+    previousObstacles,
   )
   const shielded =
     fullShield || (swept.collisionType === 'obstacle' && obstacleShield)

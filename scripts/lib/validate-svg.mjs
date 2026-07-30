@@ -12,6 +12,14 @@ const forbiddenElements = [
   'use',
 ]
 
+/**
+ * Validates a vector asset against the centered Pixi-compatible SVG contract.
+ *
+ * @pure
+ * @param {string} source SVG source text.
+ * @param {string} [label='SVG'] Diagnostic asset label.
+ * @returns {string[]} Validation errors.
+ */
 export function validateSvgSource(source, label = 'SVG') {
   const errors = []
   const normalized = source.trim()

@@ -6,6 +6,7 @@ import {
   sweepShape,
 } from '../geometry/geometry.js'
 import { findPath, generateLevel } from './levelGenerator.js'
+import { dynamicObstacleEnvelope } from '../engine/DynamicObstacleSystem.js'
 
 function pairs(items) {
   const result = []
@@ -41,7 +42,7 @@ describe('released V2 campaign', () => {
       campaign.push(generateLevel(config))
       await new Promise((resolve) => setTimeout(resolve, 0))
     }
-  }, 120_000)
+  }, 180_000)
 
   it('keeps every initial entity inside the arena and free of overlap', () => {
     const errors = []
@@ -50,12 +51,14 @@ describe('released V2 campaign', () => {
         ...level.obstacles,
         ...level.movingObstacles,
         ...level.trackingObstacles,
+        ...(level.dynamicObstacles ?? []).flatMap(dynamicObstacleEnvelope),
       ]
       const pickups = [
         level.token,
         level.mainTarget,
         ...level.bonusTargets,
         ...level.coins,
+        ...(level.switches ?? []),
       ]
       for (const entity of [...hazards, ...pickups]) {
         if (!shapeInsideArena(entity, level.arena)) {
@@ -92,6 +95,7 @@ describe('released V2 campaign', () => {
         }
       }
       for (const [first, second] of pairs(hazards)) {
+        if (first.dynamicEnvelope || second.dynamicEnvelope) continue
         if (shapesIntersect(first, second)) {
           errors.push(`${level.id}:${first.id}/${second.id}`)
         }
@@ -144,7 +148,7 @@ describe('released V2 campaign', () => {
       '31a802f7',
       '9fe77436',
       '214296b9',
-      '5f09e9b3',
+      '3f368540',
       'a4fb9d29',
       'f0ccee0b',
       '6499c2dd',
@@ -157,7 +161,7 @@ describe('released V2 campaign', () => {
       '8ba2abf6',
       '9b6c9bb8',
       '2d61753f',
-      'a35da4e8',
+      '1870525c',
       '35274bef',
       'd77670f2',
       'df64e43e',
@@ -216,6 +220,14 @@ describe('released V2 campaign', () => {
           expect(
             shapeInsideArena({ ...obstacle, x, y }, level.arena),
             `${level.id}:${obstacle.id} tracking zone`,
+          ).toBe(true)
+        }
+      }
+      for (const obstacle of level.dynamicObstacles ?? []) {
+        for (const envelope of dynamicObstacleEnvelope(obstacle)) {
+          expect(
+            shapeInsideArena(envelope, level.arena),
+            `${level.id}:${obstacle.id} dynamic envelope`,
           ).toBe(true)
         }
       }

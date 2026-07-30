@@ -4,6 +4,7 @@ import {
   configurationStatus,
   gameplayConfig,
   levels as levelConfigs,
+  microProtocols,
   powerups,
 } from '../config/loadConfig.js'
 import GameView from '../game/GameView.jsx'
@@ -20,10 +21,12 @@ import {
   purchasePowerup,
   recordFailedAttempt,
   recordLevelResult,
+  recordMicroProtocolResult,
   resetProgress,
   saveProgress,
 } from '../persistence/progressStore.js'
 
+/** Renders the reusable Path Protocol wordmark. */
 function ProtocolMark({ compact = false }) {
   return (
     <div className={`protocol-mark ${compact ? 'protocol-mark--compact' : ''}`} aria-hidden="true">
@@ -37,6 +40,7 @@ function ProtocolMark({ compact = false }) {
   )
 }
 
+/** Displays asset-preload progress and the user-gesture start action. */
 function StartupScreen({ startup, onStart, onRetry }) {
   const ready = startup.status === 'ready'
   const failed = startup.status === 'error'
@@ -77,6 +81,7 @@ function StartupScreen({ startup, onStart, onRetry }) {
   )
 }
 
+/** Renders navigation and persistent campaign resources outside gameplay. */
 function ShellHeader({
   onHome,
   onLevels,
@@ -119,6 +124,7 @@ function ShellHeader({
   )
 }
 
+/** Presents the campaign entry point, progress summary, and Dev mode toggle. */
 function HomeScreen({
   progress,
   totalScore,
@@ -245,6 +251,7 @@ function HomeScreen({
   )
 }
 
+/** Renders unlocked or development-accessible campaign levels. */
 function LevelSelect({ levels, progress, onSelect, onPowers, devMode }) {
   return (
     <main className="content-screen">
@@ -316,6 +323,7 @@ function LevelSelect({ levels, progress, onSelect, onPowers, devMode }) {
   )
 }
 
+/** Presents score-gated consumable powers and coin purchases. */
 function PowerLab({ progress, totalScore, onPurchase }) {
   return (
     <main className="content-screen">
@@ -380,6 +388,7 @@ function PowerLab({ progress, totalScore, onPurchase }) {
   )
 }
 
+/** Presents accessible mouse, keyboard, scoring, and power instructions. */
 function Instructions() {
   return (
     <main className="content-screen guide-screen">
@@ -434,6 +443,7 @@ function Instructions() {
   )
 }
 
+/** Presents persisted audio, motion, and progress-reset controls. */
 function Settings({ settings, onChange, onReset }) {
   const update = (key, value) => onChange({ ...settings, [key]: value })
   return (
@@ -534,7 +544,13 @@ function Settings({ settings, onChange, onReset }) {
   )
 }
 
-function Results({
+/**
+ * Presents a completed attempt, Micro Protocols, rewards, and navigation.
+ *
+ * @param {object} props Result screen properties.
+ * @returns {import('react').JSX.Element} Completion result screen.
+ */
+export function Results({
   level,
   result,
   improved,
@@ -543,6 +559,10 @@ function Results({
   onNext,
   onLevels,
   devMode,
+  protocols,
+  microRecords,
+  microNotice,
+  onMicro,
 }) {
   const efficiency = Math.round(result.routeFactor * 100)
   const timeRating = Math.round(result.timeFactor * 100)
@@ -584,6 +604,46 @@ function Results({
           </small>
         </div>
       </div>
+      <section
+        className="micro-protocol-panel"
+        aria-labelledby="micro-protocol-heading"
+      >
+        <div>
+          <p className="eyebrow">Optional signal fragments</p>
+          <h2 id="micro-protocol-heading">Micro Protocols</h2>
+          <p>
+            Short challenges test one hazard behavior. Their records stay
+            separate from campaign score.
+          </p>
+          {microNotice && (
+            <p className="micro-protocol-notice" role="status">
+              {microNotice}
+            </p>
+          )}
+        </div>
+        <div className="micro-protocol-grid">
+          {protocols.map((protocol) => {
+            const record = microRecords[protocol.id]
+            return (
+              <button
+                key={protocol.id}
+                className={`micro-protocol-card micro-protocol-card--${protocol.kind}`}
+                type="button"
+                onClick={() => onMicro(protocol.id)}
+              >
+                <span>{record?.completed ? 'CLEARED' : 'AVAILABLE'}</span>
+                <strong>{protocol.name}</strong>
+                <small>{protocol.description}</small>
+                <b>
+                  {record?.completed
+                    ? `Best ${record.bestScore.toLocaleString()}`
+                    : `First clear +${protocol.rewardCoins} coins`}
+                </b>
+              </button>
+            )
+          })}
+        </div>
+      </section>
       <div className="results-actions">
         {level.number < levelConfigs.length && (
           <button className="primary-button" type="button" onClick={onNext}>
@@ -608,18 +668,30 @@ function Results({
  *
  * @returns {boolean} Whether isolated developer playtesting is active.
  */
+/**
+ * Resolves the initial development-access override from environment and URL.
+ *
+ * @returns {boolean} Whether all levels should initially be accessible.
+ */
 function initialDevMode() {
   const override = new URLSearchParams(window.location.search).get('dev')
   if (override !== null) return override === '1'
   return import.meta.env.DEV
 }
 
+/**
+ * Owns startup, navigation, progress, settings, audio, and gameplay screens.
+ *
+ * @returns {import('react').JSX.Element} Path Protocol application shell.
+ */
 function PathProtocolApp() {
   const [devMode, setDevMode] = useState(initialDevMode)
   const [progress, setProgress] = useState(() => loadProgress())
   const [screen, setScreen] = useState('home')
   const [selectedLevelId, setSelectedLevelId] = useState('level-01')
+  const [selectedMicroId, setSelectedMicroId] = useState(null)
   const [lastResult, setLastResult] = useState(null)
+  const [microNotice, setMicroNotice] = useState(null)
   const [mediaManifest, setMediaManifest] = useState(null)
   const [startupAttempt, setStartupAttempt] = useState(0)
   const [startup, setStartup] = useState({
@@ -629,8 +701,12 @@ function PathProtocolApp() {
     error: null,
   })
   const [started, setStarted] = useState(false)
+  const currentMicroProtocol =
+    microProtocols.find((protocol) => protocol.id === selectedMicroId) ?? null
   const selectedConfig =
-    levelConfigs.find((level) => level.id === selectedLevelId) ?? levelConfigs[0]
+    currentMicroProtocol?.level ??
+    levelConfigs.find((level) => level.id === selectedLevelId) ??
+    levelConfigs[0]
   const currentLevel = useMemo(() => generateLevel(selectedConfig), [selectedConfig])
   const totalScore = cumulativeScore(progress)
   const audioRef = useRef(null)
@@ -728,8 +804,16 @@ function PathProtocolApp() {
   }
 
   const playLevel = (levelId) => {
+    setSelectedMicroId(null)
     setSelectedLevelId(levelId)
     setLastResult(null)
+    setMicroNotice(null)
+    navigate('game')
+  }
+
+  const playMicroProtocol = (protocolId) => {
+    setSelectedMicroId(protocolId)
+    setMicroNotice(null)
     navigate('game')
   }
 
@@ -739,6 +823,33 @@ function PathProtocolApp() {
   }
 
   const handleComplete = (result) => {
+    if (currentMicroProtocol) {
+      if (devMode) {
+        recordPlaytestRun(currentLevel, result)
+        setMicroNotice(`${currentMicroProtocol.name} playtest run captured.`)
+        setSelectedMicroId(null)
+        setScreen('results')
+        return
+      }
+      const recorded = recordMicroProtocolResult(
+        progressRef.current,
+        currentMicroProtocol,
+        result,
+      )
+      progressRef.current = recorded.progress
+      saveProgress(recorded.progress)
+      setProgress(recorded.progress)
+      setMicroNotice(
+        recorded.coinsEarned
+          ? `${currentMicroProtocol.name} cleared — +${recorded.coinsEarned} coins.`
+          : `${currentMicroProtocol.name} cleared${
+              recorded.improved ? ' with a new record' : ''
+            }.`,
+      )
+      setSelectedMicroId(null)
+      setScreen('results')
+      return
+    }
     if (devMode) {
       recordPlaytestRun(currentLevel, result)
       setLastResult({ result, improved: false, level: currentLevel })
@@ -759,7 +870,7 @@ function PathProtocolApp() {
   }
 
   const handleFailedAttempt = () => {
-    if (devMode) return
+    if (devMode || currentMicroProtocol) return
     setProgress((current) => {
       const updated = recordFailedAttempt(current, currentLevel.id)
       saveProgress(updated)
@@ -794,6 +905,7 @@ function PathProtocolApp() {
   }
 
   const handleCoinCollected = (coin) => {
+    if (currentMicroProtocol) return false
     if (devMode) return true
     const collection = collectCourseCoin(progressRef.current, currentLevel.id, coin)
     if (!collection.collected) return false
@@ -903,20 +1015,37 @@ function PathProtocolApp() {
         <GameView
           key={currentLevel.id}
           level={currentLevel}
-          levelBest={progress.levels[currentLevel.id]?.bestScore ?? 0}
+          levelBest={
+            currentMicroProtocol
+              ? progress.microProtocols[currentMicroProtocol.id]?.bestScore ?? 0
+              : progress.levels[currentLevel.id]?.bestScore ?? 0
+          }
           cumulative={totalScore}
           audio={audioRef.current}
           onComplete={handleComplete}
           onAttemptFailed={handleFailedAttempt}
-          onExit={() => navigate('levels')}
+          onExit={() => {
+            if (currentMicroProtocol) {
+              setSelectedMicroId(null)
+              navigate('results')
+            } else {
+              navigate('levels')
+            }
+          }}
           devMode={devMode}
           onPreviousLevel={previousLevel}
           onNextLevel={nextLevel}
           totalLevels={levelConfigs.length}
           powerups={powerups}
-          inventory={progress.player.inventory}
-          collectedCoins={progress.player.collectedCoins}
-          onUsePowerup={handleUsePowerup}
+          inventory={
+            currentMicroProtocol ? {} : progress.player.inventory
+          }
+          collectedCoins={
+            currentMicroProtocol ? {} : progress.player.collectedCoins
+          }
+          onUsePowerup={
+            currentMicroProtocol ? () => false : handleUsePowerup
+          }
           onCoinCollected={handleCoinCollected}
           mediaManifest={mediaManifest}
           reducedMotion={progress.settings.reducedMotion}
@@ -934,6 +1063,7 @@ function PathProtocolApp() {
           keyboardSpeedUnitsPerSecond={
             gameplayConfig.input.keyboardSpeedUnitsPerSecond
           }
+          microProtocol={currentMicroProtocol}
         />
       )}
       {screen === 'results' && lastResult && (
@@ -946,6 +1076,10 @@ function PathProtocolApp() {
           onNext={nextLevel}
           onLevels={() => navigate('levels')}
           devMode={devMode}
+          protocols={microProtocols}
+          microRecords={progress.microProtocols}
+          microNotice={microNotice}
+          onMicro={playMicroProtocol}
         />
       )}
 
@@ -959,6 +1093,12 @@ function PathProtocolApp() {
   )
 }
 
+/**
+ * Displays actionable development configuration failures safely.
+ *
+ * @param {{errors: string[]}} props Validation failures.
+ * @returns {import('react').JSX.Element} Configuration error screen.
+ */
 export function ConfigurationErrorScreen({ errors }) {
   return (
     <main className="configuration-error" role="alert">
@@ -976,6 +1116,11 @@ export function ConfigurationErrorScreen({ errors }) {
   )
 }
 
+/**
+ * Selects the validated application or safe configuration-error boundary.
+ *
+ * @returns {import('react').JSX.Element} Root application.
+ */
 export default function App() {
   if (!configurationStatus.valid) {
     return <ConfigurationErrorScreen errors={configurationStatus.errors} />

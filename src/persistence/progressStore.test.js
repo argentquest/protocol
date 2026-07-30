@@ -8,6 +8,7 @@ import {
   loadProgress,
   purchasePowerup,
   recordLevelResult,
+  recordMicroProtocolResult,
   saveProgress,
 } from './progressStore.js'
 
@@ -79,11 +80,12 @@ describe('progressStore', () => {
     storage.setItem(STORAGE_KEY, JSON.stringify(legacy))
 
     const migrated = loadProgress(storage)
-    expect(migrated.schemaVersion).toBe(2)
+    expect(migrated.schemaVersion).toBe(3)
     expect(migrated.player.coins).toBe(17)
     expect(migrated.levels['level-01'].bestScore).toBe(8123)
     expect(migrated.settings.reducedMotion).toBe(true)
-    expect(JSON.parse(storage.getItem(STORAGE_KEY)).schemaVersion).toBe(2)
+    expect(JSON.parse(storage.getItem(STORAGE_KEY)).schemaVersion).toBe(3)
+    expect(migrated.microProtocols).toEqual({})
   })
 
   it('collects each configured course coin only once', () => {
@@ -113,5 +115,30 @@ describe('progressStore', () => {
     expect(use.consumed).toBe(true)
     expect(use.progress.player.inventory[powerup.id]).toBe(0)
     expect(secondUse.consumed).toBe(false)
+  })
+
+  it('records Micro Protocol results separately and grants one-time coins', () => {
+    const initial = createInitialProgress()
+    const protocol = { id: 'phase-window', rewardCoins: 3 }
+    const first = recordMicroProtocolResult(initial, protocol, {
+      finalScore: 850,
+      elapsedMs: 9000,
+    })
+    const replay = recordMicroProtocolResult(first.progress, protocol, {
+      finalScore: 900,
+      elapsedMs: 8500,
+    })
+
+    expect(first.coinsEarned).toBe(3)
+    expect(replay.coinsEarned).toBe(0)
+    expect(replay.progress.player.coins).toBe(3)
+    expect(replay.progress.microProtocols['phase-window']).toMatchObject({
+      completed: true,
+      bestScore: 900,
+      bestTimeMs: 8500,
+      attempts: 2,
+      rewardClaimed: true,
+    })
+    expect(cumulativeScore(replay.progress)).toBe(0)
   })
 })

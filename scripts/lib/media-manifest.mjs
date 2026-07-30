@@ -47,6 +47,14 @@ async function listFiles(directory) {
   }
 }
 
+/**
+ * Finds files that do not map to registered visual or sound IDs.
+ *
+ * @param {string} root Media-library root path.
+ * @param {object} mediaRegistry Visual registry.
+ * @param {object} soundRegistry Sound registry.
+ * @returns {Promise<string[]>} Unknown relative paths.
+ */
 export async function findUnknownMediaFiles(root, mediaRegistry, soundRegistry) {
   const unknown = []
   const categories = [...new Set(mediaRegistry.media.map((entry) => entry.category))]
@@ -77,6 +85,14 @@ export async function findUnknownMediaFiles(root, mediaRegistry, soundRegistry) 
   return unknown.sort()
 }
 
+/**
+ * Tests whether a theme playback entry completely overrides its default.
+ *
+ * @pure
+ * @param {object} entry Playback settings.
+ * @param {'ambience'|'effects'} channel Audio channel.
+ * @returns {boolean} Whether every required setting is present and valid.
+ */
 export function isCompletePlaybackEntry(entry, channel) {
   if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return false
   if (Object.keys(entry).length !== requiredPlaybackKeys.length) return false
@@ -130,6 +146,12 @@ async function readThemeSettings(themeRoot, warnings) {
   }
 }
 
+/**
+ * Resolves each theme asset independently through theme-to-default fallback.
+ *
+ * @param {object} options Registry, filesystem roots, theme, and warning options.
+ * @returns {Promise<object>} Deterministic resolved media manifest.
+ */
 export async function resolveThemeManifest({
   themeName,
   mediaVersion,

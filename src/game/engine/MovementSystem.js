@@ -1,3 +1,12 @@
+/**
+ * Moves a scalar toward a target by a bounded amount.
+ *
+ * @pure
+ * @param {number} current Current value.
+ * @param {number} target Target value.
+ * @param {number} maximumChange Maximum magnitude of change.
+ * @returns {number} Next value.
+ */
 function approach(current, target, maximumChange) {
   const difference = target - current
   if (Math.abs(difference) <= maximumChange) return target
@@ -30,6 +39,18 @@ function desiredKeyboardVelocity(directions, movement) {
   }
 }
 
+/**
+ * Advances token velocity and position from pointer or keyboard intent.
+ *
+ * @pure
+ * @param {object} inputs Motion inputs.
+ * @param {import('../types.js').Point} inputs.position Position in logical world units.
+ * @param {import('../types.js').Point} inputs.velocity Velocity in world units/second.
+ * @param {import('../types.js').GameInputState} inputs.input Current input intent.
+ * @param {object} inputs.movement Speed in world units/second and acceleration in world units/second².
+ * @param {number} inputs.stepMs Fixed-step duration in milliseconds.
+ * @returns {{position: import('../types.js').Point, velocity: import('../types.js').Point}} Next motion state.
+ */
 export function advanceTokenMotion({
   position,
   velocity,

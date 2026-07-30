@@ -13,6 +13,11 @@ import { PixiSceneRenderer } from './rendering/pixi/PixiSceneRenderer.js'
 import { sharedVectorAssetCache } from './rendering/pixi/VectorAssetCache.js'
 import { screenToWorld } from './rendering/pixi/Viewport.js'
 
+/**
+ * Resolves power inventory, granting test charges only in development mode.
+ *
+ * @pure
+ */
 function inputInventory(powerups, inventory, devMode) {
   return Object.fromEntries(
     powerups.map((power) => [
@@ -22,12 +27,19 @@ function inputInventory(powerups, inventory, devMode) {
   )
 }
 
+/** Returns course-coin IDs previously claimed for the selected level. */
 function claimedCoinIds(level, collectedCoins) {
   return level.coins
     .filter((coin) => collectedCoins[`${level.id}:${coin.id}`])
     .map((coin) => coin.id)
 }
 
+/**
+ * Coordinates one React-owned gameplay screen around an imperative Pixi canvas.
+ *
+ * @param {object} props Validated level, player state, media, and callbacks.
+ * @returns {import('react').JSX.Element} Active game view.
+ */
 export default function GameView({
   level,
   levelBest,
@@ -49,6 +61,7 @@ export default function GameView({
   reducedMotion = false,
   tokenCollisionTolerance = 0,
   collisionGuideStyle,
+  microProtocol = null,
 }) {
   const [engine] = useState(
     () =>
@@ -149,6 +162,14 @@ export default function GameView({
           )
         }
         publishHud()
+      }),
+      engine.events.subscribe('switch.activated', ({ payload }) => {
+        audio.play('target-reached')
+        setMessage(
+          payload.active
+            ? `${payload.switch.id} activated — barrier open`
+            : `${payload.switch.id} toggled — barrier restored`,
+        )
       }),
       engine.events.subscribe('attempt.restarted', () => {
         adapterRef.current?.resetAttempt()
@@ -363,6 +384,7 @@ export default function GameView({
         onPreviousLevel={onPreviousLevel}
         onNextLevel={onNextLevel}
         onToggleDebug={toggleDebug}
+        microProtocol={microProtocol}
       />
       <section className="game-layout">
         <GameHud

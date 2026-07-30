@@ -326,7 +326,7 @@ V2 work is complete when:
   the implementation.
 
 ## Documentation
-- KSDoc Annotation Guidelines: All non-trivial functions, custom hooks, utilities, and entity behaviors must be documented with JSDoc comments.
+- JSDoc Annotation Guidelines: All non-trivial functions, custom hooks, utilities, and entity behaviors must be documented with JSDoc comments.
 
 - Key Rules
 - Specify Units: Always state physical units in comments (e.g., pixels/sec, ms, radians).

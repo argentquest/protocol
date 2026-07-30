@@ -3,11 +3,23 @@ import {
   advanceTrackingObstacle,
   shapeInsideArena,
 } from '../geometry/geometry.js'
+import {
+  dynamicObstacleEnvelope,
+  resolveDynamicObstacles,
+} from './DynamicObstacleSystem.js'
 
 function withCurrentPosition(obstacle, state) {
   return { ...obstacle, x: state.x, y: state.y }
 }
 
+/**
+ * Advances moving and tracking hazards using deterministic simulation time.
+ *
+ * @param {object} session Active engine session.
+ * @param {number} stepMs Fixed-step duration in milliseconds.
+ * @param {number} [timeScale=1] Hazard-time multiplier used by slow-field powers.
+ * @returns {{previous: object[], current: object[]}} Previous and current hazard shapes.
+ */
 export function advanceHazards(session, stepMs, timeScale = 1) {
   const scaledStep = stepMs * timeScale
   session.hazardTimeMs += scaledStep
@@ -20,6 +32,7 @@ export function advanceHazards(session, stepMs, timeScale = 1) {
     ...session.trackingObstacles.map((state, index) =>
       withCurrentPosition(session.level.trackingObstacles[index], state),
     ),
+    ...session.dynamicObstacles.filter((obstacle) => obstacle.solid),
   ]
 
   session.movingObstacles = session.level.movingObstacles.map((obstacle) => {
@@ -37,6 +50,11 @@ export function advanceHazards(session, stepMs, timeScale = 1) {
       ),
     }),
   )
+  session.dynamicObstacles = resolveDynamicObstacles(
+    session.level.dynamicObstacles ?? [],
+    session.hazardTimeMs,
+    session.switchStates,
+  )
 
   const current = [
     ...session.movingObstacles.map((obstacle) => ({
@@ -47,10 +65,18 @@ export function advanceHazards(session, stepMs, timeScale = 1) {
     ...session.trackingObstacles.map((state, index) =>
       withCurrentPosition(session.level.trackingObstacles[index], state),
     ),
+    ...session.dynamicObstacles.filter((obstacle) => obstacle.solid),
   ]
   return { previous, current }
 }
 
+/**
+ * Verifies that complete moving and tracking shapes remain inside the arena.
+ *
+ * @pure
+ * @param {object} level Validated level configuration.
+ * @returns {string[]} Actionable envelope validation errors.
+ */
 export function validateHazardEnvelopes(level) {
   const errors = []
   for (const obstacle of level.movingObstacles) {
@@ -81,6 +107,15 @@ export function validateHazardEnvelopes(level) {
       )
     ) {
       errors.push(`${obstacle.id}: tracking zone leaves the arena`)
+    }
+  }
+  for (const obstacle of level.dynamicObstacles ?? []) {
+    if (
+      dynamicObstacleEnvelope(obstacle).some(
+        (shape) => !shapeInsideArena(shape, level.arena),
+      )
+    ) {
+      errors.push(`${obstacle.id}: dynamic envelope leaves the arena`)
     }
   }
   return errors

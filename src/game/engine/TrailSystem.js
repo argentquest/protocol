@@ -5,6 +5,14 @@ function samePoint(first, second) {
   return first?.x === second?.x && first?.y === second?.y
 }
 
+/**
+ * Adds a unique token-center sample while bounding retained trail memory.
+ *
+ * @param {import('../types.js').Point[]} trail Mutable active trail.
+ * @param {import('../types.js').Point} point Token center in logical world units.
+ * @param {number} [maximumSamples=512] Maximum retained point count.
+ * @returns {import('../types.js').Point[]} The mutated trail.
+ */
 export function appendTrailSample(
   trail,
   point,
@@ -25,6 +33,15 @@ export function appendTrailSample(
   return trail
 }
 
+/**
+ * Copies a completed active trail into the bounded ghost-trail collection.
+ *
+ * @pure
+ * @param {import('../types.js').Point[][]} ghosts Existing immutable ghost trails.
+ * @param {import('../types.js').Point[]} activeTrail Completed active trail.
+ * @param {number} [maximumGhosts=2] Maximum retained attempt count.
+ * @returns {import('../types.js').Point[][]} New bounded ghost collection.
+ */
 export function retainGhostTrail(
   ghosts,
   activeTrail,

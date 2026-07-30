@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Path Protocol is a browser game inspired by an idea from Kieran and built by Eric Silver with AI-assisted development."
+    />
+    <title>Path Protocol — From Idea to Playable Web Game</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        color: #f4f8ff;
+        background: #030916;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        background:
+          radial-gradient(circle at 20% 15%, #0a678544, transparent 28rem),
+          radial-gradient(circle at 85% 75%, #7729aa33, transparent 30rem),
+          linear-gradient(#071225 1px, transparent 1px),
+          linear-gradient(90deg, #071225 1px, transparent 1px),
+          #030916;
+        background-size: auto, auto, 32px 32px, 32px 32px, auto;
+      }
+
+      main {
+        width: min(1120px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 48px 0;
+      }
+
+      .card {
+        display: grid;
+        grid-template-columns: minmax(0, 0.9fr) minmax(320px, 1.1fr);
+        gap: clamp(28px, 5vw, 72px);
+        align-items: center;
+        padding: clamp(24px, 5vw, 64px);
+        overflow: hidden;
+        border: 1px solid #38cdf866;
+        border-radius: 24px;
+        background: #061122e8;
+        box-shadow:
+          0 28px 80px #000a,
+          inset 0 0 48px #089fd20d;
+      }
+
+      .eyebrow {
+        margin: 0 0 12px;
+        color: #4bdfff;
+        font-size: 0.82rem;
+        font-weight: 800;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2.8rem, 7vw, 5.8rem);
+        line-height: 0.92;
+        letter-spacing: -0.055em;
+        text-transform: uppercase;
+      }
+
+      .intro {
+        max-width: 62ch;
+        margin: 24px 0;
+        color: #c7d7ea;
+        font-size: clamp(1.05rem, 2vw, 1.25rem);
+        line-height: 1.65;
+      }
+
+      .metrics {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin: 28px 0;
+      }
+
+      .metric {
+        min-width: 150px;
+        padding: 16px 18px;
+        border: 1px solid #9659ff70;
+        border-radius: 14px;
+        background: #11142e;
+      }
+
+      .metric strong {
+        display: block;
+        color: #63e8ff;
+        font-size: 1.7rem;
+      }
+
+      .metric span {
+        color: #aebbd0;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .workflow {
+        margin: 24px 0;
+        color: #d9e8f7;
+        font-size: 0.88rem;
+        font-weight: 750;
+        line-height: 1.8;
+        letter-spacing: 0.045em;
+        text-transform: uppercase;
+      }
+
+      .stack {
+        color: #9eacc0;
+        font-size: 0.92rem;
+        line-height: 1.7;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 30px;
+      }
+
+      .button {
+        display: inline-flex;
+        min-height: 50px;
+        align-items: center;
+        justify-content: center;
+        padding: 0 22px;
+        border-radius: 12px;
+        color: #04101d;
+        background: linear-gradient(135deg, #5be8ff, #b57aff);
+        box-shadow: 0 10px 30px #3fcfec33;
+        font-weight: 850;
+        text-decoration: none;
+      }
+
+      .button:hover,
+      .button:focus-visible {
+        filter: brightness(1.12);
+        transform: translateY(-1px);
+      }
+
+      figure {
+        margin: 0;
+      }
+
+      figure img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border: 1px solid #54daf866;
+        border-radius: 18px;
+        box-shadow: 0 22px 60px #000b;
+      }
+
+      figcaption {
+        margin-top: 10px;
+        color: #7f91aa;
+        font-size: 0.78rem;
+        text-align: center;
+      }
+
+      @media (max-width: 800px) {
+        main {
+          padding: 16px 0;
+        }
+
+        .card {
+          grid-template-columns: 1fr;
+        }
+
+        figure {
+          order: -1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <article class="card">
+        <section>
+          <p class="eyebrow">From an idea to a playable web game</p>
+          <h1>Path Protocol</h1>
+
+          <p class="intro">
+            After years of vibe coding business applications and CMS platforms,
+            Eric Silver decided to build something completely different: a
+            browser game inspired by an idea from his son, Kieran.
+          </p>
+
+          <div class="metrics" aria-label="Development highlights">
+            <div class="metric">
+              <strong>6 hours</strong>
+              <span>Hands-on effort</span>
+            </div>
+            <div class="metric">
+              <strong>36 hours</strong>
+              <span>Build window</span>
+            </div>
+          </div>
+
+          <p class="workflow">
+            Idea → Questions → Architecture → Sprints → Code → Tests →
+            Deployment
+          </p>
+
+          <p class="stack">
+            Built with <strong>OpenCode</strong> and
+            <strong>ChatGPT 5.6 with Medium reasoning</strong>, supported by
+            React, Vite, PixiJS, WebGL, Howler.js, SVG, JSON, Docker, and Nginx.
+          </p>
+
+          <div class="actions">
+            <a
+              class="button"
+              href="https://app.inkandquill.io/protocol/"
+              rel="noopener"
+            >
+              Play Path Protocol Free
+            </a>
+          </div>
+        </section>
+
+        <figure>
+          <img
+            src="./media/social/path-protocol-linkedin-ai-build-infographic.png"
+            alt="Path Protocol infographic describing the idea, AI-assisted workflow, development time, and supporting technology stack."
+          />
+          <figcaption>Created by Eric Silver from an idea by Kieran.</figcaption>
+        </figure>
+      </article>
+    </main>
+  </body>
+</html>

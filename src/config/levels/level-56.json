@@ -5,7 +5,7 @@
   "name": "Geometry Shift",
   "seed": "path-protocol-geometry-shift-v1",
   "difficulty": 6,
-  "briefing": "Expansion chamber 56: a difficulty-6 variation with a new deterministic layout.",
+  "briefing": "A pulse block repeatedly narrows the direct center passage.",
   "arena": {
     "shape": "polygon",
     "points": [
@@ -144,5 +144,23 @@
     "deceleration": 1800,
     "keyboardSpeed": 280
   },
-  "trackingObstacles": []
+  "trackingObstacles": [],
+  "dynamicObstacles": [
+    {
+      "id": "pulse-block-a",
+      "mediaId": "obstacle-pulse-block",
+      "shape": "rect",
+      "x": 480,
+      "y": 540,
+      "width": 140,
+      "height": 24,
+      "behavior": {
+        "type": "pulse",
+        "minScale": 0.45,
+        "maxScale": 1.4,
+        "periodMs": 3600,
+        "phase": -1.5707963267948966
+      }
+    }
+  ]
 }

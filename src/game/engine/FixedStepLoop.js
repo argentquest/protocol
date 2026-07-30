@@ -1,4 +1,14 @@
+/**
+ * Coordinates a deterministic fixed-rate simulation with independent renders.
+ */
 export class FixedStepLoop {
+  /**
+   * @param {object} [options] Loop configuration.
+   * @param {number} [options.updatesPerSecond=60] Simulation frequency in hertz.
+   * @param {number} [options.maximumFrameDeltaMs=250] Maximum accepted frame gap in milliseconds.
+   * @param {(stepMs: number) => void} [options.update] Fixed-step callback.
+   * @param {(interpolation: number) => void} [options.render] Render callback.
+   */
   constructor({
     updatesPerSecond = 60,
     maximumFrameDeltaMs = 250,
@@ -18,23 +28,37 @@ export class FixedStepLoop {
     this.simulationTimeMs = 0
   }
 
+  /**
+   * Starts accepting animation-frame timestamps.
+   *
+   * @param {number|null} [timestamp=null] Monotonic timestamp in milliseconds.
+   * @returns {void}
+   */
   start(timestamp = null) {
     this.running = true
     this.lastTimestamp = timestamp
   }
 
+  /** Stops the loop and discards its pending frame time. */
   stop() {
     this.running = false
     this.lastTimestamp = null
     this.accumulatorMs = 0
   }
 
+  /** Restores the loop to simulation time zero milliseconds. */
   reset() {
     this.lastTimestamp = null
     this.accumulatorMs = 0
     this.simulationTimeMs = 0
   }
 
+  /**
+   * Advances the loop to a monotonic animation-frame timestamp.
+   *
+   * @param {number} timestamp Timestamp in milliseconds.
+   * @returns {import('../types.js').FrameAdvanceResult} Fixed updates and render interpolation.
+   */
   advance(timestamp) {
     if (!this.running) return { updates: 0, interpolation: 0 }
     if (this.lastTimestamp === null) {

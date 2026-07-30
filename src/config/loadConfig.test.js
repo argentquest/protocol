@@ -4,6 +4,7 @@ import {
   gameplayConfig,
   levels,
   mediaDefinitions,
+  microProtocols,
   powerups,
   soundDefinitions,
 } from './loadConfig.js'
@@ -50,5 +51,21 @@ describe('game configuration', () => {
     expect(gameplayConfig.input.pointerResponsePerSecond).toBeLessThanOrEqual(12)
     expect(gameplayConfig.input.keyboardSpeedUnitsPerSecond).toBeGreaterThan(0)
     expect(gameplayConfig.collision.tokenToleranceUnits).toBe(4)
+  })
+
+  it('loads four validated Micro Protocols outside campaign progression', () => {
+    expect(microProtocols).toHaveLength(4)
+    expect(microProtocols.map((item) => item.id)).toEqual([
+      'phase-window',
+      'orbit-lock',
+      'pulse-thread',
+      'switchback',
+    ])
+    expect(
+      microProtocols.every(
+        (item) => item.level?.number >= 91 && item.level?.number <= 94,
+      ),
+    ).toBe(true)
+    expect(configurationStatus.valid).toBe(true)
   })
 })

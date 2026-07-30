@@ -5,7 +5,7 @@
   "name": "Motion Lattice",
   "seed": "path-protocol-motion-lattice-v1",
   "difficulty": 7,
-  "briefing": "Expansion chamber 47: a difficulty-7 variation with a new deterministic layout.",
+  "briefing": "A pulsing vertical block changes the scanner crossing from wide to exact.",
   "arena": {
     "shape": "rect",
     "margin": 34,
@@ -129,5 +129,23 @@
     "deceleration": 1800,
     "keyboardSpeed": 280
   },
-  "trackingObstacles": []
+  "trackingObstacles": [],
+  "dynamicObstacles": [
+    {
+      "id": "pulse-block-a",
+      "mediaId": "obstacle-pulse-block",
+      "shape": "rect",
+      "x": 400,
+      "y": 590,
+      "width": 30,
+      "height": 180,
+      "behavior": {
+        "type": "pulse",
+        "minScale": 0.45,
+        "maxScale": 1.25,
+        "periodMs": 3400,
+        "phase": -1.5707963267948966
+      }
+    }
+  ]
 }

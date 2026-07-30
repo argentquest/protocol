@@ -60,6 +60,13 @@ export function resolveManifestUrls(manifest, requestedBaseUrl = '/') {
   }
 }
 
+/**
+ * Creates a weighted reporter for startup phase completion.
+ *
+ * @param {(snapshot: object) => void} onProgress Progress subscriber.
+ * @param {object[]} phases Weighted startup phase definitions.
+ * @returns {{report: (phaseId: string, phaseProgress: number) => object}} Reporter.
+ */
 export function createStartupProgressReporter(
   onProgress = () => {},
   phases = defaultPhases,
@@ -89,6 +96,12 @@ export function createStartupProgressReporter(
   return { report }
 }
 
+/**
+ * Validates configuration and preloads resolved visual and audio media.
+ *
+ * @param {object} options Startup loader dependencies.
+ * @returns {Promise<object>} Loaded resolved media manifest.
+ */
 export async function loadStartupMedia({
   themeName,
   fetchManifest,

@@ -12,6 +12,14 @@ export const GAME_STATES = Object.freeze([
   'paused',
 ])
 
+/**
+ * @typedef {object} GameTransition
+ * @property {string} previous Previous game state.
+ * @property {string} state Resulting game state.
+ * @property {string} event Transition event.
+ * @property {object} payload Event-specific data.
+ */
+
 const transitions = {
   loading: { loaded: 'ready', fail: 'failed' },
   ready: { activate: 'active-main', restart: 'restarting', fail: 'failed' },
@@ -53,6 +61,13 @@ const transitions = {
   restarting: { reset: 'ready', fail: 'failed' },
 }
 
+/**
+ * Creates the validated state machine that governs a level session.
+ *
+ * @param {string} [initialState='loading'] Initial state.
+ * @param {(transition: GameTransition) => void} [onTransition] Transition observer.
+ * @returns {{can: (event: string) => boolean, transition: (event: string, payload?: object) => GameTransition, readonly state: string, readonly resumeState: string|null}}
+ */
 export function createGameStateMachine(initialState = 'loading', onTransition = () => {}) {
   if (!GAME_STATES.includes(initialState)) {
     throw new Error(`Unknown initial game state "${initialState}".`)
