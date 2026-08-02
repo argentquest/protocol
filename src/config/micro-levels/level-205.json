@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 2,
+  "id": "level-205",
+  "number": 205,
+  "name": "Crosscurrent",
+  "seed": "path-protocol-micro-conveyor-v2",
+  "difficulty": 7,
+  "briefing": "Focused conveyor mastery challenge.",
+  "arena": {
+    "shape": "rect",
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
+  },
+  "token": {
+    "shape": "rect",
+    "size": 42,
+    "mediaId": "token-rect"
+  },
+  "movement": {
+    "maximumSpeed": 596,
+    "acceleration": 1760,
+    "deceleration": 2045,
+    "keyboardSpeed": 408
+  },
+  "start": {
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 1311,
+    "y": 195
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 313,
+    "y": 152,
+    "size": 58
+  },
+  "generation": {
+    "obstacleCount": 0,
+    "allowedShapes": [
+      "circle",
+      "rect",
+      "diamond"
+    ],
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    },
+    "minSize": 50,
+    "maxSize": 114,
+    "minimumGap": 58,
+    "pathGrid": 20
+  },
+  "manualObstacles": [
+    {
+      "id": "barrier-1",
+      "mediaId": "obstacle-static-rect",
+      "shape": "rect",
+      "x": 1403,
+      "y": 465,
+      "width": 105,
+      "height": 82
+    },
+    {
+      "id": "barrier-2",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 676,
+      "y": 286,
+      "width": 66,
+      "height": 66
+    }
+  ],
+  "movingObstacles": [],
+  "trackingObstacles": [],
+  "dynamicObstacles": [],
+  "switches": [],
+  "forceFields": [
+    {
+      "id": "current-1",
+      "mediaId": "field-conveyor",
+      "type": "conveyor",
+      "x": 707,
+      "y": 200,
+      "width": 250,
+      "height": 164,
+      "directionDegrees": -101,
+      "force": 303
+    }
+  ],
+  "coins": [],
+  "rewards": {
+    "completionCoins": 0,
+    "bonusCoinsPerTarget": 0
+  },
+  "scoring": {
+    "baseMaximum": 1500,
+    "parTimeMs": 8500,
+    "parDistance": 999,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 0,
+    "rewardPerTarget": 0,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0,
+    "targets": []
+  }
+}

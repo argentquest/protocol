@@ -27,9 +27,13 @@
     "bonuses"
   ],
   "properties": {
+    "internalId": {
+      "type": "string",
+      "pattern": "^[a-f0-9-]{36}$"
+    },
     "schemaVersion": { "const": 2 },
-    "id": { "type": "string", "pattern": "^level-[0-9]{2}$" },
-    "number": { "type": "integer", "minimum": 1, "maximum": 99 },
+    "id": { "type": "string", "pattern": "^level-[0-9]{2,3}$" },
+    "number": { "type": "integer", "minimum": 1, "maximum": 999 },
     "name": { "type": "string", "minLength": 1, "maxLength": 80 },
     "seed": { "type": "string", "minLength": 1, "maxLength": 160 },
     "difficulty": {
@@ -63,6 +67,10 @@
       "type": "array",
       "items": { "$ref": "#/$defs/switch" }
     },
+    "forceFields": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/forceField" }
+    },
     "coins": {
       "type": "array",
       "items": { "$ref": "#/$defs/coin" }
@@ -79,12 +87,12 @@
     "coordinate": {
       "type": "number",
       "minimum": 0,
-      "maximum": 1000
+      "maximum": 1600
     },
     "positiveDimension": {
       "type": "number",
       "exclusiveMinimum": 0,
-      "maximum": 1000
+      "maximum": 1600
     },
     "region": {
       "type": "object",
@@ -369,7 +377,8 @@
             { "$ref": "#/$defs/phaseBehavior" },
             { "$ref": "#/$defs/orbitBehavior" },
             { "$ref": "#/$defs/pulseBehavior" },
-            { "$ref": "#/$defs/switchBehavior" }
+            { "$ref": "#/$defs/switchBehavior" },
+            { "$ref": "#/$defs/rotateBehavior" }
           ]
         }
       },
@@ -420,6 +429,57 @@
         "switchId": { "type": "string", "minLength": 1 },
         "initiallySolid": { "type": "boolean" }
       }
+    },
+    "rotateBehavior": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "speedDegreesPerSecond", "initialDegrees"],
+      "properties": {
+        "type": { "const": "rotate" },
+        "speedDegreesPerSecond": {
+          "type": "number",
+          "minimum": -720,
+          "maximum": 720
+        },
+        "initialDegrees": { "type": "number" }
+      }
+    },
+    "forceField": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id", "mediaId", "type", "x", "y", "width", "height",
+            "directionDegrees", "force"
+          ],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "mediaId": { "$ref": "#/$defs/mediaId" },
+            "type": { "const": "conveyor" },
+            "x": { "$ref": "#/$defs/coordinate" },
+            "y": { "$ref": "#/$defs/coordinate" },
+            "width": { "$ref": "#/$defs/positiveDimension" },
+            "height": { "$ref": "#/$defs/positiveDimension" },
+            "directionDegrees": { "type": "number" },
+            "force": { "type": "number", "exclusiveMinimum": 0, "maximum": 5000 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "mediaId", "type", "x", "y", "radius", "force"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "mediaId": { "$ref": "#/$defs/mediaId" },
+            "type": { "enum": ["repulsor", "attractor"] },
+            "x": { "$ref": "#/$defs/coordinate" },
+            "y": { "$ref": "#/$defs/coordinate" },
+            "radius": { "$ref": "#/$defs/positiveDimension" },
+            "force": { "type": "number", "exclusiveMinimum": 0, "maximum": 5000 }
+          }
+        }
+      ]
     },
     "switch": {
       "type": "object",

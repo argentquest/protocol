@@ -44,7 +44,7 @@ test('profiles WebGL frame rate with four tracking hazards', async ({
 }) => {
   await boot(page, '/?dev=1')
   await page.getByRole('button', { name: /select level/i }).click()
-  await page.getByRole('button', { name: /23.*vector swarm/i }).click()
+  await page.getByRole('button', { name: /91.*convergence 01/i }).click()
   const canvas = await readyCanvas(page)
   await page.keyboard.press('Space')
   const measuredFps = await page.evaluate(

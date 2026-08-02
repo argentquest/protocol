@@ -4,10 +4,13 @@
 [![Renderer: PixiJS WebGL](https://img.shields.io/badge/renderer-PixiJS%20WebGL-8b5cf6)](https://pixijs.com/)
 [![Tests: Vitest + Playwright](https://img.shields.io/badge/tests-Vitest%20%2B%20Playwright-22c55e)](#testing)
 
-Path Protocol is a 70-level desktop browser precision game. The player guides a
+Path Protocol is a 100-level desktop browser precision game. The player guides a
 dimensioned token through deterministic obstacle courses, avoids stationary and
 moving hazards, collects one-time coins, reaches ordered targets, and uses
 consumable powers to improve a per-level and cumulative score.
+Each released level uses a fixed seed to spread its start, target, pickups, and
+hazards across the full 1600 × 900 arena. Restarts preserve that layout, keeping
+scores comparable without repeating a small set of route lanes.
 
 Play the current release at
 [app.inkandquill.io/protocol](https://app.inkandquill.io/protocol/).
@@ -27,9 +30,16 @@ npm install
 npm run dev
 ```
 
-Open the URL printed by Vite, normally `http://localhost:5173`.
+This starts Vite plus the local Express theme server. Open the URL printed by
+Vite, normally `http://localhost:5173`; `/api` is proxied to the server.
 
-The local server enables **Dev mode** by default so all 70 levels are available
+On Windows, double-click `start-game.cmd` for the same combined startup. The
+launcher verifies Node, npm, installed dependencies, and ports 4173/5173 before
+starting. Press Ctrl+C once in its terminal to stop both processes. The
+individual processes can also be run with `npm run dev:frontend` and
+`npm run dev:server` when debugging.
+
+The local server enables **Dev mode** by default so all 100 levels are available
 for playtesting. The home-screen toggle restores normal progression.
 
 Create and preview a production build:
@@ -38,6 +48,22 @@ Create and preview a production build:
 npm run build
 npm run preview
 ```
+
+`npm run preview` serves the production UI and Theme Workshop API through Node
+on port 4173. Mutable themes default to `data/themes`, and SQLite accounts to
+`data/path-protocol.sqlite`. Set `PATH_PROTOCOL_DATA_DIR` and
+`PATH_PROTOCOL_DB_PATH` to select other persistent locations.
+
+Theme authors register with a username, email address, and password. Local
+development accounts are active immediately without email confirmation. Public
+themes remain playable without login; cloning and editing require an account.
+Players can choose any built-in presentation theme from Settings.
+
+The Theme Workshop media editor browses the licensed `PublicMedia` catalog.
+Applying an image or sound copies it into the editable theme package; runtime
+themes never depend on the catalog source path. Imported audio is normalized to
+a WAV master plus WebM and MP3 delivery files. Validate all built-in theme
+fallbacks with `npm run media:validate-themes`.
 
 ## Architecture Overview
 
@@ -52,6 +78,10 @@ Path Protocol V2 uses:
 - WAV audio masters with WebM preferred and MP3 fallback delivery.
 - JSON Schema-validated levels, media, themes, audio, and powers.
 - Browser-local versioned progress storage.
+- Express APIs, SQLite accounts/sessions, and filesystem-backed theme packages.
+- A mixed Pixi visual cache supporting validated SVG defaults and optional PNG
+  texture overrides. The active Celestial Foundry proof theme demonstrates 29
+  open-licensed texture replacements.
 
 ```text
 React screens and HUD

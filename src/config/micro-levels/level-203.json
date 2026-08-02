@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 2,
+  "id": "level-203",
+  "number": 203,
+  "name": "Orbit Lock",
+  "seed": "path-protocol-micro-orbit-v2",
+  "difficulty": 5,
+  "briefing": "Focused orbit mastery challenge.",
+  "arena": {
+    "shape": "rect",
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
+  },
+  "token": {
+    "shape": "circle",
+    "size": 44,
+    "mediaId": "token-circle"
+  },
+  "movement": {
+    "maximumSpeed": 560,
+    "acceleration": 1600,
+    "deceleration": 1875,
+    "keyboardSpeed": 380
+  },
+  "start": {
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 232,
+    "y": 591
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 1085,
+    "y": 609,
+    "size": 58
+  },
+  "generation": {
+    "obstacleCount": 0,
+    "allowedShapes": [
+      "circle",
+      "rect",
+      "diamond"
+    ],
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    },
+    "minSize": 50,
+    "maxSize": 110,
+    "minimumGap": 62,
+    "pathGrid": 20
+  },
+  "manualObstacles": [
+    {
+      "id": "barrier-1",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 537,
+      "y": 693,
+      "width": 82,
+      "height": 82
+    },
+    {
+      "id": "barrier-2",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 1388,
+      "y": 771,
+      "width": 80,
+      "height": 80
+    }
+  ],
+  "movingObstacles": [],
+  "trackingObstacles": [],
+  "dynamicObstacles": [
+    {
+      "id": "orbiter-1",
+      "mediaId": "obstacle-orbiter",
+      "shape": "circle",
+      "x": 355,
+      "y": 241,
+      "size": 39,
+      "behavior": {
+        "type": "orbit",
+        "radiusX": 72,
+        "radiusY": 76,
+        "periodMs": 3041,
+        "phase": 5.084
+      }
+    }
+  ],
+  "switches": [],
+  "forceFields": [],
+  "coins": [],
+  "rewards": {
+    "completionCoins": 0,
+    "bonusCoinsPerTarget": 0
+  },
+  "scoring": {
+    "baseMaximum": 1500,
+    "parTimeMs": 8500,
+    "parDistance": 853,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 0,
+    "rewardPerTarget": 0,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0,
+    "targets": []
+  }
+}

@@ -2,201 +2,174 @@
   "schemaVersion": 2,
   "id": "level-49",
   "number": 49,
-  "name": "Containment Ring",
-  "seed": "path-protocol-containment-ring-v2",
-  "difficulty": 9,
-  "briefing": "Expansion chamber 49: a difficulty-9 variation with a new deterministic layout.",
+  "name": "Orbit 09",
+  "seed": "path-protocol-16x9-049-v2",
+  "difficulty": 5,
+  "briefing": "Tier 5: Orbit. Predict orbiting hazards rather than chasing them.",
   "arena": {
-    "shape": "polygon",
-    "points": [
-      [
-        80,
-        120
-      ],
-      [
-        370,
-        45
-      ],
-      [
-        780,
-        80
-      ],
-      [
-        950,
-        310
-      ],
-      [
-        885,
-        870
-      ],
-      [
-        650,
-        950
-      ],
-      [
-        210,
-        910
-      ],
-      [
-        45,
-        640
-      ]
-    ],
-    "mediaId": "arena-polygon"
+    "shape": "rect",
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
   },
   "token": {
-    "shape": "diamond",
-    "size": 54,
-    "mediaId": "token-diamond"
+    "shape": "rect",
+    "size": 44,
+    "mediaId": "token-rect"
+  },
+  "movement": {
+    "maximumSpeed": 560,
+    "acceleration": 1600,
+    "deceleration": 1875,
+    "keyboardSpeed": 380
   },
   "start": {
-    "mode": "generated",
-    "region": {
-      "x": 120,
-      "y": 700,
-      "width": 130,
-      "height": 120
-    },
-    "mediaId": "start-pad"
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 371,
+    "y": 414
   },
   "mainTarget": {
-    "mode": "generated",
-    "region": {
-      "x": 710,
-      "y": 150,
-      "width": 130,
-      "height": 120
-    },
-    "size": 48,
-    "mediaId": "target-main"
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 1131,
+    "y": 598,
+    "size": 58
   },
   "generation": {
-    "obstacleCount": 9,
+    "obstacleCount": 2,
     "allowedShapes": [
-      "rect",
       "circle",
+      "rect",
       "diamond"
     ],
-    "minSize": 75,
-    "maxSize": 145,
-    "minimumGap": 67,
-    "pathGrid": 16,
     "mediaByShape": {
       "circle": "obstacle-static-circle",
       "rect": "obstacle-static-rect",
       "diamond": "obstacle-static-diamond"
-    }
+    },
+    "minSize": 50,
+    "maxSize": 110,
+    "minimumGap": 62,
+    "pathGrid": 20
   },
   "manualObstacles": [
     {
-      "id": "containment-core",
+      "id": "barrier-1",
+      "mediaId": "obstacle-static-circle",
       "shape": "circle",
-      "x": 510,
-      "y": 510,
-      "size": 150,
-      "mediaId": "obstacle-static-circle"
+      "x": 655,
+      "y": 751,
+      "width": 88,
+      "height": 88
+    },
+    {
+      "id": "barrier-2",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 884,
+      "y": 316,
+      "width": 67,
+      "height": 67
+    },
+    {
+      "id": "barrier-3",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 211,
+      "y": 642,
+      "width": 111,
+      "height": 111
+    },
+    {
+      "id": "barrier-4",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 872,
+      "y": 515,
+      "width": 68,
+      "height": 68
+    },
+    {
+      "id": "barrier-5",
+      "mediaId": "obstacle-static-rect",
+      "shape": "rect",
+      "x": 333,
+      "y": 228,
+      "width": 115,
+      "height": 78
     }
   ],
   "movingObstacles": [
     {
-      "id": "scanner-a",
-      "shape": "rect",
-      "x": 400,
-      "y": 350,
-      "width": 130,
-      "height": 36,
-      "axis": "x",
-      "amplitude": 170,
-      "periodMs": 3500,
-      "phase": 0.7,
-      "mediaId": "obstacle-moving-rect"
-    },
-    {
-      "id": "scanner-b",
+      "id": "sweeper-1",
+      "mediaId": "obstacle-moving-circle",
       "shape": "circle",
-      "x": 660,
-      "y": 650,
-      "size": 76,
-      "axis": "y",
-      "amplitude": 165,
-      "periodMs": 4100,
-      "phase": 2.2,
-      "mediaId": "obstacle-moving-circle"
+      "x": 1202,
+      "y": 140,
+      "size": 46,
+      "axis": "x",
+      "amplitude": 88,
+      "periodMs": 4195,
+      "phase": 5.9
     }
   ],
+  "trackingObstacles": [],
+  "dynamicObstacles": [
+    {
+      "id": "orbiter-1",
+      "mediaId": "obstacle-orbiter",
+      "shape": "circle",
+      "x": 638,
+      "y": 488,
+      "size": 40,
+      "behavior": {
+        "type": "orbit",
+        "radiusX": 95,
+        "radiusY": 101,
+        "periodMs": 3959,
+        "phase": 4.645
+      }
+    }
+  ],
+  "switches": [],
+  "forceFields": [],
   "coins": [
     {
-      "id": "coin-a",
-      "x": 300,
-      "y": 700,
-      "size": 28,
-      "value": 1,
-      "mediaId": "coin-standard"
-    },
-    {
-      "id": "coin-b",
-      "x": 500,
-      "y": 400,
-      "size": 28,
-      "value": 2,
-      "mediaId": "coin-standard"
-    },
-    {
-      "id": "coin-c",
-      "x": 700,
-      "y": 300,
-      "size": 28,
-      "value": 1,
-      "mediaId": "coin-standard"
+      "id": "coin-49",
+      "mediaId": "coin-standard",
+      "x": 1331,
+      "y": 522,
+      "size": 30,
+      "value": 1
     }
   ],
   "rewards": {
-    "completionCoins": 5,
-    "bonusCoinsPerTarget": 3
+    "completionCoins": 3,
+    "bonusCoinsPerTarget": 1
   },
   "scoring": {
-    "baseMaximum": 24500,
-    "parTimeMs": 14500,
-    "parDistance": 1550,
+    "baseMaximum": 29500,
+    "parTimeMs": 14000,
+    "parDistance": 782,
     "timeWeight": 0.5,
     "distanceWeight": 0.5,
     "collisionPenaltyRate": 0.2,
     "maximumCollisions": 3
   },
   "bonuses": {
-    "maximumTargets": 3,
-    "rewardPerTarget": 600,
+    "maximumTargets": 1,
+    "rewardPerTarget": 900,
     "offerChanceMode": "currentScorePercent",
-    "failurePenaltyRate": 0.2,
+    "failurePenaltyRate": 0.1,
     "targets": [
       {
-        "id": "relay-a",
-        "x": 780,
-        "y": 720,
-        "size": 42,
-        "mediaId": "target-bonus"
-      },
-      {
-        "id": "relay-b",
-        "x": 320,
-        "y": 230,
-        "size": 40,
-        "mediaId": "target-bonus"
-      },
-      {
-        "id": "relay-c",
-        "x": 210,
-        "y": 650,
-        "size": 40,
-        "mediaId": "target-bonus"
+        "id": "bonus-a",
+        "mediaId": "target-bonus",
+        "x": 709,
+        "y": 242,
+        "size": 48
       }
     ]
-  },
-  "movement": {
-    "maximumSpeed": 360,
-    "acceleration": 1400,
-    "deceleration": 1800,
-    "keyboardSpeed": 280
-  },
-  "trackingObstacles": []
+  }
 }

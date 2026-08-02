@@ -2,96 +2,137 @@
   "schemaVersion": 2,
   "id": "level-55",
   "number": 55,
-  "name": "Distance Circuit",
-  "seed": "path-protocol-distance-circuit-v1",
-  "difficulty": 5,
-  "briefing": "Expansion chamber 55: a difficulty-5 variation with a new deterministic layout.",
+  "name": "Switch 05",
+  "seed": "path-protocol-16x9-055-v2",
+  "difficulty": 6,
+  "briefing": "Tier 6: Switch. Activate the remote pad before crossing its barrier.",
   "arena": {
     "shape": "rect",
-    "margin": 32,
-    "cornerRadius": 32,
-    "mediaId": "arena-standard"
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
   },
   "token": {
     "shape": "circle",
     "size": 42,
     "mediaId": "token-circle"
   },
+  "movement": {
+    "maximumSpeed": 578,
+    "acceleration": 1680,
+    "deceleration": 1960,
+    "keyboardSpeed": 394
+  },
   "start": {
-    "mode": "generated",
-    "region": {
-      "x": 80,
-      "y": 760,
-      "width": 150,
-      "height": 120
-    },
-    "mediaId": "start-pad"
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 124,
+    "y": 686
   },
   "mainTarget": {
-    "mode": "generated",
-    "region": {
-      "x": 780,
-      "y": 90,
-      "width": 120,
-      "height": 150
-    },
-    "size": 50,
-    "mediaId": "target-main"
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 741,
+    "y": 177,
+    "size": 58
   },
   "generation": {
-    "obstacleCount": 8,
+    "obstacleCount": 2,
     "allowedShapes": [
-      "rect",
       "circle",
+      "rect",
       "diamond"
     ],
-    "minSize": 80,
-    "maxSize": 170,
-    "minimumGap": 62,
-    "pathGrid": 18,
     "mediaByShape": {
       "circle": "obstacle-static-circle",
       "rect": "obstacle-static-rect",
       "diamond": "obstacle-static-diamond"
-    }
+    },
+    "minSize": 50,
+    "maxSize": 112,
+    "minimumGap": 60,
+    "pathGrid": 20
   },
   "manualObstacles": [
     {
-      "id": "spine-a",
+      "id": "barrier-1",
+      "mediaId": "obstacle-static-rect",
       "shape": "rect",
-      "x": 310,
-      "y": 240,
-      "width": 70,
-      "height": 320,
-      "mediaId": "obstacle-static-rect"
+      "x": 332,
+      "y": 140,
+      "width": 68,
+      "height": 77
     },
     {
-      "id": "spine-b",
+      "id": "barrier-2",
+      "mediaId": "obstacle-static-rect",
       "shape": "rect",
-      "x": 650,
-      "y": 500,
-      "width": 70,
-      "height": 310,
-      "mediaId": "obstacle-static-rect"
+      "x": 1367,
+      "y": 601,
+      "width": 92,
+      "height": 93
+    },
+    {
+      "id": "barrier-3",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 365,
+      "y": 489,
+      "width": 68,
+      "height": 68
     }
   ],
-  "movingObstacles": [],
+  "movingObstacles": [
+    {
+      "id": "sweeper-1",
+      "mediaId": "obstacle-moving-circle",
+      "shape": "circle",
+      "x": 1417,
+      "y": 235,
+      "size": 55,
+      "axis": "y",
+      "amplitude": 84,
+      "periodMs": 2738,
+      "phase": 3.039
+    }
+  ],
+  "trackingObstacles": [],
+  "dynamicObstacles": [
+    {
+      "id": "switch-barrier-1",
+      "mediaId": "obstacle-switch-barrier",
+      "shape": "rect",
+      "x": 1137,
+      "y": 285,
+      "width": 207,
+      "height": 34,
+      "behavior": {
+        "type": "switch",
+        "switchId": "switch-1",
+        "initiallySolid": true
+      }
+    }
+  ],
+  "switches": [
+    {
+      "id": "switch-1",
+      "mediaId": "switch-pad",
+      "x": 676,
+      "y": 443,
+      "size": 44,
+      "activation": "once",
+      "durationMs": 0
+    }
+  ],
+  "forceFields": [],
   "coins": [
     {
-      "id": "coin-a",
-      "x": 350,
-      "y": 650,
-      "size": 28,
-      "value": 1,
-      "mediaId": "coin-standard"
-    },
-    {
-      "id": "coin-b",
-      "x": 720,
-      "y": 350,
-      "size": 28,
-      "value": 1,
-      "mediaId": "coin-standard"
+      "id": "coin-55",
+      "mediaId": "coin-standard",
+      "x": 1139,
+      "y": 426,
+      "size": 30,
+      "value": 1
     }
   ],
   "rewards": {
@@ -99,41 +140,27 @@
     "bonusCoinsPerTarget": 2
   },
   "scoring": {
-    "baseMaximum": 27500,
-    "parTimeMs": 10500,
-    "parDistance": 1250,
+    "baseMaximum": 32500,
+    "parTimeMs": 15000,
+    "parDistance": 800,
     "timeWeight": 0.5,
     "distanceWeight": 0.5,
     "collisionPenaltyRate": 0.2,
     "maximumCollisions": 3
   },
   "bonuses": {
-    "maximumTargets": 2,
-    "rewardPerTarget": 400,
+    "maximumTargets": 1,
+    "rewardPerTarget": 1000,
     "offerChanceMode": "currentScorePercent",
-    "failurePenaltyRate": 0.2,
+    "failurePenaltyRate": 0.1,
     "targets": [
       {
-        "id": "relay-a",
-        "x": 820,
-        "y": 740,
-        "size": 46,
-        "mediaId": "target-bonus"
-      },
-      {
-        "id": "relay-b",
-        "x": 190,
-        "y": 210,
-        "size": 44,
-        "mediaId": "target-bonus"
+        "id": "bonus-a",
+        "mediaId": "target-bonus",
+        "x": 914,
+        "y": 478,
+        "size": 48
       }
     ]
-  },
-  "movement": {
-    "maximumSpeed": 360,
-    "acceleration": 1400,
-    "deceleration": 1800,
-    "keyboardSpeed": 280
-  },
-  "trackingObstacles": []
+  }
 }

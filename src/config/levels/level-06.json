@@ -2,147 +2,137 @@
   "schemaVersion": 2,
   "id": "level-06",
   "number": 6,
-  "name": "Shape Test",
-  "seed": "path-protocol-shape-test-v1",
-  "difficulty": 6,
-  "briefing": "A diamond token changes every clearance calculation.",
+  "name": "Foundation 06",
+  "seed": "path-protocol-16x9-006-v2",
+  "difficulty": 1,
+  "briefing": "Tier 1: Foundation. Learn efficient lines through stable geometry.",
   "arena": {
-    "shape": "polygon",
-    "points": [
-      [
-        90,
-        90
-      ],
-      [
-        850,
-        55
-      ],
-      [
-        950,
-        300
-      ],
-      [
-        870,
-        910
-      ],
-      [
-        520,
-        950
-      ],
-      [
-        75,
-        820
-      ],
-      [
-        45,
-        360
-      ]
-    ],
-    "mediaId": "arena-polygon"
+    "shape": "rect",
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
   },
   "token": {
-    "shape": "diamond",
-    "size": 58,
-    "mediaId": "token-diamond"
+    "shape": "circle",
+    "size": 46,
+    "mediaId": "token-circle"
+  },
+  "movement": {
+    "maximumSpeed": 488,
+    "acceleration": 1280,
+    "deceleration": 1535,
+    "keyboardSpeed": 324
   },
   "start": {
-    "mode": "generated",
-    "region": {
-      "x": 420,
-      "y": 760,
-      "width": 160,
-      "height": 110
-    },
-    "mediaId": "start-pad"
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 809,
+    "y": 759
   },
   "mainTarget": {
-    "mode": "generated",
-    "region": {
-      "x": 410,
-      "y": 100,
-      "width": 180,
-      "height": 120
-    },
-    "size": 52,
-    "mediaId": "target-main"
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 448,
+    "y": 290,
+    "size": 58
   },
   "generation": {
-    "obstacleCount": 8,
+    "obstacleCount": 1,
     "allowedShapes": [
-      "rect",
       "circle",
+      "rect",
       "diamond"
     ],
-    "minSize": 75,
-    "maxSize": 155,
-    "minimumGap": 70,
-    "pathGrid": 18,
     "mediaByShape": {
       "circle": "obstacle-static-circle",
       "rect": "obstacle-static-rect",
       "diamond": "obstacle-static-diamond"
-    }
+    },
+    "minSize": 50,
+    "maxSize": 102,
+    "minimumGap": 70,
+    "pathGrid": 20
   },
-  "manualObstacles": [],
-  "movingObstacles": [],
-  "coins": [
+  "manualObstacles": [
     {
-      "id": "coin-a",
-      "x": 330,
-      "y": 670,
-      "size": 28,
-      "value": 1,
-      "mediaId": "coin-standard"
+      "id": "barrier-1",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 228,
+      "y": 731,
+      "width": 81,
+      "height": 81
     },
     {
-      "id": "coin-b",
-      "x": 690,
-      "y": 330,
-      "size": 28,
-      "value": 1,
-      "mediaId": "coin-standard"
+      "id": "barrier-2",
+      "mediaId": "obstacle-static-rect",
+      "shape": "rect",
+      "x": 1054,
+      "y": 249,
+      "width": 78,
+      "height": 66
+    },
+    {
+      "id": "barrier-3",
+      "mediaId": "obstacle-static-rect",
+      "shape": "rect",
+      "x": 1157,
+      "y": 763,
+      "width": 87,
+      "height": 113
+    },
+    {
+      "id": "barrier-4",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 230,
+      "y": 189,
+      "width": 90,
+      "height": 90
+    },
+    {
+      "id": "barrier-5",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 384,
+      "y": 507,
+      "width": 71,
+      "height": 71
+    }
+  ],
+  "movingObstacles": [],
+  "trackingObstacles": [],
+  "dynamicObstacles": [],
+  "switches": [],
+  "forceFields": [],
+  "coins": [
+    {
+      "id": "coin-6",
+      "mediaId": "coin-standard",
+      "x": 1464,
+      "y": 655,
+      "size": 30,
+      "value": 1
     }
   ],
   "rewards": {
-    "completionCoins": 2,
+    "completionCoins": 1,
     "bonusCoinsPerTarget": 1
   },
   "scoring": {
-    "baseMaximum": 2350,
-    "parTimeMs": 11200,
-    "parDistance": 1320,
+    "baseMaximum": 8000,
+    "parTimeMs": 10000,
+    "parDistance": 592,
     "timeWeight": 0.5,
     "distanceWeight": 0.5,
     "collisionPenaltyRate": 0.2,
     "maximumCollisions": 3
   },
   "bonuses": {
-    "maximumTargets": 2,
-    "rewardPerTarget": 450,
+    "maximumTargets": 0,
+    "rewardPerTarget": 500,
     "offerChanceMode": "currentScorePercent",
-    "failurePenaltyRate": 0.2,
-    "targets": [
-      {
-        "id": "relay-a",
-        "x": 760,
-        "y": 730,
-        "size": 44,
-        "mediaId": "target-bonus"
-      },
-      {
-        "id": "relay-b",
-        "x": 320,
-        "y": 180,
-        "size": 44,
-        "mediaId": "target-bonus"
-      }
-    ]
-  },
-  "movement": {
-    "maximumSpeed": 360,
-    "acceleration": 1400,
-    "deceleration": 1800,
-    "keyboardSpeed": 280
-  },
-  "trackingObstacles": []
+    "failurePenaltyRate": 0.1,
+    "targets": []
+  }
 }

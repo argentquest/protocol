@@ -1,330 +1,599 @@
-import { readFile, writeFile } from 'node:fs/promises'
+import { readdir, unlink, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import {
+  createSeededRandom,
+  randomBetween,
+  randomItem,
+} from '../src/game/generation/seededRandom.js'
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url))
 const repositoryRoot = path.resolve(scriptDirectory, '..')
 const levelsDirectory = path.join(repositoryRoot, 'src', 'config', 'levels')
+const microLevelsDirectory = path.join(
+  repositoryRoot,
+  'src',
+  'config',
+  'micro-levels',
+)
 
-const distributedNames = [
-  'Vector Primer',
-  'Offset Lesson',
-  'Needle Gate',
-  'Corner Logic',
-  'Transit Arc',
-  'Form Factor',
-  'Sweep Entry',
-  'Signal Weave',
-  'Pressure Cell',
-  'Nexus Trial',
-  'Quiet Vector',
-  'Split Calibration',
-  'Fine Margin',
-  'Polygon Turn',
-  'Extended Relay',
-  'Shape Relay',
-  'Motion Lattice',
-  'Crossing Matrix',
-  'Containment Ring',
-  'Protocol Zenith',
-  'Clean Line',
-  'Double Deflection',
-  'Precision Slot',
-  'Angled Passage',
-  'Distance Circuit',
-  'Geometry Shift',
-  'Scanner Array',
-  'Interlock Field',
-  'Pursuit Vault',
-  'Master Sequence',
+const tierNames = [
+  'Foundation',
+  'Kinetics',
+  'Phase',
+  'Pulse',
+  'Orbit',
+  'Switch',
+  'Current',
+  'Gravity',
+  'Rotation',
+  'Convergence',
 ]
+const playableBounds = { left: 80, right: 1520, top: 80, bottom: 820 }
 
-const apexNames = [
-  'Singularity Gate',
-  'Overclock Grid',
-  'Predator Lattice',
-  'Event Horizon',
-  'Quantum Pursuit',
-  'Critical Vector',
-  'Zero Margin',
-  'Cascade Core',
-  'Terminal Convergence',
-  'Omega Protocol',
-]
-
-const safeSeedVersions = new Map([
-  [35, 2],
-  [49, 2],
-])
-
-function levelFilename(number) {
-  return path.join(
-    levelsDirectory,
-    `level-${String(number).padStart(2, '0')}.json`,
-  )
+function rounded(value) {
+  return Math.round(value)
 }
 
-function seedSlug(name) {
-  return name.toLowerCase().replaceAll(/[^a-z0-9]+/g, '-').replaceAll(/^-|-$/g, '')
-}
-
-async function readLevel(number) {
-  return JSON.parse(await readFile(levelFilename(number), 'utf8'))
-}
-
-function retuneRewards(level, difficulty) {
-  level.rewards.completionCoins =
-    difficulty === 15 ? 10 : Math.max(1, Math.ceil(difficulty / 2))
-  level.rewards.bonusCoinsPerTarget =
-    difficulty === 15 ? 5 : Math.max(1, Math.ceil(difficulty / 4))
-}
-
-function retuneApexHazards(level) {
-  level.generation.obstacleCount = Math.min(
-    12,
-    level.generation.obstacleCount + 2,
-  )
-  level.generation.minimumGap = Math.max(
-    52,
-    level.generation.minimumGap - 8,
-  )
-  level.movingObstacles = level.movingObstacles.map((obstacle) => ({
-    ...obstacle,
-    periodMs: Math.max(1800, Math.round(obstacle.periodMs * 0.78)),
-  }))
-  level.trackingObstacles = level.trackingObstacles.map((obstacle) => ({
-    ...obstacle,
-    maxSpeed: Math.round(obstacle.maxSpeed * 1.35),
-    acceleration: Math.round(obstacle.acceleration * 1.35),
-    turnRateDegreesPerSecond: Math.min(
-      240,
-      obstacle.turnRateDegreesPerSecond + 30,
-    ),
-  }))
-}
-
-function phaseGate(x, y, width, height, cycleMs, solidMs, warningMs, offsetMs) {
+function box(x, y, width, height, padding = 0) {
   return {
-    id: 'phase-gate-a',
-    mediaId: 'obstacle-phase-gate',
-    shape: 'rect',
-    x,
-    y,
-    width,
-    height,
-    behavior: {
-      type: 'phase',
-      cycleMs,
-      solidMs,
-      warningMs,
-      offsetMs,
+    left: x - width / 2 - padding,
+    right: x + width / 2 + padding,
+    top: y - height / 2 - padding,
+    bottom: y + height / 2 + padding,
+  }
+}
+
+function boxesOverlap(first, second) {
+  return !(
+    first.right < second.left ||
+    first.left > second.right ||
+    first.bottom < second.top ||
+    first.top > second.bottom
+  )
+}
+
+function distance(first, second) {
+  return Math.hypot(first.x - second.x, first.y - second.y)
+}
+
+function place(
+  random,
+  reserved,
+  width,
+  height,
+  { padding = 35, minimumDistanceFrom = null, minimumDistance = 0 } = {},
+) {
+  const minimumX = playableBounds.left + width / 2
+  const maximumX = playableBounds.right - width / 2
+  const minimumY = playableBounds.top + height / 2
+  const maximumY = playableBounds.bottom - height / 2
+  for (let attempt = 0; attempt < 500; attempt += 1) {
+    const point = {
+      x: rounded(randomBetween(random, minimumX, maximumX)),
+      y: rounded(randomBetween(random, minimumY, maximumY)),
+    }
+    if (
+      minimumDistanceFrom &&
+      distance(point, minimumDistanceFrom) < minimumDistance
+    ) {
+      continue
+    }
+    const bounds = box(point.x, point.y, width, height, padding)
+    if (!reserved.some((item) => boxesOverlap(bounds, item))) {
+      reserved.push(bounds)
+      return point
+    }
+  }
+  throw new Error(`Unable to place ${width} × ${height} entity safely.`)
+}
+
+function placeStaticObstacles(random, number, tier, reserved) {
+  const count = 2 + ((number * 7 + tier) % 5)
+  return Array.from({ length: count }, (_, index) => {
+    const shape = randomItem(random, ['circle', 'rect', 'diamond'])
+    const width = rounded(randomBetween(random, 58, 96 + tier * 4))
+    const height =
+      shape === 'rect'
+        ? rounded(randomBetween(random, 52, 175))
+        : width
+    const point = place(random, reserved, width, height, {
+      padding: Math.max(34, 62 - tier * 2),
+    })
+    return {
+      id: `barrier-${index + 1}`,
+      mediaId: `obstacle-static-${shape}`,
+      shape,
+      ...point,
+      width,
+      height,
+    }
+  })
+}
+
+function placeMovingObstacles(random, number, tier, reserved) {
+  if (tier < 2) return []
+  const count = tier === 2 ? 1 + (number % 2) : number % 3 === 0 ? 2 : 1
+  return Array.from({ length: count }, (_, index) => {
+    const axis = random() < 0.5 ? 'x' : 'y'
+    const size = rounded(randomBetween(random, 38, 58))
+    const amplitude = rounded(randomBetween(random, 75, 145 + tier * 3))
+    const envelopeWidth = axis === 'x' ? size + amplitude * 2 : size
+    const envelopeHeight = axis === 'y' ? size + amplitude * 2 : size
+    const point = place(
+      random,
+      reserved,
+      envelopeWidth,
+      envelopeHeight,
+      { padding: 32 },
+    )
+    return {
+      id: `sweeper-${index + 1}`,
+      mediaId: 'obstacle-moving-circle',
+      shape: 'circle',
+      ...point,
+      size,
+      axis,
+      amplitude,
+      periodMs: rounded(randomBetween(random, 2600, 5400)),
+      phase: Number(randomBetween(random, 0, Math.PI * 2).toFixed(3)),
+    }
+  })
+}
+
+function mechanicCounts(number, tier) {
+  if (tier < 3) return {}
+  if (tier < 10) {
+    const primary = ['phase', 'pulse', 'orbit', 'switch', 'conveyor', 'radial', 'rotate'][
+      tier - 3
+    ]
+    const counts = { [primary]: 1 + (number % 3 === 0 ? 1 : 0) }
+    if (tier >= 4 && number % 2 === 0) {
+      const prior = ['phase', 'pulse', 'orbit', 'switch', 'conveyor', 'radial'][
+        (number + tier) % (tier - 3)
+      ]
+      if (prior) counts[prior] = 1
+    }
+    return counts
+  }
+  const mechanics = ['phase', 'pulse', 'orbit', 'switch', 'conveyor', 'radial', 'rotate']
+  const counts = {}
+  const total = 4 + (number % 3)
+  for (let index = 0; index < total; index += 1) {
+    const mechanic = mechanics[(number * 3 + index * 5) % mechanics.length]
+    counts[mechanic] = (counts[mechanic] ?? 0) + 1
+  }
+  return counts
+}
+
+function placeForceFields(random, counts, tier, reserved) {
+  const fields = []
+  const fieldReserved = [...reserved]
+  for (let index = 0; index < (counts.conveyor ?? 0); index += 1) {
+    const width = rounded(randomBetween(random, 210, 350))
+    const height = rounded(randomBetween(random, 105, 190))
+    const point = place(random, fieldReserved, width, height, { padding: 18 })
+    fields.push({
+      id: `current-${index + 1}`,
+      mediaId: 'field-conveyor',
+      type: 'conveyor',
+      ...point,
+      width,
+      height,
+      directionDegrees: rounded(randomBetween(random, -180, 180)),
+      force: rounded(randomBetween(random, 250, 320 + tier * 16)),
+    })
+  }
+  for (let index = 0; index < (counts.radial ?? 0); index += 1) {
+    const radius = rounded(randomBetween(random, 100, 145))
+    const point = place(random, fieldReserved, radius * 2, radius * 2, {
+      padding: 18,
+    })
+    fields.push({
+      id: `radial-${index + 1}`,
+      mediaId: 'field-radial',
+      type: random() < 0.5 ? 'repulsor' : 'attractor',
+      ...point,
+      radius,
+      force: rounded(randomBetween(random, 480, 610 + tier * 18)),
+    })
+  }
+  return fields
+}
+
+function placeSwitches(random, counts, reserved) {
+  const switches = []
+  for (let index = 0; index < (counts.switch ?? 0); index += 1) {
+    const point = place(random, reserved, 44, 44, { padding: 50 })
+    switches.push({
+      id: `switch-${index + 1}`,
+      mediaId: 'switch-pad',
+      ...point,
+      size: 44,
+      activation: index % 2 ? 'timed' : 'once',
+      durationMs: index % 2 ? 4500 : 0,
+    })
+  }
+  return switches
+}
+
+function placeDynamicObstacles(random, counts, tier, reserved) {
+  const obstacles = []
+  for (let index = 0; index < (counts.phase ?? 0); index += 1) {
+    const vertical = random() < 0.5
+    const width = vertical ? rounded(randomBetween(random, 28, 42)) : rounded(randomBetween(random, 170, 255))
+    const height = vertical ? rounded(randomBetween(random, 170, 255)) : rounded(randomBetween(random, 28, 42))
+    const point = place(random, reserved, width, height, { padding: 22 })
+    obstacles.push({
+      id: `phase-${index + 1}`,
+      mediaId: 'obstacle-phase-gate',
+      shape: 'rect',
+      ...point,
+      width,
+      height,
+      behavior: {
+        type: 'phase',
+        cycleMs: rounded(randomBetween(random, 3000, 4700)),
+        solidMs: rounded(randomBetween(random, 1200, 1700)),
+        warningMs: 450,
+        offsetMs: rounded(randomBetween(random, 0, 1900)),
+      },
+    })
+  }
+  for (let index = 0; index < (counts.pulse ?? 0); index += 1) {
+    const width = rounded(randomBetween(random, 105, 175))
+    const height = rounded(randomBetween(random, 30, 58))
+    const maximumScale = Number(randomBetween(random, 1.15, 1.48).toFixed(2))
+    const point = place(
+      random,
+      reserved,
+      width * maximumScale,
+      height * maximumScale,
+      { padding: 20 },
+    )
+    obstacles.push({
+      id: `pulse-${index + 1}`,
+      mediaId: 'obstacle-pulse-block',
+      shape: 'rect',
+      ...point,
+      width,
+      height,
+      behavior: {
+        type: 'pulse',
+        minScale: Number(randomBetween(random, 0.38, 0.62).toFixed(2)),
+        maxScale: maximumScale,
+        periodMs: rounded(randomBetween(random, 2600, 4400)),
+        phase: Number(randomBetween(random, -Math.PI, Math.PI).toFixed(3)),
+      },
+    })
+  }
+  for (let index = 0; index < (counts.orbit ?? 0); index += 1) {
+    const size = rounded(randomBetween(random, 36, 48))
+    const radiusX = rounded(randomBetween(random, 60, 118))
+    const radiusY = rounded(randomBetween(random, 60, 138))
+    const point = place(
+      random,
+      reserved,
+      size + radiusX * 2,
+      size + radiusY * 2,
+      { padding: 14 },
+    )
+    obstacles.push({
+      id: `orbiter-${index + 1}`,
+      mediaId: 'obstacle-orbiter',
+      shape: 'circle',
+      ...point,
+      size,
+      behavior: {
+        type: 'orbit',
+        radiusX,
+        radiusY,
+        periodMs: rounded(randomBetween(random, 3000, 5300)),
+        phase: Number(randomBetween(random, 0, Math.PI * 2).toFixed(3)),
+      },
+    })
+  }
+  for (let index = 0; index < (counts.switch ?? 0); index += 1) {
+    const vertical = random() < 0.5
+    const width = vertical ? 34 : rounded(randomBetween(random, 190, 285))
+    const height = vertical ? rounded(randomBetween(random, 190, 285)) : 34
+    const point = place(random, reserved, width, height, { padding: 22 })
+    obstacles.push({
+      id: `switch-barrier-${index + 1}`,
+      mediaId: 'obstacle-switch-barrier',
+      shape: 'rect',
+      ...point,
+      width,
+      height,
+      behavior: {
+        type: 'switch',
+        switchId: `switch-${index + 1}`,
+        initiallySolid: true,
+      },
+    })
+  }
+  for (let index = 0; index < (counts.rotate ?? 0); index += 1) {
+    const width = rounded(randomBetween(random, 175, 260))
+    const height = rounded(randomBetween(random, 22, 34))
+    const envelope = Math.hypot(width, height)
+    const point = place(random, reserved, envelope, envelope, { padding: 14 })
+    obstacles.push({
+      id: `spinner-${index + 1}`,
+      mediaId: 'obstacle-spinner',
+      shape: 'rect',
+      ...point,
+      width,
+      height,
+      behavior: {
+        type: 'rotate',
+        speedDegreesPerSecond: rounded(randomBetween(random, 55, 115 + tier * 3)),
+        initialDegrees: rounded(randomBetween(random, 0, 180)),
+      },
+    })
+  }
+  return obstacles
+}
+
+function placeTrackingObstacles(random, tier, number, reserved) {
+  if (tier < 10) return []
+  const count = 1 + (number % 2)
+  return Array.from({ length: count }, (_, index) => {
+    const zoneWidth = rounded(randomBetween(random, 180, 250))
+    const zoneHeight = rounded(randomBetween(random, 160, 230))
+    const size = rounded(randomBetween(random, 34, 42))
+    const point = place(random, reserved, size, size, { padding: 32 })
+    const zoneX = rounded(
+      Math.max(
+        playableBounds.left,
+        Math.min(playableBounds.right - zoneWidth, point.x - zoneWidth / 2),
+      ),
+    )
+    const zoneY = rounded(
+      Math.max(
+        playableBounds.top,
+        Math.min(playableBounds.bottom - zoneHeight, point.y - zoneHeight / 2),
+      ),
+    )
+    return {
+      id: `tracker-${index + 1}`,
+      mediaId: 'obstacle-tracking-circle',
+      shape: 'circle',
+      x: point.x,
+      y: point.y,
+      width: size,
+      height: size,
+      zone: {
+        x: zoneX,
+        y: zoneY,
+        width: zoneWidth,
+        height: zoneHeight,
+      },
+      maxSpeed: rounded(randomBetween(random, 100, 135)),
+      acceleration: rounded(randomBetween(random, 165, 210)),
+      turnRateDegreesPerSecond: rounded(randomBetween(random, 105, 145)),
+    }
+  })
+}
+
+function createLevel(number) {
+  const tier = Math.ceil(number / 10)
+  const tierName = tierNames[tier - 1]
+  const seed = `path-protocol-16x9-${String(number).padStart(3, '0')}-v2`
+  const random = createSeededRandom(seed)
+  const tokenSize = Math.max(34, 46 - Math.floor(tier / 3) * 2)
+  const reserved = []
+  const start = place(random, reserved, tokenSize, tokenSize, { padding: 70 })
+  const targetSize = 58
+  const target = place(random, reserved, targetSize, targetSize, {
+    padding: 70,
+    minimumDistanceFrom: start,
+    minimumDistance: 560,
+  })
+  const coin = place(random, reserved, 30, 30, { padding: 45 })
+  const bonus =
+    tier >= 3 ? place(random, reserved, 48, 48, { padding: 60 }) : null
+  const counts = mechanicCounts(number, tier)
+  const switches = placeSwitches(random, counts, reserved)
+  const forceFields = placeForceFields(random, counts, tier, reserved)
+  const dynamicObstacles = placeDynamicObstacles(
+    random,
+    counts,
+    tier,
+    reserved,
+  )
+  const trackingObstacles = placeTrackingObstacles(
+    random,
+    tier,
+    number,
+    reserved,
+  )
+  const movingObstacles = placeMovingObstacles(random, number, tier, reserved)
+  const manualObstacles = placeStaticObstacles(random, number, tier, reserved)
+
+  return {
+    schemaVersion: 2,
+    id: `level-${String(number).padStart(2, '0')}`,
+    number,
+    name: `${tierName} ${String(((number - 1) % 10) + 1).padStart(2, '0')}`,
+    seed,
+    difficulty: tier,
+    briefing:
+      `Tier ${tier}: ${tierName}. ` +
+      [
+        'Learn efficient lines through stable geometry.',
+        'Read moving hazards before committing.',
+        'Cross phase gates during their open window.',
+        'Use the breathing rhythm to preserve space.',
+        'Predict orbiting hazards rather than chasing them.',
+        'Activate the remote pad before crossing its barrier.',
+        'Counter-steer through directional currents.',
+        'Shape a route around radial push and pull.',
+        'Time movement around a swept rotating arm.',
+        'Combine every protocol under tighter timing.',
+      ][tier - 1],
+    arena: {
+      shape: 'rect',
+      mediaId: 'arena-standard',
+      margin: 35,
+      cornerRadius: 38,
+    },
+    token: {
+      shape: number % 9 === 0 ? 'diamond' : number % 7 === 0 ? 'rect' : 'circle',
+      size: tokenSize,
+      mediaId:
+        number % 9 === 0
+          ? 'token-diamond'
+          : number % 7 === 0
+            ? 'token-rect'
+            : 'token-circle',
+    },
+    movement: {
+      maximumSpeed: 470 + tier * 18,
+      acceleration: 1200 + tier * 80,
+      deceleration: 1450 + tier * 85,
+      keyboardSpeed: 310 + tier * 14,
+    },
+    start: {
+      mode: 'manual',
+      mediaId: 'start-pad',
+      ...start,
+    },
+    mainTarget: {
+      mode: 'manual',
+      mediaId: 'target-main',
+      ...target,
+      size: targetSize,
+    },
+    generation: {
+      obstacleCount: Math.min(3, Math.ceil(tier / 3)),
+      allowedShapes: ['circle', 'rect', 'diamond'],
+      mediaByShape: {
+        circle: 'obstacle-static-circle',
+        rect: 'obstacle-static-rect',
+        diamond: 'obstacle-static-diamond',
+      },
+      minSize: 50,
+      maxSize: 100 + tier * 2,
+      minimumGap: Math.max(45, 72 - tier * 2),
+      pathGrid: 20,
+    },
+    manualObstacles,
+    movingObstacles,
+    trackingObstacles,
+    dynamicObstacles,
+    switches,
+    forceFields,
+    coins: [
+      {
+        id: `coin-${number}`,
+        mediaId: 'coin-standard',
+        ...coin,
+        size: 30,
+        value: 1,
+      },
+    ],
+    rewards: {
+      completionCoins: Math.ceil(tier / 2),
+      bonusCoinsPerTarget: Math.max(1, Math.floor(tier / 3)),
+    },
+    scoring: {
+      baseMaximum: 5000 + number * 500,
+      parTimeMs: 9000 + tier * 1000,
+      parDistance: rounded(distance(start, target)),
+      timeWeight: 0.5,
+      distanceWeight: 0.5,
+      collisionPenaltyRate: 0.2,
+      maximumCollisions: 3,
+    },
+    bonuses: {
+      maximumTargets: bonus ? 1 : 0,
+      rewardPerTarget: 400 + tier * 100,
+      offerChanceMode: 'currentScorePercent',
+      failurePenaltyRate: 0.1,
+      targets: bonus
+        ? [
+            {
+              id: 'bonus-a',
+              mediaId: 'target-bonus',
+              ...bonus,
+              size: 48,
+            },
+          ]
+        : [],
     },
   }
 }
 
-/**
- * Applies authored mechanic overrides that distinguish selected expansion
- * chambers from their original seed templates.
- *
- * @param {object} level Generated expansion configuration.
- * @param {number} number Campaign level number.
- * @returns {void}
- */
-function applyExpansionVariety(level, number) {
-  if (number === 33) {
-    level.briefing =
-      'A phase gate alternates between a solid barrier and a brief crossing window.'
-    level.dynamicObstacles = [
-      phaseGate(500, 500, 190, 30, 4000, 1700, 600, 1900),
-    ]
-  } else if (number === 37) {
-    level.briefing =
-      'An offset phase gate interrupts the scanner route and rewards deliberate timing.'
-    level.dynamicObstacles = [
-      phaseGate(400, 650, 200, 28, 3600, 1600, 500, 2100),
-    ]
-  } else if (number === 43) {
-    level.briefing =
-      'An elliptical orbiter turns the center line into a prediction lesson.'
-    level.dynamicObstacles = [
-      {
-        id: 'orbiter-a',
-        mediaId: 'obstacle-orbiter',
-        shape: 'circle',
-        x: 560,
-        y: 500,
-        size: 36,
-        behavior: {
-          type: 'orbit',
-          radiusX: 25,
-          radiusY: 80,
-          periodMs: 4400,
-          phase: 0.8,
-        },
-      },
-    ]
-  } else if (number === 47) {
-    level.briefing =
-      'A pulsing vertical block changes the scanner crossing from wide to exact.'
-    level.dynamicObstacles = [
-      {
-        id: 'pulse-block-a',
-        mediaId: 'obstacle-pulse-block',
-        shape: 'rect',
-        x: 400,
-        y: 590,
-        width: 30,
-        height: 180,
-        behavior: {
-          type: 'pulse',
-          minScale: 0.45,
-          maxScale: 1.25,
-          periodMs: 3400,
-          phase: -Math.PI / 2,
-        },
-      },
-    ]
-  } else if (number === 53) {
-    level.briefing =
-      'A fast phase gate tests whether the shortest route is worth waiting for.'
-    level.dynamicObstacles = [
-      phaseGate(520, 500, 180, 28, 3000, 1350, 450, 1500),
-    ]
-  } else if (number === 54) {
-    level.briefing =
-      'An orbiter circles the final approach and turns a static route into a prediction test.'
-    level.dynamicObstacles = [
-      {
-        id: 'orbiter-a',
-        mediaId: 'obstacle-orbiter',
-        shape: 'circle',
-        x: 620,
-        y: 650,
-        size: 36,
-        behavior: {
-          type: 'orbit',
-          radiusX: 70,
-          radiusY: 60,
-          periodMs: 4400,
-          phase: 0.5,
-        },
-      },
-    ]
-  } else if (number === 56) {
-    level.briefing =
-      'A pulse block repeatedly narrows the direct center passage.'
-    level.dynamicObstacles = [
-      {
-        id: 'pulse-block-a',
-        mediaId: 'obstacle-pulse-block',
-        shape: 'rect',
-        x: 480,
-        y: 540,
-        width: 140,
-        height: 24,
-        behavior: {
-          type: 'pulse',
-          minScale: 0.45,
-          maxScale: 1.4,
-          periodMs: 3600,
-          phase: -Math.PI / 2,
-        },
-      },
-    ]
-  } else if (number === 59) {
-    level.briefing =
-      'A remote switch opens the direct upper passage while pursuit hazards close in.'
-    level.dynamicObstacles = [
-      {
-        id: 'switch-barrier-a',
-        mediaId: 'obstacle-switch-barrier',
-        shape: 'rect',
-        x: 550,
-        y: 300,
-        width: 240,
-        height: 28,
-        behavior: {
-          type: 'switch',
-          switchId: 'switch-a',
-          initiallySolid: true,
-        },
-      },
-    ]
-    level.switches = [
-      {
-        id: 'switch-a',
-        mediaId: 'switch-pad',
-        x: 300,
-        y: 650,
-        size: 48,
-        activation: 'once',
-        durationMs: 0,
-      },
-    ]
+for (const fileName of await readdir(levelsDirectory)) {
+  if (/^level-\d+\.json$/.test(fileName)) {
+    await unlink(path.join(levelsDirectory, fileName))
   }
 }
 
-/**
- * Creates a released expansion level from an existing validated archetype.
- *
- * @param {object} template Existing schema-complete level configuration.
- * @param {number} number New contiguous campaign number.
- * @param {string} name Unique display name.
- * @param {number} difficulty Difficulty band (1–10 or apex tier 15).
- * @returns {object} Complete deterministic level configuration.
- */
-function createExpansionLevel(template, number, name, difficulty) {
-  const level = structuredClone(template)
-  const paddedNumber = String(number).padStart(2, '0')
-  level.id = `level-${paddedNumber}`
+for (let number = 1; number <= 100; number += 1) {
+  const level = createLevel(number)
+  await writeFile(
+    path.join(levelsDirectory, `level-${String(number).padStart(2, '0')}.json`),
+    `${JSON.stringify(level, null, 2)}\n`,
+  )
+}
+
+console.log(
+  'Generated 100 deterministic full-board layouts across 10 mechanic tiers.',
+)
+
+const microDefinitions = [
+  [201, 3, 'Phase Window', 'phase'],
+  [202, 4, 'Pulse Thread', 'pulse'],
+  [203, 5, 'Orbit Lock', 'orbit'],
+  [204, 6, 'Switchback', 'switch'],
+  [205, 7, 'Crosscurrent', 'conveyor'],
+  [206, 8, 'Gravity Well', 'radial'],
+  [207, 9, 'Spinner Sync', 'rotate'],
+]
+
+for (const fileName of await readdir(microLevelsDirectory)) {
+  if (/^level-\d+\.json$/.test(fileName)) {
+    await unlink(path.join(microLevelsDirectory, fileName))
+  }
+}
+
+for (const [number, tier, name, mechanic] of microDefinitions) {
+  const level = createLevel(tier * 10)
+  level.id = `level-${number}`
   level.number = number
   level.name = name
-  level.seed = `path-protocol-${seedSlug(name)}-v${
-    safeSeedVersions.get(number) ?? 1
-  }`
-  level.difficulty = difficulty
-  level.briefing =
-    difficulty === 15
-      ? `Apex-tier chamber ${number - 60}: denser geometry and overclocked hazards demand complete control.`
-      : `Expansion chamber ${number}: a difficulty-${difficulty} variation with a new deterministic layout.`
-  level.scoring.baseMaximum = 15000 + (number - 30) * 500
-  retuneRewards(level, difficulty)
-  if (difficulty === 15) {
-    retuneApexHazards(level)
-    level.scoring.parTimeMs = Math.round(level.scoring.parTimeMs * 1.15)
-    level.scoring.parDistance = Math.round(level.scoring.parDistance * 1.1)
-    level.bonuses.rewardPerTarget = Math.max(
-      1800,
-      level.bonuses.rewardPerTarget,
-    )
+  level.seed = `path-protocol-micro-${mechanic}-v2`
+  level.difficulty = tier
+  level.briefing = `Focused ${mechanic} mastery challenge.`
+  level.generation.obstacleCount = 0
+  level.manualObstacles = level.manualObstacles.slice(0, 2)
+  level.movingObstacles = []
+  level.trackingObstacles = []
+  level.dynamicObstacles = level.dynamicObstacles.filter(
+    (item) => item.behavior.type === mechanic,
+  )
+  level.switches = mechanic === 'switch' ? level.switches : []
+  level.forceFields = level.forceFields.filter((item) =>
+    mechanic === 'radial'
+      ? ['repulsor', 'attractor'].includes(item.type)
+      : item.type === mechanic,
+  )
+  level.coins = []
+  level.rewards = { completionCoins: 0, bonusCoinsPerTarget: 0 }
+  level.bonuses = {
+    maximumTargets: 0,
+    rewardPerTarget: 0,
+    offerChanceMode: 'currentScorePercent',
+    failurePenaltyRate: 0,
+    targets: [],
   }
-  applyExpansionVariety(level, number)
-  return level
-}
-
-for (let offset = 0; offset < distributedNames.length; offset += 1) {
-  const number = 31 + offset
-  const difficulty = (offset % 10) + 1
-  const template = await readLevel(difficulty)
-  const level = createExpansionLevel(
-    template,
-    number,
-    distributedNames[offset],
-    difficulty,
+  level.scoring.baseMaximum = 1500
+  level.scoring.parTimeMs = 8500
+  await writeFile(
+    path.join(microLevelsDirectory, `level-${number}.json`),
+    `${JSON.stringify(level, null, 2)}\n`,
   )
-  await writeFile(levelFilename(number), `${JSON.stringify(level, null, 2)}\n`)
 }
 
-for (let offset = 0; offset < apexNames.length; offset += 1) {
-  const number = 61 + offset
-  const template = await readLevel(21 + offset)
-  const level = createExpansionLevel(
-    template,
-    number,
-    apexNames[offset],
-    15,
-  )
-  await writeFile(levelFilename(number), `${JSON.stringify(level, null, 2)}\n`)
-}
-
-console.log('Generated Levels 31–70: 30 distributed and 10 apex-tier levels.')
+console.log('Generated 7 mechanic-matched Micro Protocol levels.')

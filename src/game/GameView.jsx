@@ -51,7 +51,7 @@ export default function GameView({
   devMode = false,
   onPreviousLevel,
   onNextLevel,
-  totalLevels = 70,
+  totalLevels = 100,
   powerups = [],
   inventory = {},
   collectedCoins = {},

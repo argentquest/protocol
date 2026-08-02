@@ -62,10 +62,13 @@ export async function findUnknownMediaFiles(root, mediaRegistry, soundRegistry) 
     const allowed = new Set(
       mediaRegistry.media
         .filter((entry) => entry.category === category)
-        .map((entry) => entry.fileName),
+        .flatMap((entry) => [
+          entry.fileName,
+          `${path.parse(entry.fileName).name}.png`,
+        ]),
     )
     for (const fileName of await listFiles(path.join(root, category))) {
-      if (fileName.endsWith('.svg') && !allowed.has(fileName)) {
+      if (/\.(?:png|svg)$/.test(fileName) && !allowed.has(fileName)) {
         unknown.push(`${category}/${fileName}`)
       }
     }
@@ -112,9 +115,23 @@ export function isCompletePlaybackEntry(entry, channel) {
   )
 }
 
-async function validateVisualFile(filePath, label) {
+async function validateVisualFile(filePath, label, renderMode = 'vector') {
   const source = await readOptional(filePath)
   if (!source) return { exists: false, errors: [] }
+  if (renderMode === 'texture') {
+    const pngSignature = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])
+    const signatureValid =
+      source.length >= 24 && source.subarray(0, 8).equals(pngSignature)
+    const width = signatureValid ? source.readUInt32BE(16) : 0
+    const height = signatureValid ? source.readUInt32BE(20) : 0
+    return {
+      exists: true,
+      errors:
+        signatureValid && width > 0 && height > 0
+          ? []
+          : [`${label}: file must be a non-empty PNG texture`],
+    }
+  }
   return {
     exists: true,
     errors: validateSvgSource(source.toString('utf8'), label),
@@ -185,16 +202,35 @@ export async function resolveThemeManifest({
 
     let sourceScope = 'default'
     let sourceRootUrl = defaultRootUrl
+    let resolvedFileName = entry.fileName
+    let resolvedRenderMode = entry.renderMode
     if (themeRoot && themeRootUrl) {
-      const themeValidation = await validateVisualFile(
+      const textureFileName = `${path.parse(entry.fileName).name}.png`
+      const textureSegments = [entry.category, textureFileName]
+      const textureValidation = await validateVisualFile(
+        path.join(themeRoot, ...textureSegments),
+        `${themeName}/${textureSegments.join('/')}`,
+        'texture',
+      )
+      const vectorValidation = await validateVisualFile(
         path.join(themeRoot, ...relativeSegments),
         `${themeName}/${relativeSegments.join('/')}`,
+        'vector',
       )
-      if (themeValidation.exists && themeValidation.errors.length === 0) {
+      if (textureValidation.exists && textureValidation.errors.length === 0) {
         sourceScope = 'theme'
         sourceRootUrl = themeRootUrl
-      } else if (themeValidation.exists) {
-        warnings.push(...themeValidation.errors)
+        resolvedFileName = textureFileName
+        resolvedRenderMode = 'texture'
+      } else if (vectorValidation.exists && vectorValidation.errors.length === 0) {
+        sourceScope = 'theme'
+        sourceRootUrl = themeRootUrl
+      }
+      if (textureValidation.exists && textureValidation.errors.length) {
+        warnings.push(...textureValidation.errors)
+      }
+      if (vectorValidation.exists && vectorValidation.errors.length) {
+        warnings.push(...vectorValidation.errors)
       }
     }
 
@@ -202,9 +238,9 @@ export async function resolveThemeManifest({
     visuals.push({
       mediaId: entry.mediaId,
       alias,
-      src: `${toUrl(sourceRootUrl, ...relativeSegments)}?v=${mediaVersion}`,
+      src: `${toUrl(sourceRootUrl, entry.category, resolvedFileName)}?v=${mediaVersion}`,
       category: entry.category,
-      renderMode: entry.renderMode,
+      renderMode: resolvedRenderMode,
       sizing: entry.sizing,
       sourceScope,
     })

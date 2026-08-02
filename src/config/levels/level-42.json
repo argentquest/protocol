@@ -2,105 +2,226 @@
   "schemaVersion": 2,
   "id": "level-42",
   "number": 42,
-  "name": "Split Calibration",
-  "seed": "path-protocol-split-calibration-v1",
-  "difficulty": 2,
-  "briefing": "Expansion chamber 42: a difficulty-2 variation with a new deterministic layout.",
+  "name": "Orbit 02",
+  "seed": "path-protocol-16x9-042-v2",
+  "difficulty": 5,
+  "briefing": "Tier 5: Orbit. Predict orbiting hazards rather than chasing them.",
   "arena": {
     "shape": "rect",
-    "margin": 34,
-    "cornerRadius": 42,
-    "mediaId": "arena-standard"
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
   },
   "token": {
-    "shape": "circle",
-    "size": 38,
-    "mediaId": "token-circle"
+    "shape": "rect",
+    "size": 44,
+    "mediaId": "token-rect"
+  },
+  "movement": {
+    "maximumSpeed": 560,
+    "acceleration": 1600,
+    "deceleration": 1875,
+    "keyboardSpeed": 380
   },
   "start": {
-    "mode": "generated",
-    "region": {
-      "x": 760,
-      "y": 720,
-      "width": 150,
-      "height": 140
-    },
-    "mediaId": "start-pad"
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 781,
+    "y": 462
   },
   "mainTarget": {
-    "mode": "generated",
-    "region": {
-      "x": 90,
-      "y": 100,
-      "width": 150,
-      "height": 160
-    },
-    "size": 56,
-    "mediaId": "target-main"
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 270,
+    "y": 721,
+    "size": 58
   },
   "generation": {
-    "obstacleCount": 5,
+    "obstacleCount": 2,
     "allowedShapes": [
+      "circle",
       "rect",
-      "circle"
+      "diamond"
     ],
-    "minSize": 85,
-    "maxSize": 165,
-    "minimumGap": 68,
-    "pathGrid": 22,
     "mediaByShape": {
       "circle": "obstacle-static-circle",
       "rect": "obstacle-static-rect",
       "diamond": "obstacle-static-diamond"
-    }
+    },
+    "minSize": 50,
+    "maxSize": 110,
+    "minimumGap": 62,
+    "pathGrid": 20
   },
   "manualObstacles": [
     {
-      "id": "deflector",
+      "id": "barrier-1",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 1304,
+      "y": 180,
+      "width": 90,
+      "height": 90
+    },
+    {
+      "id": "barrier-2",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 287,
+      "y": 241,
+      "width": 67,
+      "height": 67
+    },
+    {
+      "id": "barrier-3",
+      "mediaId": "obstacle-static-rect",
       "shape": "rect",
-      "x": 430,
-      "y": 430,
-      "width": 160,
-      "height": 62,
-      "mediaId": "obstacle-static-rect"
+      "x": 852,
+      "y": 173,
+      "width": 112,
+      "height": 95
+    },
+    {
+      "id": "barrier-4",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 1338,
+      "y": 643,
+      "width": 73,
+      "height": 73
+    },
+    {
+      "id": "barrier-5",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 546,
+      "y": 536,
+      "width": 99,
+      "height": 99
+    },
+    {
+      "id": "barrier-6",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 127,
+      "y": 469,
+      "width": 92,
+      "height": 92
     }
   ],
-  "movingObstacles": [],
+  "movingObstacles": [
+    {
+      "id": "sweeper-1",
+      "mediaId": "obstacle-moving-circle",
+      "shape": "circle",
+      "x": 717,
+      "y": 697,
+      "size": 40,
+      "axis": "x",
+      "amplitude": 138,
+      "periodMs": 3765,
+      "phase": 6.163
+    },
+    {
+      "id": "sweeper-2",
+      "mediaId": "obstacle-moving-circle",
+      "shape": "circle",
+      "x": 1482,
+      "y": 447,
+      "size": 46,
+      "axis": "y",
+      "amplitude": 152,
+      "periodMs": 4454,
+      "phase": 1.538
+    }
+  ],
+  "trackingObstacles": [],
+  "dynamicObstacles": [
+    {
+      "id": "pulse-1",
+      "mediaId": "obstacle-pulse-block",
+      "shape": "rect",
+      "x": 1080,
+      "y": 558,
+      "width": 140,
+      "height": 57,
+      "behavior": {
+        "type": "pulse",
+        "minScale": 0.49,
+        "maxScale": 1.38,
+        "periodMs": 3208,
+        "phase": 2.285
+      }
+    },
+    {
+      "id": "orbiter-1",
+      "mediaId": "obstacle-orbiter",
+      "shape": "circle",
+      "x": 1084,
+      "y": 238,
+      "size": 43,
+      "behavior": {
+        "type": "orbit",
+        "radiusX": 68,
+        "radiusY": 108,
+        "periodMs": 3476,
+        "phase": 5.315
+      }
+    },
+    {
+      "id": "orbiter-2",
+      "mediaId": "obstacle-orbiter",
+      "shape": "circle",
+      "x": 575,
+      "y": 226,
+      "size": 40,
+      "behavior": {
+        "type": "orbit",
+        "radiusX": 61,
+        "radiusY": 125,
+        "periodMs": 3817,
+        "phase": 0.087
+      }
+    }
+  ],
+  "switches": [],
+  "forceFields": [],
   "coins": [
     {
-      "id": "coin-a",
-      "x": 500,
-      "y": 500,
+      "id": "coin-42",
+      "mediaId": "coin-standard",
+      "x": 1161,
+      "y": 679,
       "size": 30,
-      "value": 1,
-      "mediaId": "coin-standard"
+      "value": 1
     }
   ],
   "rewards": {
-    "completionCoins": 1,
+    "completionCoins": 3,
     "bonusCoinsPerTarget": 1
   },
   "scoring": {
-    "baseMaximum": 21000,
-    "parTimeMs": 7200,
-    "parDistance": 980,
+    "baseMaximum": 26000,
+    "parTimeMs": 14000,
+    "parDistance": 573,
     "timeWeight": 0.5,
     "distanceWeight": 0.5,
     "collisionPenaltyRate": 0.2,
     "maximumCollisions": 3
   },
   "bonuses": {
-    "maximumTargets": 0,
-    "rewardPerTarget": 0,
+    "maximumTargets": 1,
+    "rewardPerTarget": 900,
     "offerChanceMode": "currentScorePercent",
-    "failurePenaltyRate": 0.2,
-    "targets": []
-  },
-  "movement": {
-    "maximumSpeed": 360,
-    "acceleration": 1400,
-    "deceleration": 1800,
-    "keyboardSpeed": 280
-  },
-  "trackingObstacles": []
+    "failurePenaltyRate": 0.1,
+    "targets": [
+      {
+        "id": "bonus-a",
+        "mediaId": "target-bonus",
+        "x": 311,
+        "y": 447,
+        "size": 48
+      }
+    ]
+  }
 }

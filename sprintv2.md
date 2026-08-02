@@ -60,6 +60,12 @@ Sizes express relative complexity and risk, not calendar estimates.
 | Sprint 12 | Quality, Docker, and release readiness | `IN PROGRESS` |
 | Sprint 13 | Campaign expansion to 70 levels | `DONE` |
 | Sprint 14 | Dynamic obstacle variety and Micro Protocols | `DONE` |
+| Sprint 15 | 16:9 world and 100-level mechanic campaign | `DONE` |
+| Sprint 16 | Seeded full-board campaign diversity | `DONE` |
+| Sprint 17 | Server-backed Theme Workshop | `DONE` |
+| Sprint 18 | SQLite accounts and theme ownership | `DONE` |
+| Sprint 19 | Open-media texture proof theme | `DONE` |
+| Sprint 20 | Theme media library and player theme selection | `DONE` |
 
 ---
 
@@ -509,6 +515,142 @@ challenges teach each behavior in isolation.
 
 ---
 
+## Sprint 15 — 16:9 world and 100-level mechanic campaign
+
+**Status:** `DONE`
+
+| ID | Task | Size | Status | Acceptance |
+|---|---|---:|---|---|
+| V2-S15-01 | Migrate logical world to 1600 × 900 | L | `DONE` | Engine containment, pathfinding, Pixi masks, viewport transforms, and pointer mapping share 16:9 bounds. |
+| V2-S15-02 | Add environmental force fields | L | `DONE` | Conveyor, repulsor, and attractor acceleration is deterministic and engine-owned. |
+| V2-S15-03 | Add rotating spinners | L | `DONE` | Collision and rendering share rotation and swept angular motion cannot tunnel through the token. |
+| V2-S15-04 | Replace campaign with 100 levels | XL | `DONE` | Ten contiguous tiers introduce static, moving, phase, pulse, orbit, switch, current, radial, rotation, and convergence play. |
+| V2-S15-05 | Expand Micro Protocol mastery | M | `DONE` | Seven mechanic-matched challenges unlock with their campaign tier and award one-time tier coins. |
+| V2-S15-06 | Validate release | XL | `DONE` | Schema, media, unit, lint, build, solvability, and browser gates pass. |
+
+### Sprint 15 exit criteria
+
+- The authored world and desktop canvas use a distortion-free 16:9 transform.
+- All 100 campaign levels and seven Micro Protocols validate and generate.
+- Every new mechanic is introduced before it appears in convergence levels.
+- Force-field and spinner rules remain framework-neutral and fixed-step.
+- Campaign, media, build, and browser checks pass.
+
+---
+
+## Sprint 16 — Seeded full-board campaign diversity
+
+**Status:** `DONE`
+
+| ID | Task | Size | Status | Acceptance |
+|---|---|---:|---|---|
+| V2-S16-01 | Remove repeated route lanes | L | `DONE` | Every campaign start and target pair is unique and the campaign covers all twelve coarse arena regions. |
+| V2-S16-02 | Seed spatial composition | XL | `DONE` | Released seeds deterministically vary endpoint, pickup, static, moving, dynamic, force-field, switch, and tracker placement. |
+| V2-S16-03 | Vary mechanic mixtures | L | `DONE` | Tiers emphasize their primary mechanic while selecting different earlier-mechanic combinations and entity counts. |
+| V2-S16-04 | Validate diversity and solvability | L | `DONE` | All layouts remain deterministic, distinct, fully contained, overlap-free, and route-solvable. |
+
+### Sprint 16 exit criteria
+
+- Restarts reproduce the released seed instead of rerolling the attempt.
+- Starts, targets, and obstacles cover the full safe 16:9 arena.
+- Every campaign fingerprint is unique.
+- Every level contains at least one seed-generated obstacle.
+- Configuration and campaign validation pass.
+
+---
+
+## Sprint 17 — Server-backed Theme Workshop
+
+**Status:** `DONE`
+
+| ID | Task | Size | Status | Acceptance |
+|---|---|---:|---|---|
+| V2-S17-01 | Add persistent Express runtime | XL | `DONE` | Node serves the built app and same-origin API with a configurable filesystem data directory. |
+| V2-S17-02 | Implement theme package API | XL | `DONE` | Clone, private access, ownership, publish, delete, level CRUD, ordering, and automatic renumbering are API-tested. |
+| V2-S17-03 | Isolate theme progress | M | `DONE` | Browser progress is namespaced by theme and immutable level ID. |
+| V2-S17-04 | Build Theme Workshop management UI | L | `DONE` | Players browse, clone, resume, publish, play, and delete themes. |
+| V2-S17-05 | Build visual level editor | XL | `DONE` | The 10-unit grid supports entity manipulation, full properties, undo/redo, validation, autosave, and manual save. |
+| V2-S17-06 | Add live playtest and sequence editing | L | `DONE` | Pixi playtest, regeneration, duplication, deletion, ordering, and renumbering work from the workshop. |
+| V2-S17-07 | Validate full release | XL | `DONE` | Unit, API, lint, build, Docker, and browser gates pass. |
+
+### Sprint 17 exit criteria
+
+- The default campaign remains read-only.
+- Clones initially contain level JSON and no copied media.
+- Private themes require their owning account and public themes are playable by all.
+- Invalid levels cannot autosave or save manually.
+- Themes contain 1–200 levels with stable internal IDs.
+- Production data survives container replacement through a mounted volume.
+- Full automated and browser validation passes.
+
+---
+
+## Sprint 18 — SQLite accounts and theme ownership
+
+**Status:** `DONE`
+
+| ID | Task | Size | Status | Acceptance |
+|---|---|---:|---|---|
+| V2-S18-01 | Add account and session persistence | L | `DONE` | SQLite stores unique usernames/emails, salted scrypt password hashes, and hashed expiring sessions. |
+| V2-S18-02 | Replace edit keys with ownership | L | `DONE` | Authenticated owners can clone and mutate themes; private data stays hidden from other accounts. |
+| V2-S18-03 | Build registration and login UI | M | `DONE` | Workshop registration, login, session restore, and logout use an HTTP-only cookie. |
+| V2-S18-04 | Persist and validate deployment data | M | `DONE` | Docker mounts themes and SQLite under one persistent data volume; the runtime image builds and passes API health checks. |
+
+### Sprint 18 exit criteria
+
+- Registration requires username, email address, and an 8-character minimum password.
+- Development accounts are usable immediately without email confirmation.
+- Plaintext passwords and session tokens are never stored in SQLite.
+- Public play stays anonymous; authoring requires the owning account.
+- Unit, API, lint, build, Docker, and browser validation pass.
+
+---
+
+## Sprint 19 — Open-media texture proof theme
+
+**Status:** `DONE`
+
+| ID | Task | Size | Status | Acceptance |
+|---|---|---:|---|---|
+| V2-S19-01 | Acquire and preserve selected CC0 media | M | `DONE` | Eight original archives from six packs are stored with source URLs, SHA-256 hashes, included licenses, and safe extraction. |
+| V2-S19-02 | Add PNG theme override resolution | L | `DONE` | Valid registered PNG basenames resolve per element with cached Pixi textures and mandatory SVG fallback. |
+| V2-S19-03 | Build Celestial Foundry proof theme | M | `DONE` | The theme replaces 29 gameplay visuals from five selected media libraries while inheriting arena SVGs and audio. |
+| V2-S19-04 | Validate release gates | M | `DONE` | Configuration, manifest, renderer, build, full unit, and WebGL browser checks pass. |
+
+### Sprint 19 exit criteria
+
+- Every downloaded archive has a recorded source, license, and SHA-256 digest.
+- PNG theme overrides never alter gameplay collision geometry.
+- Invalid or missing texture overrides fall back independently to valid SVGs.
+- The proof theme renders through WebGL with stable visual snapshots.
+- Full unit, lint, build, and relevant browser checks pass.
+
+---
+
+## Sprint 20 — Theme media library and player theme selection
+
+**Status:** `DONE`
+
+| ID | Task | Size | Status | Acceptance |
+|---|---|---:|---|---|
+| V2-S20-01 | Audit configured themes | M | `DONE` | Every configured theme validates and resolves a complete visual and audio manifest. |
+| V2-S20-02 | Add player theme selection | M | `DONE` | Settings lists every configured presentation theme and persists the selection. |
+| V2-S20-03 | Build licensed PublicMedia API | L | `DONE` | The server exposes only cataloged assets with license, credit, and source provenance. |
+| V2-S20-04 | Materialize visual overrides | L | `DONE` | Selected images are validated, normalized when needed, and copied into the owned theme package. |
+| V2-S20-05 | Normalize audio overrides | L | `DONE` | Selected audio becomes a 44.1 kHz stereo WAV master plus WebM and MP3 theme files. |
+| V2-S20-06 | Build Workshop media editor | L | `DONE` | Authors can search, preview, target, and apply catalog images and sounds. |
+| V2-S20-07 | Validate release gates | M | `DONE` | API, component, manifest, lint, build, Docker runtime, and browser checks pass. |
+
+### Sprint 20 exit criteria
+
+- PublicMedia remains a read-only, provenance-bearing source catalog.
+- Every selected external asset is copied into the theme folder system.
+- Dynamic manifests preserve independent default fallback and cache versioning.
+- Players can select every configured source-controlled presentation theme.
+- Unit, API, lint, production build, and relevant browser checks pass.
+
+---
+
 ## 4. Dependency sequence
 
 ```text
@@ -527,6 +669,12 @@ Sprint 0: Decisions and branch
                     → Sprint 12: Quality and release
                       → Sprint 13: Campaign expansion
                         → Sprint 14: Dynamic obstacles and Micro Protocols
+                          → Sprint 15: 16:9 world and 100-level campaign
+                            → Sprint 16: Seeded full-board diversity
+                              → Sprint 17: Server-backed Theme Workshop
+                                → Sprint 18: SQLite accounts
+                                  → Sprint 19: Texture proof theme
+                                    → Sprint 20: Theme media library
 ```
 
 Some tasks may overlap after their contracts stabilize. For example, WAV asset

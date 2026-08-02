@@ -2,177 +2,175 @@
   "schemaVersion": 2,
   "id": "level-25",
   "number": 25,
-  "name": "Coin Corridor",
-  "seed": "path-protocol-coin-corridor-v1",
-  "difficulty": 9,
-  "briefing": "A valuable side corridor tests whether risk is worth the currency.",
+  "name": "Phase 05",
+  "seed": "path-protocol-16x9-025-v2",
+  "difficulty": 3,
+  "briefing": "Tier 3: Phase. Cross phase gates during their open window.",
   "arena": {
     "shape": "rect",
-    "margin": 36,
-    "cornerRadius": 46,
-    "mediaId": "arena-standard"
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
   },
   "token": {
     "shape": "circle",
-    "size": 40,
+    "size": 44,
     "mediaId": "token-circle"
+  },
+  "movement": {
+    "maximumSpeed": 524,
+    "acceleration": 1440,
+    "deceleration": 1705,
+    "keyboardSpeed": 352
   },
   "start": {
     "mode": "manual",
-    "x": 140,
-    "y": 150,
-    "mediaId": "start-pad"
+    "mediaId": "start-pad",
+    "x": 1232,
+    "y": 143
   },
   "mainTarget": {
     "mode": "manual",
-    "x": 850,
-    "y": 850,
-    "size": 52,
-    "mediaId": "target-main"
+    "mediaId": "target-main",
+    "x": 655,
+    "y": 209,
+    "size": 58
   },
   "generation": {
-    "obstacleCount": 8,
+    "obstacleCount": 1,
     "allowedShapes": [
+      "circle",
       "rect",
-      "circle"
+      "diamond"
     ],
-    "minSize": 75,
-    "maxSize": 145,
-    "minimumGap": 66,
-    "pathGrid": 18,
     "mediaByShape": {
       "circle": "obstacle-static-circle",
       "rect": "obstacle-static-rect",
       "diamond": "obstacle-static-diamond"
-    }
+    },
+    "minSize": 50,
+    "maxSize": 106,
+    "minimumGap": 66,
+    "pathGrid": 20
   },
-  "manualObstacles": [],
+  "manualObstacles": [
+    {
+      "id": "barrier-1",
+      "mediaId": "obstacle-static-rect",
+      "shape": "rect",
+      "x": 558,
+      "y": 701,
+      "width": 69,
+      "height": 141
+    },
+    {
+      "id": "barrier-2",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 309,
+      "y": 691,
+      "width": 91,
+      "height": 91
+    },
+    {
+      "id": "barrier-3",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 847,
+      "y": 743,
+      "width": 68,
+      "height": 68
+    },
+    {
+      "id": "barrier-4",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 978,
+      "y": 510,
+      "width": 91,
+      "height": 91
+    },
+    {
+      "id": "barrier-5",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 1245,
+      "y": 737,
+      "width": 73,
+      "height": 73
+    }
+  ],
   "movingObstacles": [
     {
-      "id": "corridor-gate",
+      "id": "sweeper-1",
+      "mediaId": "obstacle-moving-circle",
+      "shape": "circle",
+      "x": 1077,
+      "y": 339,
+      "size": 45,
+      "axis": "x",
+      "amplitude": 134,
+      "periodMs": 2654,
+      "phase": 1.578
+    }
+  ],
+  "trackingObstacles": [],
+  "dynamicObstacles": [
+    {
+      "id": "phase-1",
+      "mediaId": "obstacle-phase-gate",
       "shape": "rect",
-      "x": 690,
-      "y": 560,
-      "width": 140,
-      "height": 34,
-      "axis": "y",
-      "amplitude": 160,
-      "periodMs": 4300,
-      "phase": 0.2,
-      "mediaId": "obstacle-moving-rect"
+      "x": 380,
+      "y": 398,
+      "width": 192,
+      "height": 31,
+      "behavior": {
+        "type": "phase",
+        "cycleMs": 4634,
+        "solidMs": 1392,
+        "warningMs": 450,
+        "offsetMs": 1592
+      }
     }
   ],
-  "trackingObstacles": [
-    {
-      "id": "coin-guard-a",
-      "shape": "circle",
-      "x": 360,
-      "y": 420,
-      "width": 54,
-      "height": 54,
-      "zone": {
-        "x": 130,
-        "y": 180,
-        "width": 500,
-        "height": 520
-      },
-      "maxSpeed": 104,
-      "acceleration": 148,
-      "mediaId": "obstacle-tracking-circle",
-      "turnRateDegreesPerSecond": 160
-    },
-    {
-      "id": "coin-guard-b",
-      "shape": "circle",
-      "x": 720,
-      "y": 660,
-      "width": 54,
-      "height": 54,
-      "zone": {
-        "x": 470,
-        "y": 360,
-        "width": 410,
-        "height": 500
-      },
-      "maxSpeed": 104,
-      "acceleration": 148,
-      "mediaId": "obstacle-tracking-circle",
-      "turnRateDegreesPerSecond": 160
-    }
-  ],
+  "switches": [],
+  "forceFields": [],
   "coins": [
     {
-      "id": "coin-a",
-      "x": 250,
-      "y": 770,
-      "size": 28,
-      "value": 1,
-      "mediaId": "coin-standard"
-    },
-    {
-      "id": "coin-b",
-      "x": 370,
-      "y": 690,
-      "size": 28,
-      "value": 1,
-      "mediaId": "coin-standard"
-    },
-    {
-      "id": "coin-c",
-      "x": 500,
-      "y": 610,
-      "size": 28,
-      "value": 2,
-      "mediaId": "coin-standard"
-    },
-    {
-      "id": "coin-d",
-      "x": 740,
-      "y": 300,
-      "size": 28,
-      "value": 2,
-      "mediaId": "coin-standard"
+      "id": "coin-25",
+      "mediaId": "coin-standard",
+      "x": 202,
+      "y": 196,
+      "size": 30,
+      "value": 1
     }
   ],
   "rewards": {
-    "completionCoins": 5,
-    "bonusCoinsPerTarget": 2
+    "completionCoins": 2,
+    "bonusCoinsPerTarget": 1
   },
   "scoring": {
-    "baseMaximum": 10800,
-    "parTimeMs": 24000,
-    "parDistance": 2240,
+    "baseMaximum": 17500,
+    "parTimeMs": 12000,
+    "parDistance": 581,
     "timeWeight": 0.5,
     "distanceWeight": 0.5,
     "collisionPenaltyRate": 0.2,
     "maximumCollisions": 3
   },
   "bonuses": {
-    "maximumTargets": 2,
-    "rewardPerTarget": 1250,
+    "maximumTargets": 1,
+    "rewardPerTarget": 700,
     "offerChanceMode": "currentScorePercent",
-    "failurePenaltyRate": 0.2,
+    "failurePenaltyRate": 0.1,
     "targets": [
       {
-        "id": "relay-a",
-        "x": 820,
-        "y": 800,
-        "size": 42,
-        "mediaId": "target-bonus"
-      },
-      {
-        "id": "relay-b",
-        "x": 180,
-        "y": 210,
-        "size": 40,
-        "mediaId": "target-bonus"
+        "id": "bonus-a",
+        "mediaId": "target-bonus",
+        "x": 710,
+        "y": 453,
+        "size": 48
       }
     ]
-  },
-  "movement": {
-    "maximumSpeed": 360,
-    "acceleration": 1400,
-    "deceleration": 1800,
-    "keyboardSpeed": 280
   }
 }

@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 2,
+  "id": "level-89",
+  "number": 89,
+  "name": "Rotation 09",
+  "seed": "path-protocol-16x9-089-v2",
+  "difficulty": 9,
+  "briefing": "Tier 9: Rotation. Time movement around a swept rotating arm.",
+  "arena": {
+    "shape": "rect",
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
+  },
+  "token": {
+    "shape": "circle",
+    "size": 40,
+    "mediaId": "token-circle"
+  },
+  "movement": {
+    "maximumSpeed": 632,
+    "acceleration": 1920,
+    "deceleration": 2215,
+    "keyboardSpeed": 436
+  },
+  "start": {
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 767,
+    "y": 158
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 1375,
+    "y": 236,
+    "size": 58
+  },
+  "generation": {
+    "obstacleCount": 3,
+    "allowedShapes": [
+      "circle",
+      "rect",
+      "diamond"
+    ],
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    },
+    "minSize": 50,
+    "maxSize": 118,
+    "minimumGap": 54,
+    "pathGrid": 20
+  },
+  "manualObstacles": [
+    {
+      "id": "barrier-1",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 1168,
+      "y": 484,
+      "width": 76,
+      "height": 76
+    },
+    {
+      "id": "barrier-2",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 957,
+      "y": 671,
+      "width": 78,
+      "height": 78
+    },
+    {
+      "id": "barrier-3",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 289,
+      "y": 210,
+      "width": 84,
+      "height": 84
+    },
+    {
+      "id": "barrier-4",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 228,
+      "y": 644,
+      "width": 124,
+      "height": 124
+    }
+  ],
+  "movingObstacles": [
+    {
+      "id": "sweeper-1",
+      "mediaId": "obstacle-moving-circle",
+      "shape": "circle",
+      "x": 1315,
+      "y": 776,
+      "size": 47,
+      "axis": "x",
+      "amplitude": 83,
+      "periodMs": 3412,
+      "phase": 5.779
+    }
+  ],
+  "trackingObstacles": [],
+  "dynamicObstacles": [
+    {
+      "id": "spinner-1",
+      "mediaId": "obstacle-spinner",
+      "shape": "rect",
+      "x": 445,
+      "y": 465,
+      "width": 180,
+      "height": 24,
+      "behavior": {
+        "type": "rotate",
+        "speedDegreesPerSecond": 102,
+        "initialDegrees": 176
+      }
+    }
+  ],
+  "switches": [],
+  "forceFields": [],
+  "coins": [
+    {
+      "id": "coin-89",
+      "mediaId": "coin-standard",
+      "x": 644,
+      "y": 517,
+      "size": 30,
+      "value": 1
+    }
+  ],
+  "rewards": {
+    "completionCoins": 5,
+    "bonusCoinsPerTarget": 3
+  },
+  "scoring": {
+    "baseMaximum": 49500,
+    "parTimeMs": 18000,
+    "parDistance": 613,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 1,
+    "rewardPerTarget": 1300,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.1,
+    "targets": [
+      {
+        "id": "bonus-a",
+        "mediaId": "target-bonus",
+        "x": 590,
+        "y": 139,
+        "size": 48
+      }
+    ]
+  }
+}

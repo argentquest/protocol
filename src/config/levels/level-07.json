@@ -2,132 +2,110 @@
   "schemaVersion": 2,
   "id": "level-07",
   "number": 7,
-  "name": "Motion Detected",
-  "seed": "path-protocol-motion-detected-v1",
-  "difficulty": 7,
-  "briefing": "A live scanner now crosses the safest route.",
+  "name": "Foundation 07",
+  "seed": "path-protocol-16x9-007-v2",
+  "difficulty": 1,
+  "briefing": "Tier 1: Foundation. Learn efficient lines through stable geometry.",
   "arena": {
     "shape": "rect",
-    "margin": 34,
-    "cornerRadius": 46,
-    "mediaId": "arena-standard"
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
   },
   "token": {
-    "shape": "circle",
-    "size": 44,
-    "mediaId": "token-circle"
+    "shape": "rect",
+    "size": 46,
+    "mediaId": "token-rect"
+  },
+  "movement": {
+    "maximumSpeed": 488,
+    "acceleration": 1280,
+    "deceleration": 1535,
+    "keyboardSpeed": 324
   },
   "start": {
-    "mode": "generated",
-    "region": {
-      "x": 80,
-      "y": 760,
-      "width": 150,
-      "height": 120
-    },
-    "mediaId": "start-pad"
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 1033,
+    "y": 474
   },
   "mainTarget": {
-    "mode": "generated",
-    "region": {
-      "x": 780,
-      "y": 90,
-      "width": 120,
-      "height": 150
-    },
-    "size": 50,
-    "mediaId": "target-main"
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 458,
+    "y": 736,
+    "size": 58
   },
   "generation": {
-    "obstacleCount": 7,
+    "obstacleCount": 1,
     "allowedShapes": [
+      "circle",
       "rect",
-      "circle"
+      "diamond"
     ],
-    "minSize": 80,
-    "maxSize": 150,
-    "minimumGap": 68,
-    "pathGrid": 18,
     "mediaByShape": {
       "circle": "obstacle-static-circle",
       "rect": "obstacle-static-rect",
       "diamond": "obstacle-static-diamond"
-    }
+    },
+    "minSize": 50,
+    "maxSize": 102,
+    "minimumGap": 70,
+    "pathGrid": 20
   },
-  "manualObstacles": [],
-  "movingObstacles": [
+  "manualObstacles": [
     {
-      "id": "scanner-a",
-      "shape": "rect",
-      "x": 500,
-      "y": 500,
-      "width": 150,
-      "height": 42,
-      "axis": "x",
-      "amplitude": 210,
-      "periodMs": 4200,
-      "phase": 0,
-      "mediaId": "obstacle-moving-rect"
-    }
-  ],
-  "coins": [
-    {
-      "id": "coin-a",
-      "x": 320,
-      "y": 680,
-      "size": 28,
-      "value": 1,
-      "mediaId": "coin-standard"
+      "id": "barrier-1",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 993,
+      "y": 702,
+      "width": 82,
+      "height": 82
     },
     {
-      "id": "coin-b",
-      "x": 690,
-      "y": 320,
-      "size": 28,
-      "value": 1,
-      "mediaId": "coin-standard"
+      "id": "barrier-2",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 712,
+      "y": 397,
+      "width": 92,
+      "height": 92
+    }
+  ],
+  "movingObstacles": [],
+  "trackingObstacles": [],
+  "dynamicObstacles": [],
+  "switches": [],
+  "forceFields": [],
+  "coins": [
+    {
+      "id": "coin-7",
+      "mediaId": "coin-standard",
+      "x": 188,
+      "y": 558,
+      "size": 30,
+      "value": 1
     }
   ],
   "rewards": {
-    "completionCoins": 2,
+    "completionCoins": 1,
     "bonusCoinsPerTarget": 1
   },
   "scoring": {
-    "baseMaximum": 2700,
-    "parTimeMs": 12000,
-    "parDistance": 1360,
+    "baseMaximum": 8500,
+    "parTimeMs": 10000,
+    "parDistance": 632,
     "timeWeight": 0.5,
     "distanceWeight": 0.5,
     "collisionPenaltyRate": 0.2,
     "maximumCollisions": 3
   },
   "bonuses": {
-    "maximumTargets": 2,
+    "maximumTargets": 0,
     "rewardPerTarget": 500,
     "offerChanceMode": "currentScorePercent",
-    "failurePenaltyRate": 0.2,
-    "targets": [
-      {
-        "id": "relay-a",
-        "x": 810,
-        "y": 720,
-        "size": 44,
-        "mediaId": "target-bonus"
-      },
-      {
-        "id": "relay-b",
-        "x": 180,
-        "y": 220,
-        "size": 42,
-        "mediaId": "target-bonus"
-      }
-    ]
-  },
-  "movement": {
-    "maximumSpeed": 360,
-    "acceleration": 1400,
-    "deceleration": 1800,
-    "keyboardSpeed": 280
-  },
-  "trackingObstacles": []
+    "failurePenaltyRate": 0.1,
+    "targets": []
+  }
 }

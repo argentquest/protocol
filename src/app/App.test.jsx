@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import mediaManifest from '../../public/media/manifests/future-lab.json'
 
@@ -49,8 +49,8 @@ describe('App', () => {
     await boot()
     fireEvent.click(screen.getByRole('button', { name: /select level/i }))
     expect(screen.getByRole('heading', { name: /select a chamber/i })).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: /01.*calibration/i }))
-    expect(screen.getByRole('application', { name: /calibration obstacle course/i })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /01.*foundation 01/i }))
+    expect(screen.getByRole('application', { name: /foundation 01 obstacle course/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /restart attempt/i })).toBeInTheDocument()
   })
 
@@ -82,7 +82,7 @@ describe('App', () => {
 
     expect(screen.getByText(/dev playtest/i)).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: /select level/i }))
-    const finalLevel = screen.getByRole('button', { name: /70.*omega protocol/i })
+    const finalLevel = screen.getByRole('button', { name: /100.*convergence 10/i })
     expect(finalLevel).toBeEnabled()
     fireEvent.click(finalLevel)
 
@@ -103,8 +103,25 @@ describe('App', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /select level/i }))
     expect(
-      screen.getByRole('button', { name: /70.*omega protocol/i }),
+      screen.getByRole('button', { name: /100.*convergence 10/i }),
     ).toBeEnabled()
+  })
+
+  it('persists and loads any selected built-in presentation theme', async () => {
+    await boot()
+    fireEvent.click(screen.getByRole('button', { name: /controls/i }))
+    fireEvent.change(screen.getByRole('combobox', { name: /presentation theme/i }), {
+      target: { value: 'casual' },
+    })
+
+    expect(window.localStorage.getItem('path-protocol.presentation-theme')).toBe(
+      'casual',
+    )
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('/media/manifests/casual.json'),
+      )
+    })
   })
 
   it('shows a safe configuration error with development diagnostics', () => {

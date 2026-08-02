@@ -1,0 +1,215 @@
+{
+  "schemaVersion": 2,
+  "id": "level-84",
+  "number": 84,
+  "name": "Rotation 04",
+  "seed": "path-protocol-16x9-084-v2",
+  "difficulty": 9,
+  "briefing": "Tier 9: Rotation. Time movement around a swept rotating arm.",
+  "arena": {
+    "shape": "rect",
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
+  },
+  "token": {
+    "shape": "rect",
+    "size": 40,
+    "mediaId": "token-rect"
+  },
+  "movement": {
+    "maximumSpeed": 632,
+    "acceleration": 1920,
+    "deceleration": 2215,
+    "keyboardSpeed": 436
+  },
+  "start": {
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 760,
+    "y": 337
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 1349,
+    "y": 473,
+    "size": 58
+  },
+  "generation": {
+    "obstacleCount": 3,
+    "allowedShapes": [
+      "circle",
+      "rect",
+      "diamond"
+    ],
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    },
+    "minSize": 50,
+    "maxSize": 118,
+    "minimumGap": 54,
+    "pathGrid": 20
+  },
+  "manualObstacles": [
+    {
+      "id": "barrier-1",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 1455,
+      "y": 254,
+      "width": 76,
+      "height": 76
+    },
+    {
+      "id": "barrier-2",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 1346,
+      "y": 763,
+      "width": 105,
+      "height": 105
+    },
+    {
+      "id": "barrier-3",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 535,
+      "y": 166,
+      "width": 132,
+      "height": 132
+    },
+    {
+      "id": "barrier-4",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 1267,
+      "y": 259,
+      "width": 96,
+      "height": 96
+    }
+  ],
+  "movingObstacles": [
+    {
+      "id": "sweeper-1",
+      "mediaId": "obstacle-moving-circle",
+      "shape": "circle",
+      "x": 920,
+      "y": 556,
+      "size": 42,
+      "axis": "y",
+      "amplitude": 146,
+      "periodMs": 4227,
+      "phase": 2.865
+    },
+    {
+      "id": "sweeper-2",
+      "mediaId": "obstacle-moving-circle",
+      "shape": "circle",
+      "x": 893,
+      "y": 121,
+      "size": 46,
+      "axis": "x",
+      "amplitude": 154,
+      "periodMs": 5127,
+      "phase": 5.699
+    }
+  ],
+  "trackingObstacles": [],
+  "dynamicObstacles": [
+    {
+      "id": "switch-barrier-1",
+      "mediaId": "obstacle-switch-barrier",
+      "shape": "rect",
+      "x": 1156,
+      "y": 614,
+      "width": 243,
+      "height": 34,
+      "behavior": {
+        "type": "switch",
+        "switchId": "switch-1",
+        "initiallySolid": true
+      }
+    },
+    {
+      "id": "spinner-1",
+      "mediaId": "obstacle-spinner",
+      "shape": "rect",
+      "x": 288,
+      "y": 321,
+      "width": 218,
+      "height": 24,
+      "behavior": {
+        "type": "rotate",
+        "speedDegreesPerSecond": 104,
+        "initialDegrees": 82
+      }
+    },
+    {
+      "id": "spinner-2",
+      "mediaId": "obstacle-spinner",
+      "shape": "rect",
+      "x": 576,
+      "y": 628,
+      "width": 226,
+      "height": 28,
+      "behavior": {
+        "type": "rotate",
+        "speedDegreesPerSecond": 101,
+        "initialDegrees": 85
+      }
+    }
+  ],
+  "switches": [
+    {
+      "id": "switch-1",
+      "mediaId": "switch-pad",
+      "x": 230,
+      "y": 641,
+      "size": 44,
+      "activation": "once",
+      "durationMs": 0
+    }
+  ],
+  "forceFields": [],
+  "coins": [
+    {
+      "id": "coin-84",
+      "mediaId": "coin-standard",
+      "x": 799,
+      "y": 801,
+      "size": 30,
+      "value": 1
+    }
+  ],
+  "rewards": {
+    "completionCoins": 5,
+    "bonusCoinsPerTarget": 3
+  },
+  "scoring": {
+    "baseMaximum": 47000,
+    "parTimeMs": 18000,
+    "parDistance": 604,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 1,
+    "rewardPerTarget": 1300,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.1,
+    "targets": [
+      {
+        "id": "bonus-a",
+        "mediaId": "target-bonus",
+        "x": 1086,
+        "y": 298,
+        "size": 48
+      }
+    ]
+  }
+}

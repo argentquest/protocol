@@ -2,94 +2,157 @@
   "schemaVersion": 2,
   "id": "level-31",
   "number": 31,
-  "name": "Vector Primer",
-  "seed": "path-protocol-vector-primer-v1",
-  "difficulty": 1,
-  "briefing": "Expansion chamber 31: a difficulty-1 variation with a new deterministic layout.",
+  "name": "Pulse 01",
+  "seed": "path-protocol-16x9-031-v2",
+  "difficulty": 4,
+  "briefing": "Tier 4: Pulse. Use the breathing rhythm to preserve space.",
   "arena": {
     "shape": "rect",
-    "margin": 34,
-    "cornerRadius": 42,
-    "mediaId": "arena-standard"
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
   },
   "token": {
     "shape": "circle",
-    "size": 34,
+    "size": 44,
     "mediaId": "token-circle"
   },
+  "movement": {
+    "maximumSpeed": 542,
+    "acceleration": 1520,
+    "deceleration": 1790,
+    "keyboardSpeed": 366
+  },
   "start": {
-    "mode": "generated",
-    "region": {
-      "x": 90,
-      "y": 710,
-      "width": 150,
-      "height": 150
-    },
-    "mediaId": "start-pad"
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 504,
+    "y": 296
   },
   "mainTarget": {
-    "mode": "generated",
-    "region": {
-      "x": 760,
-      "y": 120,
-      "width": 130,
-      "height": 150
-    },
-    "size": 58,
-    "mediaId": "target-main"
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 1414,
+    "y": 713,
+    "size": 58
   },
   "generation": {
-    "obstacleCount": 3,
+    "obstacleCount": 2,
     "allowedShapes": [
-      "rect"
+      "circle",
+      "rect",
+      "diamond"
     ],
-    "minSize": 90,
-    "maxSize": 155,
-    "minimumGap": 72,
-    "pathGrid": 24,
     "mediaByShape": {
       "circle": "obstacle-static-circle",
       "rect": "obstacle-static-rect",
       "diamond": "obstacle-static-diamond"
-    }
+    },
+    "minSize": 50,
+    "maxSize": 108,
+    "minimumGap": 64,
+    "pathGrid": 20
   },
-  "manualObstacles": [],
-  "movingObstacles": [],
+  "manualObstacles": [
+    {
+      "id": "barrier-1",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 1410,
+      "y": 508,
+      "width": 100,
+      "height": 100
+    },
+    {
+      "id": "barrier-2",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 564,
+      "y": 567,
+      "width": 88,
+      "height": 88
+    },
+    {
+      "id": "barrier-3",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 1350,
+      "y": 271,
+      "width": 107,
+      "height": 107
+    }
+  ],
+  "movingObstacles": [
+    {
+      "id": "sweeper-1",
+      "mediaId": "obstacle-moving-circle",
+      "shape": "circle",
+      "x": 1093,
+      "y": 552,
+      "size": 55,
+      "axis": "y",
+      "amplitude": 123,
+      "periodMs": 4821,
+      "phase": 1.58
+    }
+  ],
+  "trackingObstacles": [],
+  "dynamicObstacles": [
+    {
+      "id": "pulse-1",
+      "mediaId": "obstacle-pulse-block",
+      "shape": "rect",
+      "x": 337,
+      "y": 466,
+      "width": 149,
+      "height": 40,
+      "behavior": {
+        "type": "pulse",
+        "minScale": 0.55,
+        "maxScale": 1.39,
+        "periodMs": 3601,
+        "phase": 1.592
+      }
+    }
+  ],
+  "switches": [],
+  "forceFields": [],
   "coins": [
     {
-      "id": "coin-a",
-      "x": 500,
-      "y": 500,
+      "id": "coin-31",
+      "mediaId": "coin-standard",
+      "x": 730,
+      "y": 473,
       "size": 30,
-      "value": 1,
-      "mediaId": "coin-standard"
+      "value": 1
     }
   ],
   "rewards": {
-    "completionCoins": 1,
+    "completionCoins": 2,
     "bonusCoinsPerTarget": 1
   },
   "scoring": {
-    "baseMaximum": 15500,
-    "parTimeMs": 6500,
-    "parDistance": 900,
+    "baseMaximum": 20500,
+    "parTimeMs": 13000,
+    "parDistance": 1001,
     "timeWeight": 0.5,
     "distanceWeight": 0.5,
     "collisionPenaltyRate": 0.2,
     "maximumCollisions": 3
   },
   "bonuses": {
-    "maximumTargets": 0,
-    "rewardPerTarget": 0,
+    "maximumTargets": 1,
+    "rewardPerTarget": 800,
     "offerChanceMode": "currentScorePercent",
-    "failurePenaltyRate": 0.2,
-    "targets": []
-  },
-  "movement": {
-    "maximumSpeed": 360,
-    "acceleration": 1400,
-    "deceleration": 1800,
-    "keyboardSpeed": 280
-  },
-  "trackingObstacles": []
+    "failurePenaltyRate": 0.1,
+    "targets": [
+      {
+        "id": "bonus-a",
+        "mediaId": "target-bonus",
+        "x": 969,
+        "y": 184,
+        "size": 48
+      }
+    ]
+  }
 }

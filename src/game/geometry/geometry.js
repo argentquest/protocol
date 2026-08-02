@@ -1,3 +1,5 @@
+import { WORLD_HEIGHT, WORLD_WIDTH } from '../world.js'
+
 const EPSILON = 0.0001
 
 /**
@@ -75,21 +77,34 @@ export function polygonForShape(input) {
     return shape.points.map(([x, y]) => ({ x, y }))
   }
 
+  let vertices
   if (shape.shape === 'diamond') {
-    return [
+    vertices = [
       { x: shape.x, y: shape.y - halfHeight },
       { x: shape.x + halfWidth, y: shape.y },
       { x: shape.x, y: shape.y + halfHeight },
       { x: shape.x - halfWidth, y: shape.y },
     ]
+  } else {
+    vertices = [
+      { x: shape.x - halfWidth, y: shape.y - halfHeight },
+      { x: shape.x + halfWidth, y: shape.y - halfHeight },
+      { x: shape.x + halfWidth, y: shape.y + halfHeight },
+      { x: shape.x - halfWidth, y: shape.y + halfHeight },
+    ]
   }
-
-  return [
-    { x: shape.x - halfWidth, y: shape.y - halfHeight },
-    { x: shape.x + halfWidth, y: shape.y - halfHeight },
-    { x: shape.x + halfWidth, y: shape.y + halfHeight },
-    { x: shape.x - halfWidth, y: shape.y + halfHeight },
-  ]
+  const rotation = shape.rotationRadians ?? 0
+  if (!rotation) return vertices
+  const cosine = Math.cos(rotation)
+  const sine = Math.sin(rotation)
+  return vertices.map((point) => {
+    const x = point.x - shape.x
+    const y = point.y - shape.y
+    return {
+      x: shape.x + x * cosine - y * sine,
+      y: shape.y + x * sine + y * cosine,
+    }
+  })
 }
 
 /**
@@ -234,9 +249,9 @@ export function shapeInsideArena(shapeInput, arena) {
 
   const margin = arena.margin ?? 0
   if (arena.shape === 'ellipse') {
-    const center = { x: 500, y: 500 }
-    const radiusX = 500 - margin
-    const radiusY = 500 - margin
+    const center = { x: WORLD_WIDTH / 2, y: WORLD_HEIGHT / 2 }
+    const radiusX = WORLD_WIDTH / 2 - margin
+    const radiusY = WORLD_HEIGHT / 2 - margin
     return samples.every((point) => {
       const dx = (point.x - center.x) / radiusX
       const dy = (point.y - center.y) / radiusY
@@ -247,9 +262,9 @@ export function shapeInsideArena(shapeInput, arena) {
   return samples.every(
     (point) =>
       point.x >= margin &&
-      point.x <= 1000 - margin &&
+      point.x <= WORLD_WIDTH - margin &&
       point.y >= margin &&
-      point.y <= 1000 - margin,
+      point.y <= WORLD_HEIGHT - margin,
   )
 }
 
@@ -302,7 +317,14 @@ export function sweepShape(
       previousById.get(obstacle.id ?? `obstacle-${index}`) ?? obstacle
     maximumRelativeTravel = Math.max(
       maximumRelativeTravel,
-      tokenTravel + distance(previous, obstacle),
+      tokenTravel +
+        distance(previous, obstacle) +
+        Math.abs(
+          (obstacle.rotationRadians ?? 0) -
+            (previous.rotationRadians ?? 0),
+        ) *
+          Math.hypot(obstacle.width, obstacle.height) /
+          2,
     )
     smallestDimension = Math.min(
       smallestDimension,
@@ -334,6 +356,11 @@ export function sweepShape(
           previous.width + (obstacle.width - previous.width) * amount,
         height:
           previous.height + (obstacle.height - previous.height) * amount,
+        rotationRadians:
+          (previous.rotationRadians ?? 0) +
+          ((obstacle.rotationRadians ?? 0) -
+            (previous.rotationRadians ?? 0)) *
+            amount,
       }
     })
     if (

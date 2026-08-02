@@ -38,6 +38,8 @@ export const configurationStatus = import.meta.env.PROD
     })
 
 export const activeTheme = themeConfig.themes[themeConfig.activeTheme]
+export const configuredThemeName = themeConfig.activeTheme
+export const themeDefinitions = themeConfig.themes
 export const powerups = powerupConfig.powerups
 export const gameplayConfig = gameConfig
 export const mediaDefinitions = mediaRegistry.media

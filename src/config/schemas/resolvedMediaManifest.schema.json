@@ -32,7 +32,7 @@
                   "required": ["alias", "src"],
                   "properties": {
                     "alias": { "type": "string", "minLength": 1 },
-                    "src": { "type": "string", "pattern": "\\.svg\\?v=[0-9]+$" }
+                    "src": { "type": "string", "pattern": "\\.(?:png|svg)\\?v=[0-9]+$" }
                   }
                 }
               }
@@ -58,9 +58,9 @@
         "properties": {
           "mediaId": { "type": "string", "minLength": 1 },
           "alias": { "type": "string", "minLength": 1 },
-          "src": { "type": "string", "pattern": "\\.svg\\?v=[0-9]+$" },
+          "src": { "type": "string", "pattern": "\\.(?:png|svg)\\?v=[0-9]+$" },
           "category": { "type": "string", "minLength": 1 },
-          "renderMode": { "const": "vector" },
+          "renderMode": { "enum": ["texture", "vector"] },
           "sizing": { "enum": ["contain", "stretch"] },
           "sourceScope": { "enum": ["default", "theme"] }
         }

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
   "world": {
-    "width": 1000,
-    "height": 1000
+    "width": 1600,
+    "height": 900
   },
   "simulation": {
     "fixedStepHz": 60,

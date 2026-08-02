@@ -44,10 +44,12 @@ The game rewards:
 - Campaign progression, coin collection, and strategic use of consumable
   powers.
 
-The expanded campaign contains 70 deterministic levels. Levels 31–60 add three
-new courses at every standard difficulty from 1 through 10. Levels 61–70 form
-an apex tier at difficulty 15. All players receive the same generated layout
-for a given level version and seed.
+The campaign contains 100 deterministic levels across ten mechanic tiers.
+Each tier teaches, tests, and combines a progressively broader obstacle
+vocabulary. Released seeds distribute start points, required targets, static
+geometry, and mechanic hazards across the full safe 1600 × 900 arena instead
+of selecting from fixed route lanes. All players receive the same generated
+layout for a given level version and seed; restarting never rerolls a course.
 
 ## 3. Technology decisions
 
@@ -68,7 +70,8 @@ for a given level version and seed.
 | Game simulation | Fixed 60 Hz update |
 | Rendering cadence | `requestAnimationFrame` through Pixi |
 | Configuration | JSON validated by JSON Schema |
-| Persistence | Versioned `localStorage` |
+| Player persistence | Versioned, theme-namespaced `localStorage` |
+| Theme persistence | Express REST API and filesystem-backed JSON packages |
 | Unit/component tests | Vitest and React Testing Library |
 | Browser tests | Playwright |
 
@@ -124,15 +127,15 @@ events such as:
 
 ## 5. Logical world and responsive viewport
 
-All authored gameplay coordinates use a logical 1000 × 1000 world.
+All authored gameplay coordinates use a logical 1600 × 900 world.
 
 The Pixi canvas resizes to its containing element. A root world container is
 uniformly scaled and centered:
 
 ```text
-scale = min(viewportWidth / 1000, viewportHeight / 1000)
-offsetX = (viewportWidth - 1000 × scale) / 2
-offsetY = (viewportHeight - 1000 × scale) / 2
+scale = min(viewportWidth / 1600, viewportHeight / 900)
+offsetX = (viewportWidth - 1600 × scale) / 2
+offsetY = (viewportHeight - 900 × scale) / 2
 ```
 
 Uniform scaling prevents distortion of tokens, targets, obstacles, coins, and
@@ -305,6 +308,13 @@ without moving gameplay rules into Pixi or React. The initial behavior set is:
 - `orbit`: moves the obstacle center around an elliptical path.
 - `pulse`: changes authoritative width and height within validated bounds.
 - `switch`: becomes solid or open from engine-owned contact-switch state.
+- `rotate`: turns authoritative rectangular geometry around its center.
+
+Non-solid environmental force fields are fixed-step engine entities:
+
+- `conveyor`: adds directional acceleration while the complete token overlaps.
+- `repulsor`: pushes away from its center with linear falloff.
+- `attractor`: pulls toward its center with linear falloff.
 
 Collision and rendering consume the same time-resolved obstacle state. Dynamic
 collision uses both previous and current transforms so fast hazards cannot
@@ -331,7 +341,7 @@ Trail updates do not trigger React rendering.
 ## 12. Level configuration
 
 Every level is a JSON document validated against a versioned JSON Schema.
-All 70 levels must contain every required gameplay attribute.
+All 100 levels must contain every required gameplay attribute.
 
 Every renderable gameplay object contains a theme-neutral `mediaId`, including:
 
@@ -699,6 +709,72 @@ stable instances and receive transforms from the renderer adapter each frame.
 Pixi object construction and SVG parsing never occur inside the hot simulation
 loop.
 
+## 17A. Theme Workshop and server persistence
+
+The Theme Workshop is an explicit post-V2 product expansion. Node and Express
+serve the production React build and a same-origin REST API. The pure engine
+does not import the server or filesystem.
+
+The source-controlled default campaign is read-only. Cloning any published
+theme creates a new folder in the configured persistent theme directory:
+
+```text
+data/themes/<theme-id>/
+├── theme.json
+├── levels/
+    ├── <immutable-level-id>.json
+│   └── ...
+└── media/
+    ├── <registered visual categories>/
+    └── audio/{source/*.wav,*.webm,*.mp3}
+```
+
+The initial clone copies level JSON only. Authors may then select registered
+visual and audio replacements from the read-only `PublicMedia/catalog.json`
+library. A selection is never referenced in place: the server validates and
+copies it into the theme's media folder and records its source asset ID.
+
+PNG and compatible SVG sources retain their runtime format; JPEG sources are
+converted to PNG. WAV, OGG, MP3, AIF, and AIFF audio is normalized to a stereo
+44.1 kHz 16-bit WAV master, then delivered as WebM/Opus first and MP3 second.
+Access-controlled dynamic manifests resolve each copied override independently
+and fall back to mandatory defaults. Applying an asset increments the theme's
+media version so renderer and audio caches reload.
+
+Players may select any source-controlled presentation theme in Settings.
+Playing an owned or public Workshop theme loads its dynamic media manifest.
+
+Source-controlled presentation themes may override a registered SVG basename
+with a validated PNG texture. Resolution remains per element: valid theme PNG,
+then valid theme SVG, then mandatory default SVG. Pixi caches both parsed vector
+contexts and textures; collision bounds continue to come exclusively from level
+JSON. Celestial Foundry is the first mixed vector/texture proof theme.
+
+Each cloned theme has a generated stable ID, an owning SQLite user ID stored in
+`theme.json`, user-provided metadata, private status until publication, and
+between 1 and 200 levels. Campaign IDs and numbers follow sequence position,
+while an immutable internal level ID owns file identity and player progress.
+
+Accounts use a unique username, unique email address, and salted scrypt password
+hash. Server sessions are represented by an HTTP-only, SameSite cookie; only a
+SHA-256 digest of each random session token is stored in SQLite. Development
+registration activates immediately without an email-confirmation step.
+Unauthenticated players may play public themes. Cloning, private-theme reads,
+and every mutation require login as the owning account.
+
+Every save is schema-validated and passed through deterministic generation,
+containment, overlap, and solvability checks. Invalid editor state remains
+client-side. Debounced autosave and manual save persist only valid state.
+
+The editor provides a mandatory 10-unit placement grid, entity CRUD and
+resizing, advanced full-level JSON properties, undo/redo, seed regeneration,
+live PixiJS playtesting, and level duplication, deletion, reordering, and
+automatic renumbering. Published themes remain editable by their key holder.
+
+Player progress, scores, coins, and inventory are namespaced by theme ID.
+Level records use immutable internal IDs so reordering cannot attach progress
+to another course.
+
 ## 18. Proposed source layout
 
 ```text
@@ -887,16 +963,17 @@ validate JSON
 → validate default completeness
 → run tests
 → Vite production build
-→ static Nginx image
+→ Node/Express runtime image
 ```
 
 The Docker build stage includes Node, npm, and FFmpeg. The runtime stage contains
-only the built static site and Nginx.
+the built site, Express API, configuration contracts, the read-only PublicMedia
+catalog, and the repository-local FFmpeg binary used for theme imports.
 
 Production builds accept a normalized `VITE_BASE_PATH` so every Vite asset,
 media manifest, SVG, and audio URL can be served from a reverse-proxy subpath.
-The runtime Nginx configuration maps the supported `/protocol/` prefix back to
-the static root, while root deployment remains the default.
+Express serves the static build and same-origin API. Root deployment remains
+the default, with the configured base path used for reverse-proxy deployment.
 
 Generated delivery media may be committed or produced during the build according
 to repository policy established during implementation. Existing converted
@@ -906,7 +983,7 @@ files are never regenerated during normal builds.
 
 ### 24.1 Configuration and media
 
-- Validate all 70 levels against the level schema.
+- Validate all 100 levels against the level schema.
 - Verify required `mediaId` attributes.
 - Verify the complete default media registry.
 - Verify individual theme overrides and fallback.
@@ -935,7 +1012,7 @@ files are never regenerated during normal builds.
 ### 24.3 Renderer
 
 - WebGL-only initialization.
-- 1000 × 1000 viewport transforms.
+- 1600 × 900 viewport transforms.
 - Undistorted object sizing.
 - Vector SVG context reuse.
 - Stable scene-layer ordering.
@@ -1000,7 +1077,7 @@ files are never regenerated during normal builds.
 - Update documentation and agent instructions for V2.
 - Define complete media ID and sound ID registries.
 - Add level, media, audio, game, power, and theme schemas.
-- Add required media IDs to all 70 levels.
+- Add required media IDs to all 100 levels.
 - Convert current generated visuals into default external SVG assets.
 - Convert current synthesized sound concepts into default WAV assets.
 - Implement audio conversion scripts.
@@ -1049,7 +1126,7 @@ Architecture V2 is complete when:
 - React owns no frame-by-frame gameplay state.
 - The engine runs deterministic fixed 60 Hz updates.
 - Pointer and keyboard controls follow the agreed activation model.
-- All 70 level files pass their schema and media requirements.
+- All 100 level files pass their schema and media requirements.
 - Default external SVG and audio libraries are complete.
 - Theme overrides resolve one element at a time.
 - Invalid theme overrides safely use defaults.

@@ -5,7 +5,7 @@
 This file provides repository instructions for coding agents working on
 **Path Protocol V2**.
 
-Path Protocol is a 70-level desktop browser precision game. React owns the
+Path Protocol is a 100-level desktop browser precision game. React owns the
 application UI, PixiJS renders the real-time arena through WebGL, a pure
 fixed-step engine owns gameplay, and Howler.js owns audio.
 
@@ -50,9 +50,26 @@ moves to the next sprint.
 - Vitest and React Testing Library for unit and component tests.
 - Playwright for critical browser journeys.
 
-Do not add TypeScript, a backend, multiplayer, a physics engine, WebGPU, touch
-gameplay, or another state-management library without an explicit product
-decision.
+Do not add TypeScript, multiplayer, a physics engine, WebGPU, touch gameplay, or
+another state-management library without an explicit product decision. The
+Theme Workshop backend is approved: Express owns same-origin theme APIs and
+persistent JSON theme folders.
+
+## Theme Workshop server rules
+
+- The source-controlled default theme and campaign are read-only.
+- A clone copies level JSON only; media overrides are deferred.
+- Store mutable themes under the configurable persistent data directory.
+- Store accounts and hashed sessions in SQLite; never store plaintext passwords
+  or browser-readable session credentials.
+- Require an authenticated owner for private reads and every mutation.
+- Development registration activates immediately without email confirmation.
+- Keep unpublished themes out of public listings.
+- Validate schema and generated gameplay before every level write.
+- Store 1–200 levels per theme with immutable internal IDs.
+- Reordering updates campaign IDs and numbers without changing internal IDs.
+- Namespace browser progress by theme ID and internal level ID.
+- Keep server/filesystem imports out of the engine and browser bundles.
 
 ## Architecture boundaries
 
@@ -88,7 +105,7 @@ Howler:
 
 Preserve these rules unless the user explicitly changes them:
 
-- The logical world is 1000 × 1000.
+- The logical world is 1600 × 900.
 - The viewport scales uniformly and centers the world without distorting
   gameplay objects.
 - The pointer controls the desired center position of the token.
@@ -159,7 +176,7 @@ modules.
 - Require a registered theme-neutral `mediaId` for every renderable object.
 - Use the shared seeded random service; never use `Math.random()` for gameplay.
 - Manual level elements take priority over generated elements.
-- Authored coordinates use the 1000 × 1000 logical world.
+- Authored coordinates use the 1600 × 900 logical world.
 
 ## Default and theme media rules
 
@@ -178,6 +195,9 @@ valid theme override → valid default → fatal default-media error
 - Missing or invalid default assets fail validation.
 - A theme never needs to duplicate a complete category.
 - Future Lab initially inherits defaults and adds only distinct overrides.
+- PublicMedia is a read-only, licensed authoring catalog. A selected external
+  asset must be validated and copied into the editable theme's media folder;
+  deployed themes must never reference a catalog file in place.
 
 Generated manifests are the result of scanning standardized filenames. Do not
 hand-maintain a second list that can drift from the files.
@@ -188,8 +208,11 @@ hand-maintain a second list that can drift from the files.
 - Use transparent backgrounds and centered `viewBox="0 0 100 100"` artwork.
 - Keep visual colors and supported effects inside each SVG.
 - Do not use global DOM CSS dependencies, embedded bitmaps, or SVG text.
-- Initial assets use explicit `renderMode: "vector"`.
-- Texture mode is reserved but unsupported until its planned sprint.
+- Default assets use explicit `renderMode: "vector"`.
+- A valid theme-level PNG with the registered media basename resolves as
+  `renderMode: "texture"`; invalid or missing PNGs fall back per element.
+- Cache each texture once and preserve aspect ratio for proportion-sensitive
+  objects. Collision geometry remains JSON-owned.
 - Vector assets must avoid SVG features unsupported by Pixi parsing, including
   blur/drop-shadow filters and unsupported patterns.
 - Collision geometry comes from JSON, never from artwork bounds.
@@ -212,6 +235,8 @@ hand-maintain a second list that can drift from the files.
   and continues between levels.
 - Rate-limit collision and other frequently repeated effects.
 - Record the provenance and license of every audio asset.
+- Normalize Theme Workshop audio imports to a stereo 44.1 kHz 16-bit WAV
+  master and generate WebM/Opus plus MP3 delivery files inside the theme.
 
 ## Fixed-step and input rules
 
@@ -315,7 +340,7 @@ V2 work is complete when:
 - PixiJS WebGL is the only gameplay renderer.
 - React owns no frame-by-frame gameplay state.
 - The engine is deterministic and framework-neutral.
-- All 70 levels and every default media asset validate.
+- All 100 levels and every default media asset validate.
 - Theme overrides resolve one element at a time.
 - External vector media preload and reuse cached contexts.
 - Howler uses WebM first with MP3 fallback and looping default ambience.

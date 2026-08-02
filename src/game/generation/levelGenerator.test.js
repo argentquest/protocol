@@ -5,9 +5,10 @@ import { generateLevel, pathExists } from './levelGenerator.js'
 
 describe('levelGenerator', () => {
   it('generates every configured level as a solvable course', () => {
-    const routeOrientations = new Set()
+    const routeDirections = new Set()
     const representativeLevels = [
       levels[0],
+      levels[1],
       levels[9],
       levels[29],
       levels[39],
@@ -18,13 +19,7 @@ describe('levelGenerator', () => {
       const level = generateLevel(config)
       const xChange = level.mainTarget.x - level.startPoint.x
       const yChange = level.mainTarget.y - level.startPoint.y
-      routeOrientations.add(
-        Math.abs(xChange) > Math.abs(yChange) * 1.5
-          ? `horizontal-${Math.sign(xChange)}`
-          : Math.abs(yChange) > Math.abs(xChange) * 1.5
-            ? `vertical-${Math.sign(yChange)}`
-            : `diagonal-${Math.sign(xChange)}-${Math.sign(yChange)}`,
-      )
+      routeDirections.add(`${Math.sign(xChange)}:${Math.sign(yChange)}`)
       expect(level.generationSummary.solvable, config.id).toBe(true)
       expect(
         pathExists({
@@ -52,7 +47,7 @@ describe('levelGenerator', () => {
         ).toBe(false)
       }
     }
-    expect(routeOrientations.size).toBeGreaterThanOrEqual(3)
+    expect(routeDirections).toEqual(new Set(['1:1', '1:-1', '-1:1', '-1:-1']))
   })
 
   it('is deterministic for the same seed and configuration', () => {
@@ -64,9 +59,15 @@ describe('levelGenerator', () => {
   })
 
   it('preserves authored manual obstacle coordinates', () => {
-    const level = generateLevel(levels[1])
+    const config = levels[1]
+    const authored = config.manualObstacles[0]
+    const level = generateLevel(config)
     expect(level.obstacles).toContainEqual(
-      expect.objectContaining({ id: 'deflector', x: 430, y: 430 }),
+      expect.objectContaining({
+        id: authored.id,
+        x: authored.x,
+        y: authored.y,
+      }),
     )
   })
 })

@@ -1,10 +1,11 @@
-export const WORLD_SIZE = 1000
+import { WORLD_HEIGHT, WORLD_WIDTH } from '../../world.js'
 
 /**
  * @typedef {object} Viewport
  * @property {number} width Canvas width in CSS pixels.
  * @property {number} height Canvas height in CSS pixels.
- * @property {number} worldSize Square world extent in logical units.
+ * @property {number} worldWidth World width in logical units.
+ * @property {number} worldHeight World height in logical units.
  * @property {number} scale CSS pixels per logical world unit.
  * @property {number} offsetX Horizontal letterbox offset in CSS pixels.
  * @property {number} offsetY Vertical letterbox offset in CSS pixels.
@@ -16,20 +17,27 @@ export const WORLD_SIZE = 1000
  * @pure
  * @param {number} width Canvas width in CSS pixels.
  * @param {number} height Canvas height in CSS pixels.
- * @param {number} [worldSize=1000] Logical world size.
+ * @param {number} [worldWidth=1600] Logical world width.
+ * @param {number} [worldHeight=900] Logical world height.
  * @returns {Viewport} Immutable viewport transform.
  */
-export function calculateViewport(width, height, worldSize = WORLD_SIZE) {
+export function calculateViewport(
+  width,
+  height,
+  worldWidth = WORLD_WIDTH,
+  worldHeight = WORLD_HEIGHT,
+) {
   const safeWidth = Math.max(1, width)
   const safeHeight = Math.max(1, height)
-  const scale = Math.min(safeWidth / worldSize, safeHeight / worldSize)
+  const scale = Math.min(safeWidth / worldWidth, safeHeight / worldHeight)
   return Object.freeze({
     width: safeWidth,
     height: safeHeight,
-    worldSize,
+    worldWidth,
+    worldHeight,
     scale,
-    offsetX: (safeWidth - worldSize * scale) / 2,
-    offsetY: (safeHeight - worldSize * scale) / 2,
+    offsetX: (safeWidth - worldWidth * scale) / 2,
+    offsetY: (safeHeight - worldHeight * scale) / 2,
   })
 }
 

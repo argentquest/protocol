@@ -1,0 +1,32 @@
+# Casual theme — audio credits
+
+All sounds are open-licensed and safe for commercial use.
+
+## Sources used
+
+### Kenney audio packs — CC0 (Public Domain)
+- Author: Kenney (kenney.nl)
+- License: CC0 1.0 Universal — no attribution required
+- Packs used: UI Audio, Interface Sounds, Digital Audio, Impact Sounds, Music Jingles
+- Source: https://kenney.nl/assets/category:Audio
+
+## License notes
+- CC0 = public domain. Free for commercial use, no attribution required.
+- Optional courtesy credit: "Kenney (kenney.nl)".
+
+## Theme mapping
+- ambience.wav        <- music-jingles jingles_HIT00
+- drag-start.wav      <- ui-audio click1
+- collision.wav       <- impact-sounds impactGeneric_light_000
+- attempt-failed.wav  <- interface-sounds error_001
+- target-reached.wav  <- digital-audio pepSound1
+- bonus-offered.wav   <- digital-audio twoTone1
+- bonus-accepted.wav  <- digital-audio powerUp1
+- coin-collected.wav  <- digital-audio pepSound2
+- power-obstacle-shield.wav <- digital-audio powerUp2
+- power-full-shield.wav     <- digital-audio powerUp3
+- power-slow-field.wav      <- digital-audio powerUp4
+- power-coin-magnet.wav     <- digital-audio powerUp5
+- power-route-scan.wav      <- digital-audio powerUp6
+- power-unavailable.wav     <- interface-sounds error_002
+- level-complete.wav        <- music-jingles jingles_HIT01

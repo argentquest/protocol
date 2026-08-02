@@ -1,6 +1,16 @@
 const STORAGE_KEY = 'path-protocol.progress'
 const SCHEMA_VERSION = 3
-const MAX_LEVEL = 70
+const MAX_STORED_LEVEL = 200
+
+function storageKeyForTheme(themeId) {
+  return themeId === 'default'
+    ? STORAGE_KEY
+    : `${STORAGE_KEY}.theme.${encodeURIComponent(themeId)}`
+}
+
+function levelProgressId(level) {
+  return level.internalId ?? level.id
+}
 
 /**
  * @typedef {object} PlayerProgress
@@ -26,6 +36,7 @@ export function createInitialProgress() {
       collectedCoins: {},
       claimedCompletionRewards: {},
       claimedBonusRewards: {},
+      claimedMicroTierRewards: {},
     },
     levels: {},
     microProtocols: {},
@@ -62,7 +73,10 @@ function sanitizeProgress(savedValue) {
     player: {
       highestUnlockedLevel: Math.max(
         1,
-        Math.min(MAX_LEVEL, Number(value.player?.highestUnlockedLevel) || 1),
+        Math.min(
+          MAX_STORED_LEVEL,
+          Number(value.player?.highestUnlockedLevel) || 1,
+        ),
       ),
       coins: Math.max(0, Number(value.player?.coins) || 0),
       inventory:
@@ -83,6 +97,11 @@ function sanitizeProgress(savedValue) {
         typeof value.player.claimedBonusRewards === 'object'
           ? value.player.claimedBonusRewards
           : {},
+      claimedMicroTierRewards:
+        value.player?.claimedMicroTierRewards &&
+        typeof value.player.claimedMicroTierRewards === 'object'
+          ? value.player.claimedMicroTierRewards
+          : {},
     },
     levels: value.levels && typeof value.levels === 'object' ? value.levels : {},
     microProtocols:
@@ -100,16 +119,18 @@ function sanitizeProgress(savedValue) {
  * Loads, migrates, and sanitizes progress from browser storage.
  *
  * @param {Storage} [storage=window.localStorage] Storage implementation.
+ * @param {string} [themeId='default'] Campaign theme namespace.
  * @returns {PlayerProgress} Valid current-version progress.
  */
-export function loadProgress(storage = window.localStorage) {
+export function loadProgress(storage = window.localStorage, themeId = 'default') {
   try {
-    const saved = storage.getItem(STORAGE_KEY)
+    const storageKey = storageKeyForTheme(themeId)
+    const saved = storage.getItem(storageKey)
     if (!saved) return createInitialProgress()
     const parsed = JSON.parse(saved)
     const progress = sanitizeProgress(parsed)
     if (parsed.schemaVersion !== SCHEMA_VERSION) {
-      storage.setItem(STORAGE_KEY, JSON.stringify(progress))
+      storage.setItem(storageKey, JSON.stringify(progress))
     }
     return progress
   } catch {
@@ -122,10 +143,18 @@ export function loadProgress(storage = window.localStorage) {
  *
  * @param {PlayerProgress} progress Progress to persist.
  * @param {Storage} [storage=window.localStorage] Storage implementation.
+ * @param {string} [themeId='default'] Campaign theme namespace.
  * @returns {void}
  */
-export function saveProgress(progress, storage = window.localStorage) {
-  storage.setItem(STORAGE_KEY, JSON.stringify(sanitizeProgress(progress)))
+export function saveProgress(
+  progress,
+  storage = window.localStorage,
+  themeId = 'default',
+) {
+  storage.setItem(
+    storageKeyForTheme(themeId),
+    JSON.stringify(sanitizeProgress(progress)),
+  )
 }
 
 /**
@@ -135,10 +164,12 @@ export function saveProgress(progress, storage = window.localStorage) {
  * @param {PlayerProgress} progress Existing progress.
  * @param {object} level Completed level configuration.
  * @param {object} result Final score, milliseconds, world distance, and bonuses.
+ * @param {number} [totalLevels=100] Active campaign level count.
  * @returns {{progress: PlayerProgress, improved: boolean}} Updated record and best-score flag.
  */
-export function recordLevelResult(progress, level, result) {
-  const previous = progress.levels[level.id] ?? {
+export function recordLevelResult(progress, level, result, totalLevels = 100) {
+  const progressId = levelProgressId(level)
+  const previous = progress.levels[progressId] ?? {
     completed: false,
     bestScore: 0,
     bestTimeMs: null,
@@ -160,7 +191,7 @@ export function recordLevelResult(progress, level, result) {
     attempts: previous.attempts + 1,
   }
   const completionAlreadyClaimed = Boolean(
-    progress.player.claimedCompletionRewards[level.id],
+    progress.player.claimedCompletionRewards[progressId],
   )
   const completionCoins = completionAlreadyClaimed
     ? 0
@@ -168,7 +199,7 @@ export function recordLevelResult(progress, level, result) {
   const claimedBonusRewards = { ...progress.player.claimedBonusRewards }
   let bonusCoins = 0
   for (const target of (level.bonusTargets ?? []).slice(0, result.earnedBonuses ?? 0)) {
-    const rewardKey = `${level.id}:${target.id}`
+    const rewardKey = `${progressId}:${target.id}`
     if (claimedBonusRewards[rewardKey]) continue
     claimedBonusRewards[rewardKey] = true
     bonusCoins += Number(level.rewards?.bonusCoinsPerTarget) || 0
@@ -181,17 +212,17 @@ export function recordLevelResult(progress, level, result) {
         ...progress.player,
         highestUnlockedLevel: Math.max(
           progress.player.highestUnlockedLevel,
-          Math.min(MAX_LEVEL, level.number + 1),
+          Math.min(totalLevels, level.number + 1),
         ),
         coins: progress.player.coins + completionCoins + bonusCoins,
         claimedCompletionRewards: completionAlreadyClaimed
           ? progress.player.claimedCompletionRewards
-          : { ...progress.player.claimedCompletionRewards, [level.id]: true },
+          : { ...progress.player.claimedCompletionRewards, [progressId]: true },
         claimedBonusRewards,
       },
       levels: {
         ...progress.levels,
-        [level.id]: levelRecord,
+        [progressId]: levelRecord,
       },
     },
     improved,
@@ -221,14 +252,23 @@ export function recordMicroProtocolResult(progress, protocol, result) {
   const coinsEarned = previous.rewardClaimed
     ? 0
     : Number(protocol.rewardCoins) || 0
+  const tierKey = `tier-${protocol.tier}`
+  const tierCoinsEarned = progress.player.claimedMicroTierRewards?.[tierKey]
+    ? 0
+    : Number(protocol.tierRewardCoins) || 0
+  const totalCoinsEarned = coinsEarned + tierCoinsEarned
   return {
     improved,
-    coinsEarned,
+    coinsEarned: totalCoinsEarned,
     progress: {
       ...progress,
       player: {
         ...progress.player,
-        coins: progress.player.coins + coinsEarned,
+        coins: progress.player.coins + totalCoinsEarned,
+        claimedMicroTierRewards: {
+          ...(progress.player.claimedMicroTierRewards ?? {}),
+          [tierKey]: true,
+        },
       },
       microProtocols: {
         ...progress.microProtocols,
@@ -376,12 +416,16 @@ export function cumulativeScore(progress) {
  * Replaces persisted progress with a fresh record.
  *
  * @param {Storage} [storage=window.localStorage] Storage implementation.
+ * @param {string} [themeId='default'] Campaign theme namespace.
  * @returns {PlayerProgress} Fresh progress.
  */
-export function resetProgress(storage = window.localStorage) {
+export function resetProgress(
+  storage = window.localStorage,
+  themeId = 'default',
+) {
   const initial = createInitialProgress()
-  saveProgress(initial, storage)
+  saveProgress(initial, storage, themeId)
   return initial
 }
 
-export { STORAGE_KEY }
+export { STORAGE_KEY, storageKeyForTheme }

@@ -1,0 +1,216 @@
+{
+  "schemaVersion": 2,
+  "id": "level-78",
+  "number": 78,
+  "name": "Gravity 08",
+  "seed": "path-protocol-16x9-078-v2",
+  "difficulty": 8,
+  "briefing": "Tier 8: Gravity. Shape a route around radial push and pull.",
+  "arena": {
+    "shape": "rect",
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
+  },
+  "token": {
+    "shape": "circle",
+    "size": 42,
+    "mediaId": "token-circle"
+  },
+  "movement": {
+    "maximumSpeed": 614,
+    "acceleration": 1840,
+    "deceleration": 2130,
+    "keyboardSpeed": 422
+  },
+  "start": {
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 987,
+    "y": 581
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 434,
+    "y": 183,
+    "size": 58
+  },
+  "generation": {
+    "obstacleCount": 3,
+    "allowedShapes": [
+      "circle",
+      "rect",
+      "diamond"
+    ],
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    },
+    "minSize": 50,
+    "maxSize": 116,
+    "minimumGap": 56,
+    "pathGrid": 20
+  },
+  "manualObstacles": [
+    {
+      "id": "barrier-1",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 746,
+      "y": 271,
+      "width": 59,
+      "height": 59
+    },
+    {
+      "id": "barrier-2",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 361,
+      "y": 376,
+      "width": 93,
+      "height": 93
+    },
+    {
+      "id": "barrier-3",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 215,
+      "y": 584,
+      "width": 122,
+      "height": 122
+    },
+    {
+      "id": "barrier-4",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 1423,
+      "y": 650,
+      "width": 127,
+      "height": 127
+    },
+    {
+      "id": "barrier-5",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 173,
+      "y": 184,
+      "width": 80,
+      "height": 80
+    },
+    {
+      "id": "barrier-6",
+      "mediaId": "obstacle-static-rect",
+      "shape": "rect",
+      "x": 1460,
+      "y": 221,
+      "width": 82,
+      "height": 138
+    }
+  ],
+  "movingObstacles": [
+    {
+      "id": "sweeper-1",
+      "mediaId": "obstacle-moving-circle",
+      "shape": "circle",
+      "x": 543,
+      "y": 522,
+      "size": 56,
+      "axis": "y",
+      "amplitude": 91,
+      "periodMs": 3403,
+      "phase": 0.624
+    },
+    {
+      "id": "sweeper-2",
+      "mediaId": "obstacle-moving-circle",
+      "shape": "circle",
+      "x": 758,
+      "y": 561,
+      "size": 40,
+      "axis": "y",
+      "amplitude": 159,
+      "periodMs": 4318,
+      "phase": 5.17
+    }
+  ],
+  "trackingObstacles": [],
+  "dynamicObstacles": [
+    {
+      "id": "pulse-1",
+      "mediaId": "obstacle-pulse-block",
+      "shape": "rect",
+      "x": 1268,
+      "y": 484,
+      "width": 142,
+      "height": 51,
+      "behavior": {
+        "type": "pulse",
+        "minScale": 0.39,
+        "maxScale": 1.22,
+        "periodMs": 3850,
+        "phase": -1.161
+      }
+    }
+  ],
+  "switches": [],
+  "forceFields": [
+    {
+      "id": "radial-1",
+      "mediaId": "field-radial",
+      "type": "attractor",
+      "x": 359,
+      "y": 496,
+      "radius": 112,
+      "force": 699
+    },
+    {
+      "id": "radial-2",
+      "mediaId": "field-radial",
+      "type": "repulsor",
+      "x": 708,
+      "y": 460,
+      "radius": 119,
+      "force": 643
+    }
+  ],
+  "coins": [
+    {
+      "id": "coin-78",
+      "mediaId": "coin-standard",
+      "x": 907,
+      "y": 404,
+      "size": 30,
+      "value": 1
+    }
+  ],
+  "rewards": {
+    "completionCoins": 4,
+    "bonusCoinsPerTarget": 2
+  },
+  "scoring": {
+    "baseMaximum": 44000,
+    "parTimeMs": 17000,
+    "parDistance": 681,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 1,
+    "rewardPerTarget": 1200,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.1,
+    "targets": [
+      {
+        "id": "bonus-a",
+        "mediaId": "target-bonus",
+        "x": 1264,
+        "y": 299,
+        "size": 48
+      }
+    ]
+  }
+}

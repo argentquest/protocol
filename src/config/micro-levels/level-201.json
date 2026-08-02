@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 2,
+  "id": "level-201",
+  "number": 201,
+  "name": "Phase Window",
+  "seed": "path-protocol-micro-phase-v2",
+  "difficulty": 3,
+  "briefing": "Focused phase mastery challenge.",
+  "arena": {
+    "shape": "rect",
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
+  },
+  "token": {
+    "shape": "circle",
+    "size": 44,
+    "mediaId": "token-circle"
+  },
+  "movement": {
+    "maximumSpeed": 524,
+    "acceleration": 1440,
+    "deceleration": 1705,
+    "keyboardSpeed": 352
+  },
+  "start": {
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 274,
+    "y": 103
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 786,
+    "y": 697,
+    "size": 58
+  },
+  "generation": {
+    "obstacleCount": 0,
+    "allowedShapes": [
+      "circle",
+      "rect",
+      "diamond"
+    ],
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    },
+    "minSize": 50,
+    "maxSize": 106,
+    "minimumGap": 66,
+    "pathGrid": 20
+  },
+  "manualObstacles": [
+    {
+      "id": "barrier-1",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 539,
+      "y": 185,
+      "width": 62,
+      "height": 62
+    },
+    {
+      "id": "barrier-2",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 1190,
+      "y": 209,
+      "width": 99,
+      "height": 99
+    }
+  ],
+  "movingObstacles": [],
+  "trackingObstacles": [],
+  "dynamicObstacles": [
+    {
+      "id": "phase-1",
+      "mediaId": "obstacle-phase-gate",
+      "shape": "rect",
+      "x": 1099,
+      "y": 421,
+      "width": 199,
+      "height": 29,
+      "behavior": {
+        "type": "phase",
+        "cycleMs": 4603,
+        "solidMs": 1592,
+        "warningMs": 450,
+        "offsetMs": 772
+      }
+    },
+    {
+      "id": "phase-2",
+      "mediaId": "obstacle-phase-gate",
+      "shape": "rect",
+      "x": 634,
+      "y": 542,
+      "width": 227,
+      "height": 29,
+      "behavior": {
+        "type": "phase",
+        "cycleMs": 3749,
+        "solidMs": 1454,
+        "warningMs": 450,
+        "offsetMs": 1479
+      }
+    }
+  ],
+  "switches": [],
+  "forceFields": [],
+  "coins": [],
+  "rewards": {
+    "completionCoins": 0,
+    "bonusCoinsPerTarget": 0
+  },
+  "scoring": {
+    "baseMaximum": 1500,
+    "parTimeMs": 8500,
+    "parDistance": 784,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 0,
+    "rewardPerTarget": 0,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0,
+    "targets": []
+  }
+}

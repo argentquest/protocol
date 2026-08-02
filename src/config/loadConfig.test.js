@@ -10,24 +10,20 @@ import {
 } from './loadConfig.js'
 
 describe('game configuration', () => {
-  it('loads a contiguous 70-level campaign', () => {
+  it('loads a contiguous 100-level campaign', () => {
     expect(configurationStatus.errors).toEqual([])
-    expect(levels).toHaveLength(70)
+    expect(levels).toHaveLength(100)
     expect(levels.map((level) => level.number)).toEqual(
-      Array.from({ length: 70 }, (_, index) => index + 1),
+      Array.from({ length: 100 }, (_, index) => index + 1),
     )
   })
 
-  it('distributes the expansion across standard and apex difficulties', () => {
-    const distributed = levels.slice(30, 60)
-    const apex = levels.slice(60)
+  it('distributes ten progressive mechanic tiers', () => {
     for (let difficulty = 1; difficulty <= 10; difficulty += 1) {
       expect(
-        distributed.filter((level) => level.difficulty === difficulty),
-      ).toHaveLength(3)
+        levels.filter((level) => level.difficulty === difficulty),
+      ).toHaveLength(10)
     }
-    expect(apex).toHaveLength(10)
-    expect(apex.every((level) => level.difficulty === 15)).toBe(true)
   })
 
   it('maps five unique consumable powers to unique number keys and sounds', () => {
@@ -53,17 +49,20 @@ describe('game configuration', () => {
     expect(gameplayConfig.collision.tokenToleranceUnits).toBe(4)
   })
 
-  it('loads four validated Micro Protocols outside campaign progression', () => {
-    expect(microProtocols).toHaveLength(4)
+  it('loads seven mechanic-matched Micro Protocols outside campaign progression', () => {
+    expect(microProtocols).toHaveLength(7)
     expect(microProtocols.map((item) => item.id)).toEqual([
       'phase-window',
-      'orbit-lock',
       'pulse-thread',
+      'orbit-lock',
       'switchback',
+      'crosscurrent',
+      'gravity-well',
+      'spinner-sync',
     ])
     expect(
       microProtocols.every(
-        (item) => item.level?.number >= 91 && item.level?.number <= 94,
+        (item) => item.level?.number >= 201 && item.level?.number <= 207,
       ),
     ).toBe(true)
     expect(configurationStatus.valid).toBe(true)

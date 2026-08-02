@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 2,
+  "id": "level-79",
+  "number": 79,
+  "name": "Gravity 09",
+  "seed": "path-protocol-16x9-079-v2",
+  "difficulty": 8,
+  "briefing": "Tier 8: Gravity. Shape a route around radial push and pull.",
+  "arena": {
+    "shape": "rect",
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
+  },
+  "token": {
+    "shape": "circle",
+    "size": 42,
+    "mediaId": "token-circle"
+  },
+  "movement": {
+    "maximumSpeed": 614,
+    "acceleration": 1840,
+    "deceleration": 2130,
+    "keyboardSpeed": 422
+  },
+  "start": {
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 1066,
+    "y": 536
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 292,
+    "y": 478,
+    "size": 58
+  },
+  "generation": {
+    "obstacleCount": 3,
+    "allowedShapes": [
+      "circle",
+      "rect",
+      "diamond"
+    ],
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    },
+    "minSize": 50,
+    "maxSize": 116,
+    "minimumGap": 56,
+    "pathGrid": 20
+  },
+  "manualObstacles": [
+    {
+      "id": "barrier-1",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 655,
+      "y": 218,
+      "width": 126,
+      "height": 126
+    },
+    {
+      "id": "barrier-2",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 767,
+      "y": 436,
+      "width": 91,
+      "height": 91
+    },
+    {
+      "id": "barrier-3",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 736,
+      "y": 695,
+      "width": 105,
+      "height": 105
+    }
+  ],
+  "movingObstacles": [
+    {
+      "id": "sweeper-1",
+      "mediaId": "obstacle-moving-circle",
+      "shape": "circle",
+      "x": 1445,
+      "y": 363,
+      "size": 39,
+      "axis": "y",
+      "amplitude": 158,
+      "periodMs": 4584,
+      "phase": 1.422
+    }
+  ],
+  "trackingObstacles": [],
+  "dynamicObstacles": [],
+  "switches": [],
+  "forceFields": [
+    {
+      "id": "radial-1",
+      "mediaId": "field-radial",
+      "type": "repulsor",
+      "x": 1015,
+      "y": 292,
+      "radius": 102,
+      "force": 607
+    }
+  ],
+  "coins": [
+    {
+      "id": "coin-79",
+      "mediaId": "coin-standard",
+      "x": 366,
+      "y": 248,
+      "size": 30,
+      "value": 1
+    }
+  ],
+  "rewards": {
+    "completionCoins": 4,
+    "bonusCoinsPerTarget": 2
+  },
+  "scoring": {
+    "baseMaximum": 44500,
+    "parTimeMs": 17000,
+    "parDistance": 776,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 1,
+    "rewardPerTarget": 1200,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.1,
+    "targets": [
+      {
+        "id": "bonus-a",
+        "mediaId": "target-bonus",
+        "x": 230,
+        "y": 794,
+        "size": 48
+      }
+    ]
+  }
+}

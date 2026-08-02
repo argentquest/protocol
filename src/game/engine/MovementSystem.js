@@ -49,6 +49,7 @@ function desiredKeyboardVelocity(directions, movement) {
  * @param {import('../types.js').GameInputState} inputs.input Current input intent.
  * @param {object} inputs.movement Speed in world units/second and acceleration in world units/second².
  * @param {number} inputs.stepMs Fixed-step duration in milliseconds.
+ * @param {import('../types.js').Point} [inputs.externalAcceleration] Environmental acceleration in world units/second².
  * @returns {{position: import('../types.js').Point, velocity: import('../types.js').Point}} Next motion state.
  */
 export function advanceTokenMotion({
@@ -57,6 +58,7 @@ export function advanceTokenMotion({
   input,
   movement,
   stepMs,
+  externalAcceleration = { x: 0, y: 0 },
 }) {
   const stepSeconds = stepMs / 1000
   const desiredVelocity =
@@ -69,8 +71,12 @@ export function advanceTokenMotion({
   const rate = isDecelerating ? movement.deceleration : movement.acceleration
   const maximumChange = rate * stepSeconds
   const nextVelocity = {
-    x: approach(velocity.x, desiredVelocity.x, maximumChange),
-    y: approach(velocity.y, desiredVelocity.y, maximumChange),
+    x:
+      approach(velocity.x, desiredVelocity.x, maximumChange) +
+      externalAcceleration.x * stepSeconds,
+    y:
+      approach(velocity.y, desiredVelocity.y, maximumChange) +
+      externalAcceleration.y * stepSeconds,
   }
   const speed = Math.hypot(nextVelocity.x, nextVelocity.y)
   if (speed > movement.maximumSpeed) {

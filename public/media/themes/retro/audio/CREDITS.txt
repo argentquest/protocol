@@ -1,0 +1,32 @@
+# Retro theme — audio credits
+
+All sounds are open-licensed and safe for commercial use.
+
+## Sources used
+
+### 512 Sound Effects (8-bit style) — CC0 (Public Domain)
+- Author: SubspaceAudio / Juhani Junkala
+- Source: https://opengameart.org/content/512-sound-effects-8-bit-style
+- License: CC0 1.0 Universal — no attribution required
+- Used for: all 15 slots in this theme (coin, powerup, impact, error, fanfare, etc.)
+
+## License notes
+- CC0 = public domain. You may use, modify, and ship commercially with no attribution.
+- Optional courtesy credit: "Sound effects by SubspaceAudio (opengameart.org)".
+
+## Theme mapping
+- ambience.wav        <- sfx_alarm_loop1
+- drag-start.wav      <- sfx_menu_select1
+- collision.wav       <- sfx_sounds_impact1
+- attempt-failed.wav  <- sfx_sounds_negative1
+- target-reached.wav  <- sfx_sound_bling
+- bonus-offered.wav   <- sfx_sounds_interaction1
+- bonus-accepted.wav  <- sfx_sounds_powerup1
+- coin-collected.wav  <- sfx_coin_single1
+- power-obstacle-shield.wav <- sfx_sounds_powerup2
+- power-full-shield.wav     <- sfx_sounds_powerup3
+- power-slow-field.wav      <- sfx_sounds_powerup4
+- power-coin-magnet.wav     <- sfx_sounds_powerup5
+- power-route-scan.wav      <- sfx_sounds_powerup6
+- power-unavailable.wav     <- sfx_sounds_error1
+- level-complete.wav        <- sfx_sounds_fanfare1

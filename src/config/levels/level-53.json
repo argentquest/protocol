@@ -2,78 +2,156 @@
   "schemaVersion": 2,
   "id": "level-53",
   "number": 53,
-  "name": "Precision Slot",
-  "seed": "path-protocol-precision-slot-v1",
-  "difficulty": 3,
-  "briefing": "A fast phase gate tests whether the shortest route is worth waiting for.",
+  "name": "Switch 03",
+  "seed": "path-protocol-16x9-053-v2",
+  "difficulty": 6,
+  "briefing": "Tier 6: Switch. Activate the remote pad before crossing its barrier.",
   "arena": {
     "shape": "rect",
-    "margin": 38,
-    "cornerRadius": 54,
-    "mediaId": "arena-standard"
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
   },
   "token": {
     "shape": "circle",
-    "size": 48,
+    "size": 42,
     "mediaId": "token-circle"
   },
+  "movement": {
+    "maximumSpeed": 578,
+    "acceleration": 1680,
+    "deceleration": 1960,
+    "keyboardSpeed": 394
+  },
   "start": {
-    "mode": "generated",
-    "region": {
-      "x": 90,
-      "y": 740,
-      "width": 160,
-      "height": 140
-    },
-    "mediaId": "start-pad"
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 572,
+    "y": 492
   },
   "mainTarget": {
-    "mode": "generated",
-    "region": {
-      "x": 760,
-      "y": 110,
-      "width": 140,
-      "height": 150
-    },
-    "size": 54,
-    "mediaId": "target-main"
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 1423,
+    "y": 626,
+    "size": 58
   },
   "generation": {
-    "obstacleCount": 6,
+    "obstacleCount": 2,
     "allowedShapes": [
+      "circle",
       "rect",
-      "circle"
+      "diamond"
     ],
-    "minSize": 95,
-    "maxSize": 180,
-    "minimumGap": 62,
-    "pathGrid": 20,
     "mediaByShape": {
       "circle": "obstacle-static-circle",
       "rect": "obstacle-static-rect",
       "diamond": "obstacle-static-diamond"
-    }
+    },
+    "minSize": 50,
+    "maxSize": 112,
+    "minimumGap": 60,
+    "pathGrid": 20
   },
-  "manualObstacles": [],
-  "movingObstacles": [],
+  "manualObstacles": [
+    {
+      "id": "barrier-1",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 1235,
+      "y": 251,
+      "width": 88,
+      "height": 88
+    },
+    {
+      "id": "barrier-2",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 1038,
+      "y": 146,
+      "width": 85,
+      "height": 85
+    },
+    {
+      "id": "barrier-3",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 273,
+      "y": 545,
+      "width": 115,
+      "height": 115
+    },
+    {
+      "id": "barrier-4",
+      "mediaId": "obstacle-static-rect",
+      "shape": "rect",
+      "x": 1444,
+      "y": 177,
+      "width": 94,
+      "height": 127
+    }
+  ],
+  "movingObstacles": [
+    {
+      "id": "sweeper-1",
+      "mediaId": "obstacle-moving-circle",
+      "shape": "circle",
+      "x": 530,
+      "y": 220,
+      "size": 52,
+      "axis": "y",
+      "amplitude": 93,
+      "periodMs": 4457,
+      "phase": 0.217
+    }
+  ],
+  "trackingObstacles": [],
+  "dynamicObstacles": [
+    {
+      "id": "switch-barrier-1",
+      "mediaId": "obstacle-switch-barrier",
+      "shape": "rect",
+      "x": 326,
+      "y": 369,
+      "width": 205,
+      "height": 34,
+      "behavior": {
+        "type": "switch",
+        "switchId": "switch-1",
+        "initiallySolid": true
+      }
+    }
+  ],
+  "switches": [
+    {
+      "id": "switch-1",
+      "mediaId": "switch-pad",
+      "x": 133,
+      "y": 757,
+      "size": 44,
+      "activation": "once",
+      "durationMs": 0
+    }
+  ],
+  "forceFields": [],
   "coins": [
     {
-      "id": "coin-a",
-      "x": 520,
-      "y": 540,
-      "size": 28,
-      "value": 1,
-      "mediaId": "coin-standard"
+      "id": "coin-53",
+      "mediaId": "coin-standard",
+      "x": 1063,
+      "y": 708,
+      "size": 30,
+      "value": 1
     }
   ],
   "rewards": {
-    "completionCoins": 2,
-    "bonusCoinsPerTarget": 1
+    "completionCoins": 3,
+    "bonusCoinsPerTarget": 2
   },
   "scoring": {
-    "baseMaximum": 26500,
-    "parTimeMs": 8200,
-    "parDistance": 1080,
+    "baseMaximum": 31500,
+    "parTimeMs": 15000,
+    "parDistance": 861,
     "timeWeight": 0.5,
     "distanceWeight": 0.5,
     "collisionPenaltyRate": 0.2,
@@ -81,42 +159,17 @@
   },
   "bonuses": {
     "maximumTargets": 1,
-    "rewardPerTarget": 300,
+    "rewardPerTarget": 1000,
     "offerChanceMode": "currentScorePercent",
-    "failurePenaltyRate": 0.2,
+    "failurePenaltyRate": 0.1,
     "targets": [
       {
-        "id": "relay-a",
-        "x": 820,
-        "y": 720,
-        "size": 48,
-        "mediaId": "target-bonus"
+        "id": "bonus-a",
+        "mediaId": "target-bonus",
+        "x": 865,
+        "y": 519,
+        "size": 48
       }
     ]
-  },
-  "movement": {
-    "maximumSpeed": 360,
-    "acceleration": 1400,
-    "deceleration": 1800,
-    "keyboardSpeed": 280
-  },
-  "trackingObstacles": [],
-  "dynamicObstacles": [
-    {
-      "id": "phase-gate-a",
-      "mediaId": "obstacle-phase-gate",
-      "shape": "rect",
-      "x": 520,
-      "y": 500,
-      "width": 180,
-      "height": 28,
-      "behavior": {
-        "type": "phase",
-        "cycleMs": 3000,
-        "solidMs": 1350,
-        "warningMs": 450,
-        "offsetMs": 1500
-      }
-    }
-  ]
+  }
 }

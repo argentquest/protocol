@@ -22,13 +22,13 @@ when a dependency is added or upgraded.
 | Vitest | Unit and component tests | 3.2.7 | MIT | <https://github.com/vitest-dev/vitest> |
 | Playwright | Browser automation | 1.61.1 | Apache-2.0 | <https://github.com/microsoft/playwright> |
 | ESLint | Static analysis | 9.39.5 | MIT | <https://github.com/eslint/eslint> |
-| FFmpeg | WAV-to-WebM/MP3 conversion in the Docker build stage | 5.1.9-0+deb12u1 | GPL-enabled Debian build (`--enable-gpl`) | <https://ffmpeg.org/> |
+| FFmpeg | WAV-to-WebM/MP3 conversion in build and theme authoring workflows | 5.1.9-0+deb12u1 | GPL-enabled Debian build (`--enable-gpl`) | <https://ffmpeg.org/> |
 | ffmpeg-static | Repository-local FFmpeg binary for repeatable media preparation | 5.3.0 | GPL-3.0-or-later package distribution; bundled FFmpeg license depends on build configuration | <https://github.com/eugeneware/ffmpeg-static> |
 
 The clean-cache Docker build verified FFmpeg 5.1.9-0+deb12u1 with
-`--enable-gpl`. FFmpeg is a build-stage tool and is not copied into the final
-Nginx runtime image. `npm audit --omit=dev` reported zero known production
-dependency vulnerabilities on 2026-07-25.
+`--enable-gpl`. The production server uses the pinned `ffmpeg-static` runtime
+dependency when an author imports media. The recorded npm audit result must be
+refreshed before release.
 
 ## Project-authored media
 
@@ -65,6 +65,18 @@ duplicate row.
 | Theme | Media ID | File | Origin | License |
 |---|---|---|---|---|
 | Future Lab | _No overrides yet_ | — | Inherits defaults | — |
+| Celestial Foundry | Tokens and spacecraft hazards | `public/media/themes/celestial-foundry/{tokens,obstacles}/*.png` | Unlucky Studio Complete Spaceship Game Art Pack | CC0-1.0 |
+| Celestial Foundry | Structures, units, and machinery | `public/media/themes/celestial-foundry/obstacles/*.png` | Kenney Sci-Fi RTS | CC0-1.0 |
+| Celestial Foundry | Puzzle hazards, coins, and powers | `public/media/themes/celestial-foundry/{obstacles,coins,powers}/*.png` | Kenney Puzzle Pack 2 | CC0-1.0 |
+| Celestial Foundry | Doors, switches, saws, and crates | `public/media/themes/celestial-foundry/{targets,obstacles}/*.png` | pzUH / GameArt2D Free Sci-Fi Platformer Tileset | CC0-1.0 |
+| Celestial Foundry | Bonus target and Slow Field | `public/media/themes/celestial-foundry/{bonus,powers}/*.png` | Screaming Brain Studios 2D Planet Pack 2 | CC0-1.0 |
+| Celestial Foundry | Conveyor field panel | `public/media/themes/celestial-foundry/obstacles/field-conveyor.png` | Kenney UI Pack - Sci-Fi | CC0-1.0 |
+| Casual | All sound overrides | `public/media/themes/casual/audio/*` | Kenney audio packs | CC0-1.0 |
+| Fantasy | Fantasy sound overrides | `public/media/themes/fantasy/audio/*` | Ivyism Fantasy Sound Effects Pack | CC-BY-4.0 |
+| Fantasy | RPG sound overrides | `public/media/themes/fantasy/audio/*` | Kenney RPG Audio | CC0-1.0 |
+| Retro | All sound overrides | `public/media/themes/retro/audio/*` | 512 Sound Effects (8-bit style) | CC0-1.0 |
+| Sci-Fi | Sci-fi sound overrides | `public/media/themes/sci-fi/audio/*` | Kenney Sci-Fi and Digital Audio packs | CC0-1.0 |
+| Sci-Fi | Interface sound overrides | `public/media/themes/sci-fi/audio/*` | Oinky55 Space UI Sounds | Permissive author grant; commercial use and modification allowed, attribution not required |
 
 ## Dependency and asset rules
 

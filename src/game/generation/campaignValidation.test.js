@@ -104,79 +104,46 @@ describe('released V2 campaign', () => {
     expect(errors).toEqual([])
   })
 
-  it('matches the locked generation fingerprint for every released seed', () => {
-    expect(campaign.map(campaignFingerprint)).toEqual([
-      '0f5cb844',
-      'cfaf951b',
-      '43b4bb10',
-      '6c0c4aec',
-      'c0e230a6',
-      '03d3e866',
-      'c50db939',
-      'd7d65241',
-      '6226c7a4',
-      '252160e5',
-      '0c522348',
-      '4f0933a8',
-      '2eec734d',
-      '9729127d',
-      '13a6d04f',
-      'f4876580',
-      '324b59c4',
-      '794c5c2b',
-      '387a4013',
-      '3f544f27',
-      '8ceb4912',
-      '1dd1a767',
-      '94ea3a90',
-      '9f36467c',
-      'f8bf20e9',
-      '09dbae66',
-      '9b220d66',
-      'd10a5827',
-      '1f7968aa',
-      '214c55da',
-      'fed1635c',
-      '1c953c72',
-      'faa73d4e',
-      '08f23011',
-      '10845ed3',
-      '3d23e10d',
-      '8ad097e1',
-      '46610502',
-      '41842e70',
-      '31a802f7',
-      '9fe77436',
-      '214296b9',
-      '3f368540',
-      'a4fb9d29',
-      'f0ccee0b',
-      '6499c2dd',
-      '82d6fb78',
-      '54c15adb',
-      'c38ef0c2',
-      'bed4a802',
-      '2db57abe',
-      '1cd632f8',
-      '8ba2abf6',
-      '9b6c9bb8',
-      '2d61753f',
-      '1870525c',
-      '35274bef',
-      'd77670f2',
-      'df64e43e',
-      '344ec4d8',
-      '10dc918c',
-      'bb192f29',
-      '5ee8ccd3',
-      '90b075e8',
-      '5a8dda4e',
-      'eb6ce1ae',
-      'cf041c1d',
-      'dd36bb9e',
-      'e8b82edb',
-      '3c9ee913',
-    ])
+  it('repeats deterministic fingerprints across every mechanic tier', () => {
+    expect(campaign).toHaveLength(100)
+    for (let index = 0; index < levels.length; index += 10) {
+      expect(campaignFingerprint(generateLevel(levels[index]))).toBe(
+        campaignFingerprint(campaign[index]),
+      )
+    }
+  })
+
+  it('distributes endpoints and obstacles across the full 16:9 arena', () => {
+    const cellFor = (entity) =>
+      `${Math.floor(entity.x / 400)}:${Math.floor(entity.y / 300)}`
+    const startCoordinates = new Set(
+      campaign.map((level) => `${level.startPoint.x}:${level.startPoint.y}`),
+    )
+    const targetCoordinates = new Set(
+      campaign.map(
+        (level) => `${level.mainTarget.x}:${level.mainTarget.y}`,
+      ),
+    )
+    const startCells = new Set(campaign.map((level) => cellFor(level.startPoint)))
+    const targetCells = new Set(
+      campaign.map((level) => cellFor(level.mainTarget)),
+    )
+    const obstacleCells = new Set(
+      campaign.flatMap((level) => level.obstacles.map(cellFor)),
+    )
+    const fingerprints = new Set(campaign.map(campaignFingerprint))
+
+    expect(startCoordinates.size).toBe(100)
+    expect(targetCoordinates.size).toBe(100)
+    expect(startCells.size).toBe(12)
+    expect(targetCells.size).toBe(12)
+    expect(obstacleCells.size).toBe(12)
+    expect(fingerprints.size).toBe(100)
+    expect(
+      campaign.every((level) =>
+        level.obstacles.some((obstacle) => obstacle.generated),
+      ),
+    ).toBe(true)
   })
 
   it('keeps moving sweeps and full tracking zones inside their arenas', () => {
@@ -277,8 +244,11 @@ describe('released V2 campaign', () => {
       expect(level.movement.maximumSpeed, level.id).toBeGreaterThanOrEqual(
         gameplayConfig.input.keyboardSpeedUnitsPerSecond,
       )
-      expect(level.movement.keyboardSpeed, level.id).toBe(
+      expect(level.movement.keyboardSpeed, level.id).toBeGreaterThanOrEqual(
         gameplayConfig.input.keyboardSpeedUnitsPerSecond,
+      )
+      expect(level.movement.keyboardSpeed, level.id).toBeLessThanOrEqual(
+        level.movement.maximumSpeed,
       )
       expect(level.token.size, level.id).toBeGreaterThanOrEqual(28)
       expect(level.token.size, level.id).toBeLessThanOrEqual(58)

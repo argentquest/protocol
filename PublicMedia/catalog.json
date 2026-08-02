@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "collections": {
+    "sources": {
+      "license": "CC0-1.0",
+      "sourceUrl": "PublicMedia/README.md",
+      "credit": "See the per-pack archive ledger in PublicMedia/README.md"
+    },
+    "512-sfx-8bit": {
+      "license": "CC0-1.0",
+      "sourceUrl": "https://opengameart.org/content/512-sound-effects-8-bit-style",
+      "credit": "SubspaceAudio / Juhani Junkala"
+    },
+    "ivyism-fantasy": {
+      "license": "CC-BY-4.0",
+      "sourceUrl": "https://ivyism.itch.io/fantasy-pack",
+      "credit": "Fantasy Sound Effects © 2022 by ivy"
+    },
+    "kenney_casino-audio": {
+      "license": "CC0-1.0",
+      "sourceUrl": "https://kenney.nl/assets/casino-audio",
+      "credit": "Kenney"
+    },
+    "kenney_digital-audio": {
+      "license": "CC0-1.0",
+      "sourceUrl": "https://kenney.nl/assets/digital-audio",
+      "credit": "Kenney"
+    },
+    "kenney_impact-sounds": {
+      "license": "CC0-1.0",
+      "sourceUrl": "https://kenney.nl/assets/impact-sounds",
+      "credit": "Kenney"
+    },
+    "kenney_interface-sounds": {
+      "license": "CC0-1.0",
+      "sourceUrl": "https://kenney.nl/assets/interface-sounds",
+      "credit": "Kenney"
+    },
+    "kenney_music-jingles": {
+      "license": "CC0-1.0",
+      "sourceUrl": "https://kenney.nl/assets/music-jingles",
+      "credit": "Kenney"
+    },
+    "kenney_rpg-audio": {
+      "license": "CC0-1.0",
+      "sourceUrl": "https://kenney.nl/assets/rpg-audio",
+      "credit": "Kenney"
+    },
+    "kenney_sci-fi-sounds": {
+      "license": "CC0-1.0",
+      "sourceUrl": "https://kenney.nl/assets/sci-fi-sounds",
+      "credit": "Kenney"
+    },
+    "kenney_ui-audio": {
+      "license": "CC0-1.0",
+      "sourceUrl": "https://kenney.nl/assets/ui-audio",
+      "credit": "Kenney"
+    },
+    "nessfx": {
+      "license": "CC0-1.0",
+      "sourceUrl": "https://opengameart.org/node/100317",
+      "credit": "Shiru / shiru8bit"
+    },
+    "oinky55-space-ui": {
+      "license": "Permissive author grant",
+      "sourceUrl": "https://oinky55.itch.io/space-ui-sounds",
+      "credit": "Oink55"
+    },
+    "wobbleboxx-soundpack01": {
+      "license": "CC0-1.0",
+      "sourceUrl": "https://opengameart.org/content/level-up-power-up-coin-get-13-sounds",
+      "credit": "wobbleboxx"
+    }
+  }
+}

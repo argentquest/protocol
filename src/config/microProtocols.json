@@ -3,35 +3,80 @@
   "protocols": [
     {
       "id": "phase-window",
-      "levelId": "level-91",
+      "levelId": "level-201",
       "name": "Phase Window",
-      "description": "Cross two synchronized gates during their open states.",
+      "description": "Cross a synchronized gate during its open state.",
       "rewardCoins": 3,
+      "tierRewardCoins": 5,
+      "unlockLevel": 21,
+      "tier": 3,
       "kind": "timing"
     },
     {
-      "id": "orbit-lock",
-      "levelId": "level-92",
-      "name": "Orbit Lock",
-      "description": "Thread the center while two orbiters cross the direct line.",
-      "rewardCoins": 3,
-      "kind": "prediction"
-    },
-    {
       "id": "pulse-thread",
-      "levelId": "level-93",
+      "levelId": "level-202",
       "name": "Pulse Thread",
-      "description": "Pass a corridor before its pulse blocks reach full size.",
+      "description": "Pass the corridor before its pulse reaches full size.",
       "rewardCoins": 3,
+      "tierRewardCoins": 5,
+      "unlockLevel": 31,
+      "tier": 4,
       "kind": "precision"
     },
     {
+      "id": "orbit-lock",
+      "levelId": "level-203",
+      "name": "Orbit Lock",
+      "description": "Predict the orbiter and thread its crossing line.",
+      "rewardCoins": 3,
+      "tierRewardCoins": 5,
+      "unlockLevel": 41,
+      "tier": 5,
+      "kind": "prediction"
+    },
+    {
       "id": "switchback",
-      "levelId": "level-94",
+      "levelId": "level-204",
       "name": "Switchback",
-      "description": "Trigger the remote pad and cross its barrier before the timer closes.",
+      "description": "Trigger the remote pad and cross its barrier.",
       "rewardCoins": 4,
+      "tierRewardCoins": 6,
+      "unlockLevel": 51,
+      "tier": 6,
       "kind": "switching"
+    },
+    {
+      "id": "crosscurrent",
+      "levelId": "level-205",
+      "name": "Crosscurrent",
+      "description": "Counter-steer through a strong directional current.",
+      "rewardCoins": 4,
+      "tierRewardCoins": 6,
+      "unlockLevel": 61,
+      "tier": 7,
+      "kind": "control"
+    },
+    {
+      "id": "gravity-well",
+      "levelId": "level-206",
+      "name": "Gravity Well",
+      "description": "Shape a clean line through radial force.",
+      "rewardCoins": 4,
+      "tierRewardCoins": 6,
+      "unlockLevel": 71,
+      "tier": 8,
+      "kind": "control"
+    },
+    {
+      "id": "spinner-sync",
+      "levelId": "level-207",
+      "name": "Spinner Sync",
+      "description": "Cross the rotating arm without entering its swept path.",
+      "rewardCoins": 5,
+      "tierRewardCoins": 8,
+      "unlockLevel": 81,
+      "tier": 9,
+      "kind": "timing"
     }
   ]
 }

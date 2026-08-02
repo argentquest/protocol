@@ -2,78 +2,138 @@
   "schemaVersion": 2,
   "id": "level-43",
   "number": 43,
-  "name": "Fine Margin",
-  "seed": "path-protocol-fine-margin-v1",
-  "difficulty": 3,
-  "briefing": "An elliptical orbiter turns the center line into a prediction lesson.",
+  "name": "Orbit 03",
+  "seed": "path-protocol-16x9-043-v2",
+  "difficulty": 5,
+  "briefing": "Tier 5: Orbit. Predict orbiting hazards rather than chasing them.",
   "arena": {
     "shape": "rect",
-    "margin": 38,
-    "cornerRadius": 54,
-    "mediaId": "arena-standard"
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
   },
   "token": {
     "shape": "circle",
-    "size": 48,
+    "size": 44,
     "mediaId": "token-circle"
   },
+  "movement": {
+    "maximumSpeed": 560,
+    "acceleration": 1600,
+    "deceleration": 1875,
+    "keyboardSpeed": 380
+  },
   "start": {
-    "mode": "generated",
-    "region": {
-      "x": 90,
-      "y": 740,
-      "width": 160,
-      "height": 140
-    },
-    "mediaId": "start-pad"
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 1256,
+    "y": 333
   },
   "mainTarget": {
-    "mode": "generated",
-    "region": {
-      "x": 760,
-      "y": 110,
-      "width": 140,
-      "height": 150
-    },
-    "size": 54,
-    "mediaId": "target-main"
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 685,
+    "y": 218,
+    "size": 58
   },
   "generation": {
-    "obstacleCount": 6,
+    "obstacleCount": 2,
     "allowedShapes": [
+      "circle",
       "rect",
-      "circle"
+      "diamond"
     ],
-    "minSize": 95,
-    "maxSize": 180,
-    "minimumGap": 62,
-    "pathGrid": 20,
     "mediaByShape": {
       "circle": "obstacle-static-circle",
       "rect": "obstacle-static-rect",
       "diamond": "obstacle-static-diamond"
-    }
+    },
+    "minSize": 50,
+    "maxSize": 110,
+    "minimumGap": 62,
+    "pathGrid": 20
   },
-  "manualObstacles": [],
-  "movingObstacles": [],
+  "manualObstacles": [
+    {
+      "id": "barrier-1",
+      "mediaId": "obstacle-static-rect",
+      "shape": "rect",
+      "x": 1116,
+      "y": 710,
+      "width": 62,
+      "height": 146
+    },
+    {
+      "id": "barrier-2",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 131,
+      "y": 238,
+      "width": 85,
+      "height": 85
+    },
+    {
+      "id": "barrier-3",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 703,
+      "y": 667,
+      "width": 95,
+      "height": 95
+    }
+  ],
+  "movingObstacles": [
+    {
+      "id": "sweeper-1",
+      "mediaId": "obstacle-moving-circle",
+      "shape": "circle",
+      "x": 366,
+      "y": 768,
+      "size": 39,
+      "axis": "x",
+      "amplitude": 78,
+      "periodMs": 4781,
+      "phase": 2.377
+    }
+  ],
+  "trackingObstacles": [],
+  "dynamicObstacles": [
+    {
+      "id": "orbiter-1",
+      "mediaId": "obstacle-orbiter",
+      "shape": "circle",
+      "x": 1387,
+      "y": 613,
+      "size": 46,
+      "behavior": {
+        "type": "orbit",
+        "radiusX": 103,
+        "radiusY": 116,
+        "periodMs": 3109,
+        "phase": 4.256
+      }
+    }
+  ],
+  "switches": [],
+  "forceFields": [],
   "coins": [
     {
-      "id": "coin-a",
-      "x": 560,
-      "y": 540,
-      "size": 28,
-      "value": 1,
-      "mediaId": "coin-standard"
+      "id": "coin-43",
+      "mediaId": "coin-standard",
+      "x": 962,
+      "y": 554,
+      "size": 30,
+      "value": 1
     }
   ],
   "rewards": {
-    "completionCoins": 2,
+    "completionCoins": 3,
     "bonusCoinsPerTarget": 1
   },
   "scoring": {
-    "baseMaximum": 21500,
-    "parTimeMs": 8200,
-    "parDistance": 1080,
+    "baseMaximum": 26500,
+    "parTimeMs": 14000,
+    "parDistance": 582,
     "timeWeight": 0.5,
     "distanceWeight": 0.5,
     "collisionPenaltyRate": 0.2,
@@ -81,41 +141,17 @@
   },
   "bonuses": {
     "maximumTargets": 1,
-    "rewardPerTarget": 300,
+    "rewardPerTarget": 900,
     "offerChanceMode": "currentScorePercent",
-    "failurePenaltyRate": 0.2,
+    "failurePenaltyRate": 0.1,
     "targets": [
       {
-        "id": "relay-a",
-        "x": 820,
-        "y": 720,
-        "size": 48,
-        "mediaId": "target-bonus"
+        "id": "bonus-a",
+        "mediaId": "target-bonus",
+        "x": 298,
+        "y": 626,
+        "size": 48
       }
     ]
-  },
-  "movement": {
-    "maximumSpeed": 360,
-    "acceleration": 1400,
-    "deceleration": 1800,
-    "keyboardSpeed": 280
-  },
-  "trackingObstacles": [],
-  "dynamicObstacles": [
-    {
-      "id": "orbiter-a",
-      "mediaId": "obstacle-orbiter",
-      "shape": "circle",
-      "x": 520,
-      "y": 500,
-      "size": 36,
-      "behavior": {
-        "type": "orbit",
-        "radiusX": 25,
-        "radiusY": 80,
-        "periodMs": 4400,
-        "phase": 0.8
-      }
-    }
-  ]
+  }
 }

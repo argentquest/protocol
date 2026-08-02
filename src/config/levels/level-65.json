@@ -2,177 +2,161 @@
   "schemaVersion": 2,
   "id": "level-65",
   "number": 65,
-  "name": "Quantum Pursuit",
-  "seed": "path-protocol-quantum-pursuit-v1",
-  "difficulty": 15,
-  "briefing": "Apex-tier chamber 5: denser geometry and overclocked hazards demand complete control.",
+  "name": "Current 05",
+  "seed": "path-protocol-16x9-065-v2",
+  "difficulty": 7,
+  "briefing": "Tier 7: Current. Counter-steer through directional currents.",
   "arena": {
     "shape": "rect",
-    "margin": 36,
-    "cornerRadius": 46,
-    "mediaId": "arena-standard"
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
   },
   "token": {
     "shape": "circle",
-    "size": 40,
+    "size": 42,
     "mediaId": "token-circle"
+  },
+  "movement": {
+    "maximumSpeed": 596,
+    "acceleration": 1760,
+    "deceleration": 2045,
+    "keyboardSpeed": 408
   },
   "start": {
     "mode": "manual",
-    "x": 140,
-    "y": 150,
-    "mediaId": "start-pad"
+    "mediaId": "start-pad",
+    "x": 518,
+    "y": 499
   },
   "mainTarget": {
     "mode": "manual",
-    "x": 850,
-    "y": 850,
-    "size": 52,
-    "mediaId": "target-main"
+    "mediaId": "target-main",
+    "x": 1191,
+    "y": 386,
+    "size": 58
   },
   "generation": {
-    "obstacleCount": 10,
+    "obstacleCount": 3,
     "allowedShapes": [
+      "circle",
       "rect",
-      "circle"
+      "diamond"
     ],
-    "minSize": 75,
-    "maxSize": 145,
-    "minimumGap": 58,
-    "pathGrid": 18,
     "mediaByShape": {
       "circle": "obstacle-static-circle",
       "rect": "obstacle-static-rect",
       "diamond": "obstacle-static-diamond"
-    }
+    },
+    "minSize": 50,
+    "maxSize": 114,
+    "minimumGap": 58,
+    "pathGrid": 20
   },
-  "manualObstacles": [],
-  "movingObstacles": [
+  "manualObstacles": [
     {
-      "id": "corridor-gate",
-      "shape": "rect",
-      "x": 690,
-      "y": 560,
-      "width": 140,
-      "height": 34,
-      "axis": "y",
-      "amplitude": 160,
-      "periodMs": 3354,
-      "phase": 0.2,
-      "mediaId": "obstacle-moving-rect"
-    }
-  ],
-  "trackingObstacles": [
-    {
-      "id": "coin-guard-a",
-      "shape": "circle",
-      "x": 360,
-      "y": 420,
-      "width": 54,
-      "height": 54,
-      "zone": {
-        "x": 130,
-        "y": 180,
-        "width": 500,
-        "height": 520
-      },
-      "maxSpeed": 140,
-      "acceleration": 200,
-      "mediaId": "obstacle-tracking-circle",
-      "turnRateDegreesPerSecond": 190
+      "id": "barrier-1",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 776,
+      "y": 480,
+      "width": 84,
+      "height": 84
     },
     {
-      "id": "coin-guard-b",
+      "id": "barrier-2",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 1306,
+      "y": 634,
+      "width": 75,
+      "height": 75
+    },
+    {
+      "id": "barrier-3",
+      "mediaId": "obstacle-static-rect",
+      "shape": "rect",
+      "x": 241,
+      "y": 146,
+      "width": 105,
+      "height": 125
+    },
+    {
+      "id": "barrier-4",
+      "mediaId": "obstacle-static-rect",
+      "shape": "rect",
+      "x": 971,
+      "y": 430,
+      "width": 98,
+      "height": 108
+    }
+  ],
+  "movingObstacles": [
+    {
+      "id": "sweeper-1",
+      "mediaId": "obstacle-moving-circle",
       "shape": "circle",
-      "x": 720,
-      "y": 660,
-      "width": 54,
-      "height": 54,
-      "zone": {
-        "x": 470,
-        "y": 360,
-        "width": 410,
-        "height": 500
-      },
-      "maxSpeed": 140,
-      "acceleration": 200,
-      "mediaId": "obstacle-tracking-circle",
-      "turnRateDegreesPerSecond": 190
+      "x": 769,
+      "y": 228,
+      "size": 40,
+      "axis": "x",
+      "amplitude": 136,
+      "periodMs": 3343,
+      "phase": 0.043
+    }
+  ],
+  "trackingObstacles": [],
+  "dynamicObstacles": [],
+  "switches": [],
+  "forceFields": [
+    {
+      "id": "current-1",
+      "mediaId": "field-conveyor",
+      "type": "conveyor",
+      "x": 214,
+      "y": 740,
+      "width": 211,
+      "height": 116,
+      "directionDegrees": -84,
+      "force": 394
     }
   ],
   "coins": [
     {
-      "id": "coin-a",
-      "x": 250,
-      "y": 770,
-      "size": 28,
-      "value": 1,
-      "mediaId": "coin-standard"
-    },
-    {
-      "id": "coin-b",
-      "x": 370,
-      "y": 690,
-      "size": 28,
-      "value": 1,
-      "mediaId": "coin-standard"
-    },
-    {
-      "id": "coin-c",
-      "x": 500,
-      "y": 610,
-      "size": 28,
-      "value": 2,
-      "mediaId": "coin-standard"
-    },
-    {
-      "id": "coin-d",
-      "x": 740,
-      "y": 300,
-      "size": 28,
-      "value": 2,
-      "mediaId": "coin-standard"
+      "id": "coin-65",
+      "mediaId": "coin-standard",
+      "x": 131,
+      "y": 583,
+      "size": 30,
+      "value": 1
     }
   ],
   "rewards": {
-    "completionCoins": 10,
-    "bonusCoinsPerTarget": 5
+    "completionCoins": 4,
+    "bonusCoinsPerTarget": 2
   },
   "scoring": {
-    "baseMaximum": 32500,
-    "parTimeMs": 27600,
-    "parDistance": 2464,
+    "baseMaximum": 37500,
+    "parTimeMs": 16000,
+    "parDistance": 682,
     "timeWeight": 0.5,
     "distanceWeight": 0.5,
     "collisionPenaltyRate": 0.2,
     "maximumCollisions": 3
   },
   "bonuses": {
-    "maximumTargets": 2,
-    "rewardPerTarget": 1800,
+    "maximumTargets": 1,
+    "rewardPerTarget": 1100,
     "offerChanceMode": "currentScorePercent",
-    "failurePenaltyRate": 0.2,
+    "failurePenaltyRate": 0.1,
     "targets": [
       {
-        "id": "relay-a",
-        "x": 820,
-        "y": 800,
-        "size": 42,
-        "mediaId": "target-bonus"
-      },
-      {
-        "id": "relay-b",
-        "x": 180,
-        "y": 210,
-        "size": 40,
-        "mediaId": "target-bonus"
+        "id": "bonus-a",
+        "mediaId": "target-bonus",
+        "x": 872,
+        "y": 751,
+        "size": 48
       }
     ]
-  },
-  "movement": {
-    "maximumSpeed": 360,
-    "acceleration": 1400,
-    "deceleration": 1800,
-    "keyboardSpeed": 280
   }
 }

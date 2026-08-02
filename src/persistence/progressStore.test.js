@@ -49,19 +49,19 @@ describe('progressStore', () => {
     expect(loadProgress(storage).player.highestUnlockedLevel).toBe(4)
   })
 
-  it('supports progression through the expanded 70-level campaign', () => {
+  it('supports progression through the expanded 100-level campaign', () => {
     const progress = createInitialProgress()
-    progress.player.highestUnlockedLevel = 70
+    progress.player.highestUnlockedLevel = 100
     const storage = memoryStorage()
     saveProgress(progress, storage)
-    expect(loadProgress(storage).player.highestUnlockedLevel).toBe(70)
+    expect(loadProgress(storage).player.highestUnlockedLevel).toBe(100)
 
     const completed = recordLevelResult(
       progress,
-      { id: 'level-70', number: 70 },
+      { id: 'level-100', number: 100 },
       { finalScore: 35000, elapsedMs: 30000, actualDistance: 2400 },
     ).progress
-    expect(completed.player.highestUnlockedLevel).toBe(70)
+    expect(completed.player.highestUnlockedLevel).toBe(100)
   })
 
   it('recovers safely from malformed storage', () => {
@@ -119,7 +119,12 @@ describe('progressStore', () => {
 
   it('records Micro Protocol results separately and grants one-time coins', () => {
     const initial = createInitialProgress()
-    const protocol = { id: 'phase-window', rewardCoins: 3 }
+    const protocol = {
+      id: 'phase-window',
+      rewardCoins: 3,
+      tier: 3,
+      tierRewardCoins: 5,
+    }
     const first = recordMicroProtocolResult(initial, protocol, {
       finalScore: 850,
       elapsedMs: 9000,
@@ -129,9 +134,12 @@ describe('progressStore', () => {
       elapsedMs: 8500,
     })
 
-    expect(first.coinsEarned).toBe(3)
+    expect(first.coinsEarned).toBe(8)
     expect(replay.coinsEarned).toBe(0)
-    expect(replay.progress.player.coins).toBe(3)
+    expect(replay.progress.player.coins).toBe(8)
+    expect(replay.progress.player.claimedMicroTierRewards).toMatchObject({
+      'tier-3': true,
+    })
     expect(replay.progress.microProtocols['phase-window']).toMatchObject({
       completed: true,
       bestScore: 900,
@@ -140,5 +148,37 @@ describe('progressStore', () => {
       rewardClaimed: true,
     })
     expect(cumulativeScore(replay.progress)).toBe(0)
+  })
+
+  it('isolates progress by theme and records reordered levels by internal ID', () => {
+    const storage = window.localStorage
+    const defaultProgress = createInitialProgress()
+    defaultProgress.player.coins = 2
+    const themedProgress = createInitialProgress()
+    themedProgress.player.coins = 9
+
+    saveProgress(defaultProgress, storage, 'default')
+    saveProgress(themedProgress, storage, 'neon-routes')
+
+    expect(loadProgress(storage, 'default').player.coins).toBe(2)
+    expect(loadProgress(storage, 'neon-routes').player.coins).toBe(9)
+
+    const recorded = recordLevelResult(themedProgress, {
+      id: 'level-03',
+      internalId: '20a83cf8-2e33-40e5-b315-c24679c0e027',
+      number: 3,
+      rewards: { completionCoins: 0, bonusCoinsPerTarget: 0 },
+      bonusTargets: [],
+    }, {
+      finalScore: 700,
+      elapsedMs: 5000,
+      actualDistance: 600,
+      earnedBonuses: 0,
+    })
+    expect(
+      recorded.progress.levels['20a83cf8-2e33-40e5-b315-c24679c0e027']
+        .bestScore,
+    ).toBe(700)
+    expect(recorded.progress.levels['level-03']).toBeUndefined()
   })
 })

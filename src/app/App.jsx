@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  activeTheme,
+  configuredThemeName,
   configurationStatus,
   gameplayConfig,
   levels as levelConfigs,
   microProtocols,
   powerups,
+  themeDefinitions,
 } from '../config/loadConfig.js'
 import GameView from '../game/GameView.jsx'
+import ThemeWorkshop from '../themeWorkshop/ThemeWorkshop.jsx'
+import { themeApi } from '../themeWorkshop/themeApi.js'
 import { createAudioManager } from '../game/audio/audioManager.js'
 import { recordPlaytestRun } from '../game/debug/playtestLog.js'
 import { generateLevel } from '../game/generation/levelGenerator.js'
@@ -25,6 +28,14 @@ import {
   resetProgress,
   saveProgress,
 } from '../persistence/progressStore.js'
+
+const PRESENTATION_THEME_KEY = 'path-protocol.presentation-theme'
+
+/** Resolves a valid persisted presentation theme or the configured default. */
+function initialPresentationTheme() {
+  const stored = window.localStorage.getItem(PRESENTATION_THEME_KEY)
+  return Object.hasOwn(themeDefinitions, stored) ? stored : configuredThemeName
+}
 
 /** Renders the reusable Path Protocol wordmark. */
 function ProtocolMark({ compact = false }) {
@@ -88,6 +99,7 @@ function ShellHeader({
   onPowers,
   onInstructions,
   onSettings,
+  onWorkshop,
   score,
   coins,
   devMode,
@@ -113,6 +125,9 @@ function ShellHeader({
         <button type="button" onClick={onSettings}>
           Controls
         </button>
+        <button type="button" onClick={onWorkshop}>
+          Theme workshop
+        </button>
       </nav>
       {devMode && <span className="dev-mode-badge">DEV PLAYTEST</span>}
       <div className="total-score">
@@ -134,6 +149,7 @@ function HomeScreen({
   onInstructions,
   devMode,
   onToggleDevMode,
+  totalLevels,
 }) {
   const completedCount = Object.values(progress.levels).filter((level) => level.completed).length
   const hasProgress = completedCount > 0
@@ -239,7 +255,7 @@ function HomeScreen({
         <div className="hero-stat hero-stat--score">
           <span>Current record</span>
           <strong>{totalScore.toLocaleString()}</strong>
-          <small>{completedCount}/{levelConfigs.length} protocols complete</small>
+          <small>{completedCount}/{totalLevels} protocols complete</small>
         </div>
         <div className="hero-stat hero-stat--efficiency">
           <span>Scoring model</span>
@@ -252,11 +268,18 @@ function HomeScreen({
 }
 
 /** Renders unlocked or development-accessible campaign levels. */
-function LevelSelect({ levels, progress, onSelect, onPowers, devMode }) {
+function LevelSelect({
+  levels,
+  progress,
+  onSelect,
+  onPowers,
+  devMode,
+  themeName,
+}) {
   return (
     <main className="content-screen">
       <div className="screen-heading">
-        <p className="eyebrow">Protocol archive</p>
+        <p className="eyebrow">Protocol archive // {themeName}</p>
         <h1>Select a chamber</h1>
         <p>Each level uses a shared deterministic seed. Replay any cleared chamber to improve its score.</p>
         <div className="screen-heading__actions">
@@ -268,7 +291,7 @@ function LevelSelect({ levels, progress, onSelect, onPowers, devMode }) {
       <section className="level-grid" aria-label="Available levels">
         {levels.map((level) => {
           const unlocked = devMode || level.number <= progress.player.highestUnlockedLevel
-          const record = progress.levels[level.id]
+          const record = progress.levels[level.internalId ?? level.id]
           return (
             <button
               key={level.id}
@@ -444,7 +467,13 @@ function Instructions() {
 }
 
 /** Presents persisted audio, motion, and progress-reset controls. */
-function Settings({ settings, onChange, onReset }) {
+function Settings({
+  settings,
+  onChange,
+  onReset,
+  presentationThemeName,
+  onPresentationThemeChange,
+}) {
   const update = (key, value) => onChange({ ...settings, [key]: value })
   return (
     <main className="content-screen settings-screen">
@@ -454,6 +483,23 @@ function Settings({ settings, onChange, onReset }) {
         <p>Audio channels and motion preferences are stored only in this browser.</p>
       </div>
       <section className="settings-panel">
+        <label className="setting-row">
+          <div>
+            <strong>Presentation theme</strong>
+            <span>Changes artwork, colors, effects, and theme sound overrides.</span>
+          </div>
+          <select
+            aria-label="Presentation theme"
+            value={presentationThemeName}
+            onChange={(event) => onPresentationThemeChange(event.target.value)}
+          >
+            {Object.entries(themeDefinitions).map(([themeId, theme]) => (
+              <option key={themeId} value={themeId}>
+                {theme.name}
+              </option>
+            ))}
+          </select>
+        </label>
         <div className="setting-row">
           <div>
             <strong>Ambient music</strong>
@@ -563,6 +609,7 @@ export function Results({
   microRecords,
   microNotice,
   onMicro,
+  totalLevels,
 }) {
   const efficiency = Math.round(result.routeFactor * 100)
   const timeRating = Math.round(result.timeFactor * 100)
@@ -645,7 +692,7 @@ export function Results({
         </div>
       </section>
       <div className="results-actions">
-        {level.number < levelConfigs.length && (
+        {level.number < totalLevels && (
           <button className="primary-button" type="button" onClick={onNext}>
             <span>Next protocol</span>
             <b aria-hidden="true">→</b>
@@ -687,6 +734,12 @@ function initialDevMode() {
 function PathProtocolApp() {
   const [devMode, setDevMode] = useState(initialDevMode)
   const [progress, setProgress] = useState(() => loadProgress())
+  const [activeThemeId, setActiveThemeId] = useState('default')
+  const [activeThemeName, setActiveThemeName] = useState('Default')
+  const [presentationThemeName, setPresentationThemeName] = useState(
+    initialPresentationTheme,
+  )
+  const [campaignLevels, setCampaignLevels] = useState(levelConfigs)
   const [screen, setScreen] = useState('home')
   const [selectedLevelId, setSelectedLevelId] = useState('level-01')
   const [selectedMicroId, setSelectedMicroId] = useState(null)
@@ -694,6 +747,7 @@ function PathProtocolApp() {
   const [microNotice, setMicroNotice] = useState(null)
   const [mediaManifest, setMediaManifest] = useState(null)
   const [startupAttempt, setStartupAttempt] = useState(0)
+  const [mediaReloadVersion, setMediaReloadVersion] = useState(0)
   const [startup, setStartup] = useState({
     status: 'loading',
     label: 'Validating configuration',
@@ -705,14 +759,20 @@ function PathProtocolApp() {
     microProtocols.find((protocol) => protocol.id === selectedMicroId) ?? null
   const selectedConfig =
     currentMicroProtocol?.level ??
-    levelConfigs.find((level) => level.id === selectedLevelId) ??
-    levelConfigs[0]
+    campaignLevels.find((level) => level.id === selectedLevelId) ??
+    campaignLevels[0]
   const currentLevel = useMemo(() => generateLevel(selectedConfig), [selectedConfig])
   const totalScore = cumulativeScore(progress)
   const audioRef = useRef(null)
   const audioLifecycleRef = useRef(null)
+  const loadedMediaKeyRef = useRef(null)
+  const startedRef = useRef(started)
   const progressRef = useRef(progress)
+  const presentationTheme =
+    themeDefinitions[presentationThemeName] ??
+    themeDefinitions[configuredThemeName]
   progressRef.current = progress
+  startedRef.current = started
 
   if (!audioRef.current) {
     audioRef.current = createAudioManager(progress.settings)
@@ -720,6 +780,19 @@ function PathProtocolApp() {
 
   useEffect(() => {
     let cancelled = false
+    const mediaTheme =
+      activeThemeId === 'default' ? presentationThemeName : activeThemeId
+    const mediaKey = `${mediaTheme}:${mediaReloadVersion}:${startupAttempt}`
+    if (
+      loadedMediaKeyRef.current &&
+      loadedMediaKeyRef.current !== mediaKey
+    ) {
+      sharedVectorAssetCache.clear()
+      audioRef.current.dispose()
+      audioRef.current = createAudioManager(progressRef.current.settings)
+    }
+    loadedMediaKeyRef.current = mediaKey
+    setMediaManifest(null)
     setStartup({
       status: 'loading',
       label: 'Validating configuration',
@@ -727,15 +800,18 @@ function PathProtocolApp() {
       error: null,
     })
     loadStartupMedia({
-      themeName: 'future-lab',
+      themeName: mediaTheme,
       validateConfiguration: async () => {
         if (!configurationStatus.valid) {
           throw new Error(configurationStatus.errors.join('; '))
         }
       },
       fetchManifest: async (url) => {
+        if (activeThemeId !== 'default') {
+          return themeApi.mediaManifest(activeThemeId)
+        }
         const response = await fetch(url)
-        if (!response.ok) throw new Error('Unable to resolve the Future Lab media.')
+        if (!response.ok) throw new Error('Unable to resolve the active theme media.')
         return response.json()
       },
       baseUrl: import.meta.env.BASE_URL,
@@ -745,9 +821,10 @@ function PathProtocolApp() {
         if (!cancelled) setStartup({ status: 'loading', error: null, ...snapshot })
       },
     })
-      .then((manifest) => {
+      .then(async (manifest) => {
         if (cancelled) return
         setMediaManifest(manifest)
+        if (startedRef.current) await audioRef.current.unlock()
         setStartup({
           status: 'ready',
           label: 'All systems ready',
@@ -768,7 +845,7 @@ function PathProtocolApp() {
     return () => {
       cancelled = true
     }
-  }, [startupAttempt])
+  }, [activeThemeId, mediaReloadVersion, presentationThemeName, startupAttempt])
 
   useEffect(() => {
     audioRef.current.updateSettings(progress.settings)
@@ -811,6 +888,30 @@ function PathProtocolApp() {
     navigate('game')
   }
 
+  const playTheme = async (themeId) => {
+    const campaign =
+      themeId === 'default'
+        ? { theme: { name: 'Default' }, levels: levelConfigs }
+        : await themeApi.campaign(themeId)
+    setActiveThemeId(themeId)
+    setActiveThemeName(campaign.theme.name)
+    setCampaignLevels(campaign.levels)
+    const themedProgress = loadProgress(window.localStorage, themeId)
+    progressRef.current = themedProgress
+    setProgress(themedProgress)
+    setSelectedLevelId(campaign.levels[0].id)
+    setSelectedMicroId(null)
+    setLastResult(null)
+    setMediaReloadVersion((version) => version + 1)
+    navigate('levels')
+  }
+
+  const changePresentationTheme = (themeName) => {
+    if (!Object.hasOwn(themeDefinitions, themeName)) return
+    window.localStorage.setItem(PRESENTATION_THEME_KEY, themeName)
+    setPresentationThemeName(themeName)
+  }
+
   const playMicroProtocol = (protocolId) => {
     setSelectedMicroId(protocolId)
     setMicroNotice(null)
@@ -818,7 +919,10 @@ function PathProtocolApp() {
   }
 
   const continuePlay = () => {
-    const nextNumber = Math.min(progress.player.highestUnlockedLevel, levelConfigs.length)
+    const nextNumber = Math.min(
+      progress.player.highestUnlockedLevel,
+      campaignLevels.length,
+    )
     playLevel(`level-${String(nextNumber).padStart(2, '0')}`)
   }
 
@@ -837,7 +941,7 @@ function PathProtocolApp() {
         result,
       )
       progressRef.current = recorded.progress
-      saveProgress(recorded.progress)
+      saveProgress(recorded.progress, window.localStorage, activeThemeId)
       setProgress(recorded.progress)
       setMicroNotice(
         recorded.coinsEarned
@@ -857,13 +961,18 @@ function PathProtocolApp() {
       return
     }
     const coinsBefore = progressRef.current.player.coins
-    const recorded = recordLevelResult(progressRef.current, currentLevel, result)
+    const recorded = recordLevelResult(
+      progressRef.current,
+      currentLevel,
+      result,
+      campaignLevels.length,
+    )
     const recordedResult = {
       ...result,
       coinsEarned: recorded.progress.player.coins - coinsBefore,
     }
     progressRef.current = recorded.progress
-    saveProgress(recorded.progress)
+    saveProgress(recorded.progress, window.localStorage, activeThemeId)
     setProgress(recorded.progress)
     setLastResult({ result: recordedResult, improved: recorded.improved, level: currentLevel })
     setScreen('results')
@@ -872,8 +981,11 @@ function PathProtocolApp() {
   const handleFailedAttempt = () => {
     if (devMode || currentMicroProtocol) return
     setProgress((current) => {
-      const updated = recordFailedAttempt(current, currentLevel.id)
-      saveProgress(updated)
+      const updated = recordFailedAttempt(
+        current,
+        currentLevel.internalId ?? currentLevel.id,
+      )
+      saveProgress(updated, window.localStorage, activeThemeId)
       return updated
     })
   }
@@ -881,7 +993,7 @@ function PathProtocolApp() {
   const handleSettings = (settings) => {
     const updated = { ...progress, settings }
     setProgress(updated)
-    saveProgress(updated)
+    saveProgress(updated, window.localStorage, activeThemeId)
     audioRef.current.updateSettings(settings)
   }
 
@@ -890,7 +1002,7 @@ function PathProtocolApp() {
     if (!purchased.purchased) return
     progressRef.current = purchased.progress
     setProgress(purchased.progress)
-    saveProgress(purchased.progress)
+    saveProgress(purchased.progress, window.localStorage, activeThemeId)
     audioRef.current.play(powerup.soundId)
   }
 
@@ -900,31 +1012,35 @@ function PathProtocolApp() {
     if (!consumed.consumed) return false
     progressRef.current = consumed.progress
     setProgress(consumed.progress)
-    saveProgress(consumed.progress)
+    saveProgress(consumed.progress, window.localStorage, activeThemeId)
     return true
   }
 
   const handleCoinCollected = (coin) => {
     if (currentMicroProtocol) return false
     if (devMode) return true
-    const collection = collectCourseCoin(progressRef.current, currentLevel.id, coin)
+    const collection = collectCourseCoin(
+      progressRef.current,
+      currentLevel.internalId ?? currentLevel.id,
+      coin,
+    )
     if (!collection.collected) return false
     progressRef.current = collection.progress
     setProgress(collection.progress)
-    saveProgress(collection.progress)
+    saveProgress(collection.progress, window.localStorage, activeThemeId)
     return true
   }
 
   const handleReset = () => {
     if (!window.confirm('Reset every local score, unlock, and setting? This cannot be undone.')) return
-    const initial = resetProgress()
+    const initial = resetProgress(window.localStorage, activeThemeId)
     setProgress(initial)
     audioRef.current.updateSettings(initial.settings)
     setScreen('home')
   }
 
   const nextLevel = () => {
-    const nextNumber = Math.min(levelConfigs.length, currentLevel.number + 1)
+    const nextNumber = Math.min(campaignLevels.length, currentLevel.number + 1)
     playLevel(`level-${String(nextNumber).padStart(2, '0')}`)
   }
 
@@ -952,13 +1068,13 @@ function PathProtocolApp() {
     <div
       className={`app-shell ${progress.settings.reducedMotion ? 'reduce-motion' : ''}`}
       style={{
-        '--color-bg': activeTheme.colors.background,
-        '--color-panel': activeTheme.colors.panel,
-        '--color-token': activeTheme.colors.token,
-        '--color-target': activeTheme.colors.mainTarget,
-        '--color-bonus': activeTheme.colors.bonusTarget,
-        '--color-hazard': activeTheme.colors.hazard,
-        '--color-danger': activeTheme.colors.danger,
+        '--color-bg': presentationTheme.colors.background,
+        '--color-panel': presentationTheme.colors.panel,
+        '--color-token': presentationTheme.colors.token,
+        '--color-target': presentationTheme.colors.mainTarget,
+        '--color-bonus': presentationTheme.colors.bonusTarget,
+        '--color-hazard': presentationTheme.colors.hazard,
+        '--color-danger': presentationTheme.colors.danger,
       }}
     >
       <div className="ambient-grid" aria-hidden="true" />
@@ -971,6 +1087,7 @@ function PathProtocolApp() {
           onPowers={() => navigate('powers')}
           onInstructions={() => navigate('instructions')}
           onSettings={() => navigate('settings')}
+          onWorkshop={() => navigate('workshop')}
           devMode={devMode}
         />
       )}
@@ -985,15 +1102,17 @@ function PathProtocolApp() {
           onInstructions={() => navigate('instructions')}
           devMode={devMode}
           onToggleDevMode={toggleDevMode}
+          totalLevels={campaignLevels.length}
         />
       )}
       {screen === 'levels' && (
         <LevelSelect
-          levels={levelConfigs}
+          levels={campaignLevels}
           progress={progress}
           onSelect={playLevel}
           onPowers={() => navigate('powers')}
           devMode={devMode}
+          themeName={activeThemeName}
         />
       )}
       {screen === 'powers' && (
@@ -1009,16 +1128,29 @@ function PathProtocolApp() {
           settings={progress.settings}
           onChange={handleSettings}
           onReset={handleReset}
+          presentationThemeName={presentationThemeName}
+          onPresentationThemeChange={changePresentationTheme}
+        />
+      )}
+      {screen === 'workshop' && (
+        <ThemeWorkshop
+          onPlayTheme={playTheme}
+          audio={audioRef.current}
+          mediaManifest={mediaManifest}
+          reducedMotion={progress.settings.reducedMotion}
+          gameplayConfig={gameplayConfig}
+          powerups={powerups}
         />
       )}
       {screen === 'game' && (
         <GameView
-          key={currentLevel.id}
+          key={`${activeThemeId}:${currentLevel.internalId ?? currentLevel.id}`}
           level={currentLevel}
           levelBest={
             currentMicroProtocol
               ? progress.microProtocols[currentMicroProtocol.id]?.bestScore ?? 0
-              : progress.levels[currentLevel.id]?.bestScore ?? 0
+              : progress.levels[currentLevel.internalId ?? currentLevel.id]
+                  ?.bestScore ?? 0
           }
           cumulative={totalScore}
           audio={audioRef.current}
@@ -1035,7 +1167,7 @@ function PathProtocolApp() {
           devMode={devMode}
           onPreviousLevel={previousLevel}
           onNextLevel={nextLevel}
-          totalLevels={levelConfigs.length}
+          totalLevels={campaignLevels.length}
           powerups={powerups}
           inventory={
             currentMicroProtocol ? {} : progress.player.inventory
@@ -1054,10 +1186,10 @@ function PathProtocolApp() {
           }
           collisionGuideStyle={{
             color: Number.parseInt(
-              activeTheme.colors.collisionGuide.slice(1),
+              presentationTheme.colors.collisionGuide.slice(1),
               16,
             ),
-            width: activeTheme.effects.collisionGuideWidth,
+            width: presentationTheme.effects.collisionGuideWidth,
           }}
           pointerResponsePerSecond={gameplayConfig.input.pointerResponsePerSecond}
           keyboardSpeedUnitsPerSecond={
@@ -1076,10 +1208,16 @@ function PathProtocolApp() {
           onNext={nextLevel}
           onLevels={() => navigate('levels')}
           devMode={devMode}
-          protocols={microProtocols}
+          protocols={microProtocols.filter(
+            (protocol) =>
+              activeThemeId === 'default' &&
+              protocol.tier === Math.min(9, Math.ceil(lastResult.level.number / 10)) &&
+              lastResult.level.number >= protocol.unlockLevel,
+          )}
           microRecords={progress.microProtocols}
           microNotice={microNotice}
           onMicro={playMicroProtocol}
+          totalLevels={campaignLevels.length}
         />
       )}
 

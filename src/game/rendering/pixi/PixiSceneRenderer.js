@@ -1,13 +1,20 @@
 import { Graphics } from 'pixi.js'
 import { insetShape } from '../../geometry/geometry.js'
 import { createArenaMask } from './ArenaMask.js'
-import { createVectorEntity } from './EntityFactory.js'
+import { createMediaEntity } from './EntityFactory.js'
 import { createSceneLayers } from './SceneLayers.js'
 import { calculateViewport } from './Viewport.js'
 import { isSwitchActive } from '../../engine/SwitchSystem.js'
+import { WORLD_HEIGHT, WORLD_WIDTH } from '../../world.js'
 
-function mediaCategory(cacheDefinitions, mediaId) {
-  return cacheDefinitions.get(mediaId)?.category ?? 'obstacles'
+function mediaDefinition(cacheDefinitions, mediaId) {
+  return (
+    cacheDefinitions.get(mediaId) ?? {
+      category: 'obstacles',
+      renderMode: 'vector',
+      sizing: 'stretch',
+    }
+  )
 }
 
 function drawTrail(graphics, points, color, width, alpha = 1) {
@@ -94,6 +101,7 @@ export class PixiSceneRenderer {
       width: collisionGuideStyle.width ?? 1.5,
     }
     this.GraphicsClass = classes.GraphicsClass ?? Graphics
+    this.SpriteClass = classes.SpriteClass
     const scene = createSceneLayers(classes.ContainerClass)
     this.root = scene.root
     this.layers = scene.layers
@@ -107,7 +115,7 @@ export class PixiSceneRenderer {
   }
 
   /**
-   * Adds one cached vector entity to a named scene layer.
+   * Adds one cached vector or texture entity to a named scene layer.
    *
    * @param {string} layerName Stable scene-layer name.
    * @param {object} item Entity in logical world units.
@@ -115,12 +123,13 @@ export class PixiSceneRenderer {
    * @returns {Promise<object>} Created Pixi display object.
    */
   async addEntity(layerName, item, mediaId = item.mediaId) {
-    const context = await this.assetCache.get(mediaId)
-    const entity = createVectorEntity({
-      context,
+    const resource = await this.assetCache.get(mediaId)
+    const entity = createMediaEntity({
+      resource,
+      definition: mediaDefinition(this.media, mediaId),
       item: { ...item, mediaId },
-      category: mediaCategory(this.media, mediaId),
       GraphicsClass: this.GraphicsClass,
+      ...(this.SpriteClass ? { SpriteClass: this.SpriteClass } : {}),
     })
     entity.baseScale = { x: entity.scale.x, y: entity.scale.y }
     this.layers[layerName].addChild(entity)
@@ -137,10 +146,10 @@ export class PixiSceneRenderer {
     await this.addEntity('arena', {
       id: 'arena',
       mediaId: this.level.arena.mediaId,
-      x: 500,
-      y: 500,
-      width: 1000,
-      height: 1000,
+      x: WORLD_WIDTH / 2,
+      y: WORLD_HEIGHT / 2,
+      width: WORLD_WIDTH,
+      height: WORLD_HEIGHT,
     })
     await this.addEntity('targets', this.level.mainTarget)
     for (const bonus of this.level.bonusTargets) {
@@ -157,6 +166,9 @@ export class PixiSceneRenderer {
       ),
       ...(this.level.switches ?? []).map((item) =>
         this.addEntity('targets', item),
+      ),
+      ...(this.level.forceFields ?? []).map((item) =>
+        this.addEntity('effects', item),
       ),
       ...this.level.coins.map((item) => this.addEntity('coins', item)),
     ])
@@ -240,6 +252,7 @@ export class PixiSceneRenderer {
         (item) => item.id === obstacle.id,
       )
       entity.position.set(obstacle.x, obstacle.y)
+      entity.rotation = obstacle.rotationRadians ?? 0
       entity.scale.set(
         entity.baseScale.x * (obstacle.width / configured.width),
         entity.baseScale.y * (obstacle.height / configured.height),

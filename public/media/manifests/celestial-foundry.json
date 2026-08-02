@@ -1,0 +1,689 @@
+{
+  "schemaVersion": 1,
+  "mediaVersion": 1,
+  "theme": "celestial-foundry",
+  "pixi": {
+    "bundles": [
+      {
+        "name": "celestial-foundry-visuals-v1",
+        "assets": [
+          {
+            "alias": "celestial-foundry:arena-ellipse:v1",
+            "src": "/media/default/arenas/arena-ellipse.svg?v=1"
+          },
+          {
+            "alias": "celestial-foundry:arena-polygon:v1",
+            "src": "/media/default/arenas/arena-polygon.svg?v=1"
+          },
+          {
+            "alias": "celestial-foundry:arena-standard:v1",
+            "src": "/media/default/arenas/arena-standard.svg?v=1"
+          },
+          {
+            "alias": "celestial-foundry:coin-standard:v1",
+            "src": "/media/themes/celestial-foundry/coins/coin-standard.png?v=1"
+          },
+          {
+            "alias": "celestial-foundry:field-conveyor:v1",
+            "src": "/media/themes/celestial-foundry/obstacles/field-conveyor.png?v=1"
+          },
+          {
+            "alias": "celestial-foundry:field-radial:v1",
+            "src": "/media/themes/celestial-foundry/obstacles/field-radial.png?v=1"
+          },
+          {
+            "alias": "celestial-foundry:obstacle-moving-circle:v1",
+            "src": "/media/themes/celestial-foundry/obstacles/obstacle-moving-circle.png?v=1"
+          },
+          {
+            "alias": "celestial-foundry:obstacle-moving-diamond:v1",
+            "src": "/media/themes/celestial-foundry/obstacles/obstacle-moving-diamond.png?v=1"
+          },
+          {
+            "alias": "celestial-foundry:obstacle-moving-rect:v1",
+            "src": "/media/themes/celestial-foundry/obstacles/obstacle-moving-rect.png?v=1"
+          },
+          {
+            "alias": "celestial-foundry:obstacle-orbiter:v1",
+            "src": "/media/themes/celestial-foundry/obstacles/obstacle-orbiter.png?v=1"
+          },
+          {
+            "alias": "celestial-foundry:obstacle-phase-gate:v1",
+            "src": "/media/themes/celestial-foundry/obstacles/obstacle-phase-gate.png?v=1"
+          },
+          {
+            "alias": "celestial-foundry:obstacle-pulse-block:v1",
+            "src": "/media/themes/celestial-foundry/obstacles/obstacle-pulse-block.png?v=1"
+          },
+          {
+            "alias": "celestial-foundry:obstacle-spinner:v1",
+            "src": "/media/themes/celestial-foundry/obstacles/obstacle-spinner.png?v=1"
+          },
+          {
+            "alias": "celestial-foundry:obstacle-static-circle:v1",
+            "src": "/media/themes/celestial-foundry/obstacles/obstacle-static-circle.png?v=1"
+          },
+          {
+            "alias": "celestial-foundry:obstacle-static-diamond:v1",
+            "src": "/media/themes/celestial-foundry/obstacles/obstacle-static-diamond.png?v=1"
+          },
+          {
+            "alias": "celestial-foundry:obstacle-static-rect:v1",
+            "src": "/media/themes/celestial-foundry/obstacles/obstacle-static-rect.png?v=1"
+          },
+          {
+            "alias": "celestial-foundry:obstacle-switch-barrier:v1",
+            "src": "/media/themes/celestial-foundry/obstacles/obstacle-switch-barrier.png?v=1"
+          },
+          {
+            "alias": "celestial-foundry:obstacle-tracking-circle:v1",
+            "src": "/media/themes/celestial-foundry/obstacles/obstacle-tracking-circle.png?v=1"
+          },
+          {
+            "alias": "celestial-foundry:obstacle-tracking-diamond:v1",
+            "src": "/media/themes/celestial-foundry/obstacles/obstacle-tracking-diamond.png?v=1"
+          },
+          {
+            "alias": "celestial-foundry:obstacle-tracking-rect:v1",
+            "src": "/media/themes/celestial-foundry/obstacles/obstacle-tracking-rect.png?v=1"
+          },
+          {
+            "alias": "celestial-foundry:power-coin-magnet:v1",
+            "src": "/media/themes/celestial-foundry/powers/power-coin-magnet.png?v=1"
+          },
+          {
+            "alias": "celestial-foundry:power-full-shield:v1",
+            "src": "/media/themes/celestial-foundry/powers/power-full-shield.png?v=1"
+          },
+          {
+            "alias": "celestial-foundry:power-obstacle-shield:v1",
+            "src": "/media/themes/celestial-foundry/powers/power-obstacle-shield.png?v=1"
+          },
+          {
+            "alias": "celestial-foundry:power-route-scan:v1",
+            "src": "/media/themes/celestial-foundry/powers/power-route-scan.png?v=1"
+          },
+          {
+            "alias": "celestial-foundry:power-slow-field:v1",
+            "src": "/media/themes/celestial-foundry/powers/power-slow-field.png?v=1"
+          },
+          {
+            "alias": "celestial-foundry:start-pad:v1",
+            "src": "/media/themes/celestial-foundry/targets/start-pad.png?v=1"
+          },
+          {
+            "alias": "celestial-foundry:switch-pad:v1",
+            "src": "/media/themes/celestial-foundry/targets/switch-pad.png?v=1"
+          },
+          {
+            "alias": "celestial-foundry:target-bonus:v1",
+            "src": "/media/themes/celestial-foundry/bonus/target-bonus.png?v=1"
+          },
+          {
+            "alias": "celestial-foundry:target-main:v1",
+            "src": "/media/themes/celestial-foundry/targets/target-main.png?v=1"
+          },
+          {
+            "alias": "celestial-foundry:token-circle:v1",
+            "src": "/media/themes/celestial-foundry/tokens/token-circle.png?v=1"
+          },
+          {
+            "alias": "celestial-foundry:token-diamond:v1",
+            "src": "/media/themes/celestial-foundry/tokens/token-diamond.png?v=1"
+          },
+          {
+            "alias": "celestial-foundry:token-rect:v1",
+            "src": "/media/themes/celestial-foundry/tokens/token-rect.png?v=1"
+          }
+        ]
+      }
+    ]
+  },
+  "visuals": [
+    {
+      "mediaId": "arena-ellipse",
+      "alias": "celestial-foundry:arena-ellipse:v1",
+      "src": "/media/default/arenas/arena-ellipse.svg?v=1",
+      "category": "arenas",
+      "renderMode": "vector",
+      "sizing": "stretch",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "arena-polygon",
+      "alias": "celestial-foundry:arena-polygon:v1",
+      "src": "/media/default/arenas/arena-polygon.svg?v=1",
+      "category": "arenas",
+      "renderMode": "vector",
+      "sizing": "stretch",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "arena-standard",
+      "alias": "celestial-foundry:arena-standard:v1",
+      "src": "/media/default/arenas/arena-standard.svg?v=1",
+      "category": "arenas",
+      "renderMode": "vector",
+      "sizing": "stretch",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "coin-standard",
+      "alias": "celestial-foundry:coin-standard:v1",
+      "src": "/media/themes/celestial-foundry/coins/coin-standard.png?v=1",
+      "category": "coins",
+      "renderMode": "texture",
+      "sizing": "contain",
+      "sourceScope": "theme"
+    },
+    {
+      "mediaId": "field-conveyor",
+      "alias": "celestial-foundry:field-conveyor:v1",
+      "src": "/media/themes/celestial-foundry/obstacles/field-conveyor.png?v=1",
+      "category": "obstacles",
+      "renderMode": "texture",
+      "sizing": "stretch",
+      "sourceScope": "theme"
+    },
+    {
+      "mediaId": "field-radial",
+      "alias": "celestial-foundry:field-radial:v1",
+      "src": "/media/themes/celestial-foundry/obstacles/field-radial.png?v=1",
+      "category": "obstacles",
+      "renderMode": "texture",
+      "sizing": "stretch",
+      "sourceScope": "theme"
+    },
+    {
+      "mediaId": "obstacle-moving-circle",
+      "alias": "celestial-foundry:obstacle-moving-circle:v1",
+      "src": "/media/themes/celestial-foundry/obstacles/obstacle-moving-circle.png?v=1",
+      "category": "obstacles",
+      "renderMode": "texture",
+      "sizing": "contain",
+      "sourceScope": "theme"
+    },
+    {
+      "mediaId": "obstacle-moving-diamond",
+      "alias": "celestial-foundry:obstacle-moving-diamond:v1",
+      "src": "/media/themes/celestial-foundry/obstacles/obstacle-moving-diamond.png?v=1",
+      "category": "obstacles",
+      "renderMode": "texture",
+      "sizing": "contain",
+      "sourceScope": "theme"
+    },
+    {
+      "mediaId": "obstacle-moving-rect",
+      "alias": "celestial-foundry:obstacle-moving-rect:v1",
+      "src": "/media/themes/celestial-foundry/obstacles/obstacle-moving-rect.png?v=1",
+      "category": "obstacles",
+      "renderMode": "texture",
+      "sizing": "stretch",
+      "sourceScope": "theme"
+    },
+    {
+      "mediaId": "obstacle-orbiter",
+      "alias": "celestial-foundry:obstacle-orbiter:v1",
+      "src": "/media/themes/celestial-foundry/obstacles/obstacle-orbiter.png?v=1",
+      "category": "obstacles",
+      "renderMode": "texture",
+      "sizing": "contain",
+      "sourceScope": "theme"
+    },
+    {
+      "mediaId": "obstacle-phase-gate",
+      "alias": "celestial-foundry:obstacle-phase-gate:v1",
+      "src": "/media/themes/celestial-foundry/obstacles/obstacle-phase-gate.png?v=1",
+      "category": "obstacles",
+      "renderMode": "texture",
+      "sizing": "stretch",
+      "sourceScope": "theme"
+    },
+    {
+      "mediaId": "obstacle-pulse-block",
+      "alias": "celestial-foundry:obstacle-pulse-block:v1",
+      "src": "/media/themes/celestial-foundry/obstacles/obstacle-pulse-block.png?v=1",
+      "category": "obstacles",
+      "renderMode": "texture",
+      "sizing": "stretch",
+      "sourceScope": "theme"
+    },
+    {
+      "mediaId": "obstacle-spinner",
+      "alias": "celestial-foundry:obstacle-spinner:v1",
+      "src": "/media/themes/celestial-foundry/obstacles/obstacle-spinner.png?v=1",
+      "category": "obstacles",
+      "renderMode": "texture",
+      "sizing": "stretch",
+      "sourceScope": "theme"
+    },
+    {
+      "mediaId": "obstacle-static-circle",
+      "alias": "celestial-foundry:obstacle-static-circle:v1",
+      "src": "/media/themes/celestial-foundry/obstacles/obstacle-static-circle.png?v=1",
+      "category": "obstacles",
+      "renderMode": "texture",
+      "sizing": "contain",
+      "sourceScope": "theme"
+    },
+    {
+      "mediaId": "obstacle-static-diamond",
+      "alias": "celestial-foundry:obstacle-static-diamond:v1",
+      "src": "/media/themes/celestial-foundry/obstacles/obstacle-static-diamond.png?v=1",
+      "category": "obstacles",
+      "renderMode": "texture",
+      "sizing": "contain",
+      "sourceScope": "theme"
+    },
+    {
+      "mediaId": "obstacle-static-rect",
+      "alias": "celestial-foundry:obstacle-static-rect:v1",
+      "src": "/media/themes/celestial-foundry/obstacles/obstacle-static-rect.png?v=1",
+      "category": "obstacles",
+      "renderMode": "texture",
+      "sizing": "stretch",
+      "sourceScope": "theme"
+    },
+    {
+      "mediaId": "obstacle-switch-barrier",
+      "alias": "celestial-foundry:obstacle-switch-barrier:v1",
+      "src": "/media/themes/celestial-foundry/obstacles/obstacle-switch-barrier.png?v=1",
+      "category": "obstacles",
+      "renderMode": "texture",
+      "sizing": "stretch",
+      "sourceScope": "theme"
+    },
+    {
+      "mediaId": "obstacle-tracking-circle",
+      "alias": "celestial-foundry:obstacle-tracking-circle:v1",
+      "src": "/media/themes/celestial-foundry/obstacles/obstacle-tracking-circle.png?v=1",
+      "category": "obstacles",
+      "renderMode": "texture",
+      "sizing": "contain",
+      "sourceScope": "theme"
+    },
+    {
+      "mediaId": "obstacle-tracking-diamond",
+      "alias": "celestial-foundry:obstacle-tracking-diamond:v1",
+      "src": "/media/themes/celestial-foundry/obstacles/obstacle-tracking-diamond.png?v=1",
+      "category": "obstacles",
+      "renderMode": "texture",
+      "sizing": "contain",
+      "sourceScope": "theme"
+    },
+    {
+      "mediaId": "obstacle-tracking-rect",
+      "alias": "celestial-foundry:obstacle-tracking-rect:v1",
+      "src": "/media/themes/celestial-foundry/obstacles/obstacle-tracking-rect.png?v=1",
+      "category": "obstacles",
+      "renderMode": "texture",
+      "sizing": "stretch",
+      "sourceScope": "theme"
+    },
+    {
+      "mediaId": "power-coin-magnet",
+      "alias": "celestial-foundry:power-coin-magnet:v1",
+      "src": "/media/themes/celestial-foundry/powers/power-coin-magnet.png?v=1",
+      "category": "powers",
+      "renderMode": "texture",
+      "sizing": "contain",
+      "sourceScope": "theme"
+    },
+    {
+      "mediaId": "power-full-shield",
+      "alias": "celestial-foundry:power-full-shield:v1",
+      "src": "/media/themes/celestial-foundry/powers/power-full-shield.png?v=1",
+      "category": "powers",
+      "renderMode": "texture",
+      "sizing": "contain",
+      "sourceScope": "theme"
+    },
+    {
+      "mediaId": "power-obstacle-shield",
+      "alias": "celestial-foundry:power-obstacle-shield:v1",
+      "src": "/media/themes/celestial-foundry/powers/power-obstacle-shield.png?v=1",
+      "category": "powers",
+      "renderMode": "texture",
+      "sizing": "contain",
+      "sourceScope": "theme"
+    },
+    {
+      "mediaId": "power-route-scan",
+      "alias": "celestial-foundry:power-route-scan:v1",
+      "src": "/media/themes/celestial-foundry/powers/power-route-scan.png?v=1",
+      "category": "powers",
+      "renderMode": "texture",
+      "sizing": "contain",
+      "sourceScope": "theme"
+    },
+    {
+      "mediaId": "power-slow-field",
+      "alias": "celestial-foundry:power-slow-field:v1",
+      "src": "/media/themes/celestial-foundry/powers/power-slow-field.png?v=1",
+      "category": "powers",
+      "renderMode": "texture",
+      "sizing": "contain",
+      "sourceScope": "theme"
+    },
+    {
+      "mediaId": "start-pad",
+      "alias": "celestial-foundry:start-pad:v1",
+      "src": "/media/themes/celestial-foundry/targets/start-pad.png?v=1",
+      "category": "targets",
+      "renderMode": "texture",
+      "sizing": "contain",
+      "sourceScope": "theme"
+    },
+    {
+      "mediaId": "switch-pad",
+      "alias": "celestial-foundry:switch-pad:v1",
+      "src": "/media/themes/celestial-foundry/targets/switch-pad.png?v=1",
+      "category": "targets",
+      "renderMode": "texture",
+      "sizing": "contain",
+      "sourceScope": "theme"
+    },
+    {
+      "mediaId": "target-bonus",
+      "alias": "celestial-foundry:target-bonus:v1",
+      "src": "/media/themes/celestial-foundry/bonus/target-bonus.png?v=1",
+      "category": "bonus",
+      "renderMode": "texture",
+      "sizing": "contain",
+      "sourceScope": "theme"
+    },
+    {
+      "mediaId": "target-main",
+      "alias": "celestial-foundry:target-main:v1",
+      "src": "/media/themes/celestial-foundry/targets/target-main.png?v=1",
+      "category": "targets",
+      "renderMode": "texture",
+      "sizing": "contain",
+      "sourceScope": "theme"
+    },
+    {
+      "mediaId": "token-circle",
+      "alias": "celestial-foundry:token-circle:v1",
+      "src": "/media/themes/celestial-foundry/tokens/token-circle.png?v=1",
+      "category": "tokens",
+      "renderMode": "texture",
+      "sizing": "contain",
+      "sourceScope": "theme"
+    },
+    {
+      "mediaId": "token-diamond",
+      "alias": "celestial-foundry:token-diamond:v1",
+      "src": "/media/themes/celestial-foundry/tokens/token-diamond.png?v=1",
+      "category": "tokens",
+      "renderMode": "texture",
+      "sizing": "contain",
+      "sourceScope": "theme"
+    },
+    {
+      "mediaId": "token-rect",
+      "alias": "celestial-foundry:token-rect:v1",
+      "src": "/media/themes/celestial-foundry/tokens/token-rect.png?v=1",
+      "category": "tokens",
+      "renderMode": "texture",
+      "sizing": "contain",
+      "sourceScope": "theme"
+    }
+  ],
+  "audio": [
+    {
+      "soundId": "ambience",
+      "sources": [
+        "/media/default/audio/ambience.webm?v=1",
+        "/media/default/audio/ambience.mp3?v=1"
+      ],
+      "settings": {
+        "volume": 0.22,
+        "cooldownMs": 0,
+        "loop": true,
+        "fadeInMs": 1200,
+        "fadeOutMs": 800,
+        "channel": "ambience"
+      },
+      "fileSourceScope": "default",
+      "settingsSourceScope": "default"
+    },
+    {
+      "soundId": "attempt-failed",
+      "sources": [
+        "/media/default/audio/attempt-failed.webm?v=1",
+        "/media/default/audio/attempt-failed.mp3?v=1"
+      ],
+      "settings": {
+        "volume": 0.65,
+        "cooldownMs": 250,
+        "loop": false,
+        "fadeInMs": 0,
+        "fadeOutMs": 0,
+        "channel": "effects"
+      },
+      "fileSourceScope": "default",
+      "settingsSourceScope": "default"
+    },
+    {
+      "soundId": "bonus-accepted",
+      "sources": [
+        "/media/default/audio/bonus-accepted.webm?v=1",
+        "/media/default/audio/bonus-accepted.mp3?v=1"
+      ],
+      "settings": {
+        "volume": 0.58,
+        "cooldownMs": 120,
+        "loop": false,
+        "fadeInMs": 0,
+        "fadeOutMs": 0,
+        "channel": "effects"
+      },
+      "fileSourceScope": "default",
+      "settingsSourceScope": "default"
+    },
+    {
+      "soundId": "bonus-offered",
+      "sources": [
+        "/media/default/audio/bonus-offered.webm?v=1",
+        "/media/default/audio/bonus-offered.mp3?v=1"
+      ],
+      "settings": {
+        "volume": 0.58,
+        "cooldownMs": 120,
+        "loop": false,
+        "fadeInMs": 0,
+        "fadeOutMs": 0,
+        "channel": "effects"
+      },
+      "fileSourceScope": "default",
+      "settingsSourceScope": "default"
+    },
+    {
+      "soundId": "coin-collected",
+      "sources": [
+        "/media/default/audio/coin-collected.webm?v=1",
+        "/media/default/audio/coin-collected.mp3?v=1"
+      ],
+      "settings": {
+        "volume": 0.52,
+        "cooldownMs": 60,
+        "loop": false,
+        "fadeInMs": 0,
+        "fadeOutMs": 0,
+        "channel": "effects"
+      },
+      "fileSourceScope": "default",
+      "settingsSourceScope": "default"
+    },
+    {
+      "soundId": "collision",
+      "sources": [
+        "/media/default/audio/collision.webm?v=1",
+        "/media/default/audio/collision.mp3?v=1"
+      ],
+      "settings": {
+        "volume": 0.7,
+        "cooldownMs": 180,
+        "loop": false,
+        "fadeInMs": 0,
+        "fadeOutMs": 0,
+        "channel": "effects"
+      },
+      "fileSourceScope": "default",
+      "settingsSourceScope": "default"
+    },
+    {
+      "soundId": "drag-start",
+      "sources": [
+        "/media/default/audio/drag-start.webm?v=1",
+        "/media/default/audio/drag-start.mp3?v=1"
+      ],
+      "settings": {
+        "volume": 0.55,
+        "cooldownMs": 80,
+        "loop": false,
+        "fadeInMs": 0,
+        "fadeOutMs": 0,
+        "channel": "effects"
+      },
+      "fileSourceScope": "default",
+      "settingsSourceScope": "default"
+    },
+    {
+      "soundId": "level-complete",
+      "sources": [
+        "/media/default/audio/level-complete.webm?v=1",
+        "/media/default/audio/level-complete.mp3?v=1"
+      ],
+      "settings": {
+        "volume": 0.68,
+        "cooldownMs": 500,
+        "loop": false,
+        "fadeInMs": 0,
+        "fadeOutMs": 0,
+        "channel": "effects"
+      },
+      "fileSourceScope": "default",
+      "settingsSourceScope": "default"
+    },
+    {
+      "soundId": "power-coin-magnet",
+      "sources": [
+        "/media/default/audio/power-coin-magnet.webm?v=1",
+        "/media/default/audio/power-coin-magnet.mp3?v=1"
+      ],
+      "settings": {
+        "volume": 0.62,
+        "cooldownMs": 150,
+        "loop": false,
+        "fadeInMs": 0,
+        "fadeOutMs": 0,
+        "channel": "effects"
+      },
+      "fileSourceScope": "default",
+      "settingsSourceScope": "default"
+    },
+    {
+      "soundId": "power-full-shield",
+      "sources": [
+        "/media/default/audio/power-full-shield.webm?v=1",
+        "/media/default/audio/power-full-shield.mp3?v=1"
+      ],
+      "settings": {
+        "volume": 0.62,
+        "cooldownMs": 150,
+        "loop": false,
+        "fadeInMs": 0,
+        "fadeOutMs": 0,
+        "channel": "effects"
+      },
+      "fileSourceScope": "default",
+      "settingsSourceScope": "default"
+    },
+    {
+      "soundId": "power-obstacle-shield",
+      "sources": [
+        "/media/default/audio/power-obstacle-shield.webm?v=1",
+        "/media/default/audio/power-obstacle-shield.mp3?v=1"
+      ],
+      "settings": {
+        "volume": 0.62,
+        "cooldownMs": 150,
+        "loop": false,
+        "fadeInMs": 0,
+        "fadeOutMs": 0,
+        "channel": "effects"
+      },
+      "fileSourceScope": "default",
+      "settingsSourceScope": "default"
+    },
+    {
+      "soundId": "power-route-scan",
+      "sources": [
+        "/media/default/audio/power-route-scan.webm?v=1",
+        "/media/default/audio/power-route-scan.mp3?v=1"
+      ],
+      "settings": {
+        "volume": 0.62,
+        "cooldownMs": 150,
+        "loop": false,
+        "fadeInMs": 0,
+        "fadeOutMs": 0,
+        "channel": "effects"
+      },
+      "fileSourceScope": "default",
+      "settingsSourceScope": "default"
+    },
+    {
+      "soundId": "power-slow-field",
+      "sources": [
+        "/media/default/audio/power-slow-field.webm?v=1",
+        "/media/default/audio/power-slow-field.mp3?v=1"
+      ],
+      "settings": {
+        "volume": 0.62,
+        "cooldownMs": 150,
+        "loop": false,
+        "fadeInMs": 0,
+        "fadeOutMs": 0,
+        "channel": "effects"
+      },
+      "fileSourceScope": "default",
+      "settingsSourceScope": "default"
+    },
+    {
+      "soundId": "power-unavailable",
+      "sources": [
+        "/media/default/audio/power-unavailable.webm?v=1",
+        "/media/default/audio/power-unavailable.mp3?v=1"
+      ],
+      "settings": {
+        "volume": 0.5,
+        "cooldownMs": 180,
+        "loop": false,
+        "fadeInMs": 0,
+        "fadeOutMs": 0,
+        "channel": "effects"
+      },
+      "fileSourceScope": "default",
+      "settingsSourceScope": "default"
+    },
+    {
+      "soundId": "target-reached",
+      "sources": [
+        "/media/default/audio/target-reached.webm?v=1",
+        "/media/default/audio/target-reached.mp3?v=1"
+      ],
+      "settings": {
+        "volume": 0.62,
+        "cooldownMs": 120,
+        "loop": false,
+        "fadeInMs": 0,
+        "fadeOutMs": 0,
+        "channel": "effects"
+      },
+      "fileSourceScope": "default",
+      "settingsSourceScope": "default"
+    }
+  ]
+}

@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 2,
+  "id": "level-207",
+  "number": 207,
+  "name": "Spinner Sync",
+  "seed": "path-protocol-micro-rotate-v2",
+  "difficulty": 9,
+  "briefing": "Focused rotate mastery challenge.",
+  "arena": {
+    "shape": "rect",
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
+  },
+  "token": {
+    "shape": "diamond",
+    "size": 40,
+    "mediaId": "token-diamond"
+  },
+  "movement": {
+    "maximumSpeed": 632,
+    "acceleration": 1920,
+    "deceleration": 2215,
+    "keyboardSpeed": 436
+  },
+  "start": {
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 831,
+    "y": 301
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 1368,
+    "y": 683,
+    "size": 58
+  },
+  "generation": {
+    "obstacleCount": 0,
+    "allowedShapes": [
+      "circle",
+      "rect",
+      "diamond"
+    ],
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    },
+    "minSize": 50,
+    "maxSize": 118,
+    "minimumGap": 54,
+    "pathGrid": 20
+  },
+  "manualObstacles": [
+    {
+      "id": "barrier-1",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 641,
+      "y": 232,
+      "width": 89,
+      "height": 89
+    },
+    {
+      "id": "barrier-2",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 1030,
+      "y": 746,
+      "width": 99,
+      "height": 99
+    }
+  ],
+  "movingObstacles": [],
+  "trackingObstacles": [],
+  "dynamicObstacles": [
+    {
+      "id": "spinner-1",
+      "mediaId": "obstacle-spinner",
+      "shape": "rect",
+      "x": 1098,
+      "y": 424,
+      "width": 220,
+      "height": 23,
+      "behavior": {
+        "type": "rotate",
+        "speedDegreesPerSecond": 76,
+        "initialDegrees": 139
+      }
+    },
+    {
+      "id": "spinner-2",
+      "mediaId": "obstacle-spinner",
+      "shape": "rect",
+      "x": 277,
+      "y": 209,
+      "width": 197,
+      "height": 32,
+      "behavior": {
+        "type": "rotate",
+        "speedDegreesPerSecond": 78,
+        "initialDegrees": 5
+      }
+    }
+  ],
+  "switches": [],
+  "forceFields": [],
+  "coins": [],
+  "rewards": {
+    "completionCoins": 0,
+    "bonusCoinsPerTarget": 0
+  },
+  "scoring": {
+    "baseMaximum": 1500,
+    "parTimeMs": 8500,
+    "parDistance": 659,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 0,
+    "rewardPerTarget": 0,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0,
+    "targets": []
+  }
+}

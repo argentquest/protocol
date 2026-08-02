@@ -24,6 +24,14 @@
             "src": "/media/default/coins/coin-standard.svg?v=1"
           },
           {
+            "alias": "future-lab:field-conveyor:v1",
+            "src": "/media/default/obstacles/field-conveyor.svg?v=1"
+          },
+          {
+            "alias": "future-lab:field-radial:v1",
+            "src": "/media/default/obstacles/field-radial.svg?v=1"
+          },
+          {
             "alias": "future-lab:obstacle-moving-circle:v1",
             "src": "/media/default/obstacles/obstacle-moving-circle.svg?v=1"
           },
@@ -46,6 +54,10 @@
           {
             "alias": "future-lab:obstacle-pulse-block:v1",
             "src": "/media/default/obstacles/obstacle-pulse-block.svg?v=1"
+          },
+          {
+            "alias": "future-lab:obstacle-spinner:v1",
+            "src": "/media/default/obstacles/obstacle-spinner.svg?v=1"
           },
           {
             "alias": "future-lab:obstacle-static-circle:v1",
@@ -165,6 +177,24 @@
       "sourceScope": "default"
     },
     {
+      "mediaId": "field-conveyor",
+      "alias": "future-lab:field-conveyor:v1",
+      "src": "/media/default/obstacles/field-conveyor.svg?v=1",
+      "category": "obstacles",
+      "renderMode": "vector",
+      "sizing": "stretch",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "field-radial",
+      "alias": "future-lab:field-radial:v1",
+      "src": "/media/default/obstacles/field-radial.svg?v=1",
+      "category": "obstacles",
+      "renderMode": "vector",
+      "sizing": "stretch",
+      "sourceScope": "default"
+    },
+    {
       "mediaId": "obstacle-moving-circle",
       "alias": "future-lab:obstacle-moving-circle:v1",
       "src": "/media/default/obstacles/obstacle-moving-circle.svg?v=1",
@@ -213,6 +243,15 @@
       "mediaId": "obstacle-pulse-block",
       "alias": "future-lab:obstacle-pulse-block:v1",
       "src": "/media/default/obstacles/obstacle-pulse-block.svg?v=1",
+      "category": "obstacles",
+      "renderMode": "vector",
+      "sizing": "stretch",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "obstacle-spinner",
+      "alias": "future-lab:obstacle-spinner:v1",
+      "src": "/media/default/obstacles/obstacle-spinner.svg?v=1",
       "category": "obstacles",
       "renderMode": "vector",
       "sizing": "stretch",

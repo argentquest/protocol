@@ -12,7 +12,7 @@ export default defineConfig({
   webServer: process.env.PLAYWRIGHT_EXTERNAL_SERVER
     ? undefined
     : {
-        command: 'node node_modules/vite/bin/vite.js preview --host 127.0.0.1',
+        command: 'node server/index.js',
         port: 4173,
         reuseExistingServer: true,
       },

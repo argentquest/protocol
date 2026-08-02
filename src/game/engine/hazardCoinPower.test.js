@@ -206,7 +206,7 @@ describe('V2 hazards, coins, and powers', () => {
   it('allows boundary passage during Full Shield and recovers safely on expiration', () => {
     let now = 1000
     const level = poweredLevel()
-    level.startPoint = { x: 940, y: 500 }
+    level.startPoint = { x: 1540, y: 500 }
     const engine = new GameEngine(level, {
       clock: () => now,
       generate: (value) => value,
@@ -215,9 +215,9 @@ describe('V2 hazards, coins, and powers', () => {
     })
     engine.startAttempt('pointer')
     expect(engine.activatePowerByKey('2').activated).toBe(true)
-    engine.session.input.desiredPosition = { x: 1100, y: 500 }
+    engine.session.input.desiredPosition = { x: 1700, y: 500 }
     expect(engine.step(100).collision).toBe(false)
-    expect(engine.session.token.position.x).toBeGreaterThan(949)
+    expect(engine.session.token.position.x).toBeGreaterThan(1549)
 
     engine.session.input.active = false
     now = 4000
@@ -225,7 +225,7 @@ describe('V2 hazards, coins, and powers', () => {
     expect(engine.session.token.position).toEqual(
       engine.session.token.lastSafePosition,
     )
-    expect(engine.session.token.position.x).toBe(940)
+    expect(engine.session.token.position.x).toBe(1540)
   })
 
   it('emits completion and bonus coin rewards only once per engine campaign', () => {

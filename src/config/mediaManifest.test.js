@@ -15,6 +15,7 @@ import {
 import defaultAudioSettings from '../../public/media/default/audio.json'
 import mediaRegistry from './mediaRegistry.json'
 import soundRegistry from './soundRegistry.json'
+import themeConfig from './themeConfig.json'
 import { getSchemaValidators } from './validateConfig.js'
 
 const defaultRoot = path.resolve('public', 'media', 'default')
@@ -74,6 +75,20 @@ describe('generated media manifests', () => {
     expect(manifest.audio[0].sources[1]).toMatch(/\.mp3\?v=1$/)
   })
 
+  it('keeps every configured presentation theme schema-valid and complete', async () => {
+    const schemaValidators = getSchemaValidators()
+    for (const themeName of Object.keys(themeConfig.themes)) {
+      const manifest = JSON.parse(
+        await readFile(path.join(manifestRoot, `${themeName}.json`), 'utf8'),
+      )
+      expect(manifest.theme).toBe(themeName)
+      expect(schemaValidators.resolvedMediaManifest(manifest)).toBe(true)
+      expect(manifest.visuals).toHaveLength(mediaRegistry.media.length)
+      expect(manifest.audio).toHaveLength(soundRegistry.sounds.length)
+      expect(manifest.audio.every((entry) => entry.sources.length === 2)).toBe(true)
+    }
+  })
+
   it('accepts exactly one valid Future Lab visual override', async () => {
     const themeRoot = await temporaryTheme()
     await mkdir(path.join(themeRoot, 'tokens'), { recursive: true })
@@ -94,6 +109,34 @@ describe('generated media manifests', () => {
     expect(
       manifest.visuals.filter((entry) => entry.sourceScope === 'theme'),
     ).toHaveLength(1)
+  })
+
+  it('accepts a PNG texture override while preserving vector defaults', async () => {
+    const themeRoot = await temporaryTheme()
+    await mkdir(path.join(themeRoot, 'tokens'), { recursive: true })
+    const png = Buffer.alloc(24)
+    Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]).copy(png)
+    png.writeUInt32BE(64, 16)
+    png.writeUInt32BE(32, 20)
+    await writeFile(path.join(themeRoot, 'tokens', 'token-circle.png'), png)
+
+    const { manifest, warnings } = await resolveThemeManifest(
+      resolutionOptions(themeRoot),
+    )
+    const token = manifest.visuals.find(
+      (entry) => entry.mediaId === 'token-circle',
+    )
+    expect(warnings).toEqual([])
+    expect(token).toMatchObject({
+      renderMode: 'texture',
+      sourceScope: 'theme',
+    })
+    expect(token.src).toMatch(/token-circle\.png\?v=1$/)
+    expect(
+      manifest.visuals
+        .filter((entry) => entry.mediaId !== 'token-circle')
+        .every((entry) => entry.renderMode === 'vector'),
+    ).toBe(true)
   })
 
   it('falls back from invalid visual and playback overrides with warnings', async () => {

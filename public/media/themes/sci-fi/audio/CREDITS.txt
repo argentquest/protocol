@@ -1,0 +1,30 @@
+# Sci-fi theme — audio credits
+
+All sounds are open-licensed and safe for commercial use.
+
+## Sources used
+- Kenney audio packs — CC0 (Public Domain), kenney.nl
+  - Sci-fi Sounds, Digital Audio, Interface Sounds
+- Oink55 "Space UI Sounds" — free, no credit required (appreciated)
+  - Source: https://oinky55.itch.io/space-ui-sounds
+
+## License notes
+- Kenney = CC0, no attribution required.
+- Oink55 = free for any use; credit optional but appreciated.
+
+## Theme mapping
+- ambience.wav            <- sci-fi-sounds spaceEngine_000 (loop)
+- drag-start.wav         <- oinky55 select1
+- collision.wav          <- sci-fi-sounds explosionCrunch_000
+- attempt-failed.wav    <- oinky55 error
+- target-reached.wav    <- oinky55 get1
+- bonus-offered.wav     <- digital-audio twoTone1
+- bonus-accepted.wav    <- digital-audio powerUp1
+- coin-collected.wav    <- digital-audio pepSound1
+- power-obstacle-shield.wav <- sci-fi-sounds forceField_000
+- power-full-shield.wav     <- sci-fi-sounds forceField_001
+- power-slow-field.wav      <- digital-audio phaserDown1
+- power-coin-magnet.wav     <- digital-audio phaserUp1
+- power-route-scan.wav      <- sci-fi-sounds computerNoise_000
+- power-unavailable.wav     <- interface-sounds error_003
+- level-complete.wav        <- oinky55 level-up

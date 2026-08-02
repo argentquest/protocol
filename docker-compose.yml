@@ -8,11 +8,19 @@ services:
     image: path-protocol:local
     container_name: path-protocol
     ports:
-      - "8080:80"
+      - "8080:4173"
+    environment:
+      PATH_PROTOCOL_DATA_DIR: /app/data/themes
+      PATH_PROTOCOL_DB_PATH: /app/data/path-protocol.sqlite
+    volumes:
+      - path-protocol-data:/app/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1/healthz"]
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4173/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
       interval: 30s
       timeout: 3s
       retries: 3
       start_period: 5s
+
+volumes:
+  path-protocol-data:

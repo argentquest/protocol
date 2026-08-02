@@ -1,16 +1,22 @@
 import { Graphics } from 'pixi.js'
+import { WORLD_HEIGHT, WORLD_WIDTH } from '../../world.js'
 
 /**
  * Creates the Pixi mask matching the configured logical arena boundary.
  *
- * @param {object} arena Arena shape in the 1000 × 1000 logical world.
+ * @param {object} arena Arena shape in the 1600 × 900 logical world.
  * @param {typeof Graphics} [GraphicsClass] Injectable Pixi class.
  * @returns {Graphics} Filled arena mask.
  */
 export function createArenaMask(arena, GraphicsClass = Graphics) {
   const mask = new GraphicsClass()
   if (arena.shape === 'ellipse') {
-    mask.ellipse(500, 500, 500 - (arena.margin ?? 0), 500 - (arena.margin ?? 0))
+    mask.ellipse(
+      WORLD_WIDTH / 2,
+      WORLD_HEIGHT / 2,
+      WORLD_WIDTH / 2 - (arena.margin ?? 0),
+      WORLD_HEIGHT / 2 - (arena.margin ?? 0),
+    )
   } else if (arena.shape === 'polygon') {
     const [first, ...remaining] = arena.points
     mask.moveTo(first[0], first[1])
@@ -21,8 +27,8 @@ export function createArenaMask(arena, GraphicsClass = Graphics) {
     mask.roundRect(
       margin,
       margin,
-      1000 - margin * 2,
-      1000 - margin * 2,
+      WORLD_WIDTH - margin * 2,
+      WORLD_HEIGHT - margin * 2,
       arena.cornerRadius ?? 0,
     )
   }

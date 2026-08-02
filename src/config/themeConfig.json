@@ -2,8 +2,39 @@
   "schemaVersion": 2,
   "mediaVersion": 1,
   "defaultMediaRoot": "/media/default",
-  "activeTheme": "future-lab",
+  "activeTheme": "celestial-foundry",
   "themes": {
+    "celestial-foundry": {
+      "name": "Celestial Foundry",
+      "mediaRoot": "/media/themes/celestial-foundry",
+      "colors": {
+        "background": "#02060d",
+        "backgroundRaised": "#071321",
+        "panel": "#091827",
+        "panelStrong": "#10283a",
+        "grid": "#14354a",
+        "gridBright": "#1e6680",
+        "token": "#18d9f3",
+        "tokenCore": "#d7fbff",
+        "collisionGuide": "#ffffff",
+        "mainTarget": "#15f4d0",
+        "bonusTarget": "#78a8ff",
+        "hazard": "#ff9a3d",
+        "hazardCore": "#ff465d",
+        "danger": "#ff405d",
+        "text": "#edfaff",
+        "textMuted": "#8daec2",
+        "success": "#25e8b8"
+      },
+      "effects": {
+        "glowIntensity": 0.65,
+        "trailWidth": 4,
+        "collisionGuideWidth": 1.5,
+        "ghostTrailOpacity": 0.14,
+        "targetPulseDurationMs": 1000,
+        "collisionFlashDurationMs": 200
+      }
+    },
     "future-lab": {
       "name": "Future Lab",
       "mediaRoot": "/media/themes/future-lab",
@@ -33,6 +64,130 @@
         "ghostTrailOpacity": 0.18,
         "targetPulseDurationMs": 900,
         "collisionFlashDurationMs": 220
+      }
+    },
+    "retro": {
+      "name": "Retro",
+      "mediaRoot": "/media/themes/retro",
+      "colors": {
+        "background": "#0a0a12",
+        "backgroundRaised": "#14141f",
+        "panel": "#1a1a28",
+        "panelStrong": "#242438",
+        "grid": "#3a3a55",
+        "gridBright": "#5a5a80",
+        "token": "#ffd23f",
+        "tokenCore": "#fff6d0",
+        "collisionGuide": "#ffffff",
+        "mainTarget": "#ff5d8f",
+        "bonusTarget": "#7cff6b",
+        "hazard": "#ff9a3d",
+        "hazardCore": "#ff465d",
+        "danger": "#ff405d",
+        "text": "#fdf6e3",
+        "textMuted": "#9a9ab0",
+        "success": "#7cff6b"
+      },
+      "effects": {
+        "glowIntensity": 0.7,
+        "trailWidth": 4,
+        "collisionGuideWidth": 1.5,
+        "ghostTrailOpacity": 0.15,
+        "targetPulseDurationMs": 950,
+        "collisionFlashDurationMs": 200
+      }
+    },
+    "casual": {
+      "name": "Casual",
+      "mediaRoot": "/media/themes/casual",
+      "colors": {
+        "background": "#0d1117",
+        "backgroundRaised": "#161b22",
+        "panel": "#1c232d",
+        "panelStrong": "#27303c",
+        "grid": "#3a4654",
+        "gridBright": "#5c6b7d",
+        "token": "#ffd166",
+        "tokenCore": "#fff3d0",
+        "collisionGuide": "#ffffff",
+        "mainTarget": "#06d6a0",
+        "bonusTarget": "#ff8fab",
+        "hazard": "#ff9a3d",
+        "hazardCore": "#ff465d",
+        "danger": "#ff405d",
+        "text": "#f0f6fc",
+        "textMuted": "#8b98a5",
+        "success": "#06d6a0"
+      },
+      "effects": {
+        "glowIntensity": 0.6,
+        "trailWidth": 4,
+        "collisionGuideWidth": 1.5,
+        "ghostTrailOpacity": 0.13,
+        "targetPulseDurationMs": 1000,
+        "collisionFlashDurationMs": 200
+      }
+    },
+    "sci-fi": {
+      "name": "Sci-Fi",
+      "mediaRoot": "/media/themes/sci-fi",
+      "colors": {
+        "background": "#02060d",
+        "backgroundRaised": "#071321",
+        "panel": "#091827",
+        "panelStrong": "#10283a",
+        "grid": "#14354a",
+        "gridBright": "#1e6680",
+        "token": "#18d9f3",
+        "tokenCore": "#d7fbff",
+        "collisionGuide": "#ffffff",
+        "mainTarget": "#15f4d0",
+        "bonusTarget": "#78a8ff",
+        "hazard": "#ff9a3d",
+        "hazardCore": "#ff465d",
+        "danger": "#ff405d",
+        "text": "#edfaff",
+        "textMuted": "#8daec2",
+        "success": "#25e8b8"
+      },
+      "effects": {
+        "glowIntensity": 0.75,
+        "trailWidth": 5,
+        "collisionGuideWidth": 1.5,
+        "ghostTrailOpacity": 0.16,
+        "targetPulseDurationMs": 900,
+        "collisionFlashDurationMs": 210
+      }
+    },
+    "fantasy": {
+      "name": "Fantasy",
+      "mediaRoot": "/media/themes/fantasy",
+      "colors": {
+        "background": "#0d0716",
+        "backgroundRaised": "#150d24",
+        "panel": "#1c1230",
+        "panelStrong": "#2a1b45",
+        "grid": "#3a2a5e",
+        "gridBright": "#5c3f8f",
+        "token": "#ffd23f",
+        "tokenCore": "#fff6d0",
+        "collisionGuide": "#ffffff",
+        "mainTarget": "#c77dff",
+        "bonusTarget": "#ffd166",
+        "hazard": "#ff9a3d",
+        "hazardCore": "#ff465d",
+        "danger": "#ff405d",
+        "text": "#f6ecff",
+        "textMuted": "#a98fc4",
+        "success": "#7cff6b"
+      },
+      "effects": {
+        "glowIntensity": 0.7,
+        "trailWidth": 4,
+        "collisionGuideWidth": 1.5,
+        "ghostTrailOpacity": 0.15,
+        "targetPulseDurationMs": 1000,
+        "collisionFlashDurationMs": 200
       }
     }
   }

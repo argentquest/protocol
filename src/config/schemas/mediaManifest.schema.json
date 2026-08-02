@@ -18,8 +18,8 @@
         "properties": {
           "mediaId": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
           "category": { "type": "string", "minLength": 1 },
-          "src": { "type": "string", "pattern": "\\.svg(?:\\?v=[0-9]+)?$" },
-          "renderMode": { "const": "vector" },
+          "src": { "type": "string", "pattern": "\\.(?:png|svg)(?:\\?v=[0-9]+)?$" },
+          "renderMode": { "enum": ["texture", "vector"] },
           "sizing": { "enum": ["contain", "stretch"] }
         }
       }

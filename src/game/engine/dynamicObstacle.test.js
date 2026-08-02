@@ -133,6 +133,18 @@ describe('dynamic obstacle behaviors', () => {
 
   it('keeps open phase gates non-solid and collides when they phase in', () => {
     const generated = generateLevel(levels[32])
+    generated.dynamicObstacles = [
+      {
+        ...generated.dynamicObstacles[0],
+        behavior: {
+          type: 'phase',
+          cycleMs: 3000,
+          solidMs: 1000,
+          warningMs: 200,
+          offsetMs: 1000,
+        },
+      },
+    ]
     const gate = generated.dynamicObstacles[0]
     const engine = new GameEngine(generated, {
       generate: (level) => level,

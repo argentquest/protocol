@@ -6,6 +6,7 @@ import {
 } from '../geometry/geometry.js'
 import { createSeededRandom, randomBetween, randomItem } from './seededRandom.js'
 import { dynamicObstacleEnvelope } from '../engine/DynamicObstacleSystem.js'
+import { WORLD_HEIGHT, WORLD_WIDTH } from '../world.js'
 
 function resolvePoint(specification, random) {
   if (specification.mode !== 'generated') {
@@ -39,8 +40,8 @@ function searchPath(
   { arena, token, start, target, obstacles, gridSize = 24 },
   includePoints,
 ) {
-  const columns = Math.ceil(1000 / gridSize)
-  const rows = Math.ceil(1000 / gridSize)
+  const columns = Math.ceil(WORLD_WIDTH / gridSize)
+  const rows = Math.ceil(WORLD_HEIGHT / gridSize)
   const key = (column, row) => `${column}:${row}`
   const toCell = (point) => ({
     column: Math.max(0, Math.min(columns - 1, Math.floor(point.x / gridSize))),
@@ -173,8 +174,8 @@ function makeGeneratedObstacle(level, random, index) {
     id: `generated-${index + 1}`,
     mediaId: generation.mediaByShape[shape],
     shape,
-    x: randomBetween(random, 90, 910),
-    y: randomBetween(random, 90, 910),
+    x: randomBetween(random, 90, WORLD_WIDTH - 90),
+    y: randomBetween(random, 90, WORLD_HEIGHT - 90),
     width,
     height,
     generated: true,
@@ -339,7 +340,7 @@ export function validateGeneratedPlacement(level) {
 /**
  * Builds one deterministic, solvable runtime level from authored configuration.
  *
- * Coordinates and dimensions use the 1000 × 1000 logical world.
+ * Coordinates and dimensions use the 1600 × 900 logical world.
  *
  * @param {object} level Validated authored level.
  * @returns {object} Generated runtime level with a validated route.
@@ -380,6 +381,16 @@ export function generateLevel(level) {
       height: item.size,
     }),
   )
+  const forceFields = (level.forceFields ?? []).map((item) =>
+    item.type === 'conveyor'
+      ? normalizeShape({ ...item, shape: 'rect' })
+      : normalizeShape({
+          ...item,
+          shape: 'circle',
+          width: item.radius * 2,
+          height: item.radius * 2,
+        }),
+  )
   const coins = (level.coins ?? []).map((coin) =>
     normalizeShape({ ...coin, shape: 'circle', width: coin.size, height: coin.size }),
   )
@@ -402,6 +413,7 @@ export function generateLevel(level) {
     ...movingObstacles,
     ...dynamicObstacles.flatMap(dynamicObstacleEnvelope),
     ...switches,
+    ...forceFields,
   ]
 
   for (let index = 0; index < level.generation.obstacleCount; index += 1) {
@@ -476,6 +488,7 @@ export function generateLevel(level) {
     dynamicObstacles,
     coins,
     switches,
+    forceFields,
   })
   if (placementErrors.length) {
     throw new Error(`${level.id}: ${placementErrors.join('; ')}.`)
@@ -533,6 +546,7 @@ export function generateLevel(level) {
     dynamicObstacles,
     coins,
     switches,
+    forceFields,
     bonusTargets,
     validatedPath,
     generationSummary: {

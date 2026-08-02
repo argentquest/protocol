@@ -2,7 +2,7 @@ import { render, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { levels } from '../../../config/loadConfig.js'
 import { generateLevel } from '../../generation/levelGenerator.js'
-import { entityScale } from './EntityFactory.js'
+import { createTextureEntity, entityScale } from './EntityFactory.js'
 import {
   createWebGLApplication,
   destroyWebGLApplication,
@@ -59,6 +59,14 @@ class FakeGraphics extends FakeContainer {
   stroke() { return this }
 }
 
+class FakeSprite extends FakeContainer {
+  constructor({ texture }) {
+    super()
+    this.texture = texture
+    this.anchor = new FakePoint()
+  }
+}
+
 class FakeContext {
   svg(value) {
     this.value = value
@@ -92,9 +100,9 @@ describe('V2 PixiJS renderer', () => {
     })
   })
 
-  it('uniformly centers the 1000 by 1000 world and reverses pointer mapping', () => {
+  it('uniformly fits the 1600 by 900 world and reverses pointer mapping', () => {
     const viewport = calculateViewport(1600, 900)
-    expect(viewport).toMatchObject({ scale: 0.9, offsetX: 350, offsetY: 0 })
+    expect(viewport).toMatchObject({ scale: 1, offsetX: 0, offsetY: 0 })
     const screen = worldToScreen({ x: 200, y: 300 }, viewport)
     expect(screenToWorld(screen, viewport)).toEqual({ x: 200, y: 300 })
   })
@@ -117,6 +125,31 @@ describe('V2 PixiJS renderer', () => {
     expect(fetchText).toHaveBeenCalledOnce()
     expect(entityScale(80, 40, 'tokens')).toEqual({ x: 0.4, y: 0.4 })
     expect(entityScale(80, 40, 'obstacles')).toEqual({ x: 0.8, y: 0.4 })
+  })
+
+  it('loads PNG textures once and centers aspect-preserving sprites', async () => {
+    const texture = { width: 512, height: 256 }
+    const loadTexture = vi.fn(async () => texture)
+    const cache = new VectorAssetCache({ loadTexture })
+    const definition = {
+      mediaId: 'ship',
+      src: '/ship.png',
+      renderMode: 'texture',
+    }
+    expect(await cache.load(definition)).toBe(texture)
+    expect(await cache.load({ ...definition, mediaId: 'ship-copy' })).toBe(texture)
+    expect(loadTexture).toHaveBeenCalledOnce()
+
+    const sprite = createTextureEntity({
+      texture,
+      item: { x: 30, y: 40, width: 100, height: 100, mediaId: 'ship' },
+      category: 'tokens',
+      sizing: 'contain',
+      SpriteClass: FakeSprite,
+    })
+    expect(sprite.position).toMatchObject({ x: 30, y: 40 })
+    expect(sprite.anchor).toMatchObject({ x: 0.5, y: 0.5 })
+    expect(sprite.scale).toMatchObject({ x: 0.1953125, y: 0.1953125 })
   })
 
   it('creates the documented scene order', () => {

@@ -1,0 +1,30 @@
+# Fantasy theme — audio credits
+
+These sources are open-licensed and safe for commercial use.
+
+## Sources used
+- ivyism "Fantasy Sound Effects" — CC BY 4.0 (attribution required)
+  - Source: https://ivyism.itch.io/fantasy-pack
+  - Credit: "Fantasy Sound Effects © 2022 by ivy, CC BY 4.0"
+- Kenney RPG Audio — CC0 (Public Domain), kenney.nl
+
+## License notes
+- ivyism pack is CC BY 4.0: you may use commercially but MUST credit the author.
+- Kenney is CC0: no attribution required.
+
+## Theme mapping
+- ambience.wav        <- ivyism "Miscellaneous 1 (Atmospheric)"
+- drag-start.wav      <- ivyism "Selection"
+- collision.wav       <- kenney rpg metalClick
+- attempt-failed.wav  <- ivyism "Game Over"
+- target-reached.wav  <- ivyism "Check 1"
+- bonus-offered.wav   <- ivyism "Harp 1 (Ascending)"
+- bonus-accepted.wav  <- ivyism "Success 1 (subtle)"
+- coin-collected.wav  <- kenney rpg handleCoins
+- power-obstacle-shield.wav <- ivyism "Magic"
+- power-full-shield.wav     <- ivyism "Strings 1"
+- power-slow-field.wav      <- ivyism "Obscure"
+- power-coin-magnet.wav     <- ivyism "Chimes (Ascending)"
+- power-route-scan.wav      <- ivyism "Harp 2 (Descending)"
+- power-unavailable.wav     <- kenney rpg bookClose
+- level-complete.wav        <- ivyism "Success 3"

@@ -63,6 +63,19 @@ export function resolveDynamicObstacle(
     }
   }
 
+  if (behavior.type === 'rotate') {
+    return {
+      ...obstacle,
+      rotationRadians:
+        ((behavior.initialDegrees +
+          (timeMs / 1000) * behavior.speedDegreesPerSecond) *
+          Math.PI) /
+        180,
+      solid: true,
+      state: 'active',
+    }
+  }
+
   const switchState = switchStates.get(behavior.switchId)
   const open =
     Boolean(switchState?.active) &&
@@ -138,6 +151,18 @@ export function dynamicObstacleEnvelope(obstacle) {
         ...obstacle,
         width: obstacle.width * behavior.maxScale,
         height: obstacle.height * behavior.maxScale,
+        dynamicEnvelope: true,
+      },
+    ]
+  }
+  if (behavior.type === 'rotate') {
+    const radius = Math.hypot(obstacle.width, obstacle.height)
+    return [
+      {
+        ...obstacle,
+        shape: 'circle',
+        width: radius,
+        height: radius,
         dynamicEnvelope: true,
       },
     ]

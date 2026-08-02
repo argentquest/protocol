@@ -1,7 +1,7 @@
 const defaultPhases = [
   { id: 'configuration', label: 'Validating configuration', weight: 1 },
   { id: 'manifest', label: 'Resolving theme media', weight: 1 },
-  { id: 'visuals', label: 'Loading vector media', weight: 6 },
+  { id: 'visuals', label: 'Loading visual media', weight: 6 },
   { id: 'audio', label: 'Loading audio', weight: 2 },
 ]
 

@@ -238,16 +238,16 @@ describe('V2 movement and collision', () => {
       }).collision,
     ).toBe(false)
 
-    const boundarySession = createSession({ position: { x: 985, y: 50 } })
-    boundarySession.input.desiredPosition = { x: 1030, y: 50 }
+    const boundarySession = createSession({ position: { x: 1585, y: 50 } })
+    boundarySession.input.desiredPosition = { x: 1630, y: 50 }
     expect(
       advanceTokenWithCollisions(boundarySession, 100, {
         obstacleShield: true,
       }).collisionType,
     ).toBe('boundary')
 
-    const fullShieldSession = createSession({ position: { x: 985, y: 50 } })
-    fullShieldSession.input.desiredPosition = { x: 1030, y: 50 }
+    const fullShieldSession = createSession({ position: { x: 1585, y: 50 } })
+    fullShieldSession.input.desiredPosition = { x: 1630, y: 50 }
     expect(
       advanceTokenWithCollisions(fullShieldSession, 100, {
         fullShield: true,

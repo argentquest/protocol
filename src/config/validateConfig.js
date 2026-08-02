@@ -79,6 +79,7 @@ function levelMediaIds(level) {
     ...(level.trackingObstacles ?? []).map((item) => item.mediaId),
     ...(level.dynamicObstacles ?? []).map((item) => item.mediaId),
     ...(level.switches ?? []).map((item) => item.mediaId),
+    ...(level.forceFields ?? []).map((item) => item.mediaId),
     ...(level.coins ?? []).map((item) => item.mediaId),
     ...(level.bonuses?.targets ?? []).map((item) => item.mediaId),
   ].filter(Boolean)
@@ -184,6 +185,7 @@ function validateLevelRelationships(
       ...(level.trackingObstacles ?? []),
       ...(level.dynamicObstacles ?? []),
       ...(level.switches ?? []),
+      ...(level.forceFields ?? []),
       ...(level.coins ?? []),
       ...(level.bonuses?.targets ?? []),
     ].map((item) => item.id)

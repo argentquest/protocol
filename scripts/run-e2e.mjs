@@ -1,10 +1,23 @@
 import { spawn } from 'node:child_process'
+import { mkdtemp, rm } from 'node:fs/promises'
+import os from 'node:os'
+import path from 'node:path'
+
+const testDataRoot = await mkdtemp(path.join(os.tmpdir(), 'path-protocol-e2e-'))
+const testPort = 42_000 + (process.pid % 2_000)
+const previewUrl = `http://127.0.0.1:${testPort}`
 
 const preview = spawn(
   process.execPath,
-  ['node_modules/vite/bin/vite.js', 'preview', '--host', '127.0.0.1'],
+  ['server/index.js'],
   {
     cwd: process.cwd(),
+    env: {
+      ...process.env,
+      PATH_PROTOCOL_DATA_DIR: path.join(testDataRoot, 'themes'),
+      PATH_PROTOCOL_DB_PATH: path.join(testDataRoot, 'accounts.sqlite'),
+      PORT: String(testPort),
+    },
     stdio: 'ignore',
     windowsHide: true,
   },
@@ -14,14 +27,14 @@ async function waitForPreview() {
   const deadline = Date.now() + 15_000
   while (Date.now() < deadline) {
     try {
-      const response = await fetch('http://127.0.0.1:4173')
+      const response = await fetch(previewUrl)
       if (response.ok) return
     } catch {
       // The preview server is still starting.
     }
     await new Promise((resolve) => setTimeout(resolve, 150))
   }
-  throw new Error('Vite preview did not become ready within 15 seconds.')
+  throw new Error('Production server did not become ready within 15 seconds.')
 }
 
 function stopPreview() {
@@ -45,7 +58,11 @@ try {
     ],
     {
       cwd: process.cwd(),
-      env: { ...process.env, PLAYWRIGHT_EXTERNAL_SERVER: '1' },
+      env: {
+        ...process.env,
+        PLAYWRIGHT_BASE_URL: previewUrl,
+        PLAYWRIGHT_EXTERNAL_SERVER: '1',
+      },
       stdio: 'inherit',
       windowsHide: true,
     },
@@ -55,5 +72,11 @@ try {
   })
   process.exitCode = exitCode
 } finally {
+  const previewStopped =
+    preview.exitCode === null
+      ? new Promise((resolve) => preview.once('exit', resolve))
+      : Promise.resolve()
   stopPreview()
+  await previewStopped
+  await rm(testDataRoot, { recursive: true, force: true })
 }

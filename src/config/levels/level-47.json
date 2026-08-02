@@ -2,150 +2,183 @@
   "schemaVersion": 2,
   "id": "level-47",
   "number": 47,
-  "name": "Motion Lattice",
-  "seed": "path-protocol-motion-lattice-v1",
-  "difficulty": 7,
-  "briefing": "A pulsing vertical block changes the scanner crossing from wide to exact.",
+  "name": "Orbit 07",
+  "seed": "path-protocol-16x9-047-v2",
+  "difficulty": 5,
+  "briefing": "Tier 5: Orbit. Predict orbiting hazards rather than chasing them.",
   "arena": {
     "shape": "rect",
-    "margin": 34,
-    "cornerRadius": 46,
-    "mediaId": "arena-standard"
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
   },
   "token": {
     "shape": "circle",
     "size": 44,
     "mediaId": "token-circle"
   },
+  "movement": {
+    "maximumSpeed": 560,
+    "acceleration": 1600,
+    "deceleration": 1875,
+    "keyboardSpeed": 380
+  },
   "start": {
-    "mode": "generated",
-    "region": {
-      "x": 80,
-      "y": 760,
-      "width": 150,
-      "height": 120
-    },
-    "mediaId": "start-pad"
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 1382,
+    "y": 699
   },
   "mainTarget": {
-    "mode": "generated",
-    "region": {
-      "x": 780,
-      "y": 90,
-      "width": 120,
-      "height": 150
-    },
-    "size": 50,
-    "mediaId": "target-main"
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 505,
+    "y": 171,
+    "size": 58
   },
   "generation": {
-    "obstacleCount": 7,
+    "obstacleCount": 2,
     "allowedShapes": [
+      "circle",
       "rect",
-      "circle"
+      "diamond"
     ],
-    "minSize": 80,
-    "maxSize": 150,
-    "minimumGap": 68,
-    "pathGrid": 18,
     "mediaByShape": {
       "circle": "obstacle-static-circle",
       "rect": "obstacle-static-rect",
       "diamond": "obstacle-static-diamond"
-    }
+    },
+    "minSize": 50,
+    "maxSize": 110,
+    "minimumGap": 62,
+    "pathGrid": 20
   },
-  "manualObstacles": [],
-  "movingObstacles": [
+  "manualObstacles": [
     {
-      "id": "scanner-a",
-      "shape": "rect",
-      "x": 500,
-      "y": 500,
-      "width": 150,
-      "height": 42,
-      "axis": "x",
-      "amplitude": 210,
-      "periodMs": 4200,
-      "phase": 0,
-      "mediaId": "obstacle-moving-rect"
-    }
-  ],
-  "coins": [
-    {
-      "id": "coin-a",
-      "x": 320,
-      "y": 680,
-      "size": 28,
-      "value": 1,
-      "mediaId": "coin-standard"
+      "id": "barrier-1",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 255,
+      "y": 160,
+      "width": 115,
+      "height": 115
     },
     {
-      "id": "coin-b",
-      "x": 690,
-      "y": 320,
-      "size": 28,
-      "value": 1,
-      "mediaId": "coin-standard"
+      "id": "barrier-2",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 1002,
+      "y": 268,
+      "width": 103,
+      "height": 103
+    },
+    {
+      "id": "barrier-3",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 230,
+      "y": 681,
+      "width": 113,
+      "height": 113
+    },
+    {
+      "id": "barrier-4",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 534,
+      "y": 763,
+      "width": 87,
+      "height": 87
+    },
+    {
+      "id": "barrier-5",
+      "mediaId": "obstacle-static-rect",
+      "shape": "rect",
+      "x": 789,
+      "y": 138,
+      "width": 70,
+      "height": 81
+    },
+    {
+      "id": "barrier-6",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 1186,
+      "y": 704,
+      "width": 87,
+      "height": 87
+    }
+  ],
+  "movingObstacles": [
+    {
+      "id": "sweeper-1",
+      "mediaId": "obstacle-moving-circle",
+      "shape": "circle",
+      "x": 820,
+      "y": 562,
+      "size": 56,
+      "axis": "x",
+      "amplitude": 148,
+      "periodMs": 4061,
+      "phase": 0.683
+    }
+  ],
+  "trackingObstacles": [],
+  "dynamicObstacles": [
+    {
+      "id": "orbiter-1",
+      "mediaId": "obstacle-orbiter",
+      "shape": "circle",
+      "x": 1132,
+      "y": 484,
+      "size": 38,
+      "behavior": {
+        "type": "orbit",
+        "radiusX": 69,
+        "radiusY": 63,
+        "periodMs": 4468,
+        "phase": 5.458
+      }
+    }
+  ],
+  "switches": [],
+  "forceFields": [],
+  "coins": [
+    {
+      "id": "coin-47",
+      "mediaId": "coin-standard",
+      "x": 301,
+      "y": 477,
+      "size": 30,
+      "value": 1
     }
   ],
   "rewards": {
-    "completionCoins": 4,
-    "bonusCoinsPerTarget": 2
+    "completionCoins": 3,
+    "bonusCoinsPerTarget": 1
   },
   "scoring": {
-    "baseMaximum": 23500,
-    "parTimeMs": 12000,
-    "parDistance": 1360,
+    "baseMaximum": 28500,
+    "parTimeMs": 14000,
+    "parDistance": 1024,
     "timeWeight": 0.5,
     "distanceWeight": 0.5,
     "collisionPenaltyRate": 0.2,
     "maximumCollisions": 3
   },
   "bonuses": {
-    "maximumTargets": 2,
-    "rewardPerTarget": 500,
+    "maximumTargets": 1,
+    "rewardPerTarget": 900,
     "offerChanceMode": "currentScorePercent",
-    "failurePenaltyRate": 0.2,
+    "failurePenaltyRate": 0.1,
     "targets": [
       {
-        "id": "relay-a",
-        "x": 810,
-        "y": 720,
-        "size": 44,
-        "mediaId": "target-bonus"
-      },
-      {
-        "id": "relay-b",
-        "x": 180,
-        "y": 220,
-        "size": 42,
-        "mediaId": "target-bonus"
+        "id": "bonus-a",
+        "mediaId": "target-bonus",
+        "x": 1438,
+        "y": 382,
+        "size": 48
       }
     ]
-  },
-  "movement": {
-    "maximumSpeed": 360,
-    "acceleration": 1400,
-    "deceleration": 1800,
-    "keyboardSpeed": 280
-  },
-  "trackingObstacles": [],
-  "dynamicObstacles": [
-    {
-      "id": "pulse-block-a",
-      "mediaId": "obstacle-pulse-block",
-      "shape": "rect",
-      "x": 400,
-      "y": 590,
-      "width": 30,
-      "height": 180,
-      "behavior": {
-        "type": "pulse",
-        "minScale": 0.45,
-        "maxScale": 1.25,
-        "periodMs": 3400,
-        "phase": -1.5707963267948966
-      }
-    }
-  ]
+  }
 }

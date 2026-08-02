@@ -6,6 +6,7 @@ import {
   sweepShape,
 } from '../geometry/geometry.js'
 import { advanceTokenMotion } from './MovementSystem.js'
+import { resolveForceFieldAcceleration } from './ForceFieldSystem.js'
 
 function currentToken(session, position) {
   return insetShape(
@@ -72,6 +73,10 @@ export function advanceTokenWithCollisions(
     input: session.input,
     movement: session.level.movement,
     stepMs,
+    externalAcceleration: resolveForceFieldAcceleration(
+      session.level.forceFields ?? [],
+      currentToken(session, session.token.position),
+    ),
   })
   const swept = sweepShape(
     session.token.lastSafePosition,

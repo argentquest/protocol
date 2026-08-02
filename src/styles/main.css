@@ -1454,7 +1454,7 @@ input[type='range'] {
   width: 100%;
   max-height: calc(100vh - 135px);
   place-items: center;
-  aspect-ratio: 1;
+  aspect-ratio: 16 / 9;
   margin: 0 auto;
   border: 1px solid rgba(111, 191, 217, 0.17);
   background: rgba(7, 16, 29, 0.82);
@@ -1480,9 +1480,10 @@ input[type='range'] {
 
 .game-arena {
   width: calc(100% - 36px);
-  height: calc(100% - 36px);
-  max-width: calc(100vh - 170px);
+  height: auto;
+  max-width: calc((100vh - 170px) * 16 / 9);
   max-height: calc(100vh - 170px);
+  aspect-ratio: 16 / 9;
   cursor: default;
   touch-action: none;
   user-select: none;
@@ -1490,9 +1491,10 @@ input[type='range'] {
 
 .pixi-arena {
   width: calc(100% - 36px);
-  height: calc(100% - 36px);
-  max-width: calc(100vh - 170px);
+  height: auto;
+  max-width: calc((100vh - 170px) * 16 / 9);
   max-height: calc(100vh - 170px);
+  aspect-ratio: 16 / 9;
   cursor: default;
   touch-action: none;
   user-select: none;
@@ -2258,4 +2260,286 @@ input[type='range'] {
 .startup-screen [role='alert'] {
   max-width: 620px;
   color: #ff9fa7;
+}
+
+.theme-workshop,
+.theme-dashboard,
+.theme-editor {
+  position: relative;
+  z-index: 1;
+}
+
+.workshop-panel,
+.theme-gallery,
+.workshop-level-list,
+.entity-inspector,
+.level-sequence {
+  border: 1px solid rgba(54, 215, 255, 0.24);
+  background: rgba(7, 22, 39, 0.88);
+  padding: 1.25rem;
+}
+
+.workshop-panel {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.workshop-panel h2,
+.workshop-panel button {
+  align-self: end;
+}
+
+.workshop-panel h2 {
+  grid-column: 1 / -1;
+}
+
+.workshop-panel label,
+.entity-inspector label {
+  display: grid;
+  gap: 0.4rem;
+  color: var(--color-muted, #7ea8c4);
+}
+
+.workshop-panel input,
+.workshop-panel textarea,
+.workshop-panel select,
+.entity-inspector input,
+.entity-inspector textarea,
+.entity-inspector select {
+  border: 1px solid rgba(54, 215, 255, 0.3);
+  background: #061321;
+  color: #e8f8ff;
+  padding: 0.65rem;
+}
+
+.theme-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.theme-gallery > h2 {
+  grid-column: 1 / -1;
+}
+
+.theme-gallery article {
+  display: grid;
+  gap: 0.7rem;
+  border: 1px solid rgba(54, 215, 255, 0.18);
+  padding: 1rem;
+}
+
+.account-panel small,
+.account-panel .level-sequence__actions {
+  grid-column: 1 / -1;
+}
+
+.theme-dashboard__actions,
+.theme-editor__actions,
+.level-sequence__actions {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.theme-media-editor {
+  display: block;
+}
+
+.theme-media-editor > p,
+.theme-media-editor > audio,
+.theme-media-editor > [role='status'] {
+  display: block;
+  margin: 0.75rem 0;
+}
+
+.theme-media-editor__controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.theme-media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.55rem;
+  max-height: 420px;
+  overflow: auto;
+  margin: 1rem 0;
+}
+
+.theme-media-grid button {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+  border: 1px solid rgba(54, 215, 255, 0.2);
+  padding: 0.45rem;
+  text-align: left;
+}
+
+.theme-media-grid button.is-selected {
+  border-color: #36d7ff;
+  box-shadow: 0 0 0 2px rgba(54, 215, 255, 0.24);
+}
+
+.theme-media-grid img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.theme-media-grid small,
+.theme-media-grid em {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.theme-media-grid em {
+  color: var(--color-muted, #7ea8c4);
+  font-size: 0.7rem;
+}
+
+.theme-media-editor__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.workshop-level-list {
+  display: grid;
+  gap: 0.5rem;
+  max-height: 65vh;
+  overflow: auto;
+}
+
+.workshop-level-list article {
+  display: grid;
+  grid-template-columns: 4rem minmax(180px, 1fr) auto auto auto;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem;
+  border-bottom: 1px solid rgba(54, 215, 255, 0.12);
+}
+
+.theme-editor {
+  min-height: 100vh;
+  padding: 1rem 2rem 3rem;
+}
+
+.theme-editor__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.theme-editor__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 1rem;
+}
+
+.level-editor-map {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 2px solid #36d7ff;
+  background-color: #07182a;
+  background-image:
+    linear-gradient(rgba(54, 215, 255, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(54, 215, 255, 0.12) 1px, transparent 1px);
+  background-size: 0.625% 1.111%;
+  touch-action: none;
+}
+
+.editor-entity {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  min-width: 12px;
+  min-height: 12px;
+  overflow: visible;
+  border: 2px solid #ff8a3d;
+  background: rgba(255, 92, 61, 0.58);
+  padding: 0;
+  cursor: grab;
+}
+
+.editor-entity span {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  color: #dff8ff;
+  font-size: 0.62rem;
+  text-shadow: 0 1px 3px #000;
+}
+
+.editor-entity.is-selected {
+  border-color: #fff;
+  box-shadow: 0 0 0 3px #36d7ff;
+}
+
+.editor-entity--start {
+  border-radius: 50%;
+  background: #36d7ff;
+}
+
+.editor-entity--mainTarget,
+.editor-entity--bonusTargets {
+  border-radius: 50%;
+  background: #26e6ae;
+}
+
+.editor-entity--forceFields {
+  border-color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.38);
+}
+
+.entity-inspector {
+  display: grid;
+  align-content: start;
+  gap: 0.8rem;
+  max-height: 75vh;
+  overflow: auto;
+}
+
+.entity-json {
+  min-height: 270px;
+  resize: vertical;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.78rem;
+}
+
+.editor-help {
+  color: #7ea8c4;
+}
+
+.level-sequence {
+  margin-top: 1rem;
+}
+
+.workshop-playtest {
+  padding: 1rem;
+}
+
+@media (max-width: 980px) {
+  .theme-editor__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .workshop-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .workshop-level-list article {
+    grid-template-columns: 3rem 1fr;
+  }
 }

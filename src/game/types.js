@@ -1,5 +1,5 @@
 /**
- * A position in the 1000 × 1000 logical game world.
+ * A position in the 1600 × 900 logical game world.
  *
  * @typedef {object} Point
  * @property {number} x Horizontal position in logical world units.

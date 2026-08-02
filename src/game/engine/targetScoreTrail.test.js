@@ -12,6 +12,7 @@ function relayLevel() {
   const start = { x: 200, y: 500 }
   return {
     ...level,
+    seed: 'relay-3',
     startPoint: start,
     token: { ...level.token, shape: 'circle', width: 20, height: 20, size: 20 },
     mainTarget: {
@@ -53,6 +54,8 @@ function relayLevel() {
       ...level.scoring,
       parTimeMs: 10000,
       parDistance: 100,
+      timeWeight: 0,
+      distanceWeight: 1,
     },
   }
 }
