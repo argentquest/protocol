@@ -106,6 +106,7 @@ export async function createServerApp({
     response.json(
       mediaLibrary.list({
         kind: request.query.kind ?? 'image',
+        collection: request.query.collection,
         query: request.query.query,
         offset: request.query.offset,
         limit: request.query.limit,

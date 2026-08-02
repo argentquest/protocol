@@ -36,9 +36,16 @@ test('clones, edits, playtests, publishes, and deletes a server theme', async ({
   await expect(page.locator('.workshop-level-list article')).toHaveCount(100)
 
   const mediaPanel = page.locator('.theme-media-editor')
+  await expect(
+    mediaPanel.getByText(/choose a theme element above to open/i),
+  ).toBeVisible()
+  await mediaPanel.getByLabel('Theme element').selectOption('arena-standard')
   await expect(mediaPanel.getByText(/image assets available/i)).toBeVisible({
     timeout: 30_000,
   })
+  await expect(
+    mediaPanel.getByRole('complementary', { name: 'PublicMedia folders' }),
+  ).toBeVisible()
   await mediaPanel.locator('.theme-media-grid button').first().click()
   await mediaPanel.getByRole('button', { name: /use selected image/i }).click()
   await expect(mediaPanel.getByRole('status')).toContainText(

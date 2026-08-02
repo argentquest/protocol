@@ -850,26 +850,41 @@ function AccountPanel({ user, onAuthenticated, onLogout, setStatus }) {
  */
 function ThemeMediaEditor({ theme, onChanged }) {
   const [kind, setKind] = useState('image')
-  const [targetId, setTargetId] = useState(mediaDefinitions[0].mediaId)
+  const [targetId, setTargetId] = useState('')
+  const [collection, setCollection] = useState('')
   const [query, setQuery] = useState('')
   const [offset, setOffset] = useState(0)
-  const [catalog, setCatalog] = useState({ items: [], total: 0, limit: 60 })
+  const [catalog, setCatalog] = useState({
+    items: [],
+    total: 0,
+    limit: 60,
+    collections: [],
+  })
   const [selectedAssetId, setSelectedAssetId] = useState('')
-  const [status, setStatus] = useState('Loading media library…')
+  const [status, setStatus] = useState(
+    'Choose a theme element to browse PublicMedia.',
+  )
   const targets = kind === 'image' ? mediaDefinitions : soundDefinitions
   const selectedAsset = catalog.items.find((item) => item.id === selectedAssetId)
 
   const loadCatalog = useCallback(async () => {
+    if (!targetId) return
     try {
       setStatus('Loading media library…')
-      const result = await mediaLibraryApi.list({ kind, query, offset, limit: 60 })
+      const result = await mediaLibraryApi.list({
+        kind,
+        collection,
+        query,
+        offset,
+        limit: 60,
+      })
       setCatalog(result)
       setSelectedAssetId('')
       setStatus(`${result.total} ${kind} assets available.`)
     } catch (error) {
       setStatus(error.message)
     }
-  }, [kind, offset, query])
+  }, [collection, kind, offset, query, targetId])
 
   useEffect(() => {
     loadCatalog()
@@ -877,11 +892,17 @@ function ThemeMediaEditor({ theme, onChanged }) {
 
   const changeKind = (nextKind) => {
     setKind(nextKind)
-    setTargetId(
-      nextKind === 'image'
-        ? mediaDefinitions[0].mediaId
-        : soundDefinitions[0].soundId,
-    )
+    setTargetId('')
+    setCollection('')
+    setQuery('')
+    setSelectedAssetId('')
+    setStatus('Choose a theme element to browse PublicMedia.')
+    setOffset(0)
+  }
+
+  const selectCollection = (nextCollection) => {
+    setCollection(nextCollection)
+    setSelectedAssetId('')
     setOffset(0)
   }
 
@@ -909,8 +930,8 @@ function ThemeMediaEditor({ theme, onChanged }) {
     <section className="workshop-panel theme-media-editor">
       <h2>Theme media</h2>
       <p>
-        Select a source from the read-only PublicMedia catalog. The chosen file
-        is copied into this theme, so published themes remain self-contained.
+        First choose the object you want to replace. Then visually browse the
+        read-only PublicMedia folders and choose its new artwork or sound.
       </p>
       <div className="theme-media-editor__controls">
         <label>
@@ -922,45 +943,101 @@ function ThemeMediaEditor({ theme, onChanged }) {
         </label>
         <label>
           Theme element
-          <select value={targetId} onChange={(event) => setTargetId(event.target.value)}>
+          <select
+            value={targetId}
+            onChange={(event) => {
+              setTargetId(event.target.value)
+              setCollection('')
+              setSelectedAssetId('')
+              setOffset(0)
+            }}
+          >
+            <option value="">Choose an element…</option>
             {targets.map((target) => {
               const id = kind === 'image' ? target.mediaId : target.soundId
               return <option key={id} value={id}>{id}</option>
             })}
           </select>
         </label>
-        <label>
-          Search catalog
-          <input
-            value={query}
-            onChange={(event) => {
-              setQuery(event.target.value)
-              setOffset(0)
-            }}
-            placeholder="planet, coin, impact…"
-          />
-        </label>
       </div>
-      <div className="theme-media-grid">
-        {catalog.items.map((asset) => (
-          <button
-            type="button"
-            key={asset.id}
-            className={asset.id === selectedAssetId ? 'is-selected' : ''}
-            aria-pressed={asset.id === selectedAssetId}
-            onClick={() => setSelectedAssetId(asset.id)}
-            title={asset.id}
-          >
-            {kind === 'image' ? (
-              <img src={mediaLibraryApi.fileUrl(asset.id)} alt="" loading="lazy" />
-            ) : (
-              <span aria-hidden="true">♪</span>
-            )}
-            <small>{asset.name}</small>
-            <em>{asset.collection}</em>
-          </button>
-        ))}
-      </div>
+      {!targetId && (
+        <div className="theme-media-editor__empty">
+          Choose a theme element above to open the PublicMedia browser.
+        </div>
+      )}
+      {targetId && (
+        <div className="theme-media-browser">
+          <aside className="theme-media-folders" aria-label="PublicMedia folders">
+            <strong>PublicMedia</strong>
+            <button
+              type="button"
+              className={!collection ? 'is-selected' : ''}
+              onClick={() => selectCollection('')}
+            >
+              <span>All folders</span>
+              <small>{catalog.collections.reduce((sum, item) => sum + item.count, 0)}</small>
+            </button>
+            {catalog.collections.map((item) => (
+              <button
+                type="button"
+                key={item.id}
+                className={collection === item.id ? 'is-selected' : ''}
+                onClick={() => selectCollection(item.id)}
+              >
+                <span>▸ {item.id}</span>
+                <small>{item.count}</small>
+              </button>
+            ))}
+          </aside>
+          <div className="theme-media-browser__content">
+            <div className="theme-media-browser__toolbar">
+              <span>PublicMedia / {collection || 'all folders'}</span>
+              <label>
+                Search this view
+                <input
+                  value={query}
+                  onChange={(event) => {
+                    setQuery(event.target.value)
+                    setOffset(0)
+                  }}
+                  placeholder="planet, coin, impact…"
+                />
+              </label>
+            </div>
+            <div className="theme-media-grid">
+              {catalog.items.map((asset) => {
+                const relativePath = asset.id.slice(asset.collection.length + 1)
+                const folder = relativePath.includes('/')
+                  ? relativePath.slice(0, relativePath.lastIndexOf('/'))
+                  : 'root'
+                return (
+                  <button
+                    type="button"
+                    key={asset.id}
+                    className={asset.id === selectedAssetId ? 'is-selected' : ''}
+                    aria-pressed={asset.id === selectedAssetId}
+                    onClick={() => setSelectedAssetId(asset.id)}
+                    title={asset.id}
+                  >
+                    {kind === 'image' ? (
+                      <img
+                        src={mediaLibraryApi.fileUrl(asset.id)}
+                        alt={`Preview of ${asset.name}`}
+                        loading="lazy"
+                      />
+                    ) : (
+                      <span aria-hidden="true">♪</span>
+                    )}
+                    <small>{asset.name}</small>
+                    <em>{folder}</em>
+                  </button>
+                )
+              })}
+              {!catalog.items.length && <p>No media matches this folder and search.</p>}
+            </div>
+          </div>
+        </div>
+      )}
       {selectedAsset && kind === 'audio' && (
         <audio controls preload="none" src={mediaLibraryApi.fileUrl(selectedAsset.id)}>
           Audio preview is unavailable in this browser.
@@ -980,7 +1057,7 @@ function ThemeMediaEditor({ theme, onChanged }) {
           )}
         </p>
       )}
-      <div className="theme-media-editor__actions">
+      {targetId && <div className="theme-media-editor__actions">
         <button
           type="button"
           disabled={offset === 0}
@@ -999,7 +1076,7 @@ function ThemeMediaEditor({ theme, onChanged }) {
         <button type="button" disabled={!selectedAssetId} onClick={applySelection}>
           Use selected {kind}
         </button>
-      </div>
+      </div>}
       <div role="status">{status}</div>
     </section>
   )

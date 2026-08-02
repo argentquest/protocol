@@ -250,6 +250,17 @@ describe('accounts and Theme Workshop API', () => {
       id: 'images/token.png',
       kind: 'image',
     })
+    expect(images.body.collections).toEqual([{ id: 'images', count: 1 }])
+    const imageFolder = await owner
+      .get('/api/media-library')
+      .query({ kind: 'image', collection: 'images' })
+    expect(imageFolder.body).toMatchObject({ total: 1 })
+    expect(
+      (await owner.get('/api/media-library').query({
+        kind: 'image',
+        collection: 'missing',
+      })).status,
+    ).toBe(404)
     const visual = await owner
       .put(`/api/themes/${clone.body.id}/media/visuals/token-circle`)
       .send({ assetId: 'images/token.png' })

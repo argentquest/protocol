@@ -59,11 +59,13 @@ development accounts are active immediately without email confirmation. Public
 themes remain playable without login; cloning and editing require an account.
 Players can choose any built-in presentation theme from Settings.
 
-The Theme Workshop media editor browses the licensed `PublicMedia` catalog.
-Applying an image or sound copies it into the editable theme package; runtime
-themes never depend on the catalog source path. Imported audio is normalized to
-a WAV master plus WebM and MP3 delivery files. Validate all built-in theme
-fallbacks with `npm run media:validate-themes`.
+The Theme Workshop media editor uses an element-first visual browser for the
+licensed `PublicMedia` catalog. Choose the object or sound to replace, browse
+source folders with thumbnail previews, then apply the selected asset. Applying
+an image or sound copies it into the editable theme package; runtime themes
+never depend on the catalog source path. Imported audio is normalized to a WAV
+master plus WebM and MP3 delivery files. Validate all built-in theme fallbacks
+with `npm run media:validate-themes`.
 
 ## Architecture Overview
 

@@ -640,6 +640,7 @@ challenges teach each behavior in isolation.
 | V2-S20-05 | Normalize audio overrides | L | `DONE` | Selected audio becomes a 44.1 kHz stereo WAV master plus WebM and MP3 theme files. |
 | V2-S20-06 | Build Workshop media editor | L | `DONE` | Authors can search, preview, target, and apply catalog images and sounds. |
 | V2-S20-07 | Validate release gates | M | `DONE` | API, component, manifest, lint, build, Docker runtime, and browser checks pass. |
+| V2-S20-08 | Add element-first visual media browsing | M | `DONE` | Authors choose a theme element before browsing folder-filtered thumbnail previews from PublicMedia. |
 
 ### Sprint 20 exit criteria
 

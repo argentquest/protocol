@@ -155,16 +155,34 @@ export async function createMediaLibrary({ root, ffmpegPath = ffmpegStatic }) {
     return entry
   }
 
-  function list({ kind = 'image', query = '', offset = 0, limit = 60 } = {}) {
+  function list({
+    kind = 'image',
+    collection = '',
+    query = '',
+    offset = 0,
+    limit = 60,
+  } = {}) {
     if (!['image', 'audio'].includes(kind)) {
       throw Object.assign(new Error('Media kind must be image or audio.'), {
         status: 400,
       })
     }
+    const normalizedCollection = String(collection).trim()
+    const kindEntries = entries.filter((entry) => entry.kind === kind)
+    const collectionCounts = new Map()
+    for (const entry of kindEntries) {
+      collectionCounts.set(
+        entry.collection,
+        (collectionCounts.get(entry.collection) ?? 0) + 1,
+      )
+    }
+    if (normalizedCollection && !collectionCounts.has(normalizedCollection)) {
+      throw Object.assign(new Error('Media collection not found.'), { status: 404 })
+    }
     const normalizedQuery = String(query).trim().toLowerCase()
-    const filtered = entries.filter(
+    const filtered = kindEntries.filter(
       (entry) =>
-        entry.kind === kind &&
+        (!normalizedCollection || entry.collection === normalizedCollection) &&
         (!normalizedQuery || entry.id.toLowerCase().includes(normalizedQuery)),
     )
     const safeOffset = Math.max(0, Number.parseInt(offset, 10) || 0)
@@ -174,6 +192,9 @@ export async function createMediaLibrary({ root, ffmpegPath = ffmpegStatic }) {
       offset: safeOffset,
       limit: safeLimit,
       total: filtered.length,
+      collections: [...collectionCounts]
+        .map(([id, count]) => ({ id, count }))
+        .sort((first, second) => first.id.localeCompare(second.id)),
     }
   }
 

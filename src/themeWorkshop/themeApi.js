@@ -112,9 +112,10 @@ export const themeApi = {
 
 /** Read-only PublicMedia catalog operations for authenticated theme authors. */
 export const mediaLibraryApi = {
-  list: ({ kind, query = '', offset = 0, limit = 60 }) => {
+  list: ({ kind, collection = '', query = '', offset = 0, limit = 60 }) => {
     const parameters = new URLSearchParams({
       kind,
+      collection,
       query,
       offset: String(offset),
       limit: String(limit),
