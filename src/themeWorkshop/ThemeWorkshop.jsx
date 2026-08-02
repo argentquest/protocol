@@ -989,13 +989,14 @@ function AccountPanel({ user, onAuthenticated, onLogout, setStatus }) {
 function ThemeMediaEditor({ theme, onChanged }) {
   const [kind, setKind] = useState('image')
   const [targetId, setTargetId] = useState('')
-  const [collection, setCollection] = useState('')
+  const [folder, setFolder] = useState('')
   const [query, setQuery] = useState('')
   const [offset, setOffset] = useState(0)
   const [catalog, setCatalog] = useState({
     items: [],
     total: 0,
     limit: 60,
+    folders: [],
     collections: [],
   })
   const [selectedAssetId, setSelectedAssetId] = useState('')
@@ -1011,18 +1012,20 @@ function ThemeMediaEditor({ theme, onChanged }) {
       setStatus('Loading media library…')
       const result = await mediaLibraryApi.list({
         kind,
-        collection,
+        folder,
         query,
         offset,
         limit: 60,
       })
       setCatalog(result)
       setSelectedAssetId('')
-      setStatus(`${result.total} ${kind} assets available.`)
+      setStatus(
+        `${result.folders.length} folders and ${result.total} ${kind} files in this view.`,
+      )
     } catch (error) {
       setStatus(error.message)
     }
-  }, [collection, kind, offset, query, targetId])
+  }, [folder, kind, offset, query, targetId])
 
   useEffect(() => {
     loadCatalog()
@@ -1031,17 +1034,25 @@ function ThemeMediaEditor({ theme, onChanged }) {
   const changeKind = (nextKind) => {
     setKind(nextKind)
     setTargetId('')
-    setCollection('')
+    setFolder('')
     setQuery('')
     setSelectedAssetId('')
     setStatus('Choose a theme element to browse PublicMedia.')
     setOffset(0)
   }
 
-  const selectCollection = (nextCollection) => {
-    setCollection(nextCollection)
+  const selectFolder = (nextFolder) => {
+    setFolder(nextFolder)
+    setQuery('')
     setSelectedAssetId('')
     setOffset(0)
+    setCatalog((current) => ({
+      ...current,
+      items: [],
+      total: 0,
+      folders: [],
+    }))
+    setStatus('Loading media folder…')
   }
 
   const applySelection = async () => {
@@ -1085,7 +1096,7 @@ function ThemeMediaEditor({ theme, onChanged }) {
             value={targetId}
             onChange={(event) => {
               setTargetId(event.target.value)
-              setCollection('')
+              setFolder('')
               setSelectedAssetId('')
               setOffset(0)
             }}
@@ -1109,18 +1120,18 @@ function ThemeMediaEditor({ theme, onChanged }) {
             <strong>PublicMedia</strong>
             <button
               type="button"
-              className={!collection ? 'is-selected' : ''}
-              onClick={() => selectCollection('')}
+              className={!folder ? 'is-selected' : ''}
+              onClick={() => selectFolder('')}
             >
-              <span>All folders</span>
+              <span>⌂ Root</span>
               <small>{catalog.collections.reduce((sum, item) => sum + item.count, 0)}</small>
             </button>
             {catalog.collections.map((item) => (
               <button
                 type="button"
                 key={item.id}
-                className={collection === item.id ? 'is-selected' : ''}
-                onClick={() => selectCollection(item.id)}
+                className={folder === item.id ? 'is-selected' : ''}
+                onClick={() => selectFolder(item.id)}
               >
                 <span>▸ {item.id}</span>
                 <small>{item.count}</small>
@@ -1129,7 +1140,20 @@ function ThemeMediaEditor({ theme, onChanged }) {
           </aside>
           <div className="theme-media-browser__content">
             <div className="theme-media-browser__toolbar">
-              <span>PublicMedia / {collection || 'all folders'}</span>
+              <nav className="theme-media-breadcrumbs" aria-label="Media folder path">
+                <button type="button" onClick={() => selectFolder('')}>PublicMedia</button>
+                {folder.split('/').filter(Boolean).map((segment, index, segments) => (
+                  <span key={segments.slice(0, index + 1).join('/')}>
+                    <span aria-hidden="true">/</span>
+                    <button
+                      type="button"
+                      onClick={() => selectFolder(segments.slice(0, index + 1).join('/'))}
+                    >
+                      {segment}
+                    </button>
+                  </span>
+                ))}
+              </nav>
               <label>
                 Search this view
                 <input
@@ -1143,9 +1167,22 @@ function ThemeMediaEditor({ theme, onChanged }) {
               </label>
             </div>
             <div className="theme-media-grid">
+              {!query && catalog.folders.map((item) => (
+                <button
+                  type="button"
+                  className="theme-media-folder-tile"
+                  key={item.path}
+                  onClick={() => selectFolder(item.path)}
+                  title={item.path}
+                >
+                  <span aria-hidden="true">📁</span>
+                  <small>{item.name}</small>
+                  <em>{item.count} files</em>
+                </button>
+              ))}
               {catalog.items.map((asset) => {
                 const relativePath = asset.id.slice(asset.collection.length + 1)
-                const folder = relativePath.includes('/')
+                const assetFolder = relativePath.includes('/')
                   ? relativePath.slice(0, relativePath.lastIndexOf('/'))
                   : 'root'
                 return (
@@ -1167,33 +1204,46 @@ function ThemeMediaEditor({ theme, onChanged }) {
                       <span aria-hidden="true">♪</span>
                     )}
                     <small>{asset.name}</small>
-                    <em>{folder}</em>
+                    <em>{assetFolder}</em>
                   </button>
                 )
               })}
-              {!catalog.items.length && <p>No media matches this folder and search.</p>}
+              {!catalog.items.length && !catalog.folders.length && (
+                <p>No media matches this folder and search.</p>
+              )}
             </div>
           </div>
         </div>
       )}
-      {selectedAsset && kind === 'audio' && (
-        <audio controls preload="none" src={mediaLibraryApi.fileUrl(selectedAsset.id)}>
-          Audio preview is unavailable in this browser.
-        </audio>
-      )}
       {selectedAsset && (
-        <p className="theme-media-editor__license">
-          <strong>{selectedAsset.license}</strong>
-          {selectedAsset.credit && ` · ${selectedAsset.credit}`}
-          {selectedAsset.sourceUrl.startsWith('http') && (
-            <>
-              {' · '}
-              <a href={selectedAsset.sourceUrl} target="_blank" rel="noreferrer">
-                Source and license
-              </a>
-            </>
+        <section className="theme-media-preview" aria-label="Selected media preview">
+          {kind === 'image' ? (
+            <img
+              src={mediaLibraryApi.fileUrl(selectedAsset.id)}
+              alt={`Large preview of ${selectedAsset.name}`}
+            />
+          ) : (
+            <audio controls preload="metadata" src={mediaLibraryApi.fileUrl(selectedAsset.id)}>
+              Audio preview is unavailable in this browser.
+            </audio>
           )}
-        </p>
+          <div>
+            <strong>{selectedAsset.name}</strong>
+            <small>{selectedAsset.id}</small>
+            <p className="theme-media-editor__license">
+              <strong>{selectedAsset.license}</strong>
+              {selectedAsset.credit && ` · ${selectedAsset.credit}`}
+              {selectedAsset.sourceUrl.startsWith('http') && (
+                <>
+                  {' · '}
+                  <a href={selectedAsset.sourceUrl} target="_blank" rel="noreferrer">
+                    Source and license
+                  </a>
+                </>
+              )}
+            </p>
+          </div>
+        </section>
       )}
       {targetId && <div className="theme-media-editor__actions">
         <button
@@ -1203,7 +1253,11 @@ function ThemeMediaEditor({ theme, onChanged }) {
         >
           Previous
         </button>
-        <span>{catalog.total ? `${offset + 1}–${Math.min(offset + catalog.items.length, catalog.total)} of ${catalog.total}` : 'No matches'}</span>
+        <span>
+          {catalog.total
+            ? `${offset + 1}–${Math.min(offset + catalog.items.length, catalog.total)} of ${catalog.total} files`
+            : `${catalog.folders.length} folders`}
+        </span>
         <button
           type="button"
           disabled={offset + catalog.limit >= catalog.total}

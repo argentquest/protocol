@@ -40,13 +40,26 @@ test('clones, edits, playtests, publishes, and deletes a server theme', async ({
     mediaPanel.getByText(/choose a theme element above to open/i),
   ).toBeVisible()
   await mediaPanel.getByLabel('Theme element').selectOption('arena-standard')
-  await expect(mediaPanel.getByText(/image assets available/i)).toBeVisible({
+  await expect(mediaPanel.getByText(/folders and .* image files/i)).toBeVisible({
     timeout: 30_000,
   })
   await expect(
     mediaPanel.getByRole('complementary', { name: 'PublicMedia folders' }),
   ).toBeVisible()
-  await mediaPanel.locator('.theme-media-grid button').first().click()
+  const mediaFiles = mediaPanel.locator('.theme-media-grid button[aria-pressed]')
+  for (let depth = 0; depth < 10 && (await mediaFiles.count()) === 0; depth += 1) {
+    const folders = mediaPanel.locator('.theme-media-folder-tile')
+    await expect(folders.first()).toBeVisible()
+    await folders.first().click()
+    await expect(mediaPanel.getByRole('status')).not.toHaveText(
+      /loading media folder/i,
+    )
+  }
+  await expect(mediaFiles.first()).toBeVisible()
+  await mediaFiles.first().click()
+  await expect(
+    mediaPanel.getByRole('region', { name: 'Selected media preview' }),
+  ).toBeVisible()
   await mediaPanel.getByRole('button', { name: /use selected image/i }).click()
   await expect(mediaPanel.getByRole('status')).toContainText(
     `Saved arena-standard in ${themeName}.`,

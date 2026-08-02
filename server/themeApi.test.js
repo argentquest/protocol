@@ -269,6 +269,18 @@ describe('accounts and Theme Workshop API', () => {
       kind: 'image',
     })
     expect(images.body.collections).toEqual([{ id: 'images', count: 1 }])
+    const imageRoot = await owner
+      .get('/api/media-library')
+      .query({ kind: 'image', folder: '' })
+    expect(imageRoot.body).toMatchObject({
+      folder: '',
+      total: 0,
+      folders: [{ path: 'images', name: 'images', count: 1 }],
+    })
+    const browsedImageFolder = await owner
+      .get('/api/media-library')
+      .query({ kind: 'image', folder: 'images' })
+    expect(browsedImageFolder.body.items[0].id).toBe('images/token.png')
     const imageFolder = await owner
       .get('/api/media-library')
       .query({ kind: 'image', collection: 'images' })

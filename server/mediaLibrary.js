@@ -158,6 +158,7 @@ export async function createMediaLibrary({ root, ffmpegPath = ffmpegStatic }) {
   function list({
     kind = 'image',
     collection = '',
+    folder = null,
     query = '',
     offset = 0,
     limit = 60,
@@ -179,10 +180,40 @@ export async function createMediaLibrary({ root, ffmpegPath = ffmpegStatic }) {
     if (normalizedCollection && !collectionCounts.has(normalizedCollection)) {
       throw Object.assign(new Error('Media collection not found.'), { status: 404 })
     }
+    const folderMode = folder !== null && folder !== undefined
+    const normalizedFolder = String(folder ?? '')
+      .replaceAll('\\', '/')
+      .replace(/^\/+|\/+$/g, '')
+    if (
+      normalizedFolder.split('/').includes('..') ||
+      (normalizedFolder && !collectionCounts.has(normalizedFolder.split('/')[0]))
+    ) {
+      throw Object.assign(new Error('Media folder not found.'), { status: 404 })
+    }
     const normalizedQuery = String(query).trim().toLowerCase()
-    const filtered = kindEntries.filter(
+    const folderPrefix = normalizedFolder ? `${normalizedFolder}/` : ''
+    const folderEntries = folderMode
+      ? kindEntries.filter((entry) => entry.id.startsWith(folderPrefix))
+      : kindEntries
+    const childFolderCounts = new Map()
+    if (folderMode) {
+      for (const entry of folderEntries) {
+        const remainder = entry.id.slice(folderPrefix.length)
+        if (!remainder.includes('/')) continue
+        const childName = remainder.slice(0, remainder.indexOf('/'))
+        const childPath = folderPrefix ? `${normalizedFolder}/${childName}` : childName
+        childFolderCounts.set(
+          childPath,
+          (childFolderCounts.get(childPath) ?? 0) + 1,
+        )
+      }
+    }
+    const filtered = folderEntries.filter(
       (entry) =>
         (!normalizedCollection || entry.collection === normalizedCollection) &&
+        (!folderMode ||
+          normalizedQuery ||
+          !entry.id.slice(folderPrefix.length).includes('/')) &&
         (!normalizedQuery || entry.id.toLowerCase().includes(normalizedQuery)),
     )
     const safeOffset = Math.max(0, Number.parseInt(offset, 10) || 0)
@@ -192,6 +223,14 @@ export async function createMediaLibrary({ root, ffmpegPath = ffmpegStatic }) {
       offset: safeOffset,
       limit: safeLimit,
       total: filtered.length,
+      folder: normalizedFolder,
+      folders: [...childFolderCounts]
+        .map(([folderPath, count]) => ({
+          path: folderPath,
+          name: folderPath.slice(folderPath.lastIndexOf('/') + 1),
+          count,
+        }))
+        .sort((first, second) => first.name.localeCompare(second.name)),
       collections: [...collectionCounts]
         .map(([id, count]) => ({ id, count }))
         .sort((first, second) => first.id.localeCompare(second.id)),

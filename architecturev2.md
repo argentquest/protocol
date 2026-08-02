@@ -733,6 +733,9 @@ The initial clone copies level JSON only. Authors may then select registered
 visual and audio replacements from the read-only `PublicMedia/catalog.json`
 library. A selection is never referenced in place: the server validates and
 copies it into the theme's media folder and records its source asset ID.
+The authoring UI exposes every supported media file through recursive folder
+navigation, breadcrumbs, paging, and direct image/audio preview; search is an
+optional accelerator rather than the only discovery mechanism.
 
 PNG and compatible SVG sources retain their runtime format; JPEG sources are
 converted to PNG. WAV, OGG, MP3, AIF, and AIFF audio is normalized to a stereo

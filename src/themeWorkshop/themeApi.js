@@ -117,7 +117,14 @@ export const themeApi = {
 
 /** Read-only PublicMedia catalog operations for authenticated theme authors. */
 export const mediaLibraryApi = {
-  list: ({ kind, collection = '', query = '', offset = 0, limit = 60 }) => {
+  list: ({
+    kind,
+    collection = '',
+    folder = null,
+    query = '',
+    offset = 0,
+    limit = 60,
+  }) => {
     const parameters = new URLSearchParams({
       kind,
       collection,
@@ -125,6 +132,7 @@ export const mediaLibraryApi = {
       offset: String(offset),
       limit: String(limit),
     })
+    if (folder !== null) parameters.set('folder', folder)
     return apiRequest(`/api/media-library?${parameters}`)
   },
   fileUrl: (assetId) =>
