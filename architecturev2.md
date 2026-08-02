@@ -767,8 +767,9 @@ containment, overlap, and solvability checks. Invalid editor state remains
 client-side. Debounced autosave and manual save persist only valid state.
 
 The editor provides a mandatory 10-unit placement grid, entity CRUD and
-resizing, advanced full-level JSON properties, undo/redo, seed regeneration,
-live PixiJS playtesting, and level duplication, deletion, reordering, and
+resizing, a modal full-level JSON editor with formatting and server-side JSON
+Schema plus gameplay validation, undo/redo, seed regeneration, live PixiJS
+playtesting, and level duplication, deletion, reordering, and
 automatic renumbering. Published themes remain editable by their key holder.
 
 Player progress, scores, coins, and inventory are namespaced by theme ID.

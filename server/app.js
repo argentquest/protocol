@@ -252,6 +252,21 @@ export async function createServerApp({
       )
     }),
   )
+  app.post(
+    '/api/themes/:themeId/levels/validate',
+    asyncRoute(async (request, response) => {
+      const theme = await store.getTheme(
+        request.params.themeId,
+        requireUser(request).id,
+      )
+      if (!theme.canEdit) {
+        throw Object.assign(new Error('Login as the theme owner to edit it.'), {
+          status: 403,
+        })
+      }
+      response.json(store.validateLevel(request.body))
+    }),
+  )
   app.put(
     '/api/themes/:themeId/levels/:internalId',
     asyncRoute(async (request, response) => {

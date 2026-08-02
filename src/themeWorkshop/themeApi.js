@@ -87,6 +87,11 @@ export const themeApi = {
       method: 'PUT',
       body: level,
     }),
+  validateLevel: (themeId, level) =>
+    apiRequest(`/api/themes/${themeId}/levels/validate`, {
+      method: 'POST',
+      body: level,
+    }),
   addLevel: (themeId, sourceInternalId) =>
     apiRequest(`/api/themes/${themeId}/levels`, {
       method: 'POST',

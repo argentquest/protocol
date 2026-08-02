@@ -641,6 +641,7 @@ challenges teach each behavior in isolation.
 | V2-S20-06 | Build Workshop media editor | L | `DONE` | Authors can search, preview, target, and apply catalog images and sounds. |
 | V2-S20-07 | Validate release gates | M | `DONE` | API, component, manifest, lint, build, Docker runtime, and browser checks pass. |
 | V2-S20-08 | Add element-first visual media browsing | M | `DONE` | Authors choose a theme element before browsing folder-filtered thumbnail previews from PublicMedia. |
+| V2-S20-09 | Add schema-aware popup JSON editor | M | `DONE` | Full-level JSON can be formatted and must pass server-side schema and gameplay validation before it is applied. |
 
 ### Sprint 20 exit criteria
 

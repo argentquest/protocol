@@ -67,6 +67,10 @@ never depend on the catalog source path. Imported audio is normalized to a WAV
 master plus WebM and MP3 delivery files. Validate all built-in theme fallbacks
 with `npm run media:validate-themes`.
 
+Each level editor also provides a popup full-level JSON editor. It formats JSON,
+reports parse errors, and validates drafts against the authoritative level JSON
+Schema and generated-course gameplay checks before applying them locally.
+
 ## Architecture Overview
 
 Path Protocol V2 uses:

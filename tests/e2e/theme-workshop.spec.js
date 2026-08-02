@@ -61,7 +61,15 @@ test('clones, edits, playtests, publishes, and deletes a server theme', async ({
   await expect(
     page.getByRole('application', { name: /10-unit level placement grid/i }),
   ).toBeVisible()
-  await expect(page.getByLabel('Full level JSON')).toBeAttached()
+  await page.getByRole('button', { name: /open full-level json editor/i }).click()
+  const jsonEditor = page.getByRole('dialog', { name: 'Full level JSON' })
+  await expect(jsonEditor.getByLabel('Full level JSON')).toBeVisible()
+  await jsonEditor.getByRole('button', { name: 'Validate JSON' }).click()
+  await expect(
+    jsonEditor.getByText('Schema and gameplay validation passed.'),
+  ).toBeVisible({ timeout: 30_000 })
+  await jsonEditor.getByRole('button', { name: 'Cancel' }).click()
+  await expect(jsonEditor).not.toBeVisible()
 
   await page.getByLabel('Level name').fill('')
   await expect(page.getByText(/not saved: level validation failed/i)).toBeVisible({

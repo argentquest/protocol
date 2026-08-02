@@ -391,6 +391,149 @@ function LevelMap({
   )
 }
 
+/**
+ * Presents a modal, schema-aware editor for one complete level document.
+ *
+ * @param {object} props JSON editor properties.
+ * @returns {import('react').JSX.Element} Modal level JSON editor.
+ */
+function LevelJsonEditor({ themeId, level, onApply, onClose }) {
+  const [draft, setDraft] = useState(() => JSON.stringify(level, null, 2))
+  const [validation, setValidation] = useState({ state: 'idle', errors: [] })
+  const lines = draft.split('\n').length
+
+  const parseDraft = () => {
+    try {
+      return { value: JSON.parse(draft), error: null }
+    } catch (error) {
+      return { value: null, error: error.message }
+    }
+  }
+
+  const validateDraft = async () => {
+    const parsed = parseDraft()
+    if (parsed.error) {
+      const result = { state: 'invalid', errors: [parsed.error] }
+      setValidation(result)
+      return { ...parsed, valid: false }
+    }
+    setValidation({ state: 'checking', errors: [] })
+    try {
+      const result = await themeApi.validateLevel(themeId, parsed.value)
+      setValidation({
+        state: result.valid ? 'valid' : 'invalid',
+        errors: result.errors,
+      })
+      return { ...parsed, valid: result.valid }
+    } catch (error) {
+      setValidation({
+        state: 'invalid',
+        errors: [error.message, ...(error.details ?? [])],
+      })
+      return { ...parsed, valid: false }
+    }
+  }
+
+  const insertIndent = (event) => {
+    if (event.key !== 'Tab') return
+    event.preventDefault()
+    const textarea = event.currentTarget
+    const next = `${draft.slice(0, textarea.selectionStart)}  ${draft.slice(textarea.selectionEnd)}`
+    const cursor = textarea.selectionStart + 2
+    setDraft(next)
+    window.requestAnimationFrame(() => textarea.setSelectionRange(cursor, cursor))
+  }
+
+  return (
+    <div
+      className="json-editor-backdrop"
+      role="presentation"
+      onKeyDown={(event) => {
+        if (event.key === 'Escape') onClose()
+      }}
+    >
+      <section
+        className="json-editor-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="level-json-editor-title"
+      >
+        <header>
+          <div>
+            <p className="eyebrow">Schema-aware editor</p>
+            <h2 id="level-json-editor-title">Full level JSON</h2>
+          </div>
+          <button type="button" onClick={onClose} aria-label="Close JSON editor">
+            ×
+          </button>
+        </header>
+        <div className="json-editor-toolbar">
+          <button
+            type="button"
+            onClick={() => {
+              const parsed = parseDraft()
+              if (parsed.error) {
+                setValidation({ state: 'invalid', errors: [parsed.error] })
+                return
+              }
+              setDraft(JSON.stringify(parsed.value, null, 2))
+              setValidation({ state: 'idle', errors: [] })
+            }}
+          >
+            Format JSON
+          </button>
+          <button type="button" onClick={validateDraft}>
+            Validate JSON
+          </button>
+          <span>{lines} lines · JSON Schema + generated-course checks</span>
+        </div>
+        <textarea
+          autoFocus
+          aria-label="Full level JSON"
+          spellCheck="false"
+          value={draft}
+          onChange={(event) => {
+            setDraft(event.target.value)
+            setValidation({ state: 'idle', errors: [] })
+          }}
+          onKeyDown={insertIndent}
+        />
+        <div
+          className={`json-editor-validation is-${validation.state}`}
+          role={validation.state === 'invalid' ? 'alert' : 'status'}
+        >
+          {validation.state === 'idle' && 'Not validated since the last edit.'}
+          {validation.state === 'checking' && 'Validating against the level schema…'}
+          {validation.state === 'valid' && 'Schema and gameplay validation passed.'}
+          {validation.state === 'invalid' && (
+            <>
+              <strong>Validation failed</strong>
+              <ul>
+                {validation.errors.map((error, index) => (
+                  <li key={`${error}-${index}`}>{error}</li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
+        <footer>
+          <button type="button" onClick={onClose}>Cancel</button>
+          <button
+            type="button"
+            onClick={async () => {
+              const result = await validateDraft()
+              if (!result.valid) return
+              onApply(result.value)
+            }}
+          >
+            Validate and apply
+          </button>
+        </footer>
+      </section>
+    </div>
+  )
+}
+
 function LevelEditor({
   theme,
   initialLevel,
@@ -407,7 +550,7 @@ function LevelEditor({
   const [undoStack, setUndoStack] = useState([])
   const [redoStack, setRedoStack] = useState([])
   const [entityJson, setEntityJson] = useState('')
-  const [levelJson, setLevelJson] = useState('')
+  const [jsonEditorOpen, setJsonEditorOpen] = useState(false)
   const [status, setStatus] = useState('All changes saved.')
   const [playtest, setPlaytest] = useState(false)
   const initialRender = useRef(true)
@@ -423,7 +566,6 @@ function LevelEditor({
 
   useEffect(() => {
     setEntityJson(JSON.stringify(getEntity(level, selection), null, 2))
-    setLevelJson(JSON.stringify(level, null, 2))
   }, [level, selection])
 
   useEffect(() => {
@@ -683,35 +825,31 @@ function LevelEditor({
           >
             Delete selected entity
           </button>
-          <details>
-            <summary>Advanced full-level JSON</summary>
+          <div className="advanced-json-launcher">
+            <h2>Advanced level configuration</h2>
             <p>
               Edit arena, token, movement, generation, scoring, rewards, bonuses,
-              and every mechanic contract.
+              and every mechanic contract in a validated popup editor.
             </p>
-            <textarea
-              className="entity-json"
-              aria-label="Full level JSON"
-              value={levelJson}
-              onChange={(event) => setLevelJson(event.target.value)}
-            />
-            <button
-              type="button"
-              onClick={() => {
-                try {
-                  const parsed = JSON.parse(levelJson)
-                  commit(parsed)
-                  setStatus('Full-level JSON applied locally.')
-                } catch {
-                  setStatus('Full-level JSON is invalid.')
-                }
-              }}
-            >
-              Apply full-level JSON
+            <button type="button" onClick={() => setJsonEditorOpen(true)}>
+              Open full-level JSON editor
             </button>
-          </details>
+          </div>
         </aside>
       </div>
+
+      {jsonEditorOpen && (
+        <LevelJsonEditor
+          themeId={theme.id}
+          level={level}
+          onClose={() => setJsonEditorOpen(false)}
+          onApply={(nextLevel) => {
+            commit(nextLevel)
+            setJsonEditorOpen(false)
+            setStatus('Validated full-level JSON applied locally.')
+          }}
+        />
+      )}
 
       <section className="level-sequence">
         <h2>Campaign sequence</h2>

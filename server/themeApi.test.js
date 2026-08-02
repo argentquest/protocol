@@ -178,6 +178,24 @@ describe('accounts and Theme Workshop API', () => {
       await owner.get(`/api/themes/${clone.body.id}/levels/${first.internalId}`)
     ).body
 
+    const validDraft = await owner
+      .post(`/api/themes/${clone.body.id}/levels/validate`)
+      .send(level)
+    expect(validDraft.body).toEqual({ valid: true, errors: [] })
+    const invalidDraft = await owner
+      .post(`/api/themes/${clone.body.id}/levels/validate`)
+      .send({ ...level, name: '' })
+    expect(invalidDraft.status).toBe(200)
+    expect(invalidDraft.body.valid).toBe(false)
+    expect(invalidDraft.body.errors.length).toBeGreaterThan(0)
+    expect(
+      (
+        await request(app)
+          .post(`/api/themes/${clone.body.id}/levels/validate`)
+          .send(level)
+      ).status,
+    ).toBe(401)
+
     const invalid = await owner
       .put(`/api/themes/${clone.body.id}/levels/${first.internalId}`)
       .send({ ...level, name: '' })
