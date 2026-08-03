@@ -31,13 +31,22 @@ import {
 
 const PRESENTATION_THEME_KEY = 'path-protocol.presentation-theme'
 
-/** Resolves a valid persisted presentation theme or the configured default. */
+/**
+ * Reads the last selected presentation theme from browser storage.
+ *
+ * @returns {string} Configured theme ID, defaulting safely to `default`.
+ */
 function initialPresentationTheme() {
   const stored = window.localStorage.getItem(PRESENTATION_THEME_KEY)
   return Object.hasOwn(themeDefinitions, stored) ? stored : configuredThemeName
 }
 
-/** Renders the reusable Path Protocol wordmark. */
+/**
+ * Renders the Path Protocol brand mark at full or compact size.
+ *
+ * @param {{compact?: boolean}} props Component props.
+ * @returns {import('react').JSX.Element} Brand artwork.
+ */
 function ProtocolMark({ compact = false }) {
   return (
     <div className={`protocol-mark ${compact ? 'protocol-mark--compact' : ''}`} aria-hidden="true">
@@ -51,7 +60,15 @@ function ProtocolMark({ compact = false }) {
   )
 }
 
-/** Displays asset-preload progress and the user-gesture start action. */
+/**
+ * Presents media-loading progress, startup failures, and the audio-unlocking start action.
+ *
+ * @param {object} props Component props.
+ * @param {object} props.startup Current startup status and progress.
+ * @param {() => void} props.onStart Starts the application after media is ready.
+ * @param {() => void} props.onRetry Retries failed startup work.
+ * @returns {import('react').JSX.Element} Startup screen.
+ */
 function StartupScreen({ startup, onStart, onRetry }) {
   const ready = startup.status === 'ready'
   const failed = startup.status === 'error'
@@ -92,7 +109,12 @@ function StartupScreen({ startup, onStart, onRetry }) {
   )
 }
 
-/** Renders navigation and persistent campaign resources outside gameplay. */
+/**
+ * Renders persistent application navigation and score context.
+ *
+ * @param {object} props Navigation state and callbacks.
+ * @returns {import('react').JSX.Element} Application header.
+ */
 function ShellHeader({
   onHome,
   onLevels,
@@ -139,7 +161,12 @@ function ShellHeader({
   )
 }
 
-/** Presents the campaign entry point, progress summary, and Dev mode toggle. */
+/**
+ * Renders the campaign landing screen and current progression summary.
+ *
+ * @param {object} props Progress, theme, and navigation callbacks.
+ * @returns {import('react').JSX.Element} Home screen.
+ */
 function HomeScreen({
   progress,
   totalScore,
@@ -267,7 +294,12 @@ function HomeScreen({
   )
 }
 
-/** Renders unlocked or development-accessible campaign levels. */
+/**
+ * Renders campaign levels with unlock, completion, and apex status.
+ *
+ * @param {object} props Campaign selection state and callbacks.
+ * @returns {import('react').JSX.Element} Level-selection screen.
+ */
 function LevelSelect({
   levels,
   progress,
@@ -346,7 +378,15 @@ function LevelSelect({
   )
 }
 
-/** Presents score-gated consumable powers and coin purchases. */
+/**
+ * Renders consumable inventory and score-funded purchase actions.
+ *
+ * @param {object} props Component props.
+ * @param {object} props.progress Persisted player progress.
+ * @param {number} props.totalScore Current cumulative campaign points.
+ * @param {(power: object) => void} props.onPurchase Purchase callback.
+ * @returns {import('react').JSX.Element} Power Lab screen.
+ */
 function PowerLab({ progress, totalScore, onPurchase }) {
   return (
     <main className="content-screen">
@@ -411,7 +451,7 @@ function PowerLab({ progress, totalScore, onPurchase }) {
   )
 }
 
-/** Presents accessible mouse, keyboard, scoring, and power instructions. */
+/** @returns {import('react').JSX.Element} Keyboard and pointer gameplay instructions. */
 function Instructions() {
   return (
     <main className="content-screen guide-screen">
@@ -466,7 +506,12 @@ function Instructions() {
   )
 }
 
-/** Presents persisted audio, motion, and progress-reset controls. */
+/**
+ * Renders audio, motion, theme, and progress-reset preferences.
+ *
+ * @param {object} props Current settings and update callbacks.
+ * @returns {import('react').JSX.Element} Settings screen.
+ */
 function Settings({
   settings,
   onChange,
@@ -474,6 +519,7 @@ function Settings({
   presentationThemeName,
   onPresentationThemeChange,
 }) {
+  /** @param {string} key Setting key. @param {unknown} value New value. @returns {void} */
   const update = (key, value) => onChange({ ...settings, [key]: value })
   return (
     <main className="content-screen settings-screen">
@@ -715,11 +761,6 @@ export function Results({
  *
  * @returns {boolean} Whether isolated developer playtesting is active.
  */
-/**
- * Resolves the initial development-access override from environment and URL.
- *
- * @returns {boolean} Whether all levels should initially be accessible.
- */
 function initialDevMode() {
   const override = new URLSearchParams(window.location.search).get('dev')
   if (override !== null) return override === '1'
@@ -862,10 +903,12 @@ function PathProtocolApp() {
     }
   }, [])
 
+  /** @param {string} nextScreen Application screen ID. @returns {void} */
   const navigate = (nextScreen) => {
     setScreen(nextScreen)
   }
 
+  /** Toggles developer diagnostics and persists the preference. */
   const toggleDevMode = () => {
     setDevMode((current) => {
       const next = !current
@@ -880,6 +923,7 @@ function PathProtocolApp() {
     })
   }
 
+  /** @param {string} levelId Campaign level ID. @returns {void} */
   const playLevel = (levelId) => {
     setSelectedMicroId(null)
     setSelectedLevelId(levelId)
@@ -888,6 +932,7 @@ function PathProtocolApp() {
     navigate('game')
   }
 
+  /** @param {string} themeId Public or owned theme ID. @returns {Promise<void>} */
   const playTheme = async (themeId) => {
     const campaign =
       themeId === 'default'
@@ -906,18 +951,21 @@ function PathProtocolApp() {
     navigate('levels')
   }
 
+  /** @param {string} themeName Configured presentation theme name. @returns {void} */
   const changePresentationTheme = (themeName) => {
     if (!Object.hasOwn(themeDefinitions, themeName)) return
     window.localStorage.setItem(PRESENTATION_THEME_KEY, themeName)
     setPresentationThemeName(themeName)
   }
 
+  /** @param {string} protocolId Optional challenge ID. @returns {void} */
   const playMicroProtocol = (protocolId) => {
     setSelectedMicroId(protocolId)
     setMicroNotice(null)
     navigate('game')
   }
 
+  /** Advances results to the next campaign level or level selection. */
   const continuePlay = () => {
     const nextNumber = Math.min(
       progress.player.highestUnlockedLevel,
@@ -926,6 +974,12 @@ function PathProtocolApp() {
     playLevel(`level-${String(nextNumber).padStart(2, '0')}`)
   }
 
+  /**
+   * Persists a campaign or Micro Protocol completion and opens results.
+   *
+   * @param {object} result Engine completion payload.
+   * @returns {void}
+   */
   const handleComplete = (result) => {
     if (currentMicroProtocol) {
       if (devMode) {
@@ -978,6 +1032,7 @@ function PathProtocolApp() {
     setScreen('results')
   }
 
+  /** Records a failed campaign attempt for progression statistics. */
   const handleFailedAttempt = () => {
     if (devMode || currentMicroProtocol) return
     setProgress((current) => {
@@ -990,6 +1045,7 @@ function PathProtocolApp() {
     })
   }
 
+  /** @param {object} settings Updated player settings. @returns {void} */
   const handleSettings = (settings) => {
     const updated = { ...progress, settings }
     setProgress(updated)
@@ -997,6 +1053,7 @@ function PathProtocolApp() {
     audioRef.current.updateSettings(settings)
   }
 
+  /** @param {object} powerup Power definition to purchase. @returns {void} */
   const handlePurchasePowerup = (powerup) => {
     const purchased = purchasePowerup(progressRef.current, powerup)
     if (!purchased.purchased) return
@@ -1006,6 +1063,7 @@ function PathProtocolApp() {
     audioRef.current.play(powerup.soundId)
   }
 
+  /** @param {string} powerupId Consumed power ID. @returns {void} */
   const handleUsePowerup = (powerupId) => {
     if (devMode) return true
     const consumed = consumePowerup(progressRef.current, powerupId)
@@ -1016,6 +1074,7 @@ function PathProtocolApp() {
     return true
   }
 
+  /** @param {object} coin Newly collected course coin. @returns {void} */
   const handleCoinCollected = (coin) => {
     if (currentMicroProtocol) return false
     if (devMode) return true
@@ -1031,6 +1090,7 @@ function PathProtocolApp() {
     return true
   }
 
+  /** Confirms and replaces the active theme's progress with a fresh record. */
   const handleReset = () => {
     if (!window.confirm('Reset every local score, unlock, and setting? This cannot be undone.')) return
     const initial = resetProgress(window.localStorage, activeThemeId)
@@ -1039,11 +1099,13 @@ function PathProtocolApp() {
     setScreen('home')
   }
 
+  /** Opens the next campaign level when one exists. */
   const nextLevel = () => {
     const nextNumber = Math.min(campaignLevels.length, currentLevel.number + 1)
     playLevel(`level-${String(nextNumber).padStart(2, '0')}`)
   }
 
+  /** Opens the previous campaign level when one exists. */
   const previousLevel = () => {
     const previousNumber = Math.max(1, currentLevel.number - 1)
     playLevel(`level-${String(previousNumber).padStart(2, '0')}`)

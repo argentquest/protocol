@@ -81,4 +81,17 @@ describe('V2 configuration validation', () => {
       result.errors.some((error) => error.includes('mediaVersion must match')),
     ).toBe(true)
   })
+
+  it('accepts server-issued entity overrides and rejects arbitrary source IDs', () => {
+    const configuration = validConfiguration()
+    configuration.levels[0].coins[0].visualOverrideId =
+      'entity-visual-12345678-1234-1234-1234-123456789abc'
+    configuration.levels[0].coins[0].audioOverrideId =
+      'entity-audio-12345678-1234-1234-1234-123456789abc'
+    expect(validateConfiguration(configuration).valid).toBe(true)
+
+    configuration.levels[0].coins[0].visualOverrideId =
+      'public-media/images/coin.png'
+    expect(validateConfiguration(configuration).valid).toBe(false)
+  })
 })

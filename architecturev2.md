@@ -744,6 +744,17 @@ Access-controlled dynamic manifests resolve each copied override independently
 and fall back to mandatory defaults. Applying an asset increments the theme's
 media version so renderer and audio caches reload.
 
+Level entities retain their theme-neutral `mediaId` and may additionally hold
+server-issued `visualOverrideId` and `audioOverrideId` values. These IDs name
+files copied into the owned theme, never paths in PublicMedia. The visual
+override affects only that entity instance, which allows (for example) a
+10-point coin and a 50-point coin to use different artwork while both remain
+coins. Per-entity audio currently applies to discrete coin-collection,
+main/bonus-target, and switch-activation events. A missing or invalid override
+falls back to the entity's `mediaId` or logical event sound. Cloning strips
+per-entity override IDs because the initial clone intentionally copies levels
+without media.
+
 Players may select any source-controlled presentation theme in Settings.
 Playing an owned or public Workshop theme loads its dynamic media manifest.
 

@@ -62,7 +62,7 @@
           "category": { "type": "string", "minLength": 1 },
           "renderMode": { "enum": ["texture", "vector"] },
           "sizing": { "enum": ["contain", "stretch"] },
-          "sourceScope": { "enum": ["default", "theme"] }
+          "sourceScope": { "enum": ["default", "theme", "entity"] }
         }
       }
     },
@@ -103,7 +103,7 @@
               "channel": { "enum": ["ambience", "effects"] }
             }
           },
-          "fileSourceScope": { "enum": ["default", "theme"] },
+          "fileSourceScope": { "enum": ["default", "theme", "entity"] },
           "settingsSourceScope": { "enum": ["default", "theme"] }
         }
       }

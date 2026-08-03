@@ -77,6 +77,15 @@ test('clones, edits, playtests, publishes, and deletes a server theme', async ({
   await page.getByRole('button', { name: /open full-level json editor/i }).click()
   const jsonEditor = page.getByRole('dialog', { name: 'Full level JSON' })
   await expect(jsonEditor.getByLabel('Full level JSON')).toBeVisible()
+  const referencePopupPromise = page.waitForEvent('popup')
+  await jsonEditor
+    .getByRole('button', { name: 'Open node and property guide' })
+    .click()
+  const referencePopup = await referencePopupPromise
+  await expect(referencePopup.locator('body')).toContainText(
+    'Theme Workshop JSON Reference',
+  )
+  await referencePopup.close()
   await jsonEditor.getByRole('button', { name: 'Validate JSON' }).click()
   await expect(
     jsonEditor.getByText('Schema and gameplay validation passed.'),

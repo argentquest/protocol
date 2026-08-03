@@ -27,11 +27,34 @@ function inputInventory(powerups, inventory, devMode) {
   )
 }
 
-/** Returns course-coin IDs previously claimed for the selected level. */
+/**
+ * Selects collected coin IDs that belong to the current level namespace.
+ *
+ * @pure
+ * @param {object} level Active level configuration.
+ * @param {Record<string, boolean>} collectedCoins Persisted coin claims.
+ * @returns {Set<string>} Claimed coin IDs local to the level.
+ */
 function claimedCoinIds(level, collectedCoins) {
   return level.coins
     .filter((coin) => collectedCoins[`${level.id}:${coin.id}`])
     .map((coin) => coin.id)
+}
+
+/**
+ * Resolves an entity-specific sound only when the active manifest contains it.
+ *
+ * @pure
+ * @param {object|null|undefined} entity Gameplay entity.
+ * @param {string} fallbackSoundId Logical default sound ID.
+ * @param {object|null|undefined} manifest Active resolved media manifest.
+ * @returns {string} Playable entity override or the logical default.
+ */
+function entitySoundId(entity, fallbackSoundId, manifest) {
+  const overrideId = entity?.audioOverrideId
+  return overrideId && manifest?.audio?.some((item) => item.soundId === overrideId)
+    ? overrideId
+    : fallbackSoundId
 }
 
 /**
@@ -89,6 +112,7 @@ export default function GameView({
     inputInventory(powerups, inventory, devMode),
   )
 
+  /** Publishes a throttled serializable HUD snapshot to React state. */
   const publishHud = useCallback(() => {
     setHud(engine.snapshot())
     setDisplayInventory(
@@ -103,6 +127,12 @@ export default function GameView({
     )
   }, [devMode, engine, powerups])
 
+  /**
+   * Activates a numbered engine power and persists consumption on success.
+   *
+   * @param {string} key Configured numeric power key.
+   * @returns {void}
+   */
   const activatePowerup = useCallback(
     (power) => {
       const available = Number(engine.session.powerInventory.get(power.id)) || 0
@@ -144,8 +174,8 @@ export default function GameView({
         )
         publishHud()
       }),
-      engine.events.subscribe('target.reached', () => {
-        audio.play('target-reached')
+      engine.events.subscribe('target.reached', ({ payload }) => {
+        audio.play(entitySoundId(payload.target, 'target-reached', mediaManifest))
         setMessage('Target reached')
         publishHud()
       }),
@@ -156,7 +186,9 @@ export default function GameView({
       }),
       engine.events.subscribe('coin.claimed', ({ payload }) => {
         if (onCoinCollected(payload.coin)) {
-          audio.play('coin-collected')
+          audio.play(
+            entitySoundId(payload.coin, 'coin-collected', mediaManifest),
+          )
           setMessage(
             `Coin collected — +${Number(payload.coin.value) || 1} gold`,
           )
@@ -164,7 +196,9 @@ export default function GameView({
         publishHud()
       }),
       engine.events.subscribe('switch.activated', ({ payload }) => {
-        audio.play('target-reached')
+        audio.play(
+          entitySoundId(payload.switch, 'target-reached', mediaManifest),
+        )
         setMessage(
           payload.active
             ? `${payload.switch.id} activated — barrier open`
@@ -204,6 +238,7 @@ export default function GameView({
     onAttemptFailed,
     onCoinCollected,
     onComplete,
+    mediaManifest,
     publishHud,
   ])
 
@@ -227,6 +262,12 @@ export default function GameView({
     }
   }, [engine])
 
+  /**
+   * Connects the mounted Pixi renderer to engine, input, audio, and event adapters.
+   *
+   * @param {object} renderer Initialized Pixi scene renderer.
+   * @returns {() => void} Adapter cleanup callback.
+   */
   const onRendererReady = useCallback(
     async (app, container) => {
       if (!mediaManifest) throw new Error('The media manifest is not ready.')
@@ -268,7 +309,8 @@ export default function GameView({
       const canvas = app.canvas
       canvas.setAttribute('role', 'application')
       canvas.setAttribute('aria-label', `${level.name} obstacle course`)
-      const toWorld = ({ x, y }) => {
+    /** @param {{x:number,y:number}} point Client coordinates in CSS pixels. @returns {{x:number,y:number}} Logical world coordinates. */
+    const toWorld = ({ x, y }) => {
         const bounds = canvas.getBoundingClientRect()
         return screenToWorld(
           { x: x - bounds.left, y: y - bounds.top },
@@ -308,7 +350,8 @@ export default function GameView({
         detachKeyboard()
       }
 
-      const resize = () =>
+    /** Resizes the Pixi renderer to its current CSS pixel bounds. */
+    const resize = () =>
         renderer.resize(container.clientWidth, container.clientHeight)
       const observer =
         typeof ResizeObserver === 'undefined'
@@ -335,10 +378,12 @@ export default function GameView({
     ],
   )
 
+  /** @param {Error} error Pixi initialization failure. @returns {void} */
   const handleRendererError = useCallback((error) => {
     setRendererError(error)
   }, [])
 
+  /** Restarts the same deterministic level layout and resets adapter time. */
   const restart = () => {
     if (engine.machine.state === 'ready') {
       setMessage('Chamber ready — click the token')
@@ -347,6 +392,7 @@ export default function GameView({
     engine.restart('manual')
   }
 
+  /** Accepts the offered bonus and reactivates control at its checkpoint. */
   const pursueBonus = () => {
     engine.pursueBonus()
     audio.play('bonus-accepted')
@@ -354,11 +400,13 @@ export default function GameView({
     setMessage('Bonus relay armed — reactivate at the checkpoint')
   }
 
+  /** Banks the current result without pursuing another offered bonus. */
   const bankBonus = () => {
     engine.bankBonus()
     setBonusPrompt(false)
   }
 
+  /** Toggles engine/Pixi diagnostics for the active game view. */
   const toggleDebug = () => {
     setDebugVisible((visible) => {
       const next = !visible

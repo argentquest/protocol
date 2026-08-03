@@ -1,6 +1,14 @@
 const DEFAULT_MAXIMUM_SAMPLES = 512
 const DEFAULT_MAXIMUM_GHOSTS = 2
 
+/**
+ * Tests exact equality of two deterministic world positions.
+ *
+ * @pure
+ * @param {{x:number,y:number}} first First point.
+ * @param {{x:number,y:number}} second Second point.
+ * @returns {boolean} Whether both coordinates match.
+ */
 function samePoint(first, second) {
   return first?.x === second?.x && first?.y === second?.y
 }

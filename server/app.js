@@ -7,6 +7,14 @@ import { createMediaLibrary } from './mediaLibrary.js'
 
 const SESSION_COOKIE = 'path_protocol_session'
 
+/**
+ * Reads one decoded cookie value from an Express request.
+ *
+ * @pure
+ * @param {import('express').Request} request Incoming request.
+ * @param {string} name Cookie name.
+ * @returns {string} Decoded value, or an empty string when absent.
+ */
 function cookieValue(request, name) {
   const cookies = String(request.get('cookie') ?? '').split(';')
   for (const cookie of cookies) {
@@ -16,6 +24,14 @@ function cookieValue(request, name) {
   return ''
 }
 
+/**
+ * Writes the HTTP-only authentication cookie with the session lifetime.
+ *
+ * @param {import('express').Response} response Outgoing response.
+ * @param {string} token Opaque session credential.
+ * @param {boolean} secure Whether to restrict transport to HTTPS.
+ * @returns {void}
+ */
 function writeSessionCookie(response, token, secure) {
   response.cookie(SESSION_COOKIE, token, {
     httpOnly: true,
@@ -26,6 +42,13 @@ function writeSessionCookie(response, token, secure) {
   })
 }
 
+/**
+ * Returns the authenticated request user or raises an HTTP 401 error.
+ *
+ * @param {import('express').Request & {user?: object}} request Incoming request.
+ * @returns {object} Authenticated public user record.
+ * @throws {Error} When the request has no authenticated session.
+ */
 function requireUser(request) {
   if (!request.user) {
     throw Object.assign(new Error('Login is required.'), { status: 401 })
@@ -33,6 +56,12 @@ function requireUser(request) {
   return request.user
 }
 
+/**
+ * Adapts an asynchronous route handler to Express error middleware.
+ *
+ * @param {(request: import('express').Request, response: import('express').Response) => Promise<unknown>} handler Asynchronous route implementation.
+ * @returns {import('express').RequestHandler} Express-compatible handler.
+ */
 function asyncRoute(handler) {
   return (request, response, next) => {
     Promise.resolve(handler(request, response)).catch(next)
@@ -185,6 +214,18 @@ export async function createServerApp({
     }),
   )
   app.get(
+    '/api/themes/:themeId/media-file/:fileName',
+    asyncRoute(async (request, response) => {
+      response.sendFile(
+        await store.resolveMediaFile(
+          request.params.themeId,
+          request.user?.id,
+          request.query.path,
+        ),
+      )
+    }),
+  )
+  app.get(
     '/api/themes/:themeId/media-file',
     asyncRoute(async (request, response) => {
       response.sendFile(
@@ -218,6 +259,18 @@ export async function createServerApp({
           requireUser(request).id,
           request.params.soundId,
           request.body?.assetId,
+        ),
+      )
+    }),
+  )
+  app.post(
+    '/api/themes/:themeId/media/entity-overrides',
+    asyncRoute(async (request, response) => {
+      response.status(201).json(
+        await store.setEntityMediaOverride(
+          request.params.themeId,
+          requireUser(request).id,
+          request.body ?? {},
         ),
       )
     }),
@@ -328,6 +381,13 @@ export async function createServerApp({
       await access(path.join(distributionDirectory, 'index.html'))
       app.use(
         express.static(distributionDirectory, {
+          /**
+           * Prevents caching the HTML shell while allowing versioned assets to cache.
+           *
+           * @param {import('express').Response} response Static-file response.
+           * @param {string} filePath Served file path.
+           * @returns {void}
+           */
           setHeaders(response, filePath) {
             const normalized = filePath.replaceAll('\\', '/')
             if (normalized.includes('/media/manifests/')) {

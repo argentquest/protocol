@@ -654,6 +654,28 @@ challenges teach each behavior in isolation.
 
 ---
 
+## Sprint 21 — Per-entity media overrides
+
+**Status:** `DONE`
+
+| ID | Task | Size | Status | Acceptance |
+|---|---|---:|---|---|
+| V2-S21-01 | Add level override contracts | M | `DONE` | Renderable entities accept optional server-issued visual and audio override IDs. |
+| V2-S21-02 | Materialize owned entity media | L | `DONE` | The API copies selected catalog files into the owned theme and rejects unavailable references on save. |
+| V2-S21-03 | Resolve overrides at runtime | L | `DONE` | Pixi and supported gameplay events use an entity override with deterministic base-media fallback. |
+| V2-S21-04 | Add selected-object authoring UI | L | `DONE` | Authors can choose, preview, apply, and clear image or supported event-sound overrides for one entity. |
+| V2-S21-05 | Document and validate release gates | M | `DONE` | Author reference, architecture, tests, lint, and production build match the implementation. |
+
+### Sprint 21 exit criteria
+
+- Two entities with the same base type can resolve different owned visuals and sounds.
+- Level JSON never stores a direct PublicMedia path.
+- Missing, invalid, or cleared per-entity media falls back to the registered base.
+- Clone-without-media cannot retain dangling entity override IDs.
+- Unit, API, documentation, lint, and production build checks pass.
+
+---
+
 ## 4. Dependency sequence
 
 ```text
@@ -678,6 +700,7 @@ Sprint 0: Decisions and branch
                                 → Sprint 18: SQLite accounts
                                   → Sprint 19: Texture proof theme
                                     → Sprint 20: Theme media library
+                                      → Sprint 21: Per-entity media overrides
 ```
 
 Some tasks may overlap after their contracts stabilize. For example, WAV asset

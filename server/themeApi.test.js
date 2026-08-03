@@ -318,6 +318,48 @@ describe('accounts and Theme Workshop API', () => {
       'coin-collected.wav',
     ])
 
+    const entityVisual = await owner
+      .post(`/api/themes/${clone.body.id}/media/entity-overrides`)
+      .send({
+        kind: 'visual',
+        baseId: 'coin-standard',
+        assetId: 'images/token.png',
+      })
+    expect(entityVisual.status).toBe(201)
+    expect(entityVisual.body.overrideId).toMatch(/^entity-visual-/)
+    const entityAudio = await owner
+      .post(`/api/themes/${clone.body.id}/media/entity-overrides`)
+      .send({
+        kind: 'audio',
+        baseId: 'coin-collected',
+        assetId: 'audio/coin.aif',
+      })
+    expect(entityAudio.status).toBe(201)
+    expect(entityAudio.body.overrideId).toMatch(/^entity-audio-/)
+
+    const campaign = await owner.get(`/api/themes/${clone.body.id}/campaign`)
+    const customizedLevel = campaign.body.levels[0]
+    customizedLevel.coins[0].visualOverrideId = entityVisual.body.overrideId
+    customizedLevel.coins[0].audioOverrideId = entityAudio.body.overrideId
+    expect(
+      (
+        await owner
+          .put(
+            `/api/themes/${clone.body.id}/levels/${customizedLevel.internalId}`,
+          )
+          .send(customizedLevel)
+      ).status,
+    ).toBe(200)
+    customizedLevel.coins[0].visualOverrideId =
+      'entity-visual-00000000-0000-0000-0000-000000000000'
+    const missingOverride = await owner
+      .put(`/api/themes/${clone.body.id}/levels/${customizedLevel.internalId}`)
+      .send(customizedLevel)
+    expect(missingOverride.status).toBe(422)
+    expect(missingOverride.body.details).toContain(
+      customizedLevel.coins[0].visualOverrideId,
+    )
+
     const manifest = await owner.get(
       `/api/themes/${clone.body.id}/media-manifest`,
     )
@@ -330,6 +372,18 @@ describe('accounts and Theme Workshop API', () => {
     )
     expect(coinSound.fileSourceScope).toBe('theme')
     expect(coinSound.sources).toHaveLength(2)
-    expect(coinSound.sources[0]).toContain(`/api/themes/${clone.body.id}/media-file`)
-  }, 30_000)
+    expect(coinSound.sources[0]).toContain(
+      `/api/themes/${clone.body.id}/media-file/asset.webm?v=`,
+    )
+    expect(
+      manifest.body.visuals.find(
+        (entry) => entry.mediaId === entityVisual.body.overrideId,
+      ),
+    ).toMatchObject({ renderMode: 'texture', sourceScope: 'entity' })
+    expect(
+      manifest.body.audio.find(
+        (entry) => entry.soundId === entityAudio.body.overrideId,
+      ),
+    ).toMatchObject({ fileSourceScope: 'entity' })
+  }, 60_000)
 })

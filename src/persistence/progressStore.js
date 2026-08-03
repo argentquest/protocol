@@ -2,12 +2,26 @@ const STORAGE_KEY = 'path-protocol.progress'
 const SCHEMA_VERSION = 3
 const MAX_STORED_LEVEL = 200
 
+/**
+ * Builds the versioned browser-storage namespace for a campaign theme.
+ *
+ * @pure
+ * @param {string} themeId Stable theme ID.
+ * @returns {string} Local-storage key.
+ */
 function storageKeyForTheme(themeId) {
   return themeId === 'default'
     ? STORAGE_KEY
     : `${STORAGE_KEY}.theme.${encodeURIComponent(themeId)}`
 }
 
+/**
+ * Selects the immutable progress identifier for default or Workshop levels.
+ *
+ * @pure
+ * @param {object} level Level configuration.
+ * @returns {string} Internal level ID when present, otherwise campaign ID.
+ */
 function levelProgressId(level) {
   return level.internalId ?? level.id
 }
@@ -50,6 +64,13 @@ export function createInitialProgress() {
   }
 }
 
+/**
+ * Upgrades supported legacy progress records to the current schema version.
+ *
+ * @pure
+ * @param {unknown} value Parsed persisted value.
+ * @returns {unknown} Migrated value, or the original unsupported value.
+ */
 function migrateProgress(value) {
   if ([1, 2].includes(value?.schemaVersion)) {
     return {
@@ -61,6 +82,13 @@ function migrateProgress(value) {
   return value
 }
 
+/**
+ * Projects untrusted persisted data onto a valid current progress record.
+ *
+ * @pure
+ * @param {unknown} savedValue Parsed browser-storage value.
+ * @returns {PlayerProgress} Bounded progress with safe defaults.
+ */
 function sanitizeProgress(savedValue) {
   const initial = createInitialProgress()
   const value = migrateProgress(savedValue)

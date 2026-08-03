@@ -80,6 +80,11 @@ export const themeApi = {
       method: 'PUT',
       body: { assetId },
     }),
+  setEntityMediaOverride: (themeId, body) =>
+    apiRequest(`/api/themes/${themeId}/media/entity-overrides`, {
+      method: 'POST',
+      body,
+    }),
   level: (themeId, internalId) =>
     apiRequest(`/api/themes/${themeId}/levels/${internalId}`),
   saveLevel: (themeId, internalId, level) =>

@@ -5,6 +5,12 @@ import Ajv2020 from 'ajv/dist/2020.js'
 import { validateDefaultAudioLibrary } from './lib/validate-audio.mjs'
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
+/**
+ * Reads and parses a repository-relative JSON document.
+ *
+ * @param {...string} segments Path segments below the repository root.
+ * @returns {Promise<object>} Parsed JSON value.
+ */
 const readJson = async (...segments) =>
   JSON.parse(await readFile(path.join(projectRoot, ...segments), 'utf8'))
 

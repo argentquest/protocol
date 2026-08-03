@@ -8,6 +8,14 @@ import {
 import { advanceTokenMotion } from './MovementSystem.js'
 import { resolveForceFieldAcceleration } from './ForceFieldSystem.js'
 
+/**
+ * Builds the token's authoritative collision shape at a candidate center.
+ *
+ * @pure
+ * @param {object} session Active level session.
+ * @param {{x:number,y:number}} position Candidate center in world units.
+ * @returns {object} Inset token collision shape.
+ */
 function currentToken(session, position) {
   return insetShape(
     { ...session.level.token, x: position.x, y: position.y },

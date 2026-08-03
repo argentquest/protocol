@@ -8,6 +8,13 @@ import { createSeededRandom, randomBetween, randomItem } from './seededRandom.js
 import { dynamicObstacleEnvelope } from '../engine/DynamicObstacleSystem.js'
 import { WORLD_HEIGHT, WORLD_WIDTH } from '../world.js'
 
+/**
+ * Resolves an authored point or samples one from its seeded region.
+ *
+ * @param {object} specification Fixed coordinates or generated-region contract.
+ * @param {() => number} random Seeded random source.
+ * @returns {{x:number,y:number}} World point.
+ */
 function resolvePoint(specification, random) {
   if (specification.mode !== 'generated') {
     return { x: specification.x, y: specification.y }
@@ -19,6 +26,13 @@ function resolvePoint(specification, random) {
   }
 }
 
+/**
+ * Normalizes obstacle shorthand to explicit collision dimensions.
+ *
+ * @pure
+ * @param {object} obstacle Authored obstacle.
+ * @returns {object} Obstacle with width and height in world units.
+ */
 function normalizeObstacle(obstacle) {
   return normalizeShape({
     ...obstacle,
@@ -27,6 +41,15 @@ function normalizeObstacle(obstacle) {
   })
 }
 
+/**
+ * Tests a placement candidate against reserved geometry with clearance.
+ *
+ * @pure
+ * @param {object} candidate Candidate collision shape.
+ * @param {object[]} reserved Existing reserved shapes.
+ * @param {number} minimumGap Required clearance in world units.
+ * @returns {boolean} Whether the expanded candidate overlaps anything reserved.
+ */
 function overlapsReserved(candidate, reserved, minimumGap) {
   const expanded = {
     ...candidate,
@@ -36,13 +59,23 @@ function overlapsReserved(candidate, reserved, minimumGap) {
   return reserved.some((item) => shapesIntersect(expanded, item))
 }
 
+/**
+ * Performs an eight-direction breadth-first search for a complete-token route.
+ *
+ * @pure
+ * @param {object} options Arena, token, endpoints, obstacles, and grid size in world units.
+ * @param {boolean} includePoints Whether to reconstruct route points.
+ * @returns {import('../types.js').Point[]|null} Empty/reconstructed route, or `null` when blocked.
+ */
 function searchPath(
   { arena, token, start, target, obstacles, gridSize = 24 },
   includePoints,
 ) {
   const columns = Math.ceil(WORLD_WIDTH / gridSize)
   const rows = Math.ceil(WORLD_HEIGHT / gridSize)
+  /** @param {number} column Grid column. @param {number} row Grid row. @returns {string} Stable cell key. */
   const key = (column, row) => `${column}:${row}`
+  /** @param {object} point World point. @returns {{column:number,row:number}} Bounded grid cell. */
   const toCell = (point) => ({
     column: Math.max(0, Math.min(columns - 1, Math.floor(point.x / gridSize))),
     row: Math.max(0, Math.min(rows - 1, Math.floor(point.y / gridSize))),
@@ -162,6 +195,14 @@ export function findPath(options) {
   return searchPath(options, true)
 }
 
+/**
+ * Creates one seeded obstacle candidate from level generation constraints.
+ *
+ * @param {object} level Level configuration.
+ * @param {() => number} random Seeded random source.
+ * @param {number} index Zero-based generated obstacle index.
+ * @returns {object} Normalized obstacle candidate.
+ */
 function makeGeneratedObstacle(level, random, index) {
   const generation = level.generation
   const shape = randomItem(random, generation.allowedShapes)
@@ -359,6 +400,8 @@ export function generateLevel(level) {
     y: startPoint.y,
   })
   const mainTarget = normalizeShape({
+    visualOverrideId: level.mainTarget.visualOverrideId,
+    audioOverrideId: level.mainTarget.audioOverrideId,
     id: 'main-target',
     mediaId: level.mainTarget.mediaId,
     shape: 'circle',

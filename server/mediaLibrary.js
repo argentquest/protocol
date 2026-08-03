@@ -19,14 +19,26 @@ const AUDIO_EXTENSIONS = new Set(['.wav', '.ogg', '.mp3', '.aif', '.aiff'])
 const MAX_IMAGE_BYTES = 25 * 1024 * 1024
 const MAX_AUDIO_BYTES = 100 * 1024 * 1024
 
-/** @returns {'image'|'audio'|null} Catalog kind for a lowercase extension. */
+/**
+ * Maps a lowercase file extension to a supported catalog kind.
+ *
+ * @pure
+ * @param {string} extension Lowercase extension including its leading dot.
+ * @returns {'image'|'audio'|null} Supported catalog kind.
+ */
 function mediaKind(extension) {
   if (IMAGE_EXTENSIONS.has(extension)) return 'image'
   if (AUDIO_EXTENSIONS.has(extension)) return 'audio'
   return null
 }
 
-/** @returns {Promise<string[]>} Absolute file paths below the catalog root. */
+/**
+ * Recursively enumerates catalog files without following non-file entries.
+ *
+ * @param {string} root Absolute catalog root retained for recursive calls.
+ * @param {string} [directory=root] Current directory being visited.
+ * @returns {Promise<string[]>} Absolute file paths below the catalog root.
+ */
 async function walkFiles(root, directory = root) {
   const entries = await readdir(directory, { withFileTypes: true })
   const groups = await Promise.all(entries.map(async (entry) => {
@@ -37,7 +49,14 @@ async function walkFiles(root, directory = root) {
   return groups.flat()
 }
 
-/** @returns {Promise<void>} Completion of one hidden FFmpeg conversion process. */
+/**
+ * Runs one hidden FFmpeg conversion and exposes useful stderr on failure.
+ *
+ * @param {string} ffmpegPath FFmpeg executable path.
+ * @param {string[]} argumentsList Conversion arguments.
+ * @param {string} label Diagnostic operation label.
+ * @returns {Promise<void>} Completion of the conversion process.
+ */
 function runFfmpeg(ffmpegPath, argumentsList, label) {
   return new Promise((resolve, reject) => {
     const child = spawn(ffmpegPath, argumentsList, {
@@ -56,13 +75,25 @@ function runFfmpeg(ffmpegPath, argumentsList, label) {
   })
 }
 
-/** @returns {Promise<void>} Atomic replacement of one materialized theme file. */
+/**
+ * Replaces a materialized theme file with its same-directory temporary file.
+ *
+ * @param {string} temporaryPath Completed temporary output path.
+ * @param {string} destinationPath Final theme asset path.
+ * @returns {Promise<void>} Completion of replacement.
+ */
 async function replaceFile(temporaryPath, destinationPath) {
   await rm(destinationPath, { force: true })
   await rename(temporaryPath, destinationPath)
 }
 
-/** @returns {Promise<void>} Validation of one normalized SVG or PNG file. */
+/**
+ * Validates a normalized SVG contract or non-empty PNG dimensions.
+ *
+ * @param {string} filePath Absolute normalized image path.
+ * @param {'.svg'|'.png'} extension Output extension.
+ * @returns {Promise<void>} Resolves when the image is valid.
+ */
 async function validateNormalizedImage(filePath, extension) {
   const source = await readFile(filePath)
   if (extension === '.svg') {
@@ -147,6 +178,13 @@ export async function createMediaLibrary({ root, ffmpegPath = ffmpegStatic }) {
   }
   entries.sort((first, second) => first.id.localeCompare(second.id))
 
+  /**
+   * Resolves a catalog ID and optionally enforces its media kind.
+   *
+   * @param {string} id Stable catalog asset ID.
+   * @param {'image'|'audio'|null} [expectedKind=null] Required media kind.
+   * @returns {object} Catalog entry.
+   */
   function resolveEntry(id, expectedKind = null) {
     const entry = byId.get(String(id ?? '').replaceAll('\\', '/'))
     if (!entry || (expectedKind && entry.kind !== expectedKind)) {
@@ -155,6 +193,12 @@ export async function createMediaLibrary({ root, ffmpegPath = ffmpegStatic }) {
     return entry
   }
 
+  /**
+   * Filters and paginates safe catalog metadata for the Workshop browser.
+   *
+   * @param {object} options Kind, collection, folder, search, and paging filters.
+   * @returns {object} Matching entries, folders, and paging metadata.
+   */
   function list({
     kind = 'image',
     collection = '',
@@ -237,6 +281,13 @@ export async function createMediaLibrary({ root, ffmpegPath = ffmpegStatic }) {
     }
   }
 
+  /**
+   * Copies or normalizes a catalog image into a theme media destination.
+   *
+   * @param {string} assetId Stable catalog image ID.
+   * @param {string} destinationBasePath Extension-free theme path.
+   * @returns {Promise<{extension:string,entry:object}>} Materialized format and provenance.
+   */
   async function materializeVisual(assetId, destinationBasePath) {
     const entry = resolveEntry(assetId, 'image')
     const sourceStats = await stat(entry.absolutePath)
@@ -270,6 +321,14 @@ export async function createMediaLibrary({ root, ffmpegPath = ffmpegStatic }) {
     }
   }
 
+  /**
+   * Normalizes catalog audio to WAV, WebM, and MP3 theme assets.
+   *
+   * @param {string} assetId Stable catalog audio ID.
+   * @param {string} audioRoot Absolute theme audio directory.
+   * @param {string} soundId Registered logical sound ID.
+   * @returns {Promise<{entry:object}>} Source provenance for the materialized audio.
+   */
   async function materializeAudio(assetId, audioRoot, soundId) {
     const entry = resolveEntry(assetId, 'audio')
     const sourceStats = await stat(entry.absolutePath)

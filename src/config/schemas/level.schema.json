@@ -84,6 +84,10 @@
       "type": "string",
       "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
     },
+    "overrideId": {
+      "type": "string",
+      "pattern": "^entity-(?:visual|audio)-[a-f0-9-]{36}$"
+    },
     "coordinate": {
       "type": "number",
       "minimum": 0,
@@ -114,6 +118,8 @@
           "properties": {
             "shape": { "const": "rect" },
             "mediaId": { "$ref": "#/$defs/mediaId" },
+            "visualOverrideId": { "$ref": "#/$defs/overrideId" },
+            "audioOverrideId": { "$ref": "#/$defs/overrideId" },
             "margin": { "type": "number", "minimum": 0, "maximum": 400 },
             "cornerRadius": { "type": "number", "minimum": 0, "maximum": 500 }
           }
@@ -125,6 +131,8 @@
           "properties": {
             "shape": { "const": "ellipse" },
             "mediaId": { "$ref": "#/$defs/mediaId" },
+            "visualOverrideId": { "$ref": "#/$defs/overrideId" },
+            "audioOverrideId": { "$ref": "#/$defs/overrideId" },
             "margin": { "type": "number", "minimum": 0, "maximum": 400 }
           }
         },
@@ -135,6 +143,8 @@
           "properties": {
             "shape": { "const": "polygon" },
             "mediaId": { "$ref": "#/$defs/mediaId" },
+            "visualOverrideId": { "$ref": "#/$defs/overrideId" },
+            "audioOverrideId": { "$ref": "#/$defs/overrideId" },
             "points": {
               "type": "array",
               "minItems": 3,
@@ -160,7 +170,9 @@
       "properties": {
         "shape": { "enum": ["circle", "rect", "diamond"] },
         "size": { "$ref": "#/$defs/positiveDimension" },
-        "mediaId": { "$ref": "#/$defs/mediaId" }
+        "mediaId": { "$ref": "#/$defs/mediaId" },
+        "visualOverrideId": { "$ref": "#/$defs/overrideId" },
+        "audioOverrideId": { "$ref": "#/$defs/overrideId" }
       }
     },
     "movement": {
@@ -183,6 +195,8 @@
           "properties": {
             "mode": { "const": "generated" },
             "mediaId": { "$ref": "#/$defs/mediaId" },
+            "visualOverrideId": { "$ref": "#/$defs/overrideId" },
+            "audioOverrideId": { "$ref": "#/$defs/overrideId" },
             "region": { "$ref": "#/$defs/region" }
           }
         },
@@ -193,6 +207,8 @@
           "properties": {
             "mode": { "const": "manual" },
             "mediaId": { "$ref": "#/$defs/mediaId" },
+            "visualOverrideId": { "$ref": "#/$defs/overrideId" },
+            "audioOverrideId": { "$ref": "#/$defs/overrideId" },
             "x": { "$ref": "#/$defs/coordinate" },
             "y": { "$ref": "#/$defs/coordinate" }
           }
@@ -208,6 +224,8 @@
           "properties": {
             "mode": { "const": "generated" },
             "mediaId": { "$ref": "#/$defs/mediaId" },
+            "visualOverrideId": { "$ref": "#/$defs/overrideId" },
+            "audioOverrideId": { "$ref": "#/$defs/overrideId" },
             "region": { "$ref": "#/$defs/region" },
             "size": { "$ref": "#/$defs/positiveDimension" }
           }
@@ -219,6 +237,8 @@
           "properties": {
             "mode": { "const": "manual" },
             "mediaId": { "$ref": "#/$defs/mediaId" },
+            "visualOverrideId": { "$ref": "#/$defs/overrideId" },
+            "audioOverrideId": { "$ref": "#/$defs/overrideId" },
             "x": { "$ref": "#/$defs/coordinate" },
             "y": { "$ref": "#/$defs/coordinate" },
             "size": { "$ref": "#/$defs/positiveDimension" }
@@ -286,6 +306,8 @@
       "properties": {
         "id": { "type": "string", "minLength": 1 },
         "mediaId": { "$ref": "#/$defs/mediaId" },
+        "visualOverrideId": { "$ref": "#/$defs/overrideId" },
+        "audioOverrideId": { "$ref": "#/$defs/overrideId" },
         "shape": { "enum": ["circle", "rect", "diamond"] },
         "x": { "$ref": "#/$defs/coordinate" },
         "y": { "$ref": "#/$defs/coordinate" },
@@ -312,6 +334,8 @@
       "properties": {
         "id": { "type": "string", "minLength": 1 },
         "mediaId": { "$ref": "#/$defs/mediaId" },
+        "visualOverrideId": { "$ref": "#/$defs/overrideId" },
+        "audioOverrideId": { "$ref": "#/$defs/overrideId" },
         "shape": { "enum": ["circle", "rect", "diamond"] },
         "x": { "$ref": "#/$defs/coordinate" },
         "y": { "$ref": "#/$defs/coordinate" },
@@ -344,6 +368,8 @@
       "properties": {
         "id": { "type": "string", "minLength": 1 },
         "mediaId": { "$ref": "#/$defs/mediaId" },
+        "visualOverrideId": { "$ref": "#/$defs/overrideId" },
+        "audioOverrideId": { "$ref": "#/$defs/overrideId" },
         "shape": { "enum": ["circle", "rect", "diamond"] },
         "x": { "$ref": "#/$defs/coordinate" },
         "y": { "$ref": "#/$defs/coordinate" },
@@ -366,6 +392,8 @@
       "properties": {
         "id": { "type": "string", "minLength": 1 },
         "mediaId": { "$ref": "#/$defs/mediaId" },
+        "visualOverrideId": { "$ref": "#/$defs/overrideId" },
+        "audioOverrideId": { "$ref": "#/$defs/overrideId" },
         "shape": { "enum": ["circle", "rect", "diamond"] },
         "x": { "$ref": "#/$defs/coordinate" },
         "y": { "$ref": "#/$defs/coordinate" },
@@ -456,6 +484,8 @@
           "properties": {
             "id": { "type": "string", "minLength": 1 },
             "mediaId": { "$ref": "#/$defs/mediaId" },
+            "visualOverrideId": { "$ref": "#/$defs/overrideId" },
+            "audioOverrideId": { "$ref": "#/$defs/overrideId" },
             "type": { "const": "conveyor" },
             "x": { "$ref": "#/$defs/coordinate" },
             "y": { "$ref": "#/$defs/coordinate" },
@@ -472,6 +502,8 @@
           "properties": {
             "id": { "type": "string", "minLength": 1 },
             "mediaId": { "$ref": "#/$defs/mediaId" },
+            "visualOverrideId": { "$ref": "#/$defs/overrideId" },
+            "audioOverrideId": { "$ref": "#/$defs/overrideId" },
             "type": { "enum": ["repulsor", "attractor"] },
             "x": { "$ref": "#/$defs/coordinate" },
             "y": { "$ref": "#/$defs/coordinate" },
@@ -496,6 +528,8 @@
       "properties": {
         "id": { "type": "string", "minLength": 1 },
         "mediaId": { "$ref": "#/$defs/mediaId" },
+        "visualOverrideId": { "$ref": "#/$defs/overrideId" },
+        "audioOverrideId": { "$ref": "#/$defs/overrideId" },
         "x": { "$ref": "#/$defs/coordinate" },
         "y": { "$ref": "#/$defs/coordinate" },
         "size": { "$ref": "#/$defs/positiveDimension" },
@@ -510,6 +544,8 @@
       "properties": {
         "id": { "type": "string", "minLength": 1 },
         "mediaId": { "$ref": "#/$defs/mediaId" },
+        "visualOverrideId": { "$ref": "#/$defs/overrideId" },
+        "audioOverrideId": { "$ref": "#/$defs/overrideId" },
         "x": { "$ref": "#/$defs/coordinate" },
         "y": { "$ref": "#/$defs/coordinate" },
         "size": { "$ref": "#/$defs/positiveDimension" },
@@ -554,6 +590,8 @@
       "properties": {
         "id": { "type": "string", "minLength": 1 },
         "mediaId": { "$ref": "#/$defs/mediaId" },
+        "visualOverrideId": { "$ref": "#/$defs/overrideId" },
+        "audioOverrideId": { "$ref": "#/$defs/overrideId" },
         "x": { "$ref": "#/$defs/coordinate" },
         "y": { "$ref": "#/$defs/coordinate" },
         "size": { "$ref": "#/$defs/positiveDimension" }

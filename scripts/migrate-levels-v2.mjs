@@ -5,8 +5,22 @@ import { fileURLToPath } from 'node:url'
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const levelDirectory = path.join(projectRoot, 'src', 'config', 'levels')
 
+/**
+ * Builds the registered media ID for an obstacle kind and shape.
+ *
+ * @pure
+ * @param {string} kind Obstacle motion category.
+ * @param {string} shape Authoritative collision shape.
+ * @returns {string} Theme-neutral obstacle media ID.
+ */
 const mediaFor = (kind, shape) => `obstacle-${kind}-${shape}`
 
+/**
+ * Mutates a legacy level document into the V2 configuration contract.
+ *
+ * @param {object} level Parsed legacy level configuration.
+ * @returns {object} The migrated level object.
+ */
 function migrateLevel(level) {
   level.schemaVersion = 2
   level.arena.mediaId =

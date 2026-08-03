@@ -23,6 +23,12 @@ const preview = spawn(
   },
 )
 
+/**
+ * Polls the isolated production server until it accepts HTTP requests.
+ *
+ * @returns {Promise<void>} Resolves when the preview is ready.
+ * @throws {Error} If the server is not ready within 15,000 milliseconds.
+ */
 async function waitForPreview() {
   const deadline = Date.now() + 15_000
   while (Date.now() < deadline) {
@@ -37,6 +43,7 @@ async function waitForPreview() {
   throw new Error('Production server did not become ready within 15 seconds.')
 }
 
+/** Stops the child preview server when it is still running. */
 function stopPreview() {
   if (preview.exitCode === null && !preview.killed) preview.kill()
 }

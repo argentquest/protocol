@@ -8,6 +8,14 @@ import {
   resolveDynamicObstacles,
 } from './DynamicObstacleSystem.js'
 
+/**
+ * Overlays simulated tracking state onto immutable obstacle configuration.
+ *
+ * @pure
+ * @param {object} obstacle Tracking obstacle configuration.
+ * @param {object} state Current simulated transform and velocity.
+ * @returns {object} Collision-ready obstacle at its current position.
+ */
 function withCurrentPosition(obstacle, state) {
   return { ...obstacle, x: state.x, y: state.y }
 }

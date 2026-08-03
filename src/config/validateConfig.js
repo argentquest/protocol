@@ -23,6 +23,11 @@ const schemaEntries = {
   themes: themeSchema,
 }
 
+/**
+ * Compiles all configuration schemas into reusable AJV validators.
+ *
+ * @returns {Record<string, import('ajv').ValidateFunction>} Validator by contract name.
+ */
 function createValidators() {
   const ajv = new Ajv2020({
     allErrors: true,
@@ -36,6 +41,11 @@ function createValidators() {
 
 let validators
 
+/**
+ * Returns the lazily compiled schema-validator cache.
+ *
+ * @returns {Record<string, import('ajv').ValidateFunction>} Shared validators.
+ */
 function getValidators() {
   validators ??= createValidators()
   return validators
@@ -50,6 +60,14 @@ export function getSchemaValidators() {
   return getValidators()
 }
 
+/**
+ * Converts AJV error objects into actionable scoped messages.
+ *
+ * @pure
+ * @param {string} scope Configuration document label.
+ * @param {object[]} [errors=[]] AJV validation errors.
+ * @returns {string[]} Human-readable error messages.
+ */
 function formatAjvErrors(scope, errors = []) {
   return errors.map((error) => {
     const path = error.instancePath || '/'
@@ -57,6 +75,13 @@ function formatAjvErrors(scope, errors = []) {
   })
 }
 
+/**
+ * Finds repeated stable IDs in encounter order.
+ *
+ * @pure
+ * @param {string[]} values Candidate IDs.
+ * @returns {string[]} Unique duplicate IDs.
+ */
 function duplicateValues(values) {
   const seen = new Set()
   const duplicates = new Set()
@@ -67,6 +92,13 @@ function duplicateValues(values) {
   return [...duplicates]
 }
 
+/**
+ * Collects every theme-neutral visual media ID referenced by a level.
+ *
+ * @pure
+ * @param {object} level Level configuration.
+ * @returns {string[]} Referenced media IDs.
+ */
 function levelMediaIds(level) {
   return [
     level.arena?.mediaId,
@@ -85,6 +117,14 @@ function levelMediaIds(level) {
   ].filter(Boolean)
 }
 
+/**
+ * Validates uniqueness and cross-contract rules in media registries.
+ *
+ * @param {object} mediaRegistry Visual media registry.
+ * @param {object} soundRegistry Logical sound registry.
+ * @param {string[]} errors Mutable error collection.
+ * @returns {void}
+ */
 function validateRegistries(mediaRegistry, soundRegistry, errors) {
   const mediaIds = mediaRegistry.media.map((entry) => entry.mediaId)
   const mediaFiles = mediaRegistry.media.map(
@@ -110,6 +150,15 @@ function validateRegistries(mediaRegistry, soundRegistry, errors) {
   }
 }
 
+/**
+ * Validates level references and gameplay relationships beyond JSON Schema.
+ *
+ * @param {object} level Level configuration.
+ * @param {Set<string>} mediaIds Registered visual media IDs.
+ * @param {string[]} errors Mutable error collection.
+ * @param {object} [options] Campaign-specific constraints.
+ * @returns {void}
+ */
 function validateLevelRelationships(
   levels,
   mediaIds,
@@ -195,6 +244,15 @@ function validateLevelRelationships(
   }
 }
 
+/**
+ * Validates power visual and audio references against their registries.
+ *
+ * @param {object} powerupConfig Power configuration.
+ * @param {Set<string>} mediaIds Registered visual IDs.
+ * @param {Set<string>} soundIds Registered sound IDs.
+ * @param {string[]} errors Mutable error collection.
+ * @returns {void}
+ */
 function validatePowerRelationships(powerupConfig, mediaIds, soundIds, errors) {
   const powers = powerupConfig.powerups
   for (const duplicate of duplicateValues(powers.map((power) => power.id))) {
@@ -231,6 +289,14 @@ export function validateConfiguration({
 }) {
   const validators = getValidators()
   const errors = []
+  /**
+   * Runs a compiled schema validator and appends scoped diagnostics.
+   *
+   * @param {string} validatorName Validator cache key.
+   * @param {string} scope Configuration document label.
+   * @param {unknown} value Candidate configuration.
+   * @returns {void}
+   */
   const validate = (validatorName, scope, value) => {
     const valid = validators[validatorName](value)
     if (!valid) {

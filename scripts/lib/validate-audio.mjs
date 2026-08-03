@@ -24,6 +24,13 @@ export function validateWavBuffer(buffer, label = 'WAV') {
   return errors
 }
 
+/**
+ * Validates that a required delivery asset is a non-empty regular file.
+ *
+ * @param {string} filePath Absolute delivery-file path.
+ * @param {string} label Human-readable diagnostic label.
+ * @returns {Promise<string[]>} Validation errors, empty when valid.
+ */
 async function validateNonEmptyFile(filePath, label) {
   try {
     const fileStats = await stat(filePath)

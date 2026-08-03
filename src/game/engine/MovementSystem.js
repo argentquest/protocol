@@ -13,6 +13,15 @@ function approach(current, target, maximumChange) {
   return current + Math.sign(difference) * maximumChange
 }
 
+/**
+ * Computes pointer-directed target velocity without snapping the token.
+ *
+ * @pure
+ * @param {{x:number,y:number}} position Token center in world units.
+ * @param {{x:number,y:number}} desiredPosition Pointer target in world units.
+ * @param {object} movement Movement limits in world units per second.
+ * @returns {{x:number,y:number}} Desired velocity in world units per second.
+ */
 function desiredPointerVelocity(position, desiredPosition, movement) {
   const deltaX = desiredPosition.x - position.x
   const deltaY = desiredPosition.y - position.y
@@ -26,6 +35,14 @@ function desiredPointerVelocity(position, desiredPosition, movement) {
   }
 }
 
+/**
+ * Converts pressed directions into a normalized keyboard target velocity.
+ *
+ * @pure
+ * @param {Set<string>} directions Active direction names.
+ * @param {object} movement Movement limits in world units per second.
+ * @returns {{x:number,y:number}} Desired velocity in world units per second.
+ */
 function desiredKeyboardVelocity(directions, movement) {
   const horizontal =
     Number(directions.has('ArrowRight')) - Number(directions.has('ArrowLeft'))

@@ -13,6 +13,7 @@ export function createGameEventBus() {
   const listeners = new Map()
   let disposed = false
 
+  /** @param {string} type Event type. @param {(event:object)=>void} listener Subscriber. @returns {() => void} Unsubscribe callback. */
   function subscribe(type, listener) {
     if (disposed) throw new Error('Cannot subscribe to a disposed event bus.')
     if (typeof listener !== 'function') {
@@ -27,6 +28,7 @@ export function createGameEventBus() {
     }
   }
 
+  /** @param {string} type Event type. @param {object} [payload={}] Serializable event data. @returns {object} Emitted event. */
   function emit(type, payload = {}) {
     if (disposed) return
     const event = Object.freeze({ type, payload })
@@ -34,6 +36,7 @@ export function createGameEventBus() {
     for (const listener of listeners.get('*') ?? []) listener(event)
   }
 
+  /** Clears subscriptions and permanently closes the bus. */
   function dispose() {
     disposed = true
     listeners.clear()
@@ -43,6 +46,7 @@ export function createGameEventBus() {
     subscribe,
     emit,
     dispose,
+    /** @returns {boolean} Whether the bus has been permanently disposed. */
     get disposed() {
       return disposed
     },

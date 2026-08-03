@@ -1,6 +1,13 @@
 import { shapesIntersect } from '../geometry/geometry.js'
 import { createSeededRandom } from '../generation/seededRandom.js'
 
+/**
+ * Builds the authoritative inset token shape at its current center.
+ *
+ * @pure
+ * @param {object} session Active level session.
+ * @returns {object} Token collision shape in world units.
+ */
 function tokenShape(session) {
   return {
     ...session.level.token,

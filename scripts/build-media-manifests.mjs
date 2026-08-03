@@ -12,6 +12,12 @@ const publicMediaRoot = path.join(projectRoot, 'public', 'media')
 const defaultRoot = path.join(publicMediaRoot, 'default')
 const themesRoot = path.join(publicMediaRoot, 'themes')
 const manifestsRoot = path.join(publicMediaRoot, 'manifests')
+/**
+ * Reads and parses a repository-relative JSON document.
+ *
+ * @param {...string} segments Path segments below the repository root.
+ * @returns {Promise<object>} Parsed JSON value.
+ */
 const readJson = async (...segments) =>
   JSON.parse(await readFile(path.join(projectRoot, ...segments), 'utf8'))
 

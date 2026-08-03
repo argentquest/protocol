@@ -1,6 +1,11 @@
 import { formatDistance, formatTime } from '../ui/formatters.js'
 
-/** Renders consumable powers and their numeric-key assignments. */
+/**
+ * Renders numbered consumable controls and their active/available states.
+ *
+ * @param {object} props Power definitions, inventory, and activation callback.
+ * @returns {import('react').JSX.Element} Power control tray.
+ */
 function PowerTray({ powerups, activePowerIds, inventory, devMode, onActivate }) {
   return (
     <div className="power-tray" aria-label="Power-up inventory">
@@ -26,7 +31,12 @@ function PowerTray({ powerups, activePowerIds, inventory, devMode, onActivate })
   )
 }
 
-/** Renders development-only simulation and geometry diagnostics. */
+/**
+ * Renders development-only engine and course diagnostics.
+ *
+ * @param {object} props HUD snapshot, level, and unclaimed coin count.
+ * @returns {import('react').JSX.Element} Debug diagnostics panel.
+ */
 function DebugPanel({ hud, level, availableCoinCount }) {
   return (
     <div className="debug-panel" data-testid="playtest-diagnostics">

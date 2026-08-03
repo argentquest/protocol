@@ -12,10 +12,24 @@ const requiredPlaybackKeys = [
   'channel',
 ]
 
+/**
+ * Joins URL path segments without introducing duplicate separators.
+ *
+ * @pure
+ * @param {string} root Base URL path.
+ * @param {...string} segments Child URL segments.
+ * @returns {string} Normalized URL path.
+ */
 function toUrl(root, ...segments) {
   return [root.replace(/\/$/, ''), ...segments].join('/')
 }
 
+/**
+ * Reads an optional asset, distinguishing absence from other I/O failures.
+ *
+ * @param {string} filePath Absolute asset path.
+ * @returns {Promise<Buffer|null>} File bytes, or `null` when absent.
+ */
 async function readOptional(filePath) {
   try {
     return await readFile(filePath)
@@ -25,6 +39,12 @@ async function readOptional(filePath) {
   }
 }
 
+/**
+ * Tests whether a path identifies a non-empty regular file.
+ *
+ * @param {string} filePath Absolute path to inspect.
+ * @returns {Promise<boolean>} Whether the file can be used as media.
+ */
 async function isNonEmptyFile(filePath) {
   try {
     const fileStats = await stat(filePath)
@@ -35,6 +55,12 @@ async function isNonEmptyFile(filePath) {
   }
 }
 
+/**
+ * Recursively lists files below a directory in deterministic order.
+ *
+ * @param {string} directory Absolute directory to scan.
+ * @returns {Promise<string[]>} Absolute file paths.
+ */
 async function listFiles(directory) {
   try {
     return (await readdir(directory, { withFileTypes: true }))
@@ -115,6 +141,14 @@ export function isCompletePlaybackEntry(entry, channel) {
   )
 }
 
+/**
+ * Validates an optional SVG vector or PNG texture override.
+ *
+ * @param {string} filePath Absolute media path.
+ * @param {string} label Human-readable diagnostic label.
+ * @param {'vector'|'texture'} [renderMode='vector'] Expected Pixi render mode.
+ * @returns {Promise<{exists: boolean, errors: string[]}>} Presence and validation result.
+ */
 async function validateVisualFile(filePath, label, renderMode = 'vector') {
   const source = await readOptional(filePath)
   if (!source) return { exists: false, errors: [] }
@@ -138,6 +172,13 @@ async function validateVisualFile(filePath, label, renderMode = 'vector') {
   }
 }
 
+/**
+ * Validates a logical sound's WAV master and runtime delivery pair.
+ *
+ * @param {string} audioRoot Absolute audio directory.
+ * @param {string} soundId Registered logical sound ID.
+ * @returns {Promise<{exists: boolean, valid: boolean, errors: string[]}>} Audio-set status.
+ */
 async function validateAudioSet(audioRoot, soundId) {
   const sourcePath = path.join(audioRoot, 'source', `${soundId}.wav`)
   const source = await readOptional(sourcePath)
@@ -151,6 +192,13 @@ async function validateAudioSet(audioRoot, soundId) {
   return { exists: true, valid: errors.length === 0, errors }
 }
 
+/**
+ * Reads optional theme playback settings and reports invalid JSON as fallback warnings.
+ *
+ * @param {string|null} themeRoot Absolute theme directory, if any.
+ * @param {string[]} warnings Mutable fallback warning collection.
+ * @returns {Promise<object|null>} Parsed settings or `null` when unavailable.
+ */
 async function readThemeSettings(themeRoot, warnings) {
   if (!themeRoot) return null
   const source = await readOptional(path.join(themeRoot, 'audio.json'))

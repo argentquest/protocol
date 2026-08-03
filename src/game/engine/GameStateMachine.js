@@ -75,6 +75,7 @@ export function createGameStateMachine(initialState = 'loading', onTransition = 
   let state = initialState
   let resumeState = null
 
+  /** @param {string} event Transition event. @returns {boolean} Whether the current state accepts it. */
   function can(event) {
     if (event === 'pause') {
       return state !== 'paused' && state !== 'loading' && state !== 'failed'
@@ -83,6 +84,13 @@ export function createGameStateMachine(initialState = 'loading', onTransition = 
     return Boolean(transitions[state]?.[event])
   }
 
+  /**
+   * Applies one valid transition and notifies the state observer.
+   *
+   * @param {string} event Transition event.
+   * @param {object} [payload={}] Serializable transition context.
+   * @returns {string} New gameplay state.
+   */
   function transition(event, payload = {}) {
     if (!can(event)) {
       throw new Error(`Invalid game transition "${event}" from "${state}".`)
@@ -105,9 +113,11 @@ export function createGameStateMachine(initialState = 'loading', onTransition = 
   return {
     can,
     transition,
+    /** @returns {string} Current gameplay state. */
     get state() {
       return state
     },
+    /** @returns {string|null} State restored when leaving pause. */
     get resumeState() {
       return resumeState
     },

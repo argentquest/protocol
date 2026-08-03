@@ -128,6 +128,15 @@ export function pointInPolygon(point, polygon) {
   return inside
 }
 
+/**
+ * Computes squared distance from a point to the nearest point on a segment.
+ *
+ * @pure
+ * @param {object} point World point.
+ * @param {object} start Segment start in world units.
+ * @param {object} end Segment end in world units.
+ * @returns {number} Squared distance in world units².
+ */
 function squaredDistanceToSegment(point, start, end) {
   const dx = end.x - start.x
   const dy = end.y - start.y
@@ -143,6 +152,14 @@ function squaredDistanceToSegment(point, start, end) {
   return (point.x - closest.x) ** 2 + (point.y - closest.y) ** 2
 }
 
+/**
+ * Tests a circle against polygon interior and edges.
+ *
+ * @pure
+ * @param {{x:number,y:number,radius:number}} circle Circle in world units.
+ * @param {object[]} polygon World-space polygon vertices.
+ * @returns {boolean} Whether the shapes touch or overlap.
+ */
 function circleIntersectsPolygon(circle, polygon) {
   if (pointInPolygon(circle, polygon)) return true
   const radiusSquared = circle.radius ** 2
@@ -155,6 +172,14 @@ function circleIntersectsPolygon(circle, polygon) {
   return false
 }
 
+/**
+ * Projects polygon vertices onto a separating axis.
+ *
+ * @pure
+ * @param {{x:number,y:number}} axis Unnormalized axis vector.
+ * @param {object[]} polygon World-space vertices.
+ * @returns {{minimum:number,maximum:number}} Scalar projection interval.
+ */
 function projectPolygon(axis, polygon) {
   let minimum = Infinity
   let maximum = -Infinity
@@ -166,6 +191,14 @@ function projectPolygon(axis, polygon) {
   return { minimum, maximum }
 }
 
+/**
+ * Applies the separating-axis theorem to two convex polygons.
+ *
+ * @pure
+ * @param {object[]} first First polygon vertices.
+ * @param {object[]} second Second polygon vertices.
+ * @returns {boolean} Whether no separating axis exists.
+ */
 function polygonsIntersect(first, second) {
   const polygons = [first, second]
   for (const polygon of polygons) {
@@ -219,6 +252,14 @@ export function shapesIntersect(firstInput, secondInput) {
   return polygonsIntersect(polygonForShape(first), polygonForShape(second))
 }
 
+/**
+ * Samples evenly spaced points around a circle boundary.
+ *
+ * @pure
+ * @param {object} shape Circle geometry in world units.
+ * @param {number} [count=20] Number of perimeter samples.
+ * @returns {object[]} Boundary points in world units.
+ */
 function sampleCircle(shape, count = 20) {
   const radius = shape.width / 2
   return Array.from({ length: count }, (_, index) => {

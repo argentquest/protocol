@@ -20,7 +20,9 @@ export function attachPointerInput({
   onInterrupt,
   isActive = () => false,
 }) {
+  /** @param {PointerEvent} event Browser pointer event. @returns {{x:number,y:number}} Logical world point. */
   const pointFor = (event) => toWorld({ x: event.clientX, y: event.clientY })
+  /** @param {PointerEvent} event Browser pointer-down event. @returns {void} */
   const pointerDown = (event) => {
     const worldPoint = pointFor(event)
     if (isActive()) {
@@ -31,11 +33,13 @@ export function attachPointerInput({
     if (!onPress(worldPoint, event)) return
     event.preventDefault()
   }
+  /** @param {PointerEvent} event Browser pointer-move event. @returns {void} */
   const pointerMove = (event) => {
     if (!isActive()) return
     onMove(pointFor(event), event)
     event.preventDefault()
   }
+  /** @param {PointerEvent} event Browser pointer cancellation event. @returns {void} */
   const pointerCancel = (event) => {
     if (!isActive()) return
     onInterrupt('pointer-cancel')

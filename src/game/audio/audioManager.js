@@ -35,6 +35,7 @@ export function createAudioManager(
   const sounds = new Map()
   const lastPlayedAt = new Map()
 
+  /** @param {object} entry Resolved playback entry. @returns {number} Effective channel volume from 0 to 1. */
   const channelVolume = (entry) => {
     const ambience = entry.settings.channel === 'ambience'
     const enabled = ambience ? settings.musicEnabled : settings.effectsEnabled
@@ -42,6 +43,12 @@ export function createAudioManager(
     return enabled ? entry.settings.volume * master : 0
   }
 
+  /**
+   * Loads one logical sound with ordered source fallback.
+   *
+   * @param {object} entry Resolved manifest audio entry.
+   * @returns {Promise<object>} Loaded Howl instance.
+   */
   function loadSound(entry) {
     if (disposed) return Promise.reject(new Error('Audio manager was disposed.'))
     if (sounds.has(entry.soundId)) return sounds.get(entry.soundId).loadPromise
@@ -52,7 +59,8 @@ export function createAudioManager(
         ...entry.sources.map((source) => ({ source, html5: false })),
         { source: entry.sources.at(-1), html5: true },
       ]
-      const trySource = (attemptIndex) => {
+    /** @param {number} attemptIndex Zero-based source index. @returns {void} */
+    const trySource = (attemptIndex) => {
         const attempt = attempts[attemptIndex]
         const howl = new HowlClass({
           src: [attempt.source],
@@ -62,12 +70,14 @@ export function createAudioManager(
           html5: attempt.html5,
         })
         record.howl = howl
-        const loaded = () => {
+      /** Resolves the pending logical sound after Howler decodes it. */
+      const loaded = () => {
           howl.off?.('loaderror', failed)
           howl.volume(channelVolume(entry))
           resolve(howl)
         }
-        const failed = (_id, error) => {
+      /** @param {unknown} _id Howler sound ID. @param {unknown} error Load failure. @returns {void} */
+      const failed = (_id, error) => {
           howl.off?.('load', loaded)
           howl.unload()
           if (attemptIndex + 1 < attempts.length) {
@@ -90,11 +100,13 @@ export function createAudioManager(
     return record.loadPromise
   }
 
+  /** @returns {Promise<void>} Completion of browser audio-context resume. */
   async function ensureContext() {
     if (howler.ctx?.state === 'suspended') await howler.ctx.resume()
     return howler.ctx ?? null
   }
 
+  /** Starts or resumes the required looping ambience when enabled. */
   function startAmbience() {
     if (!unlocked || disposed) return false
     const record = sounds.get('ambience')
@@ -108,12 +120,14 @@ export function createAudioManager(
     return true
   }
 
+  /** @returns {Promise<void>} Completion of user-gesture audio unlock and ambience start. */
   async function unlock() {
     await ensureContext()
     unlocked = true
     startAmbience()
   }
 
+  /** @param {string} soundId Logical game sound ID. @returns {number|null} Howler playback ID when played. */
   function play(soundId) {
     if (!unlocked || disposed) return null
     const record = sounds.get(soundId)
@@ -127,6 +141,7 @@ export function createAudioManager(
     return record.howl.play()
   }
 
+  /** @param {object} nextSettings Audio enablement and channel volumes. @returns {void} */
   function updateSettings(nextSettings) {
     settings = { ...settings, ...nextSettings }
     for (const record of sounds.values()) {
@@ -149,6 +164,7 @@ export function createAudioManager(
     if (unlocked) startAmbience()
   }
 
+  /** Unloads every Howl instance and releases manager-owned state. */
   function dispose() {
     disposed = true
     for (const record of sounds.values()) record.howl.unload()

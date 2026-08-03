@@ -26,6 +26,7 @@ export default function PixiCanvas({
   useEffect(() => {
     let disposed = false
     let app = null
+    /** @returns {Promise<void>} Completion of WebGL application initialization and canvas mounting. */
     const mount = async () => {
       app = await createApplication({ container: containerRef.current })
       if (disposed) {

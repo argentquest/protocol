@@ -16,10 +16,24 @@ const ENTITY_GROUPS = [
   'coins',
 ]
 
+/**
+ * Snaps a coordinate or dimension to the Workshop grid.
+ *
+ * @pure
+ * @param {number|string} value Value in world units.
+ * @returns {number} Nearest 10-world-unit increment.
+ */
 function snap(value) {
   return Math.round(Number(value) / GRID_SIZE) * GRID_SIZE
 }
 
+/**
+ * Flattens editable level groups into stable editor selections.
+ *
+ * @pure
+ * @param {object} level Editable level configuration.
+ * @returns {Array<{group:string,index:number|null,entity:object,label:string}>} Entity descriptors.
+ */
 function entityDescriptors(level) {
   const descriptors = [
     { group: 'start', index: null, entity: level.start, label: 'Start' },
@@ -51,6 +65,14 @@ function entityDescriptors(level) {
   return descriptors
 }
 
+/**
+ * Resolves the currently selected entity from its group and index.
+ *
+ * @pure
+ * @param {object} level Editable level configuration.
+ * @param {{group:string,index:number|null}|null} selection Editor selection.
+ * @returns {object|null} Selected entity.
+ */
 function getEntity(level, selection) {
   if (!selection) return null
   if (selection.group === 'start' || selection.group === 'mainTarget') {
@@ -62,6 +84,15 @@ function getEntity(level, selection) {
   return level[selection.group]?.[selection.index] ?? null
 }
 
+/**
+ * Immutably replaces one selected entity in a level document.
+ *
+ * @pure
+ * @param {object} level Editable level configuration.
+ * @param {{group:string,index:number|null}} selection Editor selection.
+ * @param {object} entity Updated entity.
+ * @returns {object} Updated level document.
+ */
 function replaceEntity(level, selection, entity) {
   if (selection.group === 'start' || selection.group === 'mainTarget') {
     return { ...level, [selection.group]: entity }
@@ -76,6 +107,14 @@ function replaceEntity(level, selection, entity) {
   return { ...level, [selection.group]: entities }
 }
 
+/**
+ * Immutably removes an optional selected entity and repairs bonus limits.
+ *
+ * @pure
+ * @param {object} level Editable level configuration.
+ * @param {{group:string,index:number|null}|null} selection Editor selection.
+ * @returns {object} Updated or unchanged level document.
+ */
 function removeEntity(level, selection) {
   if (
     !selection ||
@@ -105,6 +144,13 @@ function removeEntity(level, selection) {
   }
 }
 
+/**
+ * Resolves editor display dimensions from radius, width, height, or size.
+ *
+ * @pure
+ * @param {object} entity Editable entity.
+ * @returns {{width:number,height:number}} Dimensions in world units.
+ */
 function entitySize(entity) {
   if (entity.radius) return { width: entity.radius * 2, height: entity.radius * 2 }
   return {
@@ -113,6 +159,13 @@ function entitySize(entity) {
   }
 }
 
+/**
+ * Adds a centered, schema-ready entity template of the requested mechanic.
+ *
+ * @param {object} level Editable level configuration.
+ * @param {string} type Workshop entity-template type.
+ * @returns {{level:object,selection:object}} Updated level and new selection.
+ */
 function addEntity(level, type) {
   const sequence = Date.now().toString(36)
   const common = { x: 800, y: 450 }
@@ -315,6 +368,12 @@ function addEntity(level, type) {
   }
 }
 
+/**
+ * Renders and manipulates level entities on the 1600 × 900 editor map.
+ *
+ * @param {object} props Level geometry, selection, and edit callbacks.
+ * @returns {import('react').JSX.Element} Interactive level map.
+ */
 function LevelMap({
   level,
   selection,
@@ -326,6 +385,12 @@ function LevelMap({
   const dragRef = useRef(null)
   const descriptors = entityDescriptors(level)
 
+  /**
+   * Moves the selected entity from pointer coordinates and snaps it to the grid.
+   *
+   * @param {import('react').PointerEvent} event Map pointer event.
+   * @returns {void}
+   */
   const handlePointerMove = (event) => {
     if (!dragRef.current) return
     const bounds = event.currentTarget.getBoundingClientRect()
@@ -402,6 +467,24 @@ function LevelJsonEditor({ themeId, level, onApply, onClose }) {
   const [validation, setValidation] = useState({ state: 'idle', errors: [] })
   const lines = draft.split('\n').length
 
+  /** Opens the author-facing Markdown field reference in a separate popup. */
+  const openJsonReference = () => {
+    const referenceUrl = new URL(
+      `${import.meta.env.BASE_URL}docs/theme-workshop-json-reference.md`,
+      window.location.href,
+    )
+    window.open(
+      referenceUrl.href,
+      'path-protocol-theme-json-reference',
+      'popup=yes,width=980,height=760,resizable=yes,scrollbars=yes',
+    )
+  }
+
+  /**
+   * Parses the JSON editor draft or exposes a user-facing syntax error.
+   *
+   * @returns {object|null} Parsed level document when valid JSON.
+   */
   const parseDraft = () => {
     try {
       return { value: JSON.parse(draft), error: null }
@@ -410,6 +493,7 @@ function LevelJsonEditor({ themeId, level, onApply, onClose }) {
     }
   }
 
+  /** @returns {Promise<void>} Completion of server-side schema and gameplay validation. */
   const validateDraft = async () => {
     const parsed = parseDraft()
     if (parsed.error) {
@@ -434,6 +518,12 @@ function LevelJsonEditor({ themeId, level, onApply, onClose }) {
     }
   }
 
+  /**
+   * Inserts two spaces for Tab while preserving the text selection.
+   *
+   * @param {import('react').KeyboardEvent<HTMLTextAreaElement>} event Editor key event.
+   * @returns {void}
+   */
   const insertIndent = (event) => {
     if (event.key !== 'Tab') return
     event.preventDefault()
@@ -485,6 +575,9 @@ function LevelJsonEditor({ themeId, level, onApply, onClose }) {
           <button type="button" onClick={validateDraft}>
             Validate JSON
           </button>
+          <button type="button" onClick={openJsonReference}>
+            Open node and property guide
+          </button>
           <span>{lines} lines · JSON Schema + generated-course checks</span>
         </div>
         <textarea
@@ -534,6 +627,175 @@ function LevelJsonEditor({ themeId, level, onApply, onClose }) {
   )
 }
 
+/**
+ * Returns the logical sound event that a selected entity may override.
+ *
+ * @pure
+ * @param {{group:string}|null} selection Editor entity selection.
+ * @returns {string|null} Default sound ID, or `null` for entities without a discrete sound event.
+ */
+function entityDefaultSoundId(selection) {
+  if (selection?.group === 'coins') return 'coin-collected'
+  if (selection?.group === 'switches') return 'target-reached'
+  if (['mainTarget', 'bonusTargets'].includes(selection?.group)) {
+    return 'target-reached'
+  }
+  return null
+}
+
+/**
+ * Lets an author copy a PublicMedia asset for only the selected level entity.
+ *
+ * @param {object} props Dialog properties.
+ * @returns {import('react').JSX.Element} Entity media override dialog.
+ */
+function EntityMediaOverrideDialog({
+  themeId,
+  entity,
+  selection,
+  onApply,
+  onClose,
+}) {
+  const defaultSoundId = entityDefaultSoundId(selection)
+  const [kind, setKind] = useState('visual')
+  const [query, setQuery] = useState('')
+  const [catalog, setCatalog] = useState({ items: [], total: 0 })
+  const [selectedAssetId, setSelectedAssetId] = useState('')
+  const [status, setStatus] = useState('Search PublicMedia for an override.')
+  const selectedAsset = catalog.items.find((item) => item.id === selectedAssetId)
+
+  /** @returns {Promise<void>} Completion of the current catalog search. */
+  const search = async () => {
+    try {
+      setStatus('Searching PublicMedia…')
+      const result = await mediaLibraryApi.list({
+        kind: kind === 'visual' ? 'image' : 'audio',
+        query,
+        offset: 0,
+        limit: 60,
+      })
+      setCatalog(result)
+      setSelectedAssetId('')
+      setStatus(`${result.total} matching files.`)
+    } catch (error) {
+      setStatus(error.message)
+    }
+  }
+
+  /** @returns {Promise<void>} Completion of copying and assigning the selected override. */
+  const apply = async () => {
+    if (!selectedAssetId) return
+    const property = kind === 'visual' ? 'visualOverrideId' : 'audioOverrideId'
+    const baseId = kind === 'visual' ? entity.mediaId : defaultSoundId
+    try {
+      setStatus(
+        kind === 'visual'
+          ? 'Copying image into this theme…'
+          : 'Normalizing audio and generating WebM/MP3…',
+      )
+      const result = await themeApi.setEntityMediaOverride(themeId, {
+        kind,
+        baseId,
+        assetId: selectedAssetId,
+      })
+      await onApply({ ...entity, [property]: result.overrideId })
+      onClose()
+    } catch (error) {
+      setStatus([error.message, ...(error.details ?? [])].join(' '))
+    }
+  }
+
+  return (
+    <div className="json-editor-backdrop" role="presentation">
+      <section
+        className="json-editor-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="entity-media-override-title"
+      >
+        <header>
+          <div>
+            <p className="eyebrow">Selected object override</p>
+            <h2 id="entity-media-override-title">
+              {entity.id ?? selection.group} media
+            </h2>
+          </div>
+          <button type="button" onClick={onClose} aria-label="Close media override">
+            ×
+          </button>
+        </header>
+        <p>
+          This changes only this object. Its normal <code>mediaId</code> and
+          sound remain as automatic fallbacks.
+        </p>
+        <div className="theme-media-editor__controls">
+          <label>
+            Override type
+            <select
+              value={kind}
+              onChange={(event) => {
+                setKind(event.target.value)
+                setCatalog({ items: [], total: 0 })
+                setSelectedAssetId('')
+              }}
+            >
+              <option value="visual">Image</option>
+              <option value="audio" disabled={!defaultSoundId}>
+                Audio{defaultSoundId ? ` (${defaultSoundId})` : ' (no event)'}
+              </option>
+            </select>
+          </label>
+          <label>
+            Search
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') search()
+              }}
+            />
+          </label>
+          <button type="button" onClick={search}>Search media</button>
+        </div>
+        <p role="status">{status}</p>
+        <div className="theme-media-grid">
+          {catalog.items.map((asset) => (
+            <button
+              type="button"
+              key={asset.id}
+              className={selectedAssetId === asset.id ? 'is-selected' : ''}
+              onClick={() => setSelectedAssetId(asset.id)}
+            >
+              {kind === 'visual' && (
+                <img src={mediaLibraryApi.fileUrl(asset.id)} alt="" loading="lazy" />
+              )}
+              <span>{asset.name}</span>
+              <small>{asset.collection}</small>
+            </button>
+          ))}
+        </div>
+        {selectedAsset && kind === 'audio' && (
+          <audio controls preload="metadata" src={mediaLibraryApi.fileUrl(selectedAsset.id)}>
+            Audio preview is unavailable.
+          </audio>
+        )}
+        <footer>
+          <button type="button" onClick={onClose}>Cancel</button>
+          <button type="button" disabled={!selectedAssetId} onClick={apply}>
+            Apply to selected object
+          </button>
+        </footer>
+      </section>
+    </div>
+  )
+}
+
+/**
+ * Coordinates level history, validation, autosave, properties, and playtesting.
+ *
+ * @param {object} props Theme level data and persistence callbacks.
+ * @returns {import('react').JSX.Element} Full Workshop level editor.
+ */
 function LevelEditor({
   theme,
   initialLevel,
@@ -551,6 +813,8 @@ function LevelEditor({
   const [redoStack, setRedoStack] = useState([])
   const [entityJson, setEntityJson] = useState('')
   const [jsonEditorOpen, setJsonEditorOpen] = useState(false)
+  const [entityMediaOpen, setEntityMediaOpen] = useState(false)
+  const [editorManifest, setEditorManifest] = useState(mediaManifest)
   const [status, setStatus] = useState('All changes saved.')
   const [playtest, setPlaytest] = useState(false)
   const initialRender = useRef(true)
@@ -567,6 +831,20 @@ function LevelEditor({
   useEffect(() => {
     setEntityJson(JSON.stringify(getEntity(level, selection), null, 2))
   }, [level, selection])
+
+  useEffect(() => {
+    themeApi
+      .mediaManifest(theme.id)
+      .then(async (manifest) => {
+        await Promise.all(
+          manifest.audio
+            .filter((entry) => entry.soundId.startsWith('entity-audio-'))
+            .map((entry) => audio.loadSound(entry)),
+        )
+        setEditorManifest(manifest)
+      })
+      .catch(() => setEditorManifest(mediaManifest))
+  }, [audio, mediaManifest, theme.id])
 
   useEffect(() => {
     if (initialRender.current) {
@@ -587,12 +865,14 @@ function LevelEditor({
     return () => window.clearTimeout(timer)
   }, [level, theme.id])
 
+  /** @param {object} next Next level document. @returns {void} */
   const commit = (next) => {
     setUndoStack((items) => [...items.slice(-49), level])
     setRedoStack([])
     setLevel(next)
   }
 
+  /** @returns {Promise<void>} Completion of immediate validated level persistence. */
   const saveNow = async () => {
     setStatus('Validating and saving…')
     try {
@@ -629,7 +909,7 @@ function LevelEditor({
           collectedCoins={{}}
           onUsePowerup={() => true}
           onCoinCollected={() => true}
-          mediaManifest={mediaManifest}
+          mediaManifest={editorManifest}
           reducedMotion={reducedMotion}
           tokenCollisionTolerance={gameplayConfig.collision.tokenToleranceUnits}
           collisionGuideStyle={{ color: 0x36d7ff, width: 2 }}
@@ -814,6 +1094,28 @@ function LevelEditor({
           </button>
           <button
             type="button"
+            disabled={!getEntity(level, selection)?.mediaId}
+            onClick={() => setEntityMediaOpen(true)}
+          >
+            Choose image or audio override
+          </button>
+          {(getEntity(level, selection)?.visualOverrideId ||
+            getEntity(level, selection)?.audioOverrideId) && (
+            <button
+              type="button"
+              onClick={() => {
+                const entity = getEntity(level, selection)
+                const next = { ...entity }
+                delete next.visualOverrideId
+                delete next.audioOverrideId
+                commit(replaceEntity(level, selection, next))
+              }}
+            >
+              Clear object media overrides
+            </button>
+          )}
+          <button
+            type="button"
             disabled={
               selection?.group === 'start' ||
               selection?.group === 'mainTarget'
@@ -847,6 +1149,26 @@ function LevelEditor({
             commit(nextLevel)
             setJsonEditorOpen(false)
             setStatus('Validated full-level JSON applied locally.')
+          }}
+        />
+      )}
+      {entityMediaOpen && getEntity(level, selection) && (
+        <EntityMediaOverrideDialog
+          themeId={theme.id}
+          entity={getEntity(level, selection)}
+          selection={selection}
+          onClose={() => setEntityMediaOpen(false)}
+          onApply={async (entity) => {
+            commit(replaceEntity(level, selection, entity))
+            const manifest = await themeApi.mediaManifest(theme.id)
+            await Promise.all(
+              manifest.audio
+                .filter((entry) => entry.soundId.startsWith('entity-audio-'))
+                .map((entry) => audio.loadSound(entry)),
+            )
+            setEditorManifest(manifest)
+            await onThemeChanged()
+            setStatus('Selected-object media override applied locally.')
           }}
         />
       )}
@@ -1006,6 +1328,7 @@ function ThemeMediaEditor({ theme, onChanged }) {
   const targets = kind === 'image' ? mediaDefinitions : soundDefinitions
   const selectedAsset = catalog.items.find((item) => item.id === selectedAssetId)
 
+  /** @returns {Promise<void>} Completion of filtered catalog-page loading. */
   const loadCatalog = useCallback(async () => {
     if (!targetId) return
     try {
@@ -1031,6 +1354,7 @@ function ThemeMediaEditor({ theme, onChanged }) {
     loadCatalog()
   }, [loadCatalog])
 
+  /** @param {'image'|'audio'} nextKind Catalog media kind. @returns {void} */
   const changeKind = (nextKind) => {
     setKind(nextKind)
     setTargetId('')
@@ -1041,6 +1365,7 @@ function ThemeMediaEditor({ theme, onChanged }) {
     setOffset(0)
   }
 
+  /** @param {string} nextFolder Catalog-relative folder path. @returns {void} */
   const selectFolder = (nextFolder) => {
     setFolder(nextFolder)
     setQuery('')
@@ -1055,6 +1380,7 @@ function ThemeMediaEditor({ theme, onChanged }) {
     setStatus('Loading media folder…')
   }
 
+  /** @returns {Promise<void>} Completion of selected catalog asset materialization. */
   const applySelection = async () => {
     if (!selectedAssetId) return
     try {
@@ -1301,6 +1627,7 @@ export default function ThemeWorkshop({
   })
   const activeThemeId = activeTheme?.id
 
+  /** @returns {Promise<void>} Completion of session, theme, and public-list refresh. */
   const refresh = useCallback(async () => {
     try {
       const publicResult = await themeApi.list()

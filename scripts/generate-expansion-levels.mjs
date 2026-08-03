@@ -31,10 +31,22 @@ const tierNames = [
 ]
 const playableBounds = { left: 80, right: 1520, top: 80, bottom: 820 }
 
+/** @pure @param {number} value Numeric value. @returns {number} Nearest integer. */
 function rounded(value) {
   return Math.round(value)
 }
 
+/**
+ * Builds padded axis-aligned bounds in world units.
+ *
+ * @pure
+ * @param {number} x Center x-coordinate in world units.
+ * @param {number} y Center y-coordinate in world units.
+ * @param {number} width Width in world units.
+ * @param {number} height Height in world units.
+ * @param {number} [padding=0] Additional clearance in world units.
+ * @returns {{left:number,right:number,top:number,bottom:number}} Bounds.
+ */
 function box(x, y, width, height, padding = 0) {
   return {
     left: x - width / 2 - padding,
@@ -44,6 +56,14 @@ function box(x, y, width, height, padding = 0) {
   }
 }
 
+/**
+ * Tests two axis-aligned placement envelopes for overlap.
+ *
+ * @pure
+ * @param {object} first First envelope in world units.
+ * @param {object} second Second envelope in world units.
+ * @returns {boolean} Whether the envelopes overlap.
+ */
 function boxesOverlap(first, second) {
   return !(
     first.right < second.left ||
@@ -53,10 +73,29 @@ function boxesOverlap(first, second) {
   )
 }
 
+/**
+ * Measures Euclidean distance between world points.
+ *
+ * @pure
+ * @param {{x:number,y:number}} first First world point.
+ * @param {{x:number,y:number}} second Second world point.
+ * @returns {number} Distance in world units.
+ */
 function distance(first, second) {
   return Math.hypot(first.x - second.x, first.y - second.y)
 }
 
+/**
+ * Finds a deterministic, non-overlapping entity center within playable bounds.
+ *
+ * @param {() => number} random Seeded random source.
+ * @param {object[]} reserved Mutable occupied envelopes.
+ * @param {number} width Entity or motion-envelope width in world units.
+ * @param {number} height Entity or motion-envelope height in world units.
+ * @param {object} [options] Clearance and endpoint-distance constraints.
+ * @returns {{x:number,y:number}} Reserved center in world units.
+ * @throws {Error} When 500 deterministic candidates cannot be placed.
+ */
 function place(
   random,
   reserved,
@@ -88,6 +127,15 @@ function place(
   throw new Error(`Unable to place ${width} × ${height} entity safely.`)
 }
 
+/**
+ * Creates the tier-scaled static-obstacle set for a campaign level.
+ *
+ * @param {() => number} random Seeded random source.
+ * @param {number} number One-based campaign level number.
+ * @param {number} tier One-based mechanic tier.
+ * @param {object[]} reserved Mutable placement envelopes.
+ * @returns {object[]} Authored static obstacle configurations.
+ */
 function placeStaticObstacles(random, number, tier, reserved) {
   const count = 2 + ((number * 7 + tier) % 5)
   return Array.from({ length: count }, (_, index) => {
@@ -111,6 +159,15 @@ function placeStaticObstacles(random, number, tier, reserved) {
   })
 }
 
+/**
+ * Creates deterministic oscillating obstacles for tiers that support motion.
+ *
+ * @param {() => number} random Seeded random source.
+ * @param {number} number One-based campaign level number.
+ * @param {number} tier One-based mechanic tier.
+ * @param {object[]} reserved Mutable placement envelopes.
+ * @returns {object[]} Moving obstacle configurations with millisecond periods.
+ */
 function placeMovingObstacles(random, number, tier, reserved) {
   if (tier < 2) return []
   const count = tier === 2 ? 1 + (number % 2) : number % 3 === 0 ? 2 : 1
@@ -141,6 +198,14 @@ function placeMovingObstacles(random, number, tier, reserved) {
   })
 }
 
+/**
+ * Chooses the mechanic mixture and counts for a campaign level.
+ *
+ * @pure
+ * @param {number} number One-based campaign level number.
+ * @param {number} tier One-based mechanic tier.
+ * @returns {Record<string, number>} Entity count by mechanic name.
+ */
 function mechanicCounts(number, tier) {
   if (tier < 3) return {}
   if (tier < 10) {
@@ -166,6 +231,15 @@ function mechanicCounts(number, tier) {
   return counts
 }
 
+/**
+ * Places non-solid conveyor and radial force fields.
+ *
+ * @param {() => number} random Seeded random source.
+ * @param {Record<string, number>} counts Mechanic counts.
+ * @param {number} tier One-based mechanic tier.
+ * @param {object[]} reserved Existing solid placement envelopes.
+ * @returns {object[]} Force-field configurations using world units and units/s².
+ */
 function placeForceFields(random, counts, tier, reserved) {
   const fields = []
   const fieldReserved = [...reserved]
@@ -201,6 +275,14 @@ function placeForceFields(random, counts, tier, reserved) {
   return fields
 }
 
+/**
+ * Places contact switches linked to generated switch barriers.
+ *
+ * @param {() => number} random Seeded random source.
+ * @param {Record<string, number>} counts Mechanic counts.
+ * @param {object[]} reserved Mutable placement envelopes.
+ * @returns {object[]} Contact-switch configurations.
+ */
 function placeSwitches(random, counts, reserved) {
   const switches = []
   for (let index = 0; index < (counts.switch ?? 0); index += 1) {
@@ -217,6 +299,15 @@ function placeSwitches(random, counts, reserved) {
   return switches
 }
 
+/**
+ * Places phase, pulse, orbit, switch, and rotating obstacles.
+ *
+ * @param {() => number} random Seeded random source.
+ * @param {Record<string, number>} counts Mechanic counts.
+ * @param {number} tier One-based mechanic tier.
+ * @param {object[]} reserved Mutable placement envelopes.
+ * @returns {object[]} Dynamic obstacle configurations.
+ */
 function placeDynamicObstacles(random, counts, tier, reserved) {
   const obstacles = []
   for (let index = 0; index < (counts.phase ?? 0); index += 1) {
@@ -334,6 +425,15 @@ function placeDynamicObstacles(random, counts, tier, reserved) {
   return obstacles
 }
 
+/**
+ * Places convergence-tier tracking hazards and their containment zones.
+ *
+ * @param {() => number} random Seeded random source.
+ * @param {number} tier One-based mechanic tier.
+ * @param {number} number One-based campaign level number.
+ * @param {object[]} reserved Mutable placement envelopes.
+ * @returns {object[]} Tracking obstacle configurations.
+ */
 function placeTrackingObstacles(random, tier, number, reserved) {
   if (tier < 10) return []
   const count = 1 + (number % 2)
@@ -375,6 +475,12 @@ function placeTrackingObstacles(random, tier, number, reserved) {
   })
 }
 
+/**
+ * Builds one complete deterministic campaign level document.
+ *
+ * @param {number} number One-based campaign level number.
+ * @returns {object} Schema-ready level configuration.
+ */
 function createLevel(number) {
   const tier = Math.ceil(number / 10)
   const tierName = tierNames[tier - 1]

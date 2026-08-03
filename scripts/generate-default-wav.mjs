@@ -31,6 +31,14 @@ const soundDesigns = {
   'level-complete': { frequency: 620, endMultiplier: 1.6, duration: 0.72, wave: 'sine' },
 }
 
+/**
+ * Samples a normalized oscillator waveform at a phase in radians.
+ *
+ * @pure
+ * @param {'sine'|'square'|'saw'|'triangle'} wave Oscillator shape.
+ * @param {number} phase Oscillator phase in radians.
+ * @returns {number} Sample amplitude in the inclusive range [-1, 1].
+ */
 function waveValue(wave, phase) {
   const normalized = phase / (Math.PI * 2)
   if (wave === 'square') return Math.sin(phase) >= 0 ? 1 : -1
@@ -41,6 +49,13 @@ function waveValue(wave, phase) {
   return Math.sin(phase)
 }
 
+/**
+ * Encodes normalized samples as a mono 16-bit PCM WAV master.
+ *
+ * @pure
+ * @param {Float64Array} samples Amplitudes in the inclusive range [-1, 1].
+ * @returns {Buffer} WAV bytes sampled at {@link sampleRate} hertz.
+ */
 function encodeMonoWav(samples) {
   const dataLength = samples.length * 2
   const buffer = Buffer.alloc(44 + dataLength)
@@ -64,6 +79,13 @@ function encodeMonoWav(samples) {
   return buffer
 }
 
+/**
+ * Synthesizes one short effect from its frequency and envelope design.
+ *
+ * @pure
+ * @param {{frequency: number, endMultiplier: number, duration: number, wave: string}} design Effect design; frequency is in hertz and duration is in seconds.
+ * @returns {Buffer} Encoded mono WAV bytes.
+ */
 function createEffect(design) {
   const sampleCount = Math.ceil(design.duration * sampleRate)
   const samples = new Float64Array(sampleCount)
@@ -83,6 +105,12 @@ function createEffect(design) {
   return encodeMonoWav(samples)
 }
 
+/**
+ * Synthesizes the eight-second looping default ambience master.
+ *
+ * @pure
+ * @returns {Buffer} Encoded mono WAV bytes.
+ */
 function createAmbience() {
   const duration = 8
   const sampleCount = duration * sampleRate
@@ -101,6 +129,12 @@ function createAmbience() {
   return encodeMonoWav(samples)
 }
 
+/**
+ * Determines whether a filesystem path is accessible.
+ *
+ * @param {string} filePath Absolute path to inspect.
+ * @returns {Promise<boolean>} Whether the path exists and is accessible.
+ */
 async function exists(filePath) {
   try {
     await access(filePath)

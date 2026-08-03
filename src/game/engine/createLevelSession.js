@@ -2,10 +2,18 @@ import { generateLevel } from '../generation/levelGenerator.js'
 import { currentMovingObstacle } from '../geometry/geometry.js'
 import { resolveDynamicObstacles } from './DynamicObstacleSystem.js'
 
+/** @pure @param {{x:number,y:number}} point World point. @returns {{x:number,y:number}} Detached point copy. */
 function copyPoint(point) {
   return { x: point.x, y: point.y }
 }
 
+/**
+ * Creates mutable deterministic simulation state for a tracking obstacle.
+ *
+ * @pure
+ * @param {object} obstacle Tracking obstacle configuration.
+ * @returns {object} Position, velocity, and heading state in world units.
+ */
 function createTrackingState(obstacle) {
   return {
     id: obstacle.id,

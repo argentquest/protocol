@@ -5,14 +5,23 @@ import Database from 'better-sqlite3'
 const scryptAsync = promisify(scrypt)
 const SESSION_DURATION_MS = 30 * 24 * 60 * 60 * 1000
 
+/** @pure @param {unknown} value Submitted username. @returns {string} Trimmed username. */
 function normalizeUsername(value) {
   return String(value ?? '').trim()
 }
 
+/** @pure @param {unknown} value Submitted email. @returns {string} Trimmed lowercase email. */
 function normalizeEmail(value) {
   return String(value ?? '').trim().toLowerCase()
 }
 
+/**
+ * Validates normalized account-registration fields.
+ *
+ * @pure
+ * @param {{username:string,email:string,password:string}} fields Registration fields.
+ * @returns {string[]} User-facing validation errors.
+ */
 function validateRegistration({ username, email, password }) {
   const errors = []
   if (!/^[a-zA-Z0-9_-]{3,32}$/.test(username)) {
@@ -27,10 +36,24 @@ function validateRegistration({ username, email, password }) {
   return errors
 }
 
+/**
+ * Produces the irreversible SHA-256 representation stored for a session token.
+ *
+ * @pure
+ * @param {string} token Opaque browser session token.
+ * @returns {string} Lowercase hexadecimal digest.
+ */
 function tokenHash(token) {
   return createHash('sha256').update(token).digest('hex')
 }
 
+/**
+ * Projects a private database row to the user fields safe for API responses.
+ *
+ * @pure
+ * @param {object|null|undefined} row SQLite user row.
+ * @returns {object|null} Public user record.
+ */
 function visibleUser(row) {
   return row
     ? {
@@ -95,10 +118,23 @@ export function createAuthStore({ databasePath, confirmEmail = false }) {
   const deleteSession = database.prepare('DELETE FROM sessions WHERE token_hash = ?')
   const deleteExpired = database.prepare('DELETE FROM sessions WHERE expires_at <= ?')
 
+  /**
+   * Derives a password digest with scrypt and the stored per-user salt.
+   *
+   * @param {string} password Plaintext credential held only for this operation.
+   * @param {string} salt Hexadecimal random salt.
+   * @returns {Promise<Buffer>} 64-byte derived key.
+   */
   async function passwordDigest(password, salt) {
     return (await scryptAsync(password, salt, 64)).toString('hex')
   }
 
+  /**
+   * Persists a hashed session credential for a user.
+   *
+   * @param {string} userId Account UUID.
+   * @returns {{token:string,expiresAt:number}} Browser token and Unix expiry in milliseconds.
+   */
   function createSession(userId) {
     deleteExpired.run(Date.now())
     const token = randomBytes(32).toString('base64url')
@@ -107,6 +143,12 @@ export function createAuthStore({ databasePath, confirmEmail = false }) {
     return { token, expiresAt }
   }
 
+  /**
+   * Validates and creates a user plus an initial authenticated session.
+   *
+   * @param {object} input Submitted username, email, and password.
+   * @returns {Promise<object>} Public user and session credentials.
+   */
   async function register(input) {
     const username = normalizeUsername(input.username)
     const email = normalizeEmail(input.email)
@@ -149,6 +191,12 @@ export function createAuthStore({ databasePath, confirmEmail = false }) {
     return { user: visibleUser(user), session: createSession(id) }
   }
 
+  /**
+   * Verifies a username/email and password using timing-safe comparison.
+   *
+   * @param {object} input Login identifier and password.
+   * @returns {Promise<object>} Public user and new session credentials.
+   */
   async function login(input) {
     const loginName = String(input.login ?? '').trim()
     const user = findUser.get(loginName, loginName.toLowerCase())
@@ -167,11 +215,23 @@ export function createAuthStore({ databasePath, confirmEmail = false }) {
     return { user: visibleUser(user), session: createSession(user.id) }
   }
 
+  /**
+   * Resolves an unexpired session token to its public user.
+   *
+   * @param {string} token Opaque browser session credential.
+   * @returns {object|null} Authenticated user, or `null`.
+   */
   function sessionUser(token) {
     if (!token) return null
     return visibleUser(readSession.get(tokenHash(token), Date.now()))
   }
 
+  /**
+   * Deletes a session by hashing the presented browser token.
+   *
+   * @param {string} token Opaque browser session credential.
+   * @returns {void}
+   */
   function logout(token) {
     if (token) deleteSession.run(tokenHash(token))
   }

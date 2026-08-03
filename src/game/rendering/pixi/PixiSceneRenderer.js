@@ -7,6 +7,14 @@ import { calculateViewport } from './Viewport.js'
 import { isSwitchActive } from '../../engine/SwitchSystem.js'
 import { WORLD_HEIGHT, WORLD_WIDTH } from '../../world.js'
 
+/**
+ * Resolves presentation metadata with a safe obstacle-vector fallback.
+ *
+ * @pure
+ * @param {Map<string, object>} cacheDefinitions Definitions by media ID.
+ * @param {string} mediaId Theme-neutral media ID.
+ * @returns {object} Render mode, category, and sizing contract.
+ */
 function mediaDefinition(cacheDefinitions, mediaId) {
   return (
     cacheDefinitions.get(mediaId) ?? {
@@ -17,6 +25,16 @@ function mediaDefinition(cacheDefinitions, mediaId) {
   )
 }
 
+/**
+ * Rebuilds one bounded Pixi trail from sampled world points.
+ *
+ * @param {Graphics} graphics Reused Pixi graphics object.
+ * @param {object[]} points Trail points in world units.
+ * @param {number} color Numeric Pixi color.
+ * @param {number} width Stroke width in world units.
+ * @param {number} [alpha=1] Stroke opacity from 0 to 1.
+ * @returns {void}
+ */
 function drawTrail(graphics, points, color, width, alpha = 1) {
   graphics.clear()
   if (points.length < 2) return
@@ -123,17 +141,21 @@ export class PixiSceneRenderer {
    * @returns {Promise<object>} Created Pixi display object.
    */
   async addEntity(layerName, item, mediaId = item.mediaId) {
-    const resource = await this.assetCache.get(mediaId)
+    const resolvedMediaId =
+      item.visualOverrideId && this.media.has(item.visualOverrideId)
+        ? item.visualOverrideId
+        : mediaId
+    const resource = await this.assetCache.get(resolvedMediaId)
     const entity = createMediaEntity({
       resource,
-      definition: mediaDefinition(this.media, mediaId),
-      item: { ...item, mediaId },
+      definition: mediaDefinition(this.media, resolvedMediaId),
+      item: { ...item, mediaId: resolvedMediaId },
       GraphicsClass: this.GraphicsClass,
       ...(this.SpriteClass ? { SpriteClass: this.SpriteClass } : {}),
     })
     entity.baseScale = { x: entity.scale.x, y: entity.scale.y }
     this.layers[layerName].addChild(entity)
-    this.entities.set(item.id ?? mediaId, entity)
+    this.entities.set(item.id ?? resolvedMediaId, entity)
     return entity
   }
 
@@ -144,14 +166,22 @@ export class PixiSceneRenderer {
    */
   async build() {
     await this.addEntity('arena', {
+      ...this.level.arena,
       id: 'arena',
-      mediaId: this.level.arena.mediaId,
       x: WORLD_WIDTH / 2,
       y: WORLD_HEIGHT / 2,
       width: WORLD_WIDTH,
       height: WORLD_HEIGHT,
     })
     await this.addEntity('targets', this.level.mainTarget)
+    await this.addEntity('targets', {
+      ...this.level.start,
+      id: 'start',
+      x: this.level.startPoint.x,
+      y: this.level.startPoint.y,
+      size: this.level.token.size,
+      shape: 'circle',
+    })
     for (const bonus of this.level.bonusTargets) {
       const entity = await this.addEntity('targets', bonus)
       entity.visible = false

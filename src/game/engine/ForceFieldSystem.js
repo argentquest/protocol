@@ -1,5 +1,12 @@
 import { shapesIntersect } from '../geometry/geometry.js'
 
+/**
+ * Converts a force-field configuration into overlap geometry.
+ *
+ * @pure
+ * @param {object} field Force-field configuration in world units.
+ * @returns {object} Circle or rectangle collision shape.
+ */
 function fieldShape(field) {
   if (field.type === 'conveyor') {
     return { ...field, shape: 'rect' }

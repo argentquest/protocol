@@ -17,6 +17,14 @@ function normalizeBaseUrl(value) {
   return `/${path.replace(/^\/+|\/+$/g, '')}/`
 }
 
+/**
+ * Rewrites a root-relative asset beneath a normalized deployment prefix.
+ *
+ * @pure
+ * @param {string} source Asset URL.
+ * @param {string} baseUrl Deployment prefix with boundary slashes.
+ * @returns {string} Deployment-safe asset URL.
+ */
 function resolveAssetUrl(source, baseUrl) {
   if (typeof source !== 'string' || !source.startsWith('/')) return source
   return `${baseUrl}${source.slice(1)}`
@@ -74,6 +82,13 @@ export function createStartupProgressReporter(
   const progress = new Map(phases.map((phase) => [phase.id, 0]))
   const totalWeight = phases.reduce((total, phase) => total + phase.weight, 0)
 
+  /**
+   * Aggregates weighted phase progress into a single startup fraction.
+   *
+   * @param {string} phaseId Startup phase ID.
+   * @param {number} phaseProgress Phase completion from 0 to 1.
+   * @returns {void}
+   */
   function report(phaseId, phaseProgress) {
     const phase = phases.find((candidate) => candidate.id === phaseId)
     if (!phase) throw new Error(`Unknown startup phase "${phaseId}"`)

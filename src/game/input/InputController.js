@@ -34,6 +34,7 @@ export function createInputController(inputState, callbacks = {}) {
     onInterrupt = () => {},
   } = callbacks
 
+  /** @param {'pointer'|'keyboard'} mode Requested control mode. @returns {void} */
   function activate(mode) {
     const inputState = getInputState()
     if (inputState.active) return false
@@ -43,6 +44,7 @@ export function createInputController(inputState, callbacks = {}) {
     return true
   }
 
+  /** @param {string} [reason='released'] Stable release reason. @returns {void} */
   function release(reason = 'released') {
     const inputState = getInputState()
     if (!inputState.active) return false
@@ -53,12 +55,14 @@ export function createInputController(inputState, callbacks = {}) {
     return true
   }
 
+  /** @param {{x:number,y:number}} position Desired center in world units. @returns {void} */
   function setPointer(position) {
     const inputState = getInputState()
     inputState.desiredPosition.x = position.x
     inputState.desiredPosition.y = position.y
   }
 
+  /** @param {string} key Normalized keyboard key. @param {boolean} [repeat=false] Auto-repeat state. @returns {void} */
   function keyDown(key, repeat = false) {
     const inputState = getInputState()
     if (directionKeys.has(key)) {
@@ -83,6 +87,7 @@ export function createInputController(inputState, callbacks = {}) {
     return { handled: false, action: null }
   }
 
+  /** @param {string} key Normalized keyboard key. @returns {void} */
   function keyUp(key) {
     const inputState = getInputState()
     if (!directionKeys.has(key)) return false
@@ -90,6 +95,7 @@ export function createInputController(inputState, callbacks = {}) {
     return true
   }
 
+  /** @param {string} reason Focus or visibility interruption reason. @returns {void} */
   function interrupt(reason) {
     const inputState = getInputState()
     const wasActive = release(reason)

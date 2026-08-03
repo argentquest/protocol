@@ -159,12 +159,15 @@ describe('V2 PixiJS renderer', () => {
 
   it('builds stable entities, updates transforms, and disposes the scene', async () => {
     const level = generateLevel(levels[0])
+    const coinOverrideId = 'entity-visual-12345678-1234-1234-1234-123456789abc'
+    level.coins[0].visualOverrideId = coinOverrideId
     const mediaIds = new Set([
       level.arena.mediaId,
       level.mainTarget.mediaId,
       level.token.mediaId,
       ...level.obstacles.map((item) => item.mediaId),
       ...level.coins.map((item) => item.mediaId),
+      coinOverrideId,
     ])
     const manifest = {
       visuals: [...mediaIds].map((mediaId) => ({
@@ -190,6 +193,7 @@ describe('V2 PixiJS renderer', () => {
       },
     })
     await renderer.build()
+    expect(assetCache.get).toHaveBeenCalledWith(coinOverrideId)
     const token = renderer.entities.get('token')
     const entityCount = renderer.entities.size
     const session = {

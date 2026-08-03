@@ -8,12 +8,25 @@ const metadataDirectory = resolve(outputRoot, '.openai')
 
 const workerSource = `const INDEX_PATH = '/index.html'
 
+/**
+ * Tests whether a request can use the single-page application fallback.
+ *
+ * @param {Request} request Incoming worker request.
+ * @returns {boolean} Whether the client accepts an HTML response.
+ */
 function wantsHtml(request) {
   return request.method === 'GET' &&
     (request.headers.get('accept') || '').includes('text/html')
 }
 
 export default {
+  /**
+   * Serves static assets and falls back to index.html for client routes.
+   *
+   * @param {Request} request Incoming worker request.
+   * @param {{ASSETS: {fetch(request: Request): Promise<Response>}}} env Worker bindings.
+   * @returns {Promise<Response>} Static asset or application shell response.
+   */
   async fetch(request, env) {
     const response = await env.ASSETS.fetch(request)
     if (response.status !== 404 || !wantsHtml(request)) return response

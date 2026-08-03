@@ -68,6 +68,12 @@ never depend on the catalog source path. Imported audio is normalized to a WAV
 master plus WebM and MP3 delivery files. Validate all built-in theme fallbacks
 with `npm run media:validate-themes`.
 
+The selected-object inspector can also apply artwork and event-sound overrides
+to one level entity. This supports distinctions such as separate images and
+collection sounds for 10-point and 50-point coins without changing their base
+coin type. The server copies each choice into the owned theme and the level
+stores only the generated override ID.
+
 Each level editor also provides a popup full-level JSON editor. It formats JSON,
 reports parse errors, and validates drafts against the authoritative level JSON
 Schema and generated-course gameplay checks before applying them locally.
