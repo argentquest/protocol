@@ -386,4 +386,184 @@ describe('accounts and Theme Workshop API', () => {
       ),
     ).toMatchObject({ fileSourceScope: 'entity' })
   }, 60_000)
+
+  it('streams personal images into an owner-only library with provenance', async () => {
+    const owner = request.agent(app)
+    const other = request.agent(app)
+    await register(owner, 'uploader')
+    await register(other, 'uploadviewer')
+    const source = await readFile(
+      path.resolve('public/media/themes/celestial-foundry/tokens/token-circle.png'),
+    )
+
+    expect(
+      (
+        await request(app)
+          .post('/api/media-library/uploads?kind=image')
+          .attach('file', source, {
+            filename: 'private-token.png',
+            contentType: 'image/png',
+          })
+      ).status,
+    ).toBe(401)
+    const uploaded = await owner
+      .post('/api/media-library/uploads?kind=image')
+      .attach('file', source, {
+        filename: 'private-token.png',
+        contentType: 'image/png',
+      })
+    expect(uploaded.status).toBe(201)
+    expect(uploaded.body.item).toMatchObject({
+      kind: 'image',
+      collection: 'uploads',
+      originalName: 'private-token.png',
+      originalMimeType: 'image/png',
+      normalizedFormat: 'png',
+      license: 'User-provided',
+      credit: 'uploader',
+    })
+    expect(uploaded.body.item.id).toMatch(/^uploads\/[0-9a-f-]{36}$/)
+    expect(uploaded.body.quota.usedBytes).toBeGreaterThan(0)
+
+    const listing = await owner
+      .get('/api/media-library')
+      .query({ kind: 'image', collection: 'uploads' })
+    expect(listing.body.items).toHaveLength(1)
+    expect(listing.body.quota.limitBytes).toBe(500 * 1024 * 1024)
+    expect(
+      (
+        await other
+          .get('/api/media-library/file')
+          .query({ assetId: uploaded.body.item.id })
+      ).status,
+    ).toBe(404)
+    expect(
+      (
+        await owner
+          .get('/api/media-library/file')
+          .query({ assetId: uploaded.body.item.id })
+      ).status,
+    ).toBe(200)
+
+    const clone = await owner.post('/api/themes').send({
+      sourceThemeId: 'default',
+      name: 'Uploaded Media Theme',
+    })
+    const applied = await owner
+      .put(`/api/themes/${clone.body.id}/media/visuals/token-circle`)
+      .send({ assetId: uploaded.body.item.id })
+    expect(applied.status).toBe(200)
+    const metadata = JSON.parse(
+      await readFile(path.join(themesDirectory, clone.body.id, 'theme.json'), 'utf8'),
+    )
+    expect(metadata.mediaSources.visuals['token-circle'].provenance).toMatchObject({
+      assetId: uploaded.body.item.id,
+      name: 'private-token.png',
+      credit: 'uploader',
+      originalMimeType: 'image/png',
+    })
+    const deleted = await owner.delete(
+      `/api/media-library/uploads/${uploaded.body.item.id.slice('uploads/'.length)}`,
+    )
+    expect(deleted.status).toBe(200)
+    expect(
+      await readFile(
+        path.join(themesDirectory, clone.body.id, 'media', 'tokens', 'token-circle.png'),
+      ),
+    ).toBeTruthy()
+    expect(
+      (
+        await owner
+          .get('/api/media-library/file')
+          .query({ assetId: uploaded.body.item.id })
+      ).status,
+    ).toBe(404)
+  })
+
+  it('rejects spoofed uploads, cleans quarantine, and enforces account quota', async () => {
+    const owner = request.agent(app)
+    await register(owner, 'safeuploader')
+    const spoofed = await owner
+      .post('/api/media-library/uploads?kind=image')
+      .attach('file', Buffer.from('not a png'), {
+        filename: 'spoofed.png',
+        contentType: 'image/png',
+      })
+    expect(spoofed.status).toBe(415)
+    expect(
+      await readdir(path.join(dataRoot, 'user-media', '.quarantine')),
+    ).toEqual([])
+
+    const quotaRoot = await mkdtemp(path.join(os.tmpdir(), 'path-protocol-quota-'))
+    const quotaApp = await createServerApp({
+      repositoryRoot: path.resolve('.'),
+      dataDirectory: path.join(quotaRoot, 'themes'),
+      databasePath: path.join(quotaRoot, 'accounts.sqlite'),
+      publicMediaLibraryRoot: mediaLibraryDirectory,
+      personalMediaRoot: path.join(quotaRoot, 'user-media'),
+      accountMediaQuotaBytes: 1,
+      serveFrontend: false,
+    })
+    try {
+      const limitedOwner = request.agent(quotaApp)
+      await register(limitedOwner, 'limitedowner')
+      const clone = await limitedOwner.post('/api/themes').send({
+        sourceThemeId: 'default',
+        name: 'Quota Theme',
+      })
+      const themeCopyRejected = await limitedOwner
+        .put(`/api/themes/${clone.body.id}/media/visuals/token-circle`)
+        .send({ assetId: 'images/token.png' })
+      expect(themeCopyRejected.status).toBe(413)
+      expect(themeCopyRejected.body.code).toBe('MEDIA_QUOTA_EXCEEDED')
+      const source = await readFile(
+        path.resolve('public/media/themes/celestial-foundry/tokens/token-circle.png'),
+      )
+      const rejected = await limitedOwner
+        .post('/api/media-library/uploads?kind=image')
+        .attach('file', source, {
+          filename: 'token.png',
+          contentType: 'image/png',
+        })
+      expect(rejected.status).toBe(413)
+      expect(rejected.body).toMatchObject({
+        code: 'MEDIA_QUOTA_EXCEEDED',
+        quota: { usedBytes: 0, limitBytes: 1, remainingBytes: 1 },
+      })
+      expect(
+        await readdir(path.join(quotaRoot, 'user-media', '.quarantine')),
+      ).toEqual([])
+    } finally {
+      quotaApp.locals.authStore.close()
+      await rm(quotaRoot, { recursive: true, force: true })
+    }
+
+    const byteRoot = await mkdtemp(path.join(os.tmpdir(), 'path-protocol-bytes-'))
+    const byteApp = await createServerApp({
+      repositoryRoot: path.resolve('.'),
+      dataDirectory: path.join(byteRoot, 'themes'),
+      databasePath: path.join(byteRoot, 'accounts.sqlite'),
+      publicMediaLibraryRoot: mediaLibraryDirectory,
+      personalMediaRoot: path.join(byteRoot, 'user-media'),
+      uploadLimits: { maxImageBytes: 8 },
+      serveFrontend: false,
+    })
+    try {
+      const byteOwner = request.agent(byteApp)
+      await register(byteOwner, 'byteowner')
+      const tooLarge = await byteOwner
+        .post('/api/media-library/uploads?kind=image')
+        .attach('file', Buffer.alloc(64, 1), {
+          filename: 'large.png',
+          contentType: 'image/png',
+        })
+      expect(tooLarge.status).toBe(413)
+      expect(
+        await readdir(path.join(byteRoot, 'user-media', '.quarantine')),
+      ).toEqual([])
+    } finally {
+      byteApp.locals.authStore.close()
+      await rm(byteRoot, { recursive: true, force: true })
+    }
+  })
 })

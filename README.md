@@ -52,7 +52,18 @@ npm run preview
 `npm run preview` serves the production UI and Theme Workshop API through Node
 on port 4173. Mutable themes default to `data/themes`, and SQLite accounts to
 `data/path-protocol.sqlite`. Set `PATH_PROTOCOL_DATA_DIR` and
-`PATH_PROTOCOL_DB_PATH` to select other persistent locations.
+`PATH_PROTOCOL_DB_PATH` to select other persistent locations. Personal uploads
+default to `data/user-media`; override that location with
+`PATH_PROTOCOL_PERSONAL_MEDIA_ROOT`. Each account receives 500 MiB for all
+uploaded sources and copied custom theme media. Set
+`PATH_PROTOCOL_ACCOUNT_MEDIA_QUOTA_BYTES` to a positive byte count to change
+that ceiling. Upload defaults are 25 MiB per image, 100 MiB per audio file,
+4096 pixels per image axis, 16,777,216 total image pixels, and 300 seconds of
+audio. Deployments can override these with
+`PATH_PROTOCOL_MAX_UPLOAD_IMAGE_BYTES`, `PATH_PROTOCOL_MAX_UPLOAD_AUDIO_BYTES`,
+`PATH_PROTOCOL_MAX_UPLOAD_IMAGE_DIMENSION`,
+`PATH_PROTOCOL_MAX_UPLOAD_IMAGE_PIXELS`, and
+`PATH_PROTOCOL_MAX_UPLOAD_AUDIO_SECONDS`.
 
 Theme authors register with a username, email address, and password. Local
 development accounts are active immediately without email confirmation. Public
@@ -74,9 +85,31 @@ collection sounds for 10-point and 50-point coins without changing their base
 coin type. The server copies each choice into the owned theme and the level
 stores only the generated override ID.
 
+On the level grid, select a dimensioned object and drag its edge or corner
+handles to resize its authoritative collision geometry in 10-unit increments.
+Right-click an object (or press Shift+F10) for separate image, sound, and
+object-only JSON actions. Square and circular objects preserve their aspect
+ratio; rectangular objects can stretch independently on each axis.
+
+Object-level image and sound actions reuse the complete Theme media filesystem
+browser: recursive folders, breadcrumbs, search, paging, large preview,
+provenance, and license details behave identically in both workflows.
+Signed-in authors can upload supported images (PNG, JPEG, compatible SVG) and
+audio (WAV, OGG, MP3, AIF/AIFF) from the same browser. The server streams each
+file through a size-limited quarantine, verifies its extension, MIME type, and
+signature, enforces image and audio limits, normalizes it, and exposes it only
+to its owner under **My uploads**. The quota meter includes both retained
+uploads and media copied across all themes owned by the account. Deleting an
+uploaded source reclaims its bytes without changing self-contained theme
+copies.
+
 Each level editor also provides a popup full-level JSON editor. It formats JSON,
 reports parse errors, and validates drafts against the authoritative level JSON
 Schema and generated-course gameplay checks before applying them locally.
+Its designer reference opens as a formatted, responsive HTML guide with a
+sticky table of contents, readable tables and code samples, section links, and
+print styling. `npm run docs:build` regenerates that page from the maintained
+Markdown source.
 
 ## Architecture Overview
 

@@ -46,6 +46,16 @@ test('clones, edits, playtests, publishes, and deletes a server theme', async ({
   await expect(
     mediaPanel.getByRole('complementary', { name: 'PublicMedia folders' }),
   ).toBeVisible()
+  await expect(mediaPanel.getByText(/used · .* remaining of 500\.0 MiB/i)).toBeVisible()
+  await mediaPanel.locator('.theme-media-upload input[type="file"]').setInputFiles(
+    'public/media/themes/celestial-foundry/tokens/token-circle.png',
+  )
+  await expect(
+    mediaPanel.getByRole('button', { name: /my uploads/i }),
+  ).toBeVisible({ timeout: 30_000 })
+  await expect(
+    mediaPanel.getByRole('button', { name: /token-circle\.png/i }).last(),
+  ).toBeVisible({ timeout: 30_000 })
   const mediaFiles = mediaPanel.locator('.theme-media-grid button[aria-pressed]')
   for (let depth = 0; depth < 10 && (await mediaFiles.count()) === 0; depth += 1) {
     const folders = mediaPanel.locator('.theme-media-folder-tile')
@@ -74,6 +84,54 @@ test('clones, edits, playtests, publishes, and deletes a server theme', async ({
   await expect(
     page.getByRole('application', { name: /10-unit level placement grid/i }),
   ).toBeVisible()
+
+  const coin = page.locator('.editor-entity--coins').first()
+  await coin.click()
+  const selectedEntityJson = page.getByLabel('Selected entity JSON')
+  const originalCoinSize = await selectedEntityJson.evaluate((element) =>
+    JSON.parse(element.value).size,
+  )
+  const eastHandle = coin.locator('[data-resize-handle="e"]')
+  await expect(eastHandle).toBeVisible()
+  const handleBox = await eastHandle.boundingBox()
+  await page.mouse.move(handleBox.x + handleBox.width / 2, handleBox.y + handleBox.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(handleBox.x + handleBox.width / 2 + 36, handleBox.y + handleBox.height / 2)
+  await page.mouse.up()
+  await expect.poll(() =>
+    selectedEntityJson.evaluate((element) => JSON.parse(element.value).size),
+  ).toBeGreaterThan(originalCoinSize)
+
+  await coin.click({ button: 'right' })
+  const objectMenu = page.getByRole('menu', { name: 'Selected object actions' })
+  await expect(objectMenu.getByRole('menuitem', { name: /change image/i })).toBeVisible()
+  await expect(objectMenu.getByRole('menuitem', { name: /change sound/i })).toBeEnabled()
+  await objectMenu.getByRole('menuitem', { name: /show object json/i }).click()
+  const objectJsonEditor = page.getByRole('dialog', { name: /object json:/i })
+  const objectJson = objectJsonEditor.getByLabel('Selected object JSON')
+  await expect(objectJson).toHaveValue(/"mediaId"/)
+  expect(await objectJson.inputValue()).not.toContain('"schemaVersion"')
+  await objectJsonEditor.getByRole('button', { name: /close object json editor/i }).click()
+
+  await coin.click({ button: 'right' })
+  await objectMenu.getByRole('menuitem', { name: /change sound/i }).click()
+  const soundDialog = page.getByRole('dialog', { name: /coin-.* media/i })
+  await expect(soundDialog.getByLabel('Override type')).toHaveValue('audio')
+  await expect(
+    soundDialog.getByRole('complementary', { name: 'PublicMedia folders' }),
+  ).toBeVisible()
+  await expect(soundDialog.getByRole('navigation', { name: 'Media folder path' })).toBeVisible()
+  await expect(soundDialog.getByRole('status')).not.toHaveText(/loading media library/i)
+  await soundDialog.getByRole('button', { name: /close media override/i }).click()
+
+  await coin.click({ button: 'right' })
+  await objectMenu.getByRole('menuitem', { name: /change image/i }).click()
+  const imageDialog = page.getByRole('dialog', { name: /coin-.* media/i })
+  await expect(imageDialog.getByLabel('Override type')).toHaveValue('visual')
+  await expect(imageDialog.locator('.theme-media-browser')).toBeVisible()
+  await expect(imageDialog.locator('.theme-media-folder-tile').first()).toBeVisible()
+  await imageDialog.getByRole('button', { name: /close media override/i }).click()
+
   await page.getByRole('button', { name: /open full-level json editor/i }).click()
   const jsonEditor = page.getByRole('dialog', { name: 'Full level JSON' })
   await expect(jsonEditor.getByLabel('Full level JSON')).toBeVisible()
@@ -82,9 +140,16 @@ test('clones, edits, playtests, publishes, and deletes a server theme', async ({
     .getByRole('button', { name: 'Open node and property guide' })
     .click()
   const referencePopup = await referencePopupPromise
+  await expect(referencePopup).toHaveTitle('Theme Workshop JSON Reference')
   await expect(referencePopup.locator('body')).toContainText(
     'Theme Workshop JSON Reference',
   )
+  await expect(
+    referencePopup.getByRole('complementary', {
+      name: 'Designer reference navigation',
+    }),
+  ).toBeVisible()
+  await expect(referencePopup.locator('main table').first()).toBeVisible()
   await referencePopup.close()
   await jsonEditor.getByRole('button', { name: 'Validate JSON' }).click()
   await expect(

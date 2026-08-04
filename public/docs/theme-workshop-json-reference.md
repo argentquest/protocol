@@ -4,6 +4,9 @@ This guide explains the complete level JSON document shown by **Open full-level
 JSON editor** in the Theme Workshop. It is written for authors using the popup,
 not for engine developers.
 
+The application opens this reference as a formatted HTML page generated from
+this Markdown source. Run `npm run docs:build` after editing the guide.
+
 The authoritative contract is
 [`src/config/schemas/level.schema.json`](../../src/config/schemas/level.schema.json).
 The popup sends the whole document to the server for JSON Schema validation,
@@ -31,6 +34,15 @@ theme's media overrides decide how that visual looks. The selected-object
 inspector can additionally assign `visualOverrideId` and `audioOverrideId` to
 one entity, allowing (for example) a 50-value coin to look and sound different
 from a 10-value coin.
+
+For a focused view, right-click an object on the placement grid and choose
+**Show object JSON**. That dialog contains only the selected object, but the
+server still validates the edited object inside the complete level before
+applying it. The same context menu separates **Change image** and **Change
+sound**. Both media actions use the same recursive folder browser, breadcrumbs,
+search, preview, provenance, and license display as the Theme media selector.
+Selected objects with schema-backed dimensions also expose edge and corner
+handles that update these same JSON geometry fields.
 
 ## Essential rules
 
@@ -723,7 +735,12 @@ system, not placed through level JSON.
 ## Per-object image and audio overrides
 
 Select an object on the level map and choose **Choose image or audio override**.
-The dialog searches the read-only PublicMedia catalog. Applying a selection:
+The shared dialog browses the read-only PublicMedia catalog and the signed-in
+author's private **My uploads** folder. Use **Upload image** or **Upload audio**
+to add personal media. The quota meter covers uploaded sources plus custom
+media copied into every theme owned by the account; deleting an uploaded source
+frees its source bytes without removing existing theme copies. Applying a
+selection:
 
 1. copies and validates an image, or normalizes audio to a WAV master plus WebM
    and MP3 delivery files;

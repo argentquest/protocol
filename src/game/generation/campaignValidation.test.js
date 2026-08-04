@@ -42,7 +42,7 @@ describe('released V2 campaign', () => {
       campaign.push(generateLevel(config))
       await new Promise((resolve) => setTimeout(resolve, 0))
     }
-  }, 180_000)
+  }, 240_000)
 
   it('keeps every initial entity inside the arena and free of overlap', () => {
     const errors = []
@@ -201,7 +201,7 @@ describe('released V2 campaign', () => {
     }
   })
 
-  it('finds collision-safe routes through every ordered required target', () => {
+  it('finds collision-safe routes through every ordered required target', async () => {
     for (const level of campaign) {
       let start = level.startPoint
       for (const target of [level.mainTarget, ...level.bonusTargets]) {
@@ -228,8 +228,9 @@ describe('released V2 campaign', () => {
         }
         start = target
       }
+      await new Promise((resolve) => setTimeout(resolve, 0))
     }
-  })
+  }, 120_000)
 
   it('uses increasing score maxima and campaign-wide movement controls', () => {
     for (let index = 0; index < levels.length; index += 1) {

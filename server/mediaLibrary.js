@@ -87,6 +87,30 @@ async function replaceFile(temporaryPath, destinationPath) {
   await rename(temporaryPath, destinationPath)
 }
 
+/** @param {string} filePath Absolute file path. @returns {Promise<number>} Bytes, or zero when absent. */
+async function existingFileBytes(filePath) {
+  try {
+    return (await stat(filePath)).size
+  } catch (error) {
+    if (error.code === 'ENOENT') return 0
+    throw error
+  }
+}
+
+/** @param {object} entry Resolved catalog or personal entry. @returns {object} Persistable provenance. */
+function provenance(entry) {
+  return {
+    assetId: entry.id,
+    name: entry.originalName ?? entry.name,
+    license: entry.license,
+    sourceUrl: entry.sourceUrl,
+    credit: entry.credit,
+    uploadedAt: entry.uploadedAt ?? null,
+    originalMimeType: entry.originalMimeType ?? null,
+    originalFormat: entry.originalFormat ?? entry.format,
+  }
+}
+
 /**
  * Validates a normalized SVG contract or non-empty PNG dimensions.
  *
@@ -127,7 +151,12 @@ async function validateNormalizedImage(filePath, extension) {
  * @param {string|null} [options.ffmpegPath] FFmpeg executable path.
  * @returns {Promise<object>} Catalog queries, safe path resolution, and converters.
  */
-export async function createMediaLibrary({ root, ffmpegPath = ffmpegStatic }) {
+export async function createMediaLibrary({
+  root,
+  ffmpegPath = ffmpegStatic,
+  personalMediaStore = null,
+  quota = null,
+}) {
   const resolvedRoot = path.resolve(root)
   let catalogConfig
   try {
@@ -185,7 +214,13 @@ export async function createMediaLibrary({ root, ffmpegPath = ffmpegStatic }) {
    * @param {'image'|'audio'|null} [expectedKind=null] Required media kind.
    * @returns {object} Catalog entry.
    */
-  function resolveEntry(id, expectedKind = null) {
+  async function resolveEntry(id, expectedKind = null, userId = null) {
+    if (String(id ?? '').startsWith('uploads/')) {
+      if (!userId || !personalMediaStore) {
+        throw Object.assign(new Error('Media-library asset not found.'), { status: 404 })
+      }
+      return personalMediaStore.resolveEntry(userId, id, expectedKind)
+    }
     const entry = byId.get(String(id ?? '').replaceAll('\\', '/'))
     if (!entry || (expectedKind && entry.kind !== expectedKind)) {
       throw Object.assign(new Error('Media-library asset not found.'), { status: 404 })
@@ -199,13 +234,14 @@ export async function createMediaLibrary({ root, ffmpegPath = ffmpegStatic }) {
    * @param {object} options Kind, collection, folder, search, and paging filters.
    * @returns {object} Matching entries, folders, and paging metadata.
    */
-  function list({
+  async function list({
     kind = 'image',
     collection = '',
     folder = null,
     query = '',
     offset = 0,
     limit = 60,
+    userId = null,
   } = {}) {
     if (!['image', 'audio'].includes(kind)) {
       throw Object.assign(new Error('Media kind must be image or audio.'), {
@@ -213,7 +249,12 @@ export async function createMediaLibrary({ root, ffmpegPath = ffmpegStatic }) {
       })
     }
     const normalizedCollection = String(collection).trim()
-    const kindEntries = entries.filter((entry) => entry.kind === kind)
+    const personalEntries = userId && personalMediaStore
+      ? await personalMediaStore.entries(userId)
+      : []
+    const kindEntries = [...entries, ...personalEntries].filter(
+      (entry) => entry.kind === kind,
+    )
     const collectionCounts = new Map()
     for (const entry of kindEntries) {
       collectionCounts.set(
@@ -288,8 +329,8 @@ export async function createMediaLibrary({ root, ffmpegPath = ffmpegStatic }) {
    * @param {string} destinationBasePath Extension-free theme path.
    * @returns {Promise<{extension:string,entry:object}>} Materialized format and provenance.
    */
-  async function materializeVisual(assetId, destinationBasePath) {
-    const entry = resolveEntry(assetId, 'image')
+  async function materializeVisual(assetId, destinationBasePath, userId = null) {
+    const entry = await resolveEntry(assetId, 'image', userId)
     const sourceStats = await stat(entry.absolutePath)
     if (sourceStats.size > MAX_IMAGE_BYTES) {
       throw Object.assign(new Error('Selected image exceeds 25 MiB.'), { status: 413 })
@@ -310,11 +351,24 @@ export async function createMediaLibrary({ root, ffmpegPath = ffmpegStatic }) {
         )
       }
       await validateNormalizedImage(temporary, outputExtension)
-      await replaceFile(temporary, destination)
-      await rm(`${destinationBasePath}${outputExtension === '.png' ? '.svg' : '.png'}`, {
-        force: true,
-      })
-      return { assetId: entry.id, format: outputExtension.slice(1) }
+      const alternate = `${destinationBasePath}${outputExtension === '.png' ? '.svg' : '.png'}`
+      const newBytes = (await stat(temporary)).size
+      const oldBytes =
+        (await existingFileBytes(destination)) +
+        (await existingFileBytes(alternate))
+      /** @param {null|((bytes:number)=>Promise<object>)} assertAdditionalBytes Quota assertion. @returns {Promise<void>} Commit completion. */
+      const commit = async (assertAdditionalBytes = null) => {
+        await assertAdditionalBytes?.(Math.max(0, newBytes - oldBytes))
+        await replaceFile(temporary, destination)
+        await rm(alternate, { force: true })
+      }
+      if (quota && userId) await quota.mutate(userId, commit)
+      else await commit()
+      return {
+        assetId: entry.id,
+        format: outputExtension.slice(1),
+        provenance: provenance(entry),
+      }
     } catch (error) {
       await rm(temporary, { force: true })
       throw error
@@ -329,8 +383,8 @@ export async function createMediaLibrary({ root, ffmpegPath = ffmpegStatic }) {
    * @param {string} soundId Registered logical sound ID.
    * @returns {Promise<{entry:object}>} Source provenance for the materialized audio.
    */
-  async function materializeAudio(assetId, audioRoot, soundId) {
-    const entry = resolveEntry(assetId, 'audio')
+  async function materializeAudio(assetId, audioRoot, soundId, userId = null) {
+    const entry = await resolveEntry(assetId, 'audio', userId)
     const sourceStats = await stat(entry.absolutePath)
     if (sourceStats.size > MAX_AUDIO_BYTES) {
       throw Object.assign(new Error('Selected audio exceeds 100 MiB.'), { status: 413 })
@@ -371,10 +425,32 @@ export async function createMediaLibrary({ root, ffmpegPath = ffmpegStatic }) {
           details: wavErrors,
         })
       }
-      await replaceFile(wavTemporary, path.join(sourceRoot, `${soundId}.wav`))
-      await replaceFile(webmTemporary, path.join(audioRoot, `${soundId}.webm`))
-      await replaceFile(mp3Temporary, path.join(audioRoot, `${soundId}.mp3`))
-      return { assetId: entry.id, sourceFormat: entry.format, normalizedFormat: 'wav' }
+      const destinations = [
+        path.join(sourceRoot, `${soundId}.wav`),
+        path.join(audioRoot, `${soundId}.webm`),
+        path.join(audioRoot, `${soundId}.mp3`),
+      ]
+      const temporaryFiles = [wavTemporary, webmTemporary, mp3Temporary]
+      /** Total normalized output bytes. @type {number} */
+      const newBytes = (await Promise.all(temporaryFiles.map((file) => stat(file))))
+        .reduce((sum, value) => sum + value.size, 0)
+      const oldBytes = (await Promise.all(destinations.map(existingFileBytes)))
+        .reduce((sum, value) => sum + value, 0)
+      /** @param {null|((bytes:number)=>Promise<object>)} assertAdditionalBytes Quota assertion. @returns {Promise<void>} Commit completion. */
+      const commit = async (assertAdditionalBytes = null) => {
+        await assertAdditionalBytes?.(Math.max(0, newBytes - oldBytes))
+        for (let index = 0; index < destinations.length; index += 1) {
+          await replaceFile(temporaryFiles[index], destinations[index])
+        }
+      }
+      if (quota && userId) await quota.mutate(userId, commit)
+      else await commit()
+      return {
+        assetId: entry.id,
+        sourceFormat: entry.format,
+        normalizedFormat: 'wav',
+        provenance: provenance(entry),
+      }
     } catch (error) {
       await Promise.all(
         [wavTemporary, webmTemporary, mp3Temporary].map((filePath) =>

@@ -650,11 +650,16 @@ export async function createThemeStore({
       definition.category,
       path.parse(definition.fileName).name,
     )
-    const result = await mediaLibrary.materializeVisual(assetId, destinationBase)
+    const result = await mediaLibrary.materializeVisual(
+      assetId,
+      destinationBase,
+      userId,
+    )
     metadata.mediaSources ??= { visuals: {}, audio: {} }
     metadata.mediaSources.visuals[definition.mediaId] = {
       assetId: result.assetId,
       appliedAt: new Date().toISOString(),
+      provenance: result.provenance,
     }
     metadata.mediaVersion = (metadata.mediaVersion ?? 1) + 1
     metadata.updatedAt = new Date().toISOString()
@@ -682,11 +687,13 @@ export async function createThemeStore({
       assetId,
       path.join(mediaDirectory(themeId), 'audio'),
       definition.fileName,
+      userId,
     )
     metadata.mediaSources ??= { visuals: {}, audio: {} }
     metadata.mediaSources.audio[definition.soundId] = {
       assetId: result.assetId,
       appliedAt: new Date().toISOString(),
+      provenance: result.provenance,
     }
     metadata.mediaVersion = (metadata.mediaVersion ?? 1) + 1
     metadata.updatedAt = new Date().toISOString()
@@ -745,12 +752,14 @@ export async function createThemeStore({
       result = await mediaLibrary.materializeVisual(
         assetId,
         path.join(mediaDirectory(themeId), 'entity-visuals', resolvedOverrideId),
+        userId,
       )
     } else {
       result = await mediaLibrary.materializeAudio(
         assetId,
         path.join(mediaDirectory(themeId), 'entity-audio'),
         resolvedOverrideId,
+        userId,
       )
     }
     collection[resolvedOverrideId] = {
@@ -758,6 +767,7 @@ export async function createThemeStore({
       baseId: definition.mediaId ?? definition.soundId,
       format: result.format ?? result.normalizedFormat,
       appliedAt: new Date().toISOString(),
+      provenance: result.provenance,
     }
     metadata.mediaVersion = (metadata.mediaVersion ?? 1) + 1
     metadata.updatedAt = new Date().toISOString()

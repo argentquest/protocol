@@ -676,6 +676,87 @@ challenges teach each behavior in isolation.
 
 ---
 
+## Sprint 22 — Direct manipulation and object actions
+
+**Status:** `DONE`
+
+| ID | Task | Size | Status | Acceptance |
+|---|---|---:|---|---|
+| V2-S22-01 | Add geometry-aware resize handles | L | `DONE` | Selected dimensioned entities resize by edge or corner on the 10-unit grid while preserving schema shape contracts. |
+| V2-S22-02 | Add object context actions | M | `DONE` | Right-click and Shift+F10 expose separate image, supported sound, and object-only JSON actions. |
+| V2-S22-03 | Validate object-only JSON | M | `DONE` | Object drafts are validated in their complete level before local application and autosave. |
+| V2-S22-04 | Complete release verification | M | `DONE` | Geometry unit tests, Theme Workshop browser coverage, docs, lint, full unit suite, and build pass. |
+
+### Sprint 22 exit criteria
+
+- Resizing writes authoritative level geometry rather than presentation-only bounds.
+- Square, circle, and radius entities retain their required proportions.
+- Rectangular entities resize independently by horizontal and vertical edges.
+- Context actions target only the object that opened the menu.
+- Unit, browser, documentation, lint, and production build checks pass.
+
+---
+
+## Sprint 23 — Formatted designer reference
+
+**Status:** `DONE`
+
+| ID | Task | Size | Status | Acceptance |
+|---|---|---:|---|---|
+| V2-S23-01 | Generate semantic designer HTML | M | `DONE` | The maintained Markdown reference deterministically produces a standalone responsive HTML page. |
+| V2-S23-02 | Improve reference navigation | S | `DONE` | The guide includes a sticky table of contents, heading anchors, formatted tables/code, responsive layout, and print styles. |
+| V2-S23-03 | Integrate and validate the help flow | M | `DONE` | Dev/build regenerate the guide, lint rejects drift, and the Workshop browser journey verifies the formatted popup. |
+
+### Sprint 23 exit criteria
+
+- The help action opens HTML rather than raw Markdown.
+- Markdown remains the single maintainable content source.
+- The generated page is usable on desktop, narrow viewports, and print.
+- Documentation, lint, production build, and relevant browser checks pass.
+
+---
+
+## Sprint 24 — Shared object media browser
+
+**Status:** `DONE`
+
+| ID | Task | Size | Status | Acceptance |
+|---|---|---:|---|---|
+| V2-S24-01 | Extract the PublicMedia browser | M | `DONE` | Theme-wide selection uses a reusable folder, breadcrumb, search, paging, preview, and provenance component. |
+| V2-S24-02 | Reuse browsing for object overrides | M | `DONE` | Object image and sound actions render the same browser while retaining per-entity materialization. |
+| V2-S24-03 | Validate shared behavior | M | `DONE` | Docs, lint, build, and the Workshop browser journey cover both shared-browser entry points. |
+
+### Sprint 24 exit criteria
+
+- Theme and object media selection render one shared browser implementation.
+- Images and sounds support the same filesystem navigation and preview behavior.
+- Theme-wide and per-entity apply semantics remain distinct and server-validated.
+- Documentation, lint, production build, and relevant browser checks pass.
+
+---
+
+## Sprint 25 — Safe personal media uploads
+
+**Status:** `DONE`
+
+| ID | Task | Size | Status | Acceptance |
+|---|---|---:|---|---|
+| V2-S25-01 | Add owner-only streaming uploads | L | `DONE` | Multipart files stream through quarantine with early byte caps and owner-isolated listing and reads. |
+| V2-S25-02 | Validate and normalize uploads | L | `DONE` | Extension, MIME, signature, dimensions, duration, SVG compatibility, and normalized output are checked with cleanup on failure. |
+| V2-S25-03 | Enforce account-wide storage quotas | L | `DONE` | One serialized configurable quota includes normalized uploads and media copies across every owned theme. |
+| V2-S25-04 | Integrate uploads into shared browsing | M | `DONE` | Theme-wide and object media browsers show upload controls, My uploads, provenance, deletion, and live quota usage. |
+| V2-S25-05 | Complete release verification | M | `DONE` | API security tests, docs, lint, full unit suite, build, and relevant browser coverage pass. |
+
+### Sprint 25 exit criteria
+
+- Personal media cannot be listed, previewed, deleted, or applied by another account.
+- Oversized, spoofed, malformed, over-dimension, or over-duration files never leave quarantine.
+- Quota enforcement covers uploads and every generated theme media file.
+- Normalized media and provenance remain valid after an uploaded source is deleted.
+- Unit, API, browser, documentation, lint, and production build checks pass.
+
+---
+
 ## 4. Dependency sequence
 
 ```text
@@ -701,6 +782,10 @@ Sprint 0: Decisions and branch
                                   → Sprint 19: Texture proof theme
                                     → Sprint 20: Theme media library
                                       → Sprint 21: Per-entity media overrides
+                                        → Sprint 22: Direct manipulation and object actions
+                                          → Sprint 23: Formatted designer reference
+                                            → Sprint 24: Shared object media browser
+                                              → Sprint 25: Safe personal media uploads
 ```
 
 Some tasks may overlap after their contracts stabilize. For example, WAV asset

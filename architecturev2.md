@@ -786,6 +786,49 @@ Schema plus gameplay validation, undo/redo, seed regeneration, live PixiJS
 playtesting, and level duplication, deletion, reordering, and
 automatic renumbering. Published themes remain editable by their key holder.
 
+Selected dimensioned entities expose eight mouse resize handles. Edge and
+corner drags update authoritative `size`, `radius`, or `width`/`height` fields;
+single-dimension circles and squares preserve their proportions, while
+rectangles resize independently. The opposite edge remains anchored where
+world containment permits, and results snap to the 10-unit authoring grid. A
+right-click context menu offers separate per-entity image and supported-event
+sound actions plus a selected-object-only JSON dialog. Object JSON is validated
+in the complete level before it can be applied.
+
+Theme-wide and per-entity media selection share one PublicMedia browser
+component. Folder traversal, breadcrumbs, search, pagination, image/audio
+preview, provenance, and license presentation therefore cannot drift between
+the two authoring paths. Only the final materialization callback differs:
+registered theme media replaces a base ID, while object media creates a
+server-issued per-entity override ID.
+
+Authenticated authors may also stream personal assets into an owner-only
+`data/user-media/<user-id>` library. Multipart bodies are capped while bytes
+arrive and land in a temporary quarantine. Extension, declared MIME type, and
+file signature must agree before decoding. Images are limited to 4096 pixels on
+either axis and 16,777,216 total pixels; audio is limited to five minutes.
+Accepted raster images normalize to PNG, compatible SVG remains SVG, and audio
+normalizes to a stereo 44.1 kHz 16-bit WAV master. Failed validation or
+conversion removes every quarantine artifact. Stored metadata records original
+name, MIME type and format, normalized format, byte size, upload time, account
+credit, and user-provided provenance; a provenance snapshot is retained in
+theme metadata when an asset is applied.
+
+One serialized quota guard covers uploaded normalized sources and every custom
+file under all themes owned by the account, including WAV masters and WebM/MP3
+delivery audio. The default ceiling is 500 MiB and deployments may override it
+with `PATH_PROTOCOL_ACCOUNT_MEDIA_QUOTA_BYTES`. Both upload commits and theme
+materialization compute their byte delta under this guard, so concurrent or
+direct API writes cannot bypass the limit. Personal listing, preview, deletion,
+and application require the authenticated owner. Deleting a source frees its
+quota while existing theme copies remain self-contained.
+
+The full-level JSON editor links to a standalone semantic HTML designer
+reference. A deterministic build script renders the maintained Markdown source
+into the deployed page, including responsive navigation, tables, code blocks,
+heading anchors, and print styles. Development and production prebuilds
+regenerate it; documentation validation rejects a stale generated page.
+
 Player progress, scores, coins, and inventory are namespaced by theme ID.
 Level records use immutable internal IDs so reordering cannot attach progress
 to another course.

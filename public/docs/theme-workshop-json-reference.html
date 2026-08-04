@@ -1,0 +1,1522 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Theme Workshop JSON Reference</title>
+  <style>
+    :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background: #040a13; color: #dff6ff; }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: radial-gradient(circle at 80% 0%, rgba(32, 151, 190, .18), transparent 34rem), #040a13; }
+    a { color: #72e9ff; }
+    a:hover { color: #fff; }
+    .help-shell { display: grid; min-height: 100vh; grid-template-columns: 290px minmax(0, 1fr); }
+    .help-sidebar { position: sticky; top: 0; height: 100vh; overflow: auto; border-right: 1px solid rgba(114, 233, 255, .18); padding: 1.5rem 1.25rem; background: rgba(4, 10, 19, .92); }
+    .help-sidebar strong { display: block; margin-bottom: .35rem; color: #fff; letter-spacing: .08em; text-transform: uppercase; }
+    .help-sidebar p { margin: 0 0 1rem; color: #82a7b9; font-size: .82rem; }
+    .help-sidebar nav { display: grid; gap: .15rem; }
+    .help-sidebar nav a { border-left: 2px solid transparent; padding: .42rem .55rem; color: #9fc4d3; font-size: .84rem; text-decoration: none; }
+    .help-sidebar nav a:hover, .help-sidebar nav a.is-active { border-left-color: #72e9ff; color: #fff; background: rgba(114, 233, 255, .08); }
+    .help-sidebar .toc-depth-3 { padding-left: 1.25rem; font-size: .78rem; }
+    main { width: min(100%, 1080px); padding: 3rem clamp(1.25rem, 5vw, 5rem) 6rem; }
+    h1 { margin: 0 0 1.5rem; color: #fff; font-size: clamp(2.2rem, 5vw, 4.2rem); line-height: 1; letter-spacing: -.04em; }
+    h2 { margin-top: 3.5rem; padding-bottom: .55rem; border-bottom: 1px solid rgba(114, 233, 255, .22); color: #fff; font-size: 1.8rem; }
+    h3 { margin-top: 2.25rem; color: #a9f2ff; font-size: 1.25rem; }
+    h4 { margin-top: 1.75rem; color: #dff6ff; }
+    h1, h2, h3, h4 { scroll-margin-top: 1rem; }
+    .heading-link { margin-left: .45rem; opacity: 0; color: #5a899a; font-size: .75em; text-decoration: none; }
+    h1:hover .heading-link, h2:hover .heading-link, h3:hover .heading-link, h4:hover .heading-link, .heading-link:focus { opacity: 1; }
+    p, li { color: #bad0d9; line-height: 1.7; }
+    strong { color: #f4fcff; }
+    code { border: 1px solid rgba(114, 233, 255, .12); border-radius: .3rem; padding: .12rem .3rem; color: #9ff1ff; background: rgba(0, 0, 0, .28); font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .9em; }
+    pre { overflow: auto; border: 1px solid rgba(114, 233, 255, .18); border-radius: .65rem; padding: 1rem 1.15rem; background: #02070d; box-shadow: inset 3px 0 #2ac8e5; }
+    pre code { border: 0; padding: 0; color: #d8f7ff; background: transparent; line-height: 1.55; }
+    table { width: 100%; margin: 1.25rem 0 2rem; border-collapse: collapse; border: 1px solid rgba(114, 233, 255, .2); font-size: .88rem; }
+    th, td { padding: .7rem .8rem; border: 1px solid rgba(114, 233, 255, .14); text-align: left; vertical-align: top; }
+    th { color: #fff; background: rgba(114, 233, 255, .1); }
+    tr:nth-child(even) td { background: rgba(255, 255, 255, .018); }
+    blockquote { margin: 1.5rem 0; border-left: 3px solid #72e9ff; padding: .25rem 1rem; background: rgba(114, 233, 255, .06); }
+    hr { margin: 3rem 0; border: 0; border-top: 1px solid rgba(114, 233, 255, .18); }
+    .back-to-top { position: fixed; right: 1.25rem; bottom: 1.25rem; border: 1px solid rgba(114, 233, 255, .35); border-radius: 999px; padding: .65rem .9rem; color: #dff6ff; background: #071522; text-decoration: none; }
+    @media (max-width: 860px) { .help-shell { grid-template-columns: 1fr; } .help-sidebar { position: relative; height: auto; max-height: 320px; border-right: 0; border-bottom: 1px solid rgba(114, 233, 255, .18); } main { padding-top: 2rem; } }
+    @media print { :root { color-scheme: light; background: #fff; color: #111; } body { background: #fff; } .help-shell { display: block; } .help-sidebar, .back-to-top, .heading-link { display: none; } main { width: 100%; padding: 0; } p, li, code { color: #222; } h1, h2, h3, h4, strong { color: #000; } pre, code { border-color: #bbb; background: #f5f5f5; } }
+  </style>
+</head>
+<body>
+  <div class="help-shell">
+    <aside class="help-sidebar" aria-label="Designer reference navigation">
+      <strong>Designer Reference</strong>
+      <p>Path Protocol Theme Workshop</p>
+      <nav><a class="toc-depth-2" href="#what-this-json-controls">What this JSON controls</a>
+<a class="toc-depth-2" href="#essential-rules">Essential rules</a>
+<a class="toc-depth-2" href="#document-map">Document map</a>
+<a class="toc-depth-2" href="#top-level-properties">Top-level properties</a>
+<a class="toc-depth-2" href="#shared-value-shapes">Shared value shapes</a>
+<a class="toc-depth-3" href="#coordinates-and-dimensions">Coordinates and dimensions</a>
+<a class="toc-depth-3" href="#region">`region`</a>
+<a class="toc-depth-3" href="#entity-dimensions">Entity dimensions</a>
+<a class="toc-depth-3" href="#common-entity-properties">Common entity properties</a>
+<a class="toc-depth-2" href="#arena">`arena`</a>
+<a class="toc-depth-3" href="#rectangular-arena">Rectangular arena</a>
+<a class="toc-depth-3" href="#elliptical-arena">Elliptical arena</a>
+<a class="toc-depth-3" href="#polygon-arena">Polygon arena</a>
+<a class="toc-depth-2" href="#token">`token`</a>
+<a class="toc-depth-2" href="#movement">`movement`</a>
+<a class="toc-depth-2" href="#start">`start`</a>
+<a class="toc-depth-2" href="#maintarget">`mainTarget`</a>
+<a class="toc-depth-2" href="#generation">`generation`</a>
+<a class="toc-depth-2" href="#manualobstacles">`manualObstacles[]`</a>
+<a class="toc-depth-2" href="#movingobstacles">`movingObstacles[]`</a>
+<a class="toc-depth-2" href="#trackingobstacles">`trackingObstacles[]`</a>
+<a class="toc-depth-2" href="#dynamicobstacles">`dynamicObstacles[]`</a>
+<a class="toc-depth-3" href="#phase-behavior">Phase behavior</a>
+<a class="toc-depth-3" href="#orbit-behavior">Orbit behavior</a>
+<a class="toc-depth-3" href="#pulse-behavior">Pulse behavior</a>
+<a class="toc-depth-3" href="#switch-behavior">Switch behavior</a>
+<a class="toc-depth-3" href="#rotate-behavior">Rotate behavior</a>
+<a class="toc-depth-3" href="#complete-dynamic-obstacle-example">Complete dynamic obstacle example</a>
+<a class="toc-depth-2" href="#switches">`switches[]`</a>
+<a class="toc-depth-2" href="#forcefields">`forceFields[]`</a>
+<a class="toc-depth-3" href="#conveyor">Conveyor</a>
+<a class="toc-depth-3" href="#repulsor-or-attractor">Repulsor or attractor</a>
+<a class="toc-depth-2" href="#coins">`coins[]`</a>
+<a class="toc-depth-2" href="#rewards">`rewards`</a>
+<a class="toc-depth-2" href="#scoring">`scoring`</a>
+<a class="toc-depth-2" href="#bonuses">`bonuses`</a>
+<a class="toc-depth-2" href="#registered-mediaid-values">Registered `mediaId` values</a>
+<a class="toc-depth-2" href="#per-object-image-and-audio-overrides">Per-object image and audio overrides</a>
+<a class="toc-depth-2" href="#validation-beyond-property-types">Validation beyond property types</a>
+<a class="toc-depth-2" href="#safe-authoring-workflow">Safe authoring workflow</a>
+<a class="toc-depth-2" href="#minimal-complete-level-example">Minimal complete level example</a>
+<a class="toc-depth-2" href="#theme-presentation-json-for-source-controlled-themes">Theme presentation JSON for source-controlled themes</a></nav>
+    </aside>
+    <main id="top"><h1 id="theme-workshop-json-reference">Theme Workshop JSON Reference<a class="heading-link" href="#theme-workshop-json-reference" aria-label="Link to this section">#</a></h1>
+<p>This guide explains the complete level JSON document shown by <strong>Open full-level
+JSON editor</strong> in the Theme Workshop. It is written for authors using the popup,
+not for engine developers.</p>
+<p>The application opens this reference as a formatted HTML page generated from
+this Markdown source. Run <code>npm run docs:build</code> after editing the guide.</p>
+<p>The authoritative contract is
+<a href="../../src/config/schemas/level.schema.json"><code>src/config/schemas/level.schema.json</code></a>.
+The popup sends the whole document to the server for JSON Schema validation,
+deterministic generation, placement checks, and route-solvability checks before
+it can be applied or saved.</p>
+<h2 id="what-this-json-controls">What this JSON controls<a class="heading-link" href="#what-this-json-controls" aria-label="Link to this section">#</a></h2>
+<p>The popup edits one playable level inside a theme:</p>
+<ul>
+<li>identity, title, seed, difficulty, and briefing;</li>
+<li>arena and token collision geometry;</li>
+<li>movement tuning;</li>
+<li>start and target placement;</li>
+<li>generated and manually placed hazards;</li>
+<li>moving, tracking, phase, orbit, pulse, switch, and rotating hazards;</li>
+<li>conveyor, repulsor, and attractor fields;</li>
+<li>switches, coins, rewards, scoring, and bonus targets.</li>
+</ul>
+<p>It does <strong>not</strong> edit the theme account, publication state, level order, artwork
+files, audio files, or generated media manifest. Use the normal Theme Workshop
+controls for those operations. Level JSON refers to artwork through stable
+<code>mediaId</code> values; changing a <code>mediaId</code> selects a logical visual, while the
+theme&#39;s media overrides decide how that visual looks. The selected-object
+inspector can additionally assign <code>visualOverrideId</code> and <code>audioOverrideId</code> to
+one entity, allowing (for example) a 50-value coin to look and sound different
+from a 10-value coin.</p>
+<p>For a focused view, right-click an object on the placement grid and choose
+<strong>Show object JSON</strong>. That dialog contains only the selected object, but the
+server still validates the edited object inside the complete level before
+applying it. The same context menu separates <strong>Change image</strong> and <strong>Change
+sound</strong>. Both media actions use the same recursive folder browser, breadcrumbs,
+search, preview, provenance, and license display as the Theme media selector.
+Selected objects with schema-backed dimensions also expose edge and corner
+handles that update these same JSON geometry fields.</p>
+<h2 id="essential-rules">Essential rules<a class="heading-link" href="#essential-rules" aria-label="Link to this section">#</a></h2>
+<ul>
+<li>JSON allows double-quoted strings only. Comments and trailing commas are not
+valid.</li>
+<li>Unknown properties are rejected. Property names are case-sensitive.</li>
+<li>The logical world is <strong>1600 × 900 world units</strong>. <code>(0, 0)</code> is the upper-left;
+x increases right and y increases down.</li>
+<li>Entity <code>x</code> and <code>y</code> values normally describe the entity&#39;s <strong>center</strong>. A
+<code>region</code> or tracking <code>zone</code> uses <code>x</code> and <code>y</code> as its upper-left corner.</li>
+<li>Dimensions, distances, gaps, radii, and amplitudes use world units.</li>
+<li>Speeds use world units/second. Accelerations and force values use world
+units/second². Properties ending in <code>Ms</code> use milliseconds.</li>
+<li><code>phase</code> uses radians. Direction and rotation properties containing <code>Degrees</code>
+use degrees. For directions, <code>0</code> points right and <code>90</code> points down.</li>
+<li>Every renderable object needs a registered, theme-neutral <code>mediaId</code>.</li>
+<li>Collision geometry comes from JSON, never from the artwork.</li>
+<li>IDs must be stable and unique within their relevant collection. A switch
+barrier&#39;s <code>switchId</code> must match an entry in <code>switches</code>.</li>
+<li>Manual elements take priority over generated elements.</li>
+<li>Every start, target, pickup, obstacle, movement envelope, and tracking zone
+must fit inside the arena. Required targets must remain reachable by the
+complete configured token.</li>
+<li>Keep <code>internalId</code> unchanged. It is the stable progress/storage identity for a
+Workshop level.</li>
+</ul>
+<h2 id="document-map">Document map<a class="heading-link" href="#document-map" aria-label="Link to this section">#</a></h2>
+<pre><code class="language-text">level
+├── internalId                    Workshop-owned immutable level identity
+├── schemaVersion, id, number     format and campaign identity
+├── name, seed, difficulty        author-facing identity and generation seed
+├── briefing                     instructions shown to the player
+├── arena                        playable boundary and arena media
+├── token                        player collision shape and media
+├── movement                     player acceleration and speed tuning
+├── start                        manual point or generated region
+├── mainTarget                   manual point or generated region
+├── generation                   deterministic static-obstacle generation
+├── manualObstacles[]            fixed solid hazards
+├── movingObstacles[]            axis-aligned oscillating hazards
+├── trackingObstacles[]          token-following hazards confined to zones
+├── dynamicObstacles[]           phase/orbit/pulse/switch/rotate hazards
+├── switches[]                   contact pads controlling switch barriers
+├── forceFields[]                conveyor/repulsor/attractor acceleration
+├── coins[]                      one-time course pickups
+├── rewards                      completion and bonus coins
+├── scoring                      score maximum, par values, and penalties
+└── bonuses                      ordered optional targets and their scoring
+</code></pre>
+<h2 id="top-level-properties">Top-level properties<a class="heading-link" href="#top-level-properties" aria-label="Link to this section">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th align="right">Required</th>
+<th>Type and constraint</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>internalId</code></td>
+<td align="right">Workshop levels</td>
+<td>UUID-like string matching 36 lowercase hexadecimal/hyphen characters</td>
+<td>Immutable internal identity. Do not edit or copy it between levels.</td>
+</tr>
+<tr>
+<td><code>schemaVersion</code></td>
+<td align="right">Yes</td>
+<td>Exactly <code>2</code></td>
+<td>Selects the V2 level contract.</td>
+</tr>
+<tr>
+<td><code>id</code></td>
+<td align="right">Yes</td>
+<td><code>level-</code> plus 2–3 digits</td>
+<td>Campaign-facing ID. The server updates it when levels are reordered.</td>
+</tr>
+<tr>
+<td><code>number</code></td>
+<td align="right">Yes</td>
+<td>Integer <code>1–999</code></td>
+<td>One-based campaign position. The server updates it during reorder.</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td align="right">Yes</td>
+<td>String, 1–80 characters</td>
+<td>Level title shown to the player.</td>
+</tr>
+<tr>
+<td><code>seed</code></td>
+<td align="right">Yes</td>
+<td>String, 1–160 characters</td>
+<td>Seed for deterministic placement. Changing it creates a different generated layout. Restarting does not reroll it.</td>
+</tr>
+<tr>
+<td><code>difficulty</code></td>
+<td align="right">Yes</td>
+<td><code>1–10</code> or <code>15</code></td>
+<td>Difficulty label. <code>15</code> is the special apex value.</td>
+</tr>
+<tr>
+<td><code>briefing</code></td>
+<td align="right">Yes</td>
+<td>String, 1–300 characters</td>
+<td>Player-facing description and mechanic hint.</td>
+</tr>
+<tr>
+<td><code>arena</code></td>
+<td align="right">Yes</td>
+<td>Arena object</td>
+<td>Playable boundary and arena visual.</td>
+</tr>
+<tr>
+<td><code>token</code></td>
+<td align="right">Yes</td>
+<td>Token object</td>
+<td>Player shape, visible size, and visual.</td>
+</tr>
+<tr>
+<td><code>movement</code></td>
+<td align="right">Yes</td>
+<td>Movement object</td>
+<td>Pointer and keyboard movement tuning.</td>
+</tr>
+<tr>
+<td><code>start</code></td>
+<td align="right">Yes</td>
+<td>Start object</td>
+<td>Initial token-center position or generation region.</td>
+</tr>
+<tr>
+<td><code>mainTarget</code></td>
+<td align="right">Yes</td>
+<td>Target object</td>
+<td>Required target position and diameter.</td>
+</tr>
+<tr>
+<td><code>generation</code></td>
+<td align="right">Yes</td>
+<td>Generation object</td>
+<td>Seeded static-obstacle rules. Use <code>obstacleCount: 0</code> to disable generation.</td>
+</tr>
+<tr>
+<td><code>manualObstacles</code></td>
+<td align="right">Yes</td>
+<td>Array</td>
+<td>Fixed solid hazards. Use <code>[]</code> when none.</td>
+</tr>
+<tr>
+<td><code>movingObstacles</code></td>
+<td align="right">Yes</td>
+<td>Array</td>
+<td>Oscillating solid hazards. Use <code>[]</code> when none.</td>
+</tr>
+<tr>
+<td><code>trackingObstacles</code></td>
+<td align="right">Yes</td>
+<td>Array</td>
+<td>Tracking solid hazards. Use <code>[]</code> when none.</td>
+</tr>
+<tr>
+<td><code>dynamicObstacles</code></td>
+<td align="right">No</td>
+<td>Array</td>
+<td>Phase, orbit, pulse, switch, and rotate hazards. Prefer <code>[]</code> when none.</td>
+</tr>
+<tr>
+<td><code>switches</code></td>
+<td align="right">No</td>
+<td>Array</td>
+<td>Contact pads. Prefer <code>[]</code> when none.</td>
+</tr>
+<tr>
+<td><code>forceFields</code></td>
+<td align="right">No</td>
+<td>Array</td>
+<td>Non-solid environmental fields. Prefer <code>[]</code> when none.</td>
+</tr>
+<tr>
+<td><code>coins</code></td>
+<td align="right">Yes</td>
+<td>Array</td>
+<td>One-time collectible course coins. Use <code>[]</code> when none.</td>
+</tr>
+<tr>
+<td><code>rewards</code></td>
+<td align="right">Yes</td>
+<td>Rewards object</td>
+<td>Coins granted for completion and bonus targets.</td>
+</tr>
+<tr>
+<td><code>scoring</code></td>
+<td align="right">Yes</td>
+<td>Scoring object</td>
+<td>Maximum score, par values, weighting, and collision rules.</td>
+</tr>
+<tr>
+<td><code>bonuses</code></td>
+<td align="right">Yes</td>
+<td>Bonuses object</td>
+<td>Ordered optional bonus-target flow.</td>
+</tr>
+</tbody></table>
+<h2 id="shared-value-shapes">Shared value shapes<a class="heading-link" href="#shared-value-shapes" aria-label="Link to this section">#</a></h2>
+<h3 id="coordinates-and-dimensions">Coordinates and dimensions<a class="heading-link" href="#coordinates-and-dimensions" aria-label="Link to this section">#</a></h3>
+<p>Schema coordinates are numbers from <code>0</code> through <code>1600</code>, and positive
+dimensions are greater than <code>0</code> and at most <code>1600</code>. In practice, y-coordinates
+must fit the 900-unit world and every complete shape must fit its arena. The
+server&#39;s generated-course validation catches placements that satisfy the basic
+number range but do not fit the playable boundary.</p>
+<h3 id="region"><code>region</code><a class="heading-link" href="#region" aria-label="Link to this section">#</a></h3>
+<p>A region is used by generated starts/targets and tracking zones.</p>
+<pre><code class="language-json">{ &quot;x&quot;: 100, &quot;y&quot;: 120, &quot;width&quot;: 300, &quot;height&quot;: 240 }
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>x</code></td>
+<td>Number <code>0–1600</code></td>
+<td>Upper-left x-coordinate in world units.</td>
+</tr>
+<tr>
+<td><code>y</code></td>
+<td>Number <code>0–1600</code></td>
+<td>Upper-left y-coordinate; keep the region within world height <code>900</code>.</td>
+</tr>
+<tr>
+<td><code>width</code></td>
+<td>Number <code>&gt;0–1600</code></td>
+<td>Region width in world units.</td>
+</tr>
+<tr>
+<td><code>height</code></td>
+<td>Number <code>&gt;0–1600</code></td>
+<td>Region height in world units.</td>
+</tr>
+</tbody></table>
+<h3 id="entity-dimensions">Entity dimensions<a class="heading-link" href="#entity-dimensions" aria-label="Link to this section">#</a></h3>
+<p>Static, moving, and dynamic obstacles must use exactly one sizing form:</p>
+<ul>
+<li><code>size</code>: diameter/equal width and height, convenient for circles and diamonds;</li>
+<li><code>width</code> and <code>height</code>: explicit dimensions, useful for rectangles.</li>
+</ul>
+<p>Do not provide <code>size</code> together with <code>width</code>/<code>height</code>. Tracking obstacles always
+use explicit <code>width</code> and <code>height</code>.</p>
+<h3 id="common-entity-properties">Common entity properties<a class="heading-link" href="#common-entity-properties" aria-label="Link to this section">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>Non-empty string</td>
+<td>Stable identity used by validation, events, persistence, or links.</td>
+</tr>
+<tr>
+<td><code>mediaId</code></td>
+<td>Lowercase hyphenated string</td>
+<td>Logical artwork identity; it must exist in the media registry.</td>
+</tr>
+<tr>
+<td><code>visualOverrideId</code></td>
+<td>Optional server-issued <code>entity-visual-&lt;UUID&gt;</code></td>
+<td>Artwork copied into this theme for only this entity. The renderer falls back to <code>mediaId</code> when absent or unavailable. Do not type catalog paths here.</td>
+</tr>
+<tr>
+<td><code>audioOverrideId</code></td>
+<td>Optional server-issued <code>entity-audio-&lt;UUID&gt;</code></td>
+<td>Sound copied into this theme for only this entity. It currently plays for coin collection, main/bonus target contact, and switch activation; the logical event sound is the fallback.</td>
+</tr>
+<tr>
+<td><code>shape</code></td>
+<td><code>circle</code>, <code>rect</code>, or <code>diamond</code></td>
+<td>Authoritative collision geometry. Artwork does not change it.</td>
+</tr>
+<tr>
+<td><code>x</code>, <code>y</code></td>
+<td>Numbers</td>
+<td>Entity center in world units.</td>
+</tr>
+<tr>
+<td><code>size</code></td>
+<td>Positive number</td>
+<td>Equal visible/collision width and height.</td>
+</tr>
+<tr>
+<td><code>width</code>, <code>height</code></td>
+<td>Positive numbers</td>
+<td>Explicit visible/collision dimensions.</td>
+</tr>
+</tbody></table>
+<h2 id="arena"><code>arena</code><a class="heading-link" href="#arena" aria-label="Link to this section">#</a></h2>
+<p>The arena is both the complete-token containment boundary and the arena visual.
+Choose exactly one shape.</p>
+<h3 id="rectangular-arena">Rectangular arena<a class="heading-link" href="#rectangular-arena" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-json">{
+  &quot;shape&quot;: &quot;rect&quot;,
+  &quot;mediaId&quot;: &quot;arena-standard&quot;,
+  &quot;margin&quot;: 35,
+  &quot;cornerRadius&quot;: 38
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Constraint</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>shape</code></td>
+<td>Exactly <code>rect</code></td>
+<td>Selects rectangular containment.</td>
+</tr>
+<tr>
+<td><code>mediaId</code></td>
+<td>Registered media ID</td>
+<td>Normally <code>arena-standard</code>.</td>
+</tr>
+<tr>
+<td><code>margin</code></td>
+<td>Number <code>0–400</code></td>
+<td>Inset from every world edge in world units.</td>
+</tr>
+<tr>
+<td><code>cornerRadius</code></td>
+<td>Number <code>0–500</code></td>
+<td>Rounded-corner radius in world units.</td>
+</tr>
+</tbody></table>
+<h3 id="elliptical-arena">Elliptical arena<a class="heading-link" href="#elliptical-arena" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-json">{ &quot;shape&quot;: &quot;ellipse&quot;, &quot;mediaId&quot;: &quot;arena-ellipse&quot;, &quot;margin&quot;: 45 }
+</code></pre>
+<p><code>margin</code> insets the ellipse from the world edges. The complete token must remain
+inside the ellipse.</p>
+<h3 id="polygon-arena">Polygon arena<a class="heading-link" href="#polygon-arena" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-json">{
+  &quot;shape&quot;: &quot;polygon&quot;,
+  &quot;mediaId&quot;: &quot;arena-polygon&quot;,
+  &quot;points&quot;: [[120, 100], [1480, 100], [1510, 760], [800, 850], [90, 760]]
+}
+</code></pre>
+<p><code>points</code> is an ordered array of at least three absolute <code>[x, y]</code> vertices.
+List the boundary vertices consistently clockwise or counter-clockwise and do
+not create self-intersecting edges.</p>
+<h2 id="token"><code>token</code><a class="heading-link" href="#token" aria-label="Link to this section">#</a></h2>
+<pre><code class="language-json">{ &quot;shape&quot;: &quot;circle&quot;, &quot;size&quot;: 40, &quot;mediaId&quot;: &quot;token-circle&quot; }
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Constraint</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>shape</code></td>
+<td><code>circle</code>, <code>rect</code>, or <code>diamond</code></td>
+<td>Complete player collision shape; it never rotates.</td>
+</tr>
+<tr>
+<td><code>size</code></td>
+<td>Number <code>&gt;0–1600</code></td>
+<td>Token width and height in world units.</td>
+</tr>
+<tr>
+<td><code>mediaId</code></td>
+<td>Registered media ID</td>
+<td>Usually the matching <code>token-circle</code>, <code>token-rect</code>, or <code>token-diamond</code>.</td>
+</tr>
+</tbody></table>
+<p>The token center follows player intent through acceleration; it does not snap to
+the pointer. Larger tokens require larger gaps and make a course harder.</p>
+<h2 id="movement"><code>movement</code><a class="heading-link" href="#movement" aria-label="Link to this section">#</a></h2>
+<pre><code class="language-json">{
+  &quot;maximumSpeed&quot;: 520,
+  &quot;acceleration&quot;: 1750,
+  &quot;deceleration&quot;: 2050,
+  &quot;keyboardSpeed&quot;: 390
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Constraint and unit</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>maximumSpeed</code></td>
+<td><code>&gt;0–2000</code> world units/second</td>
+<td>Maximum pointer-driven token speed.</td>
+</tr>
+<tr>
+<td><code>acceleration</code></td>
+<td><code>&gt;0–10000</code> world units/second²</td>
+<td>How quickly velocity approaches the desired velocity.</td>
+</tr>
+<tr>
+<td><code>deceleration</code></td>
+<td><code>&gt;0–10000</code> world units/second²</td>
+<td>How quickly the token slows when input reduces or reverses.</td>
+</tr>
+<tr>
+<td><code>keyboardSpeed</code></td>
+<td><code>&gt;0–2000</code> world units/second</td>
+<td>Target speed for arrow-key steering.</td>
+</tr>
+</tbody></table>
+<p>High speed with low deceleration produces a slippery course. Test pointer and
+keyboard play after changing these values.</p>
+<h2 id="start"><code>start</code><a class="heading-link" href="#start" aria-label="Link to this section">#</a></h2>
+<p>The start defines the initial <strong>token center</strong>.</p>
+<p>Manual form:</p>
+<pre><code class="language-json">{ &quot;mode&quot;: &quot;manual&quot;, &quot;mediaId&quot;: &quot;start-pad&quot;, &quot;x&quot;: 180, &quot;y&quot;: 450 }
+</code></pre>
+<p>Generated form:</p>
+<pre><code class="language-json">{
+  &quot;mode&quot;: &quot;generated&quot;,
+  &quot;mediaId&quot;: &quot;start-pad&quot;,
+  &quot;region&quot;: { &quot;x&quot;: 100, &quot;y&quot;: 200, &quot;width&quot;: 250, &quot;height&quot;: 500 }
+}
+</code></pre>
+<p><code>mode</code> must be <code>manual</code> or <code>generated</code>. Manual mode requires <code>x</code> and <code>y</code>.
+Generated mode requires <code>region</code>; the seed deterministically selects a point
+inside it.</p>
+<h2 id="maintarget"><code>mainTarget</code><a class="heading-link" href="#maintarget" aria-label="Link to this section">#</a></h2>
+<p>The main target is circular and completes the required route when any part of
+the token touches it.</p>
+<p>Manual form:</p>
+<pre><code class="language-json">{
+  &quot;mode&quot;: &quot;manual&quot;,
+  &quot;mediaId&quot;: &quot;target-main&quot;,
+  &quot;x&quot;: 1400,
+  &quot;y&quot;: 450,
+  &quot;size&quot;: 58
+}
+</code></pre>
+<p>Generated form uses <code>region</code> instead of <code>x</code>/<code>y</code>. Both forms require <code>size</code>, the
+target diameter in world units.</p>
+<h2 id="generation"><code>generation</code><a class="heading-link" href="#generation" aria-label="Link to this section">#</a></h2>
+<p>This node creates additional static obstacles from <code>seed</code>. Generated obstacles
+avoid authored reserved geometry and are accepted only when the main target
+still has a collision-safe route.</p>
+<pre><code class="language-json">{
+  &quot;obstacleCount&quot;: 3,
+  &quot;allowedShapes&quot;: [&quot;circle&quot;, &quot;rect&quot;, &quot;diamond&quot;],
+  &quot;mediaByShape&quot;: {
+    &quot;circle&quot;: &quot;obstacle-static-circle&quot;,
+    &quot;rect&quot;: &quot;obstacle-static-rect&quot;,
+    &quot;diamond&quot;: &quot;obstacle-static-diamond&quot;
+  },
+  &quot;minSize&quot;: 50,
+  &quot;maxSize&quot;: 110,
+  &quot;minimumGap&quot;: 48,
+  &quot;pathGrid&quot;: 20
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Constraint</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>obstacleCount</code></td>
+<td>Integer <code>0–100</code></td>
+<td>Requested number of generated static obstacles.</td>
+</tr>
+<tr>
+<td><code>allowedShapes</code></td>
+<td>Unique non-empty array</td>
+<td>Shapes the generator may choose.</td>
+</tr>
+<tr>
+<td><code>mediaByShape</code></td>
+<td>Object with all three keys below</td>
+<td>Maps each generated collision shape to its logical visual.</td>
+</tr>
+<tr>
+<td><code>mediaByShape.circle</code></td>
+<td>Registered media ID</td>
+<td>Visual used for generated circles.</td>
+</tr>
+<tr>
+<td><code>mediaByShape.rect</code></td>
+<td>Registered media ID</td>
+<td>Visual used for generated rectangles.</td>
+</tr>
+<tr>
+<td><code>mediaByShape.diamond</code></td>
+<td>Registered media ID</td>
+<td>Visual used for generated diamonds.</td>
+</tr>
+<tr>
+<td><code>minSize</code></td>
+<td>Positive number</td>
+<td>Minimum generated width in world units. Must not exceed <code>maxSize</code>.</td>
+</tr>
+<tr>
+<td><code>maxSize</code></td>
+<td>Positive number</td>
+<td>Maximum generated width in world units.</td>
+</tr>
+<tr>
+<td><code>minimumGap</code></td>
+<td>Number <code>0–500</code></td>
+<td>Extra clearance around generated candidates.</td>
+</tr>
+<tr>
+<td><code>pathGrid</code></td>
+<td>Integer <code>4–100</code></td>
+<td>Solvability-search cell size in world units. Smaller values are more precise but more expensive.</td>
+</tr>
+</tbody></table>
+<p>The generator tries a bounded number of candidates. If a requested obstacle
+cannot be placed safely, fewer than <code>obstacleCount</code> may be produced. Always use
+<strong>Regenerate</strong> or <strong>Playtest</strong> to inspect the seed-locked result.</p>
+<h2 id="manualobstacles"><code>manualObstacles[]</code><a class="heading-link" href="#manualobstacles" aria-label="Link to this section">#</a></h2>
+<p>Each item is a fixed solid obstacle.</p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;barrier-1&quot;,
+  &quot;mediaId&quot;: &quot;obstacle-static-rect&quot;,
+  &quot;shape&quot;: &quot;rect&quot;,
+  &quot;x&quot;: 800,
+  &quot;y&quot;: 450,
+  &quot;width&quot;: 120,
+  &quot;height&quot;: 300
+}
+</code></pre>
+<p>Required properties are <code>id</code>, <code>mediaId</code>, <code>shape</code>, <code>x</code>, <code>y</code>, plus <code>size</code> or the
+pair <code>width</code>/<code>height</code>.</p>
+<h2 id="movingobstacles"><code>movingObstacles[]</code><a class="heading-link" href="#movingobstacles" aria-label="Link to this section">#</a></h2>
+<p>Moving obstacles oscillate around their configured center on one axis. Their
+complete sweep must remain inside the arena.</p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;sweeper-1&quot;,
+  &quot;mediaId&quot;: &quot;obstacle-moving-circle&quot;,
+  &quot;shape&quot;: &quot;circle&quot;,
+  &quot;x&quot;: 800,
+  &quot;y&quot;: 450,
+  &quot;size&quot;: 48,
+  &quot;axis&quot;: &quot;x&quot;,
+  &quot;amplitude&quot;: 140,
+  &quot;periodMs&quot;: 3600,
+  &quot;phase&quot;: 0
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Constraint</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Common entity fields</td>
+<td>See above</td>
+<td>Base shape and center of the sweep.</td>
+</tr>
+<tr>
+<td><code>axis</code></td>
+<td><code>x</code> or <code>y</code></td>
+<td>Horizontal or vertical motion.</td>
+</tr>
+<tr>
+<td><code>amplitude</code></td>
+<td>Number <code>0–1000</code></td>
+<td>Maximum displacement in each direction, in world units.</td>
+</tr>
+<tr>
+<td><code>periodMs</code></td>
+<td>Integer <code>100–120000</code></td>
+<td>Milliseconds for one complete oscillation.</td>
+</tr>
+<tr>
+<td><code>phase</code></td>
+<td>Number, radians</td>
+<td>Starting offset in the oscillation; <code>0</code>, <code>π/2</code>, <code>π</code>, etc.</td>
+</tr>
+</tbody></table>
+<h2 id="trackingobstacles"><code>trackingObstacles[]</code><a class="heading-link" href="#trackingobstacles" aria-label="Link to this section">#</a></h2>
+<p>Tracking hazards activate after the attempt starts, steer gradually toward the
+token, and stay inside their rectangular zone.</p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;tracker-1&quot;,
+  &quot;mediaId&quot;: &quot;obstacle-tracking-circle&quot;,
+  &quot;shape&quot;: &quot;circle&quot;,
+  &quot;x&quot;: 1100,
+  &quot;y&quot;: 450,
+  &quot;width&quot;: 40,
+  &quot;height&quot;: 40,
+  &quot;zone&quot;: { &quot;x&quot;: 950, &quot;y&quot;: 250, &quot;width&quot;: 300, &quot;height&quot;: 400 },
+  &quot;maxSpeed&quot;: 125,
+  &quot;acceleration&quot;: 180,
+  &quot;turnRateDegreesPerSecond&quot;: 140
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Constraint and unit</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code>, <code>mediaId</code>, <code>shape</code>, <code>x</code>, <code>y</code></td>
+<td>Required</td>
+<td>Identity, collision shape, and initial center.</td>
+</tr>
+<tr>
+<td><code>width</code>, <code>height</code></td>
+<td>Positive world units</td>
+<td>Explicit tracker dimensions.</td>
+</tr>
+<tr>
+<td><code>zone</code></td>
+<td>Region object</td>
+<td>Allowed center area, expressed from its upper-left corner.</td>
+</tr>
+<tr>
+<td><code>maxSpeed</code></td>
+<td><code>&gt;0–2000</code> world units/second</td>
+<td>Tracker speed limit.</td>
+</tr>
+<tr>
+<td><code>acceleration</code></td>
+<td><code>&gt;0–10000</code> world units/second²</td>
+<td>Rate of speed change.</td>
+</tr>
+<tr>
+<td><code>turnRateDegreesPerSecond</code></td>
+<td><code>&gt;0–1440</code> degrees/second</td>
+<td>Maximum gradual heading change.</td>
+</tr>
+</tbody></table>
+<h2 id="dynamicobstacles"><code>dynamicObstacles[]</code><a class="heading-link" href="#dynamicobstacles" aria-label="Link to this section">#</a></h2>
+<p>Each dynamic obstacle uses the common entity fields and exactly one <code>behavior</code>
+object. Collision and Pixi rendering use the same time-resolved behavior.</p>
+<h3 id="phase-behavior">Phase behavior<a class="heading-link" href="#phase-behavior" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-json">{
+  &quot;type&quot;: &quot;phase&quot;,
+  &quot;cycleMs&quot;: 4000,
+  &quot;solidMs&quot;: 1500,
+  &quot;warningMs&quot;: 450,
+  &quot;offsetMs&quot;: 0
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Constraint</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>type</code></td>
+<td><code>phase</code></td>
+<td>Selects phase-gate behavior.</td>
+</tr>
+<tr>
+<td><code>cycleMs</code></td>
+<td>Integer <code>400–120000</code></td>
+<td>Complete solid/open/warning cycle duration.</td>
+</tr>
+<tr>
+<td><code>solidMs</code></td>
+<td>Integer <code>100–120000</code></td>
+<td>Solid time at the start of each cycle.</td>
+</tr>
+<tr>
+<td><code>warningMs</code></td>
+<td>Integer <code>100–120000</code></td>
+<td>Warning time immediately before becoming solid again.</td>
+</tr>
+<tr>
+<td><code>offsetMs</code></td>
+<td>Integer <code>0–120000</code></td>
+<td>Per-obstacle cycle offset.</td>
+</tr>
+</tbody></table>
+<p><code>solidMs + warningMs</code> must be <strong>less than</strong> <code>cycleMs</code>, leaving a non-zero open
+window.</p>
+<h3 id="orbit-behavior">Orbit behavior<a class="heading-link" href="#orbit-behavior" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-json">{
+  &quot;type&quot;: &quot;orbit&quot;,
+  &quot;radiusX&quot;: 110,
+  &quot;radiusY&quot;: 75,
+  &quot;periodMs&quot;: 4200,
+  &quot;phase&quot;: 1.57
+}
+</code></pre>
+<p><code>radiusX</code> and <code>radiusY</code> are <code>0–1000</code> world units from the configured obstacle
+center. <code>periodMs</code> is <code>400–120000</code>. <code>phase</code> is the starting angle in radians.
+The complete elliptical motion envelope must fit inside the arena.</p>
+<h3 id="pulse-behavior">Pulse behavior<a class="heading-link" href="#pulse-behavior" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-json">{
+  &quot;type&quot;: &quot;pulse&quot;,
+  &quot;minScale&quot;: 0.55,
+  &quot;maxScale&quot;: 1.4,
+  &quot;periodMs&quot;: 3200,
+  &quot;phase&quot;: 0
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Constraint</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>minScale</code></td>
+<td>Number <code>&gt;0–1</code></td>
+<td>Smallest multiplier applied to base dimensions.</td>
+</tr>
+<tr>
+<td><code>maxScale</code></td>
+<td>Number <code>1–4</code></td>
+<td>Largest multiplier; must be at least <code>minScale</code>.</td>
+</tr>
+<tr>
+<td><code>periodMs</code></td>
+<td>Integer <code>400–120000</code></td>
+<td>Complete grow/shrink cycle.</td>
+</tr>
+<tr>
+<td><code>phase</code></td>
+<td>Number, radians</td>
+<td>Starting offset in the pulse.</td>
+</tr>
+</tbody></table>
+<p>The obstacle&#39;s dimensions at <code>maxScale</code> must fit inside the arena.</p>
+<h3 id="switch-behavior">Switch behavior<a class="heading-link" href="#switch-behavior" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-json">{
+  &quot;type&quot;: &quot;switch&quot;,
+  &quot;switchId&quot;: &quot;switch-1&quot;,
+  &quot;initiallySolid&quot;: true
+}
+</code></pre>
+<p><code>switchId</code> must exactly match a <code>switches[].id</code>. If <code>initiallySolid</code> is <code>true</code>,
+an active switch opens the barrier. If it is <code>false</code>, an active switch makes
+the barrier solid.</p>
+<h3 id="rotate-behavior">Rotate behavior<a class="heading-link" href="#rotate-behavior" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-json">{
+  &quot;type&quot;: &quot;rotate&quot;,
+  &quot;speedDegreesPerSecond&quot;: 90,
+  &quot;initialDegrees&quot;: 45
+}
+</code></pre>
+<p><code>speedDegreesPerSecond</code> ranges from <code>-720</code> through <code>720</code>; negative values rotate
+in the opposite direction. <code>initialDegrees</code> is unrestricted. The entire swept
+radius of the rotating shape must fit inside the arena.</p>
+<h3 id="complete-dynamic-obstacle-example">Complete dynamic obstacle example<a class="heading-link" href="#complete-dynamic-obstacle-example" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;spinner-1&quot;,
+  &quot;mediaId&quot;: &quot;obstacle-spinner&quot;,
+  &quot;shape&quot;: &quot;rect&quot;,
+  &quot;x&quot;: 800,
+  &quot;y&quot;: 450,
+  &quot;width&quot;: 240,
+  &quot;height&quot;: 28,
+  &quot;behavior&quot;: {
+    &quot;type&quot;: &quot;rotate&quot;,
+    &quot;speedDegreesPerSecond&quot;: 90,
+    &quot;initialDegrees&quot;: 45
+  }
+}
+</code></pre>
+<h2 id="switches"><code>switches[]</code><a class="heading-link" href="#switches" aria-label="Link to this section">#</a></h2>
+<p>Switches are circular contact pads activated when the complete token touches
+them. Activation is edge-triggered: continuous overlap does not repeatedly
+activate a switch.</p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;switch-1&quot;,
+  &quot;mediaId&quot;: &quot;switch-pad&quot;,
+  &quot;x&quot;: 500,
+  &quot;y&quot;: 700,
+  &quot;size&quot;: 44,
+  &quot;activation&quot;: &quot;timed&quot;,
+  &quot;durationMs&quot;: 4500
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Constraint</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>Non-empty string</td>
+<td>Link target for dynamic switch barriers.</td>
+</tr>
+<tr>
+<td><code>mediaId</code></td>
+<td>Registered ID</td>
+<td>Normally <code>switch-pad</code>.</td>
+</tr>
+<tr>
+<td><code>x</code>, <code>y</code></td>
+<td>Coordinates</td>
+<td>Switch center.</td>
+</tr>
+<tr>
+<td><code>size</code></td>
+<td>Positive number</td>
+<td>Circular pad diameter.</td>
+</tr>
+<tr>
+<td><code>activation</code></td>
+<td><code>once</code>, <code>timed</code>, or <code>toggle</code></td>
+<td>One permanent activation, time-limited activation, or flip on each new contact.</td>
+</tr>
+<tr>
+<td><code>durationMs</code></td>
+<td>Integer <code>0–120000</code></td>
+<td>Active time for <code>timed</code>; use <code>0</code> for non-timed modes.</td>
+</tr>
+</tbody></table>
+<h2 id="forcefields"><code>forceFields[]</code><a class="heading-link" href="#forcefields" aria-label="Link to this section">#</a></h2>
+<p>Force fields are non-solid. Their acceleration is added while the complete
+token overlaps them; overlapping fields combine in array order.</p>
+<h3 id="conveyor">Conveyor<a class="heading-link" href="#conveyor" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;current-1&quot;,
+  &quot;mediaId&quot;: &quot;field-conveyor&quot;,
+  &quot;type&quot;: &quot;conveyor&quot;,
+  &quot;x&quot;: 800,
+  &quot;y&quot;: 450,
+  &quot;width&quot;: 300,
+  &quot;height&quot;: 140,
+  &quot;directionDegrees&quot;: 0,
+  &quot;force&quot;: 320
+}
+</code></pre>
+<p>The conveyor is rectangular. <code>directionDegrees</code> sets its push direction and
+<code>force</code> is <code>&gt;0–5000</code> world units/second².</p>
+<h3 id="repulsor-or-attractor">Repulsor or attractor<a class="heading-link" href="#repulsor-or-attractor" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;radial-1&quot;,
+  &quot;mediaId&quot;: &quot;field-radial&quot;,
+  &quot;type&quot;: &quot;attractor&quot;,
+  &quot;x&quot;: 800,
+  &quot;y&quot;: 450,
+  &quot;radius&quot;: 130,
+  &quot;force&quot;: 650
+}
+</code></pre>
+<p><code>type</code> is <code>repulsor</code> or <code>attractor</code>. <code>radius</code> is the circular field radius in
+world units. <code>force</code> is <code>&gt;0–5000</code> world units/second² at the center and falls
+off linearly to zero at the edge.</p>
+<h2 id="coins"><code>coins[]</code><a class="heading-link" href="#coins" aria-label="Link to this section">#</a></h2>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;coin-1&quot;,
+  &quot;mediaId&quot;: &quot;coin-standard&quot;,
+  &quot;x&quot;: 800,
+  &quot;y&quot;: 250,
+  &quot;size&quot;: 30,
+  &quot;value&quot;: 1
+}
+</code></pre>
+<p><code>size</code> is the pickup diameter. <code>value</code> is an integer from <code>1</code> through <code>1000</code>
+coins. Each course coin is claimable once for that theme and immutable level
+identity; replaying the level cannot farm it.</p>
+<h2 id="rewards"><code>rewards</code><a class="heading-link" href="#rewards" aria-label="Link to this section">#</a></h2>
+<pre><code class="language-json">{ &quot;completionCoins&quot;: 5, &quot;bonusCoinsPerTarget&quot;: 3 }
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Constraint</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>completionCoins</code></td>
+<td>Integer <code>0–10000</code></td>
+<td>One-time coins for completing the level.</td>
+</tr>
+<tr>
+<td><code>bonusCoinsPerTarget</code></td>
+<td>Integer <code>0–10000</code></td>
+<td>One-time coins for each ordered bonus reached.</td>
+</tr>
+</tbody></table>
+<p>These are progression currency rewards. They are separate from score points and
+from collectible <code>coins[].value</code>.</p>
+<h2 id="scoring"><code>scoring</code><a class="heading-link" href="#scoring" aria-label="Link to this section">#</a></h2>
+<pre><code class="language-json">{
+  &quot;baseMaximum&quot;: 10000,
+  &quot;parTimeMs&quot;: 12000,
+  &quot;parDistance&quot;: 900,
+  &quot;timeWeight&quot;: 0.5,
+  &quot;distanceWeight&quot;: 0.5,
+  &quot;collisionPenaltyRate&quot;: 0.2,
+  &quot;maximumCollisions&quot;: 3
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Constraint and unit</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>baseMaximum</code></td>
+<td>Integer <code>≥1</code>, score points</td>
+<td>Maximum score before earned bonus capacity.</td>
+</tr>
+<tr>
+<td><code>parTimeMs</code></td>
+<td>Integer <code>≥1</code>, milliseconds</td>
+<td>Full time factor at or below this attempt time.</td>
+</tr>
+<tr>
+<td><code>parDistance</code></td>
+<td>Number <code>&gt;0</code>, world units</td>
+<td>Authoring reference distance. Runtime direct distance follows reached ordered targets.</td>
+</tr>
+<tr>
+<td><code>timeWeight</code></td>
+<td>Number <code>0–1</code></td>
+<td>Fraction of performance score based on time.</td>
+</tr>
+<tr>
+<td><code>distanceWeight</code></td>
+<td>Number <code>0–1</code></td>
+<td>Fraction based on route efficiency.</td>
+</tr>
+<tr>
+<td><code>collisionPenaltyRate</code></td>
+<td>Number <code>0–1</code></td>
+<td>Fraction of attainable maximum removed per collision; <code>0.2</code> means 20%.</td>
+</tr>
+<tr>
+<td><code>maximumCollisions</code></td>
+<td>Schema allows <code>1–20</code>; current game requires <code>3</code></td>
+<td>Collision count that restarts the same layout.</td>
+</tr>
+</tbody></table>
+<p><code>timeWeight + distanceWeight</code> must equal exactly <code>1</code> within validation
+tolerance. The engine calculates:</p>
+<pre><code class="language-text">attainableMaximum = baseMaximum + earnedBonusMaximum
+timeFactor = min(1, parTime / elapsedTime)
+routeFactor = min(1, directDistance / actualDistance)
+performanceScore = attainableMaximum ×
+  ((timeWeight × timeFactor) + (distanceWeight × routeFactor))
+collisionPenalty = attainableMaximum × collisionPenaltyRate × collisionCount
+finalScore = round(clamp(
+  performanceScore - collisionPenalty - bonusFailurePenalty,
+  0,
+  attainableMaximum
+))
+</code></pre>
+<h2 id="bonuses"><code>bonuses</code><a class="heading-link" href="#bonuses" aria-label="Link to this section">#</a></h2>
+<pre><code class="language-json">{
+  &quot;maximumTargets&quot;: 1,
+  &quot;rewardPerTarget&quot;: 1200,
+  &quot;offerChanceMode&quot;: &quot;currentScorePercent&quot;,
+  &quot;failurePenaltyRate&quot;: 0.1,
+  &quot;targets&quot;: [
+    {
+      &quot;id&quot;: &quot;bonus-a&quot;,
+      &quot;mediaId&quot;: &quot;target-bonus&quot;,
+      &quot;x&quot;: 900,
+      &quot;y&quot;: 220,
+      &quot;size&quot;: 48
+    }
+  ]
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Constraint</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>maximumTargets</code></td>
+<td>Integer <code>0–20</code></td>
+<td>Maximum ordered targets that may be offered. Must not exceed <code>targets.length</code>.</td>
+</tr>
+<tr>
+<td><code>rewardPerTarget</code></td>
+<td>Integer <code>≥0</code>, score points</td>
+<td>Added attainable score capacity for every reached bonus.</td>
+</tr>
+<tr>
+<td><code>offerChanceMode</code></td>
+<td>Exactly <code>currentScorePercent</code></td>
+<td>Uses current score percentage for deterministic offer selection.</td>
+</tr>
+<tr>
+<td><code>failurePenaltyRate</code></td>
+<td>Number <code>0–1</code></td>
+<td>Attainable-maximum fraction removed when an accepted bonus pursuit fails.</td>
+</tr>
+<tr>
+<td><code>targets</code></td>
+<td>Array</td>
+<td>Ordered bonus target definitions.</td>
+</tr>
+</tbody></table>
+<p>Each target requires a unique non-empty <code>id</code>, registered <code>mediaId</code>, center <code>x</code>
+and <code>y</code>, and positive diameter <code>size</code>. Only one bonus appears at a time. Reaching
+one checkpoints the token there; attempt time, distance, and trail continue.</p>
+<p>For a level without bonuses, use:</p>
+<pre><code class="language-json">{
+  &quot;maximumTargets&quot;: 0,
+  &quot;rewardPerTarget&quot;: 0,
+  &quot;offerChanceMode&quot;: &quot;currentScorePercent&quot;,
+  &quot;failurePenaltyRate&quot;: 0,
+  &quot;targets&quot;: []
+}
+</code></pre>
+<h2 id="registered-mediaid-values">Registered <code>mediaId</code> values<a class="heading-link" href="#registered-mediaid-values" aria-label="Link to this section">#</a></h2>
+<p>These IDs are currently available to level JSON. A theme can override the file
+for any one ID independently; missing or invalid theme media falls back to the
+default asset.</p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Registered IDs</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Arenas</td>
+<td><code>arena-standard</code>, <code>arena-ellipse</code>, <code>arena-polygon</code></td>
+</tr>
+<tr>
+<td>Tokens</td>
+<td><code>token-circle</code>, <code>token-rect</code>, <code>token-diamond</code></td>
+</tr>
+<tr>
+<td>Targets and switches</td>
+<td><code>start-pad</code>, <code>target-main</code>, <code>target-bonus</code>, <code>switch-pad</code></td>
+</tr>
+<tr>
+<td>Static obstacles</td>
+<td><code>obstacle-static-circle</code>, <code>obstacle-static-rect</code>, <code>obstacle-static-diamond</code></td>
+</tr>
+<tr>
+<td>Moving obstacles</td>
+<td><code>obstacle-moving-circle</code>, <code>obstacle-moving-rect</code>, <code>obstacle-moving-diamond</code></td>
+</tr>
+<tr>
+<td>Tracking obstacles</td>
+<td><code>obstacle-tracking-circle</code>, <code>obstacle-tracking-rect</code>, <code>obstacle-tracking-diamond</code></td>
+</tr>
+<tr>
+<td>Dynamic obstacles</td>
+<td><code>obstacle-phase-gate</code>, <code>obstacle-orbiter</code>, <code>obstacle-pulse-block</code>, <code>obstacle-switch-barrier</code>, <code>obstacle-spinner</code></td>
+</tr>
+<tr>
+<td>Force fields</td>
+<td><code>field-conveyor</code>, <code>field-radial</code></td>
+</tr>
+<tr>
+<td>Coins</td>
+<td><code>coin-standard</code></td>
+</tr>
+</tbody></table>
+<p>Power media IDs exist in the global registry but are configured by the power
+system, not placed through level JSON.</p>
+<h2 id="per-object-image-and-audio-overrides">Per-object image and audio overrides<a class="heading-link" href="#per-object-image-and-audio-overrides" aria-label="Link to this section">#</a></h2>
+<p>Select an object on the level map and choose <strong>Choose image or audio override</strong>.
+The shared dialog browses the read-only PublicMedia catalog and the signed-in
+author&#39;s private <strong>My uploads</strong> folder. Use <strong>Upload image</strong> or <strong>Upload audio</strong>
+to add personal media. The quota meter covers uploaded sources plus custom
+media copied into every theme owned by the account; deleting an uploaded source
+frees its source bytes without removing existing theme copies. Applying a
+selection:</p>
+<ol>
+<li>copies and validates an image, or normalizes audio to a WAV master plus WebM
+and MP3 delivery files;</li>
+<li>stores those files inside the owned theme;</li>
+<li>creates a server-issued <code>visualOverrideId</code> or <code>audioOverrideId</code>;</li>
+<li>assigns that ID to only the selected object;</li>
+<li>retains the object&#39;s normal <code>mediaId</code> or logical event sound as fallback.</li>
+</ol>
+<p>Example coin definitions:</p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;coin-10&quot;,
+  &quot;mediaId&quot;: &quot;coin-standard&quot;,
+  &quot;visualOverrideId&quot;: &quot;entity-visual-11111111-1111-1111-1111-111111111111&quot;,
+  &quot;audioOverrideId&quot;: &quot;entity-audio-22222222-2222-2222-2222-222222222222&quot;,
+  &quot;x&quot;: 600,
+  &quot;y&quot;: 450,
+  &quot;size&quot;: 30,
+  &quot;value&quot;: 10
+}
+</code></pre>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;coin-50&quot;,
+  &quot;mediaId&quot;: &quot;coin-standard&quot;,
+  &quot;visualOverrideId&quot;: &quot;entity-visual-33333333-3333-3333-3333-333333333333&quot;,
+  &quot;audioOverrideId&quot;: &quot;entity-audio-44444444-4444-4444-4444-444444444444&quot;,
+  &quot;x&quot;: 1000,
+  &quot;y&quot;: 450,
+  &quot;size&quot;: 38,
+  &quot;value&quot;: 50
+}
+</code></pre>
+<p>The IDs above illustrate the format only. Always let the Workshop create real
+IDs; manually invented IDs fail save validation because no owned file exists.
+Use <strong>Clear object media overrides</strong> to return the selected entity to the
+theme-wide defaults.</p>
+<h2 id="validation-beyond-property-types">Validation beyond property types<a class="heading-link" href="#validation-beyond-property-types" aria-label="Link to this section">#</a></h2>
+<p><strong>Validate JSON</strong> and <strong>Validate and apply</strong> check more than syntax:</p>
+<ol>
+<li>The document must match the schema and contain no unknown properties.</li>
+<li>Level identity and scoring relationships must be valid.</li>
+<li><code>generation.minSize</code> must not exceed <code>generation.maxSize</code>.</li>
+<li>A phase behavior must contain a real open window.</li>
+<li>Pulse scales must not be inverted.</li>
+<li>Every switch barrier must reference an existing switch ID.</li>
+<li>Every <code>mediaId</code> must be registered.</li>
+<li>The complete token, targets, pickups, hazards, movement sweeps, dynamic
+envelopes, and tracking zones must fit the arena.</li>
+<li>Invalid entity overlaps are rejected.</li>
+<li>The deterministic generated course must have safe routes through the main
+target and every ordered required target.</li>
+</ol>
+<p>Common fixes:</p>
+<table>
+<thead>
+<tr>
+<th>Validation problem</th>
+<th>Typical correction</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>must NOT have additional properties</code></td>
+<td>Remove or correct the misspelled property.</td>
+</tr>
+<tr>
+<td><code>must match exactly one schema in oneOf</code></td>
+<td>Use only the fields belonging to the selected arena, start, target, force-field, or dimension form.</td>
+</tr>
+<tr>
+<td><code>unknown mediaId</code></td>
+<td>Choose an ID from the registry table.</td>
+</tr>
+<tr>
+<td><code>requires a non-zero open phase</code></td>
+<td>Reduce <code>solidMs</code>/<code>warningMs</code> or increase <code>cycleMs</code>.</td>
+</tr>
+<tr>
+<td><code>references unknown switch</code></td>
+<td>Match <code>behavior.switchId</code> to <code>switches[].id</code>.</td>
+</tr>
+<tr>
+<td><code>is outside the arena</code></td>
+<td>Move the entity inward or reduce its size/motion envelope.</td>
+</tr>
+<tr>
+<td><code>overlaps</code></td>
+<td>Move or resize one of the reported entities.</td>
+</tr>
+<tr>
+<td><code>Unable to generate a solvable level</code></td>
+<td>Reduce obstacles, sizes, or gaps; move authored hazards; enlarge the arena route; or adjust <code>pathGrid</code>.</td>
+</tr>
+</tbody></table>
+<h2 id="safe-authoring-workflow">Safe authoring workflow<a class="heading-link" href="#safe-authoring-workflow" aria-label="Link to this section">#</a></h2>
+<ol>
+<li>Duplicate an existing level close to the mechanic you want.</li>
+<li>Keep <code>internalId</code> unchanged.</li>
+<li>Change <code>name</code>, <code>briefing</code>, and <code>seed</code> intentionally.</li>
+<li>Edit one mechanic group at a time.</li>
+<li>Select <strong>Format JSON</strong> to normalize indentation and expose syntax errors.</li>
+<li>Select <strong>Validate JSON</strong> and correct every reported issue.</li>
+<li>Select <strong>Validate and apply</strong> to place the validated draft into the editor.</li>
+<li>Use <strong>Playtest</strong> with both pointer and keyboard controls.</li>
+<li>Save the level, then test restart determinism, collisions, target order,
+bonuses, coins, switches, and the full hazard envelope.</li>
+<li>Use the media editor to replace logical visuals or sounds without changing
+collision geometry.</li>
+</ol>
+<h2 id="minimal-complete-level-example">Minimal complete level example<a class="heading-link" href="#minimal-complete-level-example" aria-label="Link to this section">#</a></h2>
+<p>This example intentionally has no obstacles, fields, coins, or bonuses. A
+Workshop copy will also contain its own immutable <code>internalId</code>.</p>
+<pre><code class="language-json">{
+  &quot;schemaVersion&quot;: 2,
+  &quot;id&quot;: &quot;level-01&quot;,
+  &quot;number&quot;: 1,
+  &quot;name&quot;: &quot;Open Run&quot;,
+  &quot;seed&quot;: &quot;my-theme-open-run-v1&quot;,
+  &quot;difficulty&quot;: 1,
+  &quot;briefing&quot;: &quot;Cross the arena and touch the target.&quot;,
+  &quot;arena&quot;: {
+    &quot;shape&quot;: &quot;rect&quot;,
+    &quot;mediaId&quot;: &quot;arena-standard&quot;,
+    &quot;margin&quot;: 35,
+    &quot;cornerRadius&quot;: 38
+  },
+  &quot;token&quot;: {
+    &quot;shape&quot;: &quot;circle&quot;,
+    &quot;size&quot;: 40,
+    &quot;mediaId&quot;: &quot;token-circle&quot;
+  },
+  &quot;movement&quot;: {
+    &quot;maximumSpeed&quot;: 420,
+    &quot;acceleration&quot;: 1500,
+    &quot;deceleration&quot;: 1800,
+    &quot;keyboardSpeed&quot;: 320
+  },
+  &quot;start&quot;: {
+    &quot;mode&quot;: &quot;manual&quot;,
+    &quot;mediaId&quot;: &quot;start-pad&quot;,
+    &quot;x&quot;: 180,
+    &quot;y&quot;: 450
+  },
+  &quot;mainTarget&quot;: {
+    &quot;mode&quot;: &quot;manual&quot;,
+    &quot;mediaId&quot;: &quot;target-main&quot;,
+    &quot;x&quot;: 1420,
+    &quot;y&quot;: 450,
+    &quot;size&quot;: 58
+  },
+  &quot;generation&quot;: {
+    &quot;obstacleCount&quot;: 0,
+    &quot;allowedShapes&quot;: [&quot;circle&quot;, &quot;rect&quot;, &quot;diamond&quot;],
+    &quot;mediaByShape&quot;: {
+      &quot;circle&quot;: &quot;obstacle-static-circle&quot;,
+      &quot;rect&quot;: &quot;obstacle-static-rect&quot;,
+      &quot;diamond&quot;: &quot;obstacle-static-diamond&quot;
+    },
+    &quot;minSize&quot;: 50,
+    &quot;maxSize&quot;: 100,
+    &quot;minimumGap&quot;: 45,
+    &quot;pathGrid&quot;: 20
+  },
+  &quot;manualObstacles&quot;: [],
+  &quot;movingObstacles&quot;: [],
+  &quot;trackingObstacles&quot;: [],
+  &quot;dynamicObstacles&quot;: [],
+  &quot;switches&quot;: [],
+  &quot;forceFields&quot;: [],
+  &quot;coins&quot;: [],
+  &quot;rewards&quot;: {
+    &quot;completionCoins&quot;: 1,
+    &quot;bonusCoinsPerTarget&quot;: 0
+  },
+  &quot;scoring&quot;: {
+    &quot;baseMaximum&quot;: 1000,
+    &quot;parTimeMs&quot;: 8000,
+    &quot;parDistance&quot;: 1240,
+    &quot;timeWeight&quot;: 0.5,
+    &quot;distanceWeight&quot;: 0.5,
+    &quot;collisionPenaltyRate&quot;: 0.2,
+    &quot;maximumCollisions&quot;: 3
+  },
+  &quot;bonuses&quot;: {
+    &quot;maximumTargets&quot;: 0,
+    &quot;rewardPerTarget&quot;: 0,
+    &quot;offerChanceMode&quot;: &quot;currentScorePercent&quot;,
+    &quot;failurePenaltyRate&quot;: 0,
+    &quot;targets&quot;: []
+  }
+}
+</code></pre>
+<h2 id="theme-presentation-json-for-source-controlled-themes">Theme presentation JSON for source-controlled themes<a class="heading-link" href="#theme-presentation-json-for-source-controlled-themes" aria-label="Link to this section">#</a></h2>
+<p>The Workshop popup does not edit this document, but developers creating a
+source-controlled presentation theme use
+<a href="../../src/config/themeConfig.json"><code>src/config/themeConfig.json</code></a>, validated by
+<a href="../../src/config/schemas/theme.schema.json"><code>src/config/schemas/theme.schema.json</code></a>.</p>
+<p>Top-level properties are:</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>schemaVersion</code></td>
+<td>Must be <code>2</code>.</td>
+</tr>
+<tr>
+<td><code>mediaVersion</code></td>
+<td>Positive integer used for cache invalidation.</td>
+</tr>
+<tr>
+<td><code>defaultMediaRoot</code></td>
+<td>Must be <code>/media/default</code>.</td>
+</tr>
+<tr>
+<td><code>activeTheme</code></td>
+<td>Hyphenated ID that must name an entry in <code>themes</code>.</td>
+</tr>
+<tr>
+<td><code>themes</code></td>
+<td>Map from theme ID to presentation settings.</td>
+</tr>
+</tbody></table>
+<p>Each <code>themes.&lt;themeId&gt;</code> object contains:</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Constraint and role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>name</code></td>
+<td>Non-empty player-facing theme name.</td>
+</tr>
+<tr>
+<td><code>mediaRoot</code></td>
+<td><code>/media/themes/&lt;theme-id&gt;</code> URL root.</td>
+</tr>
+<tr>
+<td><code>colors</code></td>
+<td>One or more named six-digit hex colors such as <code>#18d9f3</code>. Color keys are presentation tokens consumed by the UI/theme layer.</td>
+</tr>
+<tr>
+<td><code>effects.glowIntensity</code></td>
+<td>Number <code>0–1</code>.</td>
+</tr>
+<tr>
+<td><code>effects.trailWidth</code></td>
+<td>Number <code>&gt;0–50</code> world units.</td>
+</tr>
+<tr>
+<td><code>effects.collisionGuideWidth</code></td>
+<td>Number <code>&gt;0–5</code> world units.</td>
+</tr>
+<tr>
+<td><code>effects.ghostTrailOpacity</code></td>
+<td>Number <code>0–1</code>.</td>
+</tr>
+<tr>
+<td><code>effects.targetPulseDurationMs</code></td>
+<td>Integer <code>0–60000</code> milliseconds.</td>
+</tr>
+<tr>
+<td><code>effects.collisionFlashDurationMs</code></td>
+<td>Integer <code>0–60000</code> milliseconds.</td>
+</tr>
+</tbody></table>
+<p>Visual and audio overrides are not manually listed in that JSON. Build tooling
+scans standardized filenames and generates resolved manifests. A valid theme
+override wins for that one element; otherwise the valid default is used.</p>
+</main>
+  </div>
+  <a class="back-to-top" href="#top">Back to top</a>
+  <script>
+    const links = [...document.querySelectorAll('.help-sidebar nav a')]
+    const byId = new Map(links.map((link) => [link.hash.slice(1), link]))
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue
+        links.forEach((link) => link.classList.remove('is-active'))
+        byId.get(entry.target.id)?.classList.add('is-active')
+      }
+    }, { rootMargin: '0px 0px -72% 0px' })
+    document.querySelectorAll('main h2, main h3').forEach((heading) => observer.observe(heading))
+  </script>
+</body>
+</html>

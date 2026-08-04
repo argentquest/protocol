@@ -4,6 +4,11 @@ import { access, mkdir } from 'node:fs/promises'
 import { createAuthStore, SESSION_DURATION_MS } from './authStore.js'
 import { createThemeStore } from './themeStore.js'
 import { createMediaLibrary } from './mediaLibrary.js'
+import {
+  createAccountStorageQuota,
+  DEFAULT_ACCOUNT_MEDIA_QUOTA_BYTES,
+} from './accountStorageQuota.js'
+import { createPersonalMediaStore } from './personalMediaStore.js'
 
 const SESSION_COOKIE = 'path_protocol_session'
 
@@ -86,12 +91,49 @@ export async function createServerApp({
   publicMediaLibraryRoot =
     process.env.PATH_PROTOCOL_MEDIA_LIBRARY_ROOT ??
     path.join(repositoryRoot, 'PublicMedia'),
+  personalMediaRoot = process.env.PATH_PROTOCOL_PERSONAL_MEDIA_ROOT ??
+    path.join(path.dirname(path.resolve(dataDirectory)), 'user-media'),
+  accountMediaQuotaBytes = Number(
+    process.env.PATH_PROTOCOL_ACCOUNT_MEDIA_QUOTA_BYTES ??
+      DEFAULT_ACCOUNT_MEDIA_QUOTA_BYTES,
+  ),
+  uploadLimits = {
+    maxImageBytes: Number(
+      process.env.PATH_PROTOCOL_MAX_UPLOAD_IMAGE_BYTES ?? 25 * 1024 * 1024,
+    ),
+    maxAudioBytes: Number(
+      process.env.PATH_PROTOCOL_MAX_UPLOAD_AUDIO_BYTES ?? 100 * 1024 * 1024,
+    ),
+    maxImageDimension: Number(
+      process.env.PATH_PROTOCOL_MAX_UPLOAD_IMAGE_DIMENSION ?? 4096,
+    ),
+    maxImagePixels: Number(
+      process.env.PATH_PROTOCOL_MAX_UPLOAD_IMAGE_PIXELS ?? 16_777_216,
+    ),
+    maxAudioDurationSeconds: Number(
+      process.env.PATH_PROTOCOL_MAX_UPLOAD_AUDIO_SECONDS ?? 300,
+    ),
+  },
 } = {}) {
   if (databasePath !== ':memory:') {
     await mkdir(path.dirname(path.resolve(databasePath)), { recursive: true })
   }
   const authStore = createAuthStore({ databasePath, confirmEmail })
-  const mediaLibrary = await createMediaLibrary({ root: publicMediaLibraryRoot })
+  const quota = createAccountStorageQuota({
+    themesDirectory: path.resolve(dataDirectory),
+    uploadsDirectory: path.resolve(personalMediaRoot),
+    limitBytes: accountMediaQuotaBytes,
+  })
+  const personalMediaStore = await createPersonalMediaStore({
+    root: personalMediaRoot,
+    quota,
+    ...uploadLimits,
+  })
+  const mediaLibrary = await createMediaLibrary({
+    root: publicMediaLibraryRoot,
+    personalMediaStore,
+    quota,
+  })
   const store = await createThemeStore({
     dataDirectory: path.resolve(dataDirectory),
     defaultLevelsDirectory: path.join(repositoryRoot, 'src', 'config', 'levels'),
@@ -124,6 +166,7 @@ export async function createServerApp({
   })
   app.locals.authStore = authStore
   app.locals.themeStore = store
+  app.locals.personalMediaStore = personalMediaStore
 
   app.get('/api/health', (_request, response) => {
     response.json({ ok: true })
@@ -131,22 +174,50 @@ export async function createServerApp({
   app.get('/api/auth/me', (request, response) => {
     response.json({ user: request.user })
   })
-  app.get('/api/media-library', (request, response) => {
-    response.json(
-      mediaLibrary.list({
+  app.get('/api/media-library', asyncRoute(async (request, response) => {
+    const result = await mediaLibrary.list({
         kind: request.query.kind ?? 'image',
         collection: request.query.collection,
         folder: request.query.folder,
         query: request.query.query,
         offset: request.query.offset,
         limit: request.query.limit,
-      }),
-    )
-  })
+        userId: request.user?.id,
+      })
+    response.json({
+      ...result,
+      quota: request.user ? await quota.usage(request.user.id) : null,
+    })
+  }))
+  app.post(
+    '/api/media-library/uploads',
+    asyncRoute(async (request, response) => {
+      const user = requireUser(request)
+      response.status(201).json(
+        await personalMediaStore.upload(request, user, request.query.kind),
+      )
+    }),
+  )
+  app.delete(
+    '/api/media-library/uploads/:assetId',
+    asyncRoute(async (request, response) => {
+      const user = requireUser(request)
+      response.json({
+        quota: await personalMediaStore.remove(
+          user.id,
+          `uploads/${request.params.assetId}`,
+        ),
+      })
+    }),
+  )
   app.get(
     '/api/media-library/file',
     asyncRoute(async (request, response) => {
-      const entry = mediaLibrary.resolveEntry(request.query.assetId)
+      const entry = await mediaLibrary.resolveEntry(
+        request.query.assetId,
+        null,
+        request.user?.id,
+      )
       response.sendFile(entry.absolutePath)
     }),
   )
@@ -420,6 +491,8 @@ export async function createServerApp({
     response.status(error.status ?? 500).json({
       error: error.message ?? 'Unexpected server error.',
       details: error.details ?? [],
+      code: error.code,
+      quota: error.quota,
     })
   })
   return app

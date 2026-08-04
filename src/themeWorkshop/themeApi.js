@@ -33,13 +33,16 @@ async function readApiPayload(response) {
  */
 async function apiRequest(path, options = {}) {
   const headers = new Headers(options.headers)
-  if (options.body !== undefined) headers.set('content-type', 'application/json')
+  const multipart = options.body instanceof FormData
+  if (options.body !== undefined && !multipart) {
+    headers.set('content-type', 'application/json')
+  }
   const response = await fetch(path, {
     ...options,
     credentials: 'same-origin',
     headers,
     body:
-      options.body === undefined || typeof options.body === 'string'
+      options.body === undefined || typeof options.body === 'string' || multipart
         ? options.body
         : JSON.stringify(options.body),
   })
@@ -48,6 +51,8 @@ async function apiRequest(path, options = {}) {
     const error = new Error(payload?.error ?? 'Server request failed.')
     error.details = payload?.details ?? []
     error.status = response.status
+    error.code = payload?.code
+    error.quota = payload?.quota
     throw error
   }
   return payload
@@ -120,7 +125,7 @@ export const themeApi = {
     apiRequest(`/api/themes/${themeId}`, { method: 'DELETE' }),
 }
 
-/** Read-only PublicMedia catalog operations for authenticated theme authors. */
+/** Shared public-catalog and authenticated personal-upload media operations. */
 export const mediaLibraryApi = {
   list: ({
     kind,
@@ -142,4 +147,17 @@ export const mediaLibraryApi = {
   },
   fileUrl: (assetId) =>
     `/api/media-library/file?assetId=${encodeURIComponent(assetId)}`,
+  upload: (kind, file) => {
+    const body = new FormData()
+    body.append('file', file)
+    return apiRequest(
+      `/api/media-library/uploads?kind=${encodeURIComponent(kind)}`,
+      { method: 'POST', body },
+    )
+  },
+  removeUpload: (assetId) =>
+    apiRequest(
+      `/api/media-library/uploads/${encodeURIComponent(assetId.slice('uploads/'.length))}`,
+      { method: 'DELETE' },
+    ),
 }

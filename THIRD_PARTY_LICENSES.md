@@ -13,6 +13,8 @@ when a dependency is added or upgraded.
 | Ajv | JSON Schema validation | 8.20.0 | MIT | <https://github.com/ajv-validator/ajv> |
 | PixiJS | WebGL gameplay renderer | 8.19.0 | MIT | <https://github.com/pixijs/pixijs> |
 | Howler.js | Browser effects and ambience | 2.2.4 | MIT | <https://github.com/goldfire/howler.js> |
+| Busboy | Streaming multipart upload parsing | 1.6.0 | MIT | <https://github.com/mscdex/busboy> |
+| streamsearch | Busboy streaming boundary search | 1.1.0 | MIT | <https://github.com/mscdex/streamsearch> |
 
 ## Build and development dependencies
 
@@ -22,6 +24,7 @@ when a dependency is added or upgraded.
 | Vitest | Unit and component tests | 3.2.7 | MIT | <https://github.com/vitest-dev/vitest> |
 | Playwright | Browser automation | 1.61.1 | Apache-2.0 | <https://github.com/microsoft/playwright> |
 | ESLint | Static analysis | 9.39.5 | MIT | <https://github.com/eslint/eslint> |
+| Marked | Build-time Markdown-to-HTML rendering for designer help | 18.0.7 | MIT | <https://github.com/markedjs/marked> |
 | FFmpeg | WAV-to-WebM/MP3 conversion in build and theme authoring workflows | 5.1.9-0+deb12u1 | GPL-enabled Debian build (`--enable-gpl`) | <https://ffmpeg.org/> |
 | ffmpeg-static | Repository-local FFmpeg binary for repeatable media preparation | 5.3.0 | GPL-3.0-or-later package distribution; bundled FFmpeg license depends on build configuration | <https://github.com/eugeneware/ffmpeg-static> |
 

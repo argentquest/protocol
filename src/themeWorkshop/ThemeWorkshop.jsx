@@ -3,8 +3,12 @@ import GameView from '../game/GameView.jsx'
 import { mediaDefinitions, soundDefinitions } from '../config/loadConfig.js'
 import { generateLevel } from '../game/generation/levelGenerator.js'
 import { authApi, mediaLibraryApi, themeApi } from './themeApi.js'
-
-const GRID_SIZE = 10
+import {
+  entitySize,
+  isResizableEntity,
+  resizeEntity,
+  snapToEditorGrid as snap,
+} from './levelEditorGeometry.js'
 
 const ENTITY_GROUPS = [
   'manualObstacles',
@@ -16,16 +20,7 @@ const ENTITY_GROUPS = [
   'coins',
 ]
 
-/**
- * Snaps a coordinate or dimension to the Workshop grid.
- *
- * @pure
- * @param {number|string} value Value in world units.
- * @returns {number} Nearest 10-world-unit increment.
- */
-function snap(value) {
-  return Math.round(Number(value) / GRID_SIZE) * GRID_SIZE
-}
+const RESIZE_HANDLES = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw']
 
 /**
  * Flattens editable level groups into stable editor selections.
@@ -141,21 +136,6 @@ function removeEntity(level, selection) {
     [selection.group]: level[selection.group].filter(
       (_entity, index) => index !== selection.index,
     ),
-  }
-}
-
-/**
- * Resolves editor display dimensions from radius, width, height, or size.
- *
- * @pure
- * @param {object} entity Editable entity.
- * @returns {{width:number,height:number}} Dimensions in world units.
- */
-function entitySize(entity) {
-  if (entity.radius) return { width: entity.radius * 2, height: entity.radius * 2 }
-  return {
-    width: entity.width ?? entity.size ?? 50,
-    height: entity.height ?? entity.size ?? 50,
   }
 }
 
@@ -379,6 +359,8 @@ function LevelMap({
   selection,
   onSelect,
   onMove,
+  onResize,
+  onContextMenu,
   onDragStart,
   onDragEnd,
 }) {
@@ -394,10 +376,22 @@ function LevelMap({
   const handlePointerMove = (event) => {
     if (!dragRef.current) return
     const bounds = event.currentTarget.getBoundingClientRect()
-    onMove(dragRef.current, {
+    const point = {
       x: snap(((event.clientX - bounds.left) / bounds.width) * 1600),
       y: snap(((event.clientY - bounds.top) / bounds.height) * 900),
-    })
+    }
+    if (dragRef.current.mode === 'resize') {
+      onResize(
+        dragRef.current.selection,
+        resizeEntity(
+          dragRef.current.initialEntity,
+          dragRef.current.handle,
+          point,
+        ),
+      )
+      return
+    }
+    onMove(dragRef.current.selection, point)
   }
 
   return (
@@ -420,6 +414,10 @@ function LevelMap({
         const selected =
           selection?.group === descriptor.group &&
           selection?.index === descriptor.index
+        const descriptorSelection = {
+          group: descriptor.group,
+          index: descriptor.index,
+        }
         return (
           <button
             className={`editor-entity editor-entity--${descriptor.group} ${
@@ -435,20 +433,63 @@ function LevelMap({
               height: `max(12px, ${(size.height / 900) * 100}%)`,
             }}
             onPointerDown={(event) => {
+              if (event.button !== 0) return
               event.preventDefault()
               dragRef.current = {
-                group: descriptor.group,
-                index: descriptor.index,
+                mode: 'move',
+                selection: descriptorSelection,
               }
               onDragStart()
-              onSelect(dragRef.current)
+              onSelect(descriptorSelection)
               event.currentTarget.setPointerCapture(event.pointerId)
             }}
             onClick={() =>
-              onSelect({ group: descriptor.group, index: descriptor.index })
+              onSelect(descriptorSelection)
             }
+            onContextMenu={(event) => {
+              event.preventDefault()
+              onSelect(descriptorSelection)
+              onContextMenu(descriptorSelection, {
+                x: event.clientX,
+                y: event.clientY,
+              })
+            }}
+            onKeyDown={(event) => {
+              if (event.key !== 'ContextMenu' && !(event.shiftKey && event.key === 'F10')) {
+                return
+              }
+              event.preventDefault()
+              const bounds = event.currentTarget.getBoundingClientRect()
+              onSelect(descriptorSelection)
+              onContextMenu(descriptorSelection, {
+                x: bounds.right,
+                y: bounds.top,
+              })
+            }}
           >
-            <span>{descriptor.label}</span>
+            <span className="editor-entity__label">{descriptor.label}</span>
+            {selected && isResizableEntity(descriptor.entity) &&
+              RESIZE_HANDLES.map((handle) => (
+                <span
+                  aria-hidden="true"
+                  className={`editor-resize-handle editor-resize-handle--${handle}`}
+                  data-resize-handle={handle}
+                  key={handle}
+                  onPointerDown={(event) => {
+                    if (event.button !== 0) return
+                    event.preventDefault()
+                    event.stopPropagation()
+                    dragRef.current = {
+                      mode: 'resize',
+                      selection: descriptorSelection,
+                      handle,
+                      initialEntity: descriptor.entity,
+                    }
+                    onDragStart()
+                    event.currentTarget.setPointerCapture(event.pointerId)
+                  }}
+                />
+              ))}
           </button>
         )
       })}
@@ -470,7 +511,7 @@ function LevelJsonEditor({ themeId, level, onApply, onClose }) {
   /** Opens the author-facing Markdown field reference in a separate popup. */
   const openJsonReference = () => {
     const referenceUrl = new URL(
-      `${import.meta.env.BASE_URL}docs/theme-workshop-json-reference.md`,
+      `${import.meta.env.BASE_URL}docs/theme-workshop-json-reference.html`,
       window.location.href,
     )
     window.open(
@@ -628,6 +669,144 @@ function LevelJsonEditor({ themeId, level, onApply, onClose }) {
 }
 
 /**
+ * Presents JSON for only one selected object and validates it in level context.
+ *
+ * @param {object} props Object JSON editor properties.
+ * @returns {import('react').JSX.Element} Modal selected-object JSON editor.
+ */
+function EntityJsonEditor({ themeId, level, selection, entity, onApply, onClose }) {
+  const [draft, setDraft] = useState(() => JSON.stringify(entity, null, 2))
+  const [validation, setValidation] = useState({ state: 'idle', errors: [] })
+
+  /** @returns {{value:object|null,error:string|null}} Parsed and snapped object draft. */
+  const parseDraft = () => {
+    try {
+      const value = JSON.parse(draft)
+      if (!value || Array.isArray(value) || typeof value !== 'object') {
+        return { value: null, error: 'The selected object JSON must be an object.' }
+      }
+      if (typeof value.x === 'number') value.x = snap(value.x)
+      if (typeof value.y === 'number') value.y = snap(value.y)
+      return { value, error: null }
+    } catch (error) {
+      return { value: null, error: error.message }
+    }
+  }
+
+  /** @returns {Promise<{valid:boolean,value:object|null,nextLevel:object|null}>} Validation result. */
+  const validateDraft = async () => {
+    const parsed = parseDraft()
+    if (parsed.error) {
+      setValidation({ state: 'invalid', errors: [parsed.error] })
+      return { valid: false, value: null, nextLevel: null }
+    }
+    const nextLevel = replaceEntity(level, selection, parsed.value)
+    setValidation({ state: 'checking', errors: [] })
+    try {
+      const result = await themeApi.validateLevel(themeId, nextLevel)
+      setValidation({
+        state: result.valid ? 'valid' : 'invalid',
+        errors: result.errors,
+      })
+      return { valid: result.valid, value: parsed.value, nextLevel }
+    } catch (error) {
+      setValidation({
+        state: 'invalid',
+        errors: [error.message, ...(error.details ?? [])],
+      })
+      return { valid: false, value: parsed.value, nextLevel }
+    }
+  }
+
+  return (
+    <div
+      className="json-editor-backdrop"
+      role="presentation"
+      onKeyDown={(event) => {
+        if (event.key === 'Escape') onClose()
+      }}
+    >
+      <section
+        className="json-editor-dialog entity-json-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="entity-json-editor-title"
+      >
+        <header>
+          <div>
+            <p className="eyebrow">Selected object only</p>
+            <h2 id="entity-json-editor-title">
+              Object JSON: {entity.id ?? selection.group}
+            </h2>
+          </div>
+          <button type="button" onClick={onClose} aria-label="Close object JSON editor">
+            ×
+          </button>
+        </header>
+        <div className="json-editor-toolbar">
+          <button
+            type="button"
+            onClick={() => {
+              const parsed = parseDraft()
+              if (parsed.error) {
+                setValidation({ state: 'invalid', errors: [parsed.error] })
+                return
+              }
+              setDraft(JSON.stringify(parsed.value, null, 2))
+              setValidation({ state: 'idle', errors: [] })
+            }}
+          >
+            Format object JSON
+          </button>
+          <button type="button" onClick={validateDraft}>Validate object JSON</button>
+          <span>Only this object · validated in the complete level</span>
+        </div>
+        <textarea
+          autoFocus
+          aria-label="Selected object JSON"
+          spellCheck="false"
+          value={draft}
+          onChange={(event) => {
+            setDraft(event.target.value)
+            setValidation({ state: 'idle', errors: [] })
+          }}
+        />
+        <div
+          className={`json-editor-validation is-${validation.state}`}
+          role={validation.state === 'invalid' ? 'alert' : 'status'}
+        >
+          {validation.state === 'idle' && 'Not validated since the last edit.'}
+          {validation.state === 'checking' && 'Validating this object in the level…'}
+          {validation.state === 'valid' && 'Object and complete level validation passed.'}
+          {validation.state === 'invalid' && (
+            <>
+              <strong>Validation failed</strong>
+              <ul>
+                {validation.errors.map((error, index) => (
+                  <li key={`${error}-${index}`}>{error}</li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
+        <footer>
+          <button type="button" onClick={onClose}>Cancel</button>
+          <button
+            type="button"
+            onClick={async () => {
+              const result = await validateDraft()
+              if (result.valid) onApply(result.nextLevel)
+            }}
+          >
+            Validate and apply object
+          </button>
+        </footer>
+      </section>
+    </div>
+  )
+}
+
+/**
  * Returns the logical sound event that a selected entity may override.
  *
  * @pure
@@ -644,6 +823,324 @@ function entityDefaultSoundId(selection) {
 }
 
 /**
+ * Browses the read-only PublicMedia catalog with folders, search, paging, and preview.
+ *
+ * @param {object} props Browser state and selection callback.
+ * @returns {import('react').JSX.Element} Shared filesystem-style media browser.
+ */
+function PublicMediaBrowser({
+  kind,
+  enabled,
+  emptyMessage,
+  actionLabel,
+  onApply,
+}) {
+  const [folder, setFolder] = useState('')
+  const [query, setQuery] = useState('')
+  const [offset, setOffset] = useState(0)
+  const [catalog, setCatalog] = useState({
+    items: [],
+    total: 0,
+    limit: 60,
+    folders: [],
+    collections: [],
+  })
+  const [selectedAssetId, setSelectedAssetId] = useState('')
+  const [uploading, setUploading] = useState(false)
+  const [status, setStatus] = useState(
+    enabled ? 'Loading media library…' : emptyMessage,
+  )
+  const selectedAsset = catalog.items.find((item) => item.id === selectedAssetId)
+
+  /** @param {number} bytes Storage bytes. @returns {string} Compact binary size. */
+  const formatBytes = (bytes) => {
+    if (bytes < 1024 * 1024) return `${Math.ceil(bytes / 1024)} KiB`
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MiB`
+  }
+
+  /** @returns {Promise<void>} Completion of filtered catalog-page loading. */
+  const loadCatalog = useCallback(async () => {
+    if (!enabled) return
+    try {
+      setStatus('Loading media library…')
+      const result = await mediaLibraryApi.list({
+        kind,
+        folder,
+        query,
+        offset,
+        limit: 60,
+      })
+      setCatalog(result)
+      setSelectedAssetId('')
+      setStatus(
+        `${result.folders.length} folders and ${result.total} ${kind} files in this view.`,
+      )
+    } catch (error) {
+      setStatus(error.message)
+    }
+  }, [enabled, folder, kind, offset, query])
+
+  useEffect(() => {
+    loadCatalog()
+  }, [loadCatalog])
+
+  /** @param {string} nextFolder Catalog-relative folder path. @returns {void} */
+  const selectFolder = (nextFolder) => {
+    setFolder(nextFolder)
+    setQuery('')
+    setSelectedAssetId('')
+    setOffset(0)
+    setCatalog((current) => ({
+      ...current,
+      items: [],
+      total: 0,
+      folders: [],
+    }))
+    setStatus('Loading media folder…')
+  }
+
+  /** @returns {Promise<void>} Completion of applying the selected catalog asset. */
+  const applySelection = async () => {
+    if (!selectedAssetId) return
+    try {
+      setStatus(
+        kind === 'audio'
+          ? 'Normalizing WAV and generating WebM/MP3…'
+          : 'Copying image into the theme…',
+      )
+      const resultStatus = await onApply(selectedAssetId)
+      if (resultStatus) setStatus(resultStatus)
+    } catch (error) {
+      setStatus([error.message, ...(error.details ?? [])].join(' '))
+    }
+  }
+
+  /** @param {import('react').ChangeEvent<HTMLInputElement>} event File selection. @returns {Promise<void>} Upload completion. */
+  const uploadFile = async (event) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    try {
+      setUploading(true)
+      setStatus(`Validating and normalizing ${file.name}…`)
+      await mediaLibraryApi.upload(kind, file)
+      setFolder('uploads')
+      setQuery('')
+      setOffset(0)
+      setStatus(`${file.name} uploaded. It is ready to select from My uploads.`)
+    } catch (error) {
+      const quotaText = error.quota
+        ? ` ${formatBytes(error.quota.usedBytes)} of ${formatBytes(error.quota.limitBytes)} is already used.`
+        : ''
+      setStatus(`${[error.message, ...(error.details ?? [])].join(' ')}${quotaText}`)
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  /** @returns {Promise<void>} Completion of deleting the selected personal source. */
+  const deleteUpload = async () => {
+    if (!selectedAssetId.startsWith('uploads/')) return
+    try {
+      setStatus(`Deleting ${selectedAsset.name}…`)
+      await mediaLibraryApi.removeUpload(selectedAssetId)
+      setSelectedAssetId('')
+      await loadCatalog()
+      setStatus('Personal upload deleted. Existing theme copies are unchanged.')
+    } catch (error) {
+      setStatus(error.message)
+    }
+  }
+
+  if (!enabled) {
+    return <div className="theme-media-editor__empty">{emptyMessage}</div>
+  }
+
+  return (
+    <div className="public-media-browser">
+      <div className="theme-media-upload">
+        <div>
+          <strong>Personal media</strong>
+          <small>
+            {catalog.quota
+              ? `${formatBytes(catalog.quota.usedBytes)} used · ${formatBytes(catalog.quota.remainingBytes)} remaining of ${formatBytes(catalog.quota.limitBytes)}`
+              : 'Sign in to upload personal media.'}
+          </small>
+        </div>
+        <label className="button-like">
+          {uploading ? 'Uploading…' : `Upload ${kind}`}
+          <input
+            type="file"
+            accept={kind === 'image' ? '.png,.jpg,.jpeg,.svg,image/png,image/jpeg,image/svg+xml' : '.wav,.ogg,.mp3,.aif,.aiff,audio/*'}
+            disabled={uploading || !catalog.quota}
+            onChange={uploadFile}
+          />
+        </label>
+      </div>
+      <div className="theme-media-browser">
+        <aside className="theme-media-folders" aria-label="PublicMedia folders">
+          <strong>PublicMedia</strong>
+          <button
+            type="button"
+            className={!folder ? 'is-selected' : ''}
+            onClick={() => selectFolder('')}
+          >
+            <span>⌂ Root</span>
+            <small>{catalog.collections.reduce((sum, item) => sum + item.count, 0)}</small>
+          </button>
+          {catalog.collections.map((item) => (
+            <button
+              type="button"
+              key={item.id}
+              className={folder === item.id ? 'is-selected' : ''}
+              onClick={() => selectFolder(item.id)}
+            >
+              <span>▸ {item.id === 'uploads' ? 'My uploads' : item.id}</span>
+              <small>{item.count}</small>
+            </button>
+          ))}
+        </aside>
+        <div className="theme-media-browser__content">
+          <div className="theme-media-browser__toolbar">
+            <nav className="theme-media-breadcrumbs" aria-label="Media folder path">
+              <button type="button" onClick={() => selectFolder('')}>PublicMedia</button>
+              {folder.split('/').filter(Boolean).map((segment, index, segments) => (
+                <span key={segments.slice(0, index + 1).join('/')}>
+                  <span aria-hidden="true">/</span>
+                  <button
+                    type="button"
+                    onClick={() => selectFolder(segments.slice(0, index + 1).join('/'))}
+                  >
+                    {segment}
+                  </button>
+                </span>
+              ))}
+            </nav>
+            <label>
+              Search this view
+              <input
+                value={query}
+                onChange={(event) => {
+                  setQuery(event.target.value)
+                  setOffset(0)
+                }}
+                placeholder="planet, coin, impact…"
+              />
+            </label>
+          </div>
+          <div className="theme-media-grid">
+            {!query && catalog.folders.map((item) => (
+              <button
+                type="button"
+                className="theme-media-folder-tile"
+                key={item.path}
+                onClick={() => selectFolder(item.path)}
+                title={item.path}
+              >
+                <span aria-hidden="true">📁</span>
+                <small>{item.name}</small>
+                <em>{item.count} files</em>
+              </button>
+            ))}
+            {catalog.items.map((asset) => {
+              const relativePath = asset.id.slice(asset.collection.length + 1)
+              const assetFolder = relativePath.includes('/')
+                ? relativePath.slice(0, relativePath.lastIndexOf('/'))
+                : 'root'
+              return (
+                <button
+                  type="button"
+                  key={asset.id}
+                  className={asset.id === selectedAssetId ? 'is-selected' : ''}
+                  aria-pressed={asset.id === selectedAssetId}
+                  onClick={() => setSelectedAssetId(asset.id)}
+                  title={asset.id}
+                >
+                  {kind === 'image' ? (
+                    <img
+                      src={mediaLibraryApi.fileUrl(asset.id)}
+                      alt={`Preview of ${asset.name}`}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <span aria-hidden="true">♪</span>
+                  )}
+                  <small>{asset.name}</small>
+                  <em>{assetFolder}</em>
+                </button>
+              )
+            })}
+            {!catalog.items.length && !catalog.folders.length && (
+              <p>No media matches this folder and search.</p>
+            )}
+          </div>
+        </div>
+      </div>
+      {selectedAsset && (
+        <section className="theme-media-preview" aria-label="Selected media preview">
+          {kind === 'image' ? (
+            <img
+              src={mediaLibraryApi.fileUrl(selectedAsset.id)}
+              alt={`Large preview of ${selectedAsset.name}`}
+            />
+          ) : (
+            <audio controls preload="metadata" src={mediaLibraryApi.fileUrl(selectedAsset.id)}>
+              Audio preview is unavailable in this browser.
+            </audio>
+          )}
+          <div>
+            <strong>{selectedAsset.name}</strong>
+            <small>{selectedAsset.id}</small>
+            <p className="theme-media-editor__license">
+              <strong>{selectedAsset.license}</strong>
+              {selectedAsset.credit && ` · ${selectedAsset.credit}`}
+              {selectedAsset.sourceUrl.startsWith('http') && (
+                <>
+                  {' · '}
+                  <a href={selectedAsset.sourceUrl} target="_blank" rel="noreferrer">
+                    Source and license
+                  </a>
+                </>
+              )}
+            </p>
+            {selectedAsset.id.startsWith('uploads/') && (
+              <button type="button" onClick={deleteUpload}>
+                Delete uploaded source
+              </button>
+            )}
+          </div>
+        </section>
+      )}
+      <div className="theme-media-editor__actions">
+        <button
+          type="button"
+          disabled={offset === 0}
+          onClick={() => setOffset(Math.max(0, offset - catalog.limit))}
+        >
+          Previous
+        </button>
+        <span>
+          {catalog.total
+            ? `${offset + 1}–${Math.min(offset + catalog.items.length, catalog.total)} of ${catalog.total} files`
+            : `${catalog.folders.length} folders`}
+        </span>
+        <button
+          type="button"
+          disabled={offset + catalog.limit >= catalog.total}
+          onClick={() => setOffset(offset + catalog.limit)}
+        >
+          Next
+        </button>
+        <button type="button" disabled={!selectedAssetId} onClick={applySelection}>
+          {actionLabel}
+        </button>
+      </div>
+      <div role="status">{status}</div>
+    </div>
+  )
+}
+
+/**
  * Lets an author copy a PublicMedia asset for only the selected level entity.
  *
  * @param {object} props Dialog properties.
@@ -653,62 +1150,32 @@ function EntityMediaOverrideDialog({
   themeId,
   entity,
   selection,
+  initialKind = 'visual',
   onApply,
   onClose,
 }) {
   const defaultSoundId = entityDefaultSoundId(selection)
-  const [kind, setKind] = useState('visual')
-  const [query, setQuery] = useState('')
-  const [catalog, setCatalog] = useState({ items: [], total: 0 })
-  const [selectedAssetId, setSelectedAssetId] = useState('')
-  const [status, setStatus] = useState('Search PublicMedia for an override.')
-  const selectedAsset = catalog.items.find((item) => item.id === selectedAssetId)
+  const [kind, setKind] = useState(
+    initialKind === 'audio' && defaultSoundId ? 'audio' : 'visual',
+  )
 
-  /** @returns {Promise<void>} Completion of the current catalog search. */
-  const search = async () => {
-    try {
-      setStatus('Searching PublicMedia…')
-      const result = await mediaLibraryApi.list({
-        kind: kind === 'visual' ? 'image' : 'audio',
-        query,
-        offset: 0,
-        limit: 60,
-      })
-      setCatalog(result)
-      setSelectedAssetId('')
-      setStatus(`${result.total} matching files.`)
-    } catch (error) {
-      setStatus(error.message)
-    }
-  }
-
-  /** @returns {Promise<void>} Completion of copying and assigning the selected override. */
-  const apply = async () => {
-    if (!selectedAssetId) return
+  /** @param {string} assetId Selected PublicMedia asset ID. @returns {Promise<void>} Completion. */
+  const apply = async (assetId) => {
     const property = kind === 'visual' ? 'visualOverrideId' : 'audioOverrideId'
     const baseId = kind === 'visual' ? entity.mediaId : defaultSoundId
-    try {
-      setStatus(
-        kind === 'visual'
-          ? 'Copying image into this theme…'
-          : 'Normalizing audio and generating WebM/MP3…',
-      )
-      const result = await themeApi.setEntityMediaOverride(themeId, {
-        kind,
-        baseId,
-        assetId: selectedAssetId,
-      })
-      await onApply({ ...entity, [property]: result.overrideId })
-      onClose()
-    } catch (error) {
-      setStatus([error.message, ...(error.details ?? [])].join(' '))
-    }
+    const result = await themeApi.setEntityMediaOverride(themeId, {
+      kind,
+      baseId,
+      assetId,
+    })
+    await onApply({ ...entity, [property]: result.overrideId })
+    onClose()
   }
 
   return (
     <div className="json-editor-backdrop" role="presentation">
       <section
-        className="json-editor-dialog"
+        className="json-editor-dialog entity-media-browser-dialog"
         role="dialog"
         aria-modal="true"
         aria-labelledby="entity-media-override-title"
@@ -724,67 +1191,34 @@ function EntityMediaOverrideDialog({
             ×
           </button>
         </header>
-        <p>
-          This changes only this object. Its normal <code>mediaId</code> and
-          sound remain as automatic fallbacks.
-        </p>
-        <div className="theme-media-editor__controls">
-          <label>
-            Override type
-            <select
-              value={kind}
-              onChange={(event) => {
-                setKind(event.target.value)
-                setCatalog({ items: [], total: 0 })
-                setSelectedAssetId('')
-              }}
-            >
-              <option value="visual">Image</option>
-              <option value="audio" disabled={!defaultSoundId}>
-                Audio{defaultSoundId ? ` (${defaultSoundId})` : ' (no event)'}
-              </option>
-            </select>
-          </label>
-          <label>
-            Search
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') search()
-              }}
-            />
-          </label>
-          <button type="button" onClick={search}>Search media</button>
+        <div className="entity-media-browser-dialog__body">
+          <p>
+            This changes only this object. Its normal <code>mediaId</code> and
+            sound remain as automatic fallbacks.
+          </p>
+          <div className="theme-media-editor__controls">
+            <label>
+              Override type
+              <select value={kind} onChange={(event) => setKind(event.target.value)}>
+                <option value="visual">Image</option>
+                <option value="audio" disabled={!defaultSoundId}>
+                  Audio{defaultSoundId ? ` (${defaultSoundId})` : ' (no event)'}
+                </option>
+              </select>
+            </label>
+          </div>
+          <PublicMediaBrowser
+            key={kind}
+            kind={kind === 'visual' ? 'image' : 'audio'}
+            enabled
+            emptyMessage=""
+            actionLabel={`Apply ${kind === 'visual' ? 'image' : 'sound'} to selected object`}
+            onApply={apply}
+          />
+          <div className="entity-media-browser-dialog__footer">
+            <button type="button" onClick={onClose}>Cancel</button>
+          </div>
         </div>
-        <p role="status">{status}</p>
-        <div className="theme-media-grid">
-          {catalog.items.map((asset) => (
-            <button
-              type="button"
-              key={asset.id}
-              className={selectedAssetId === asset.id ? 'is-selected' : ''}
-              onClick={() => setSelectedAssetId(asset.id)}
-            >
-              {kind === 'visual' && (
-                <img src={mediaLibraryApi.fileUrl(asset.id)} alt="" loading="lazy" />
-              )}
-              <span>{asset.name}</span>
-              <small>{asset.collection}</small>
-            </button>
-          ))}
-        </div>
-        {selectedAsset && kind === 'audio' && (
-          <audio controls preload="metadata" src={mediaLibraryApi.fileUrl(selectedAsset.id)}>
-            Audio preview is unavailable.
-          </audio>
-        )}
-        <footer>
-          <button type="button" onClick={onClose}>Cancel</button>
-          <button type="button" disabled={!selectedAssetId} onClick={apply}>
-            Apply to selected object
-          </button>
-        </footer>
       </section>
     </div>
   )
@@ -813,7 +1247,10 @@ function LevelEditor({
   const [redoStack, setRedoStack] = useState([])
   const [entityJson, setEntityJson] = useState('')
   const [jsonEditorOpen, setJsonEditorOpen] = useState(false)
+  const [entityJsonOpen, setEntityJsonOpen] = useState(false)
   const [entityMediaOpen, setEntityMediaOpen] = useState(false)
+  const [entityMediaKind, setEntityMediaKind] = useState('visual')
+  const [contextMenu, setContextMenu] = useState(null)
   const [editorManifest, setEditorManifest] = useState(mediaManifest)
   const [status, setStatus] = useState('All changes saved.')
   const [playtest, setPlaytest] = useState(false)
@@ -983,6 +1420,16 @@ function LevelEditor({
               const entity = getEntity(level, target)
               setLevel(replaceEntity(level, target, { ...entity, ...point }))
             }}
+            onResize={(target, entity) => {
+              setLevel(replaceEntity(level, target, entity))
+            }}
+            onContextMenu={(target, point) => {
+              setContextMenu({
+                selection: target,
+                x: Math.max(8, Math.min(point.x, window.innerWidth - 230)),
+                y: Math.max(8, Math.min(point.y, window.innerHeight - 190)),
+              })
+            }}
             onDragStart={() => {
               dragSnapshot.current = level
             }}
@@ -1001,8 +1448,9 @@ function LevelEditor({
             }}
           />
           <p className="editor-help">
-            Drag every entity on the 10-unit grid. Exact snapped coordinates are
-            available in the inspector.
+            Drag entities on the 10-unit grid. Select an object and drag an edge
+            or corner handle to resize it. Right-click for image, sound, and
+            object-only JSON actions.
           </p>
           {runtime.error && <div role="alert">{runtime.error}</div>}
         </section>
@@ -1095,7 +1543,10 @@ function LevelEditor({
           <button
             type="button"
             disabled={!getEntity(level, selection)?.mediaId}
-            onClick={() => setEntityMediaOpen(true)}
+            onClick={() => {
+              setEntityMediaKind('visual')
+              setEntityMediaOpen(true)
+            }}
           >
             Choose image or audio override
           </button>
@@ -1140,6 +1591,68 @@ function LevelEditor({
         </aside>
       </div>
 
+      {contextMenu && (
+        <>
+          <div
+            className="entity-context-menu__dismiss"
+            role="presentation"
+            onPointerDown={() => setContextMenu(null)}
+            onContextMenu={(event) => {
+              event.preventDefault()
+              setContextMenu(null)
+            }}
+          />
+          <div
+            className="entity-context-menu"
+            role="menu"
+            aria-label="Selected object actions"
+            style={{ left: contextMenu.x, top: contextMenu.y }}
+          >
+            <strong>
+              {getEntity(level, contextMenu.selection)?.id ??
+                contextMenu.selection.group}
+            </strong>
+            <button
+              type="button"
+              role="menuitem"
+              disabled={!getEntity(level, contextMenu.selection)?.mediaId}
+              onClick={() => {
+                setSelection(contextMenu.selection)
+                setEntityMediaKind('visual')
+                setEntityMediaOpen(true)
+                setContextMenu(null)
+              }}
+            >
+              Change image…
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              disabled={!entityDefaultSoundId(contextMenu.selection)}
+              onClick={() => {
+                setSelection(contextMenu.selection)
+                setEntityMediaKind('audio')
+                setEntityMediaOpen(true)
+                setContextMenu(null)
+              }}
+            >
+              Change sound…
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setSelection(contextMenu.selection)
+                setEntityJsonOpen(true)
+                setContextMenu(null)
+              }}
+            >
+              Show object JSON…
+            </button>
+          </div>
+        </>
+      )}
+
       {jsonEditorOpen && (
         <LevelJsonEditor
           themeId={theme.id}
@@ -1152,11 +1665,26 @@ function LevelEditor({
           }}
         />
       )}
+      {entityJsonOpen && getEntity(level, selection) && (
+        <EntityJsonEditor
+          themeId={theme.id}
+          level={level}
+          selection={selection}
+          entity={getEntity(level, selection)}
+          onClose={() => setEntityJsonOpen(false)}
+          onApply={(nextLevel) => {
+            commit(nextLevel)
+            setEntityJsonOpen(false)
+            setStatus('Validated object JSON applied locally.')
+          }}
+        />
+      )}
       {entityMediaOpen && getEntity(level, selection) && (
         <EntityMediaOverrideDialog
           themeId={theme.id}
           entity={getEntity(level, selection)}
           selection={selection}
+          initialKind={entityMediaKind}
           onClose={() => setEntityMediaOpen(false)}
           onApply={async (entity) => {
             commit(replaceEntity(level, selection, entity))
@@ -1311,94 +1839,23 @@ function AccountPanel({ user, onAuthenticated, onLogout, setStatus }) {
 function ThemeMediaEditor({ theme, onChanged }) {
   const [kind, setKind] = useState('image')
   const [targetId, setTargetId] = useState('')
-  const [folder, setFolder] = useState('')
-  const [query, setQuery] = useState('')
-  const [offset, setOffset] = useState(0)
-  const [catalog, setCatalog] = useState({
-    items: [],
-    total: 0,
-    limit: 60,
-    folders: [],
-    collections: [],
-  })
-  const [selectedAssetId, setSelectedAssetId] = useState('')
-  const [status, setStatus] = useState(
-    'Choose a theme element to browse PublicMedia.',
-  )
   const targets = kind === 'image' ? mediaDefinitions : soundDefinitions
-  const selectedAsset = catalog.items.find((item) => item.id === selectedAssetId)
-
-  /** @returns {Promise<void>} Completion of filtered catalog-page loading. */
-  const loadCatalog = useCallback(async () => {
-    if (!targetId) return
-    try {
-      setStatus('Loading media library…')
-      const result = await mediaLibraryApi.list({
-        kind,
-        folder,
-        query,
-        offset,
-        limit: 60,
-      })
-      setCatalog(result)
-      setSelectedAssetId('')
-      setStatus(
-        `${result.folders.length} folders and ${result.total} ${kind} files in this view.`,
-      )
-    } catch (error) {
-      setStatus(error.message)
-    }
-  }, [folder, kind, offset, query, targetId])
-
-  useEffect(() => {
-    loadCatalog()
-  }, [loadCatalog])
 
   /** @param {'image'|'audio'} nextKind Catalog media kind. @returns {void} */
   const changeKind = (nextKind) => {
     setKind(nextKind)
     setTargetId('')
-    setFolder('')
-    setQuery('')
-    setSelectedAssetId('')
-    setStatus('Choose a theme element to browse PublicMedia.')
-    setOffset(0)
   }
 
-  /** @param {string} nextFolder Catalog-relative folder path. @returns {void} */
-  const selectFolder = (nextFolder) => {
-    setFolder(nextFolder)
-    setQuery('')
-    setSelectedAssetId('')
-    setOffset(0)
-    setCatalog((current) => ({
-      ...current,
-      items: [],
-      total: 0,
-      folders: [],
-    }))
-    setStatus('Loading media folder…')
-  }
-
-  /** @returns {Promise<void>} Completion of selected catalog asset materialization. */
-  const applySelection = async () => {
-    if (!selectedAssetId) return
-    try {
-      setStatus(
-        kind === 'audio'
-          ? 'Normalizing WAV and generating WebM/MP3…'
-          : 'Copying image into the theme…',
-      )
-      if (kind === 'image') {
-        await themeApi.setVisualMedia(theme.id, targetId, selectedAssetId)
-      } else {
-        await themeApi.setAudioMedia(theme.id, targetId, selectedAssetId)
-      }
-      setStatus(`Saved ${targetId} in ${theme.name}.`)
-      await onChanged()
-    } catch (error) {
-      setStatus(error.message)
+  /** @param {string} assetId Selected PublicMedia asset ID. @returns {Promise<string>} Status. */
+  const applySelection = async (assetId) => {
+    if (kind === 'image') {
+      await themeApi.setVisualMedia(theme.id, targetId, assetId)
+    } else {
+      await themeApi.setAudioMedia(theme.id, targetId, assetId)
     }
+    await onChanged()
+    return `Saved ${targetId} in ${theme.name}.`
   }
 
   return (
@@ -1420,12 +1877,7 @@ function ThemeMediaEditor({ theme, onChanged }) {
           Theme element
           <select
             value={targetId}
-            onChange={(event) => {
-              setTargetId(event.target.value)
-              setFolder('')
-              setSelectedAssetId('')
-              setOffset(0)
-            }}
+            onChange={(event) => setTargetId(event.target.value)}
           >
             <option value="">Choose an element…</option>
             {targets.map((target) => {
@@ -1435,167 +1887,14 @@ function ThemeMediaEditor({ theme, onChanged }) {
           </select>
         </label>
       </div>
-      {!targetId && (
-        <div className="theme-media-editor__empty">
-          Choose a theme element above to open the PublicMedia browser.
-        </div>
-      )}
-      {targetId && (
-        <div className="theme-media-browser">
-          <aside className="theme-media-folders" aria-label="PublicMedia folders">
-            <strong>PublicMedia</strong>
-            <button
-              type="button"
-              className={!folder ? 'is-selected' : ''}
-              onClick={() => selectFolder('')}
-            >
-              <span>⌂ Root</span>
-              <small>{catalog.collections.reduce((sum, item) => sum + item.count, 0)}</small>
-            </button>
-            {catalog.collections.map((item) => (
-              <button
-                type="button"
-                key={item.id}
-                className={folder === item.id ? 'is-selected' : ''}
-                onClick={() => selectFolder(item.id)}
-              >
-                <span>▸ {item.id}</span>
-                <small>{item.count}</small>
-              </button>
-            ))}
-          </aside>
-          <div className="theme-media-browser__content">
-            <div className="theme-media-browser__toolbar">
-              <nav className="theme-media-breadcrumbs" aria-label="Media folder path">
-                <button type="button" onClick={() => selectFolder('')}>PublicMedia</button>
-                {folder.split('/').filter(Boolean).map((segment, index, segments) => (
-                  <span key={segments.slice(0, index + 1).join('/')}>
-                    <span aria-hidden="true">/</span>
-                    <button
-                      type="button"
-                      onClick={() => selectFolder(segments.slice(0, index + 1).join('/'))}
-                    >
-                      {segment}
-                    </button>
-                  </span>
-                ))}
-              </nav>
-              <label>
-                Search this view
-                <input
-                  value={query}
-                  onChange={(event) => {
-                    setQuery(event.target.value)
-                    setOffset(0)
-                  }}
-                  placeholder="planet, coin, impact…"
-                />
-              </label>
-            </div>
-            <div className="theme-media-grid">
-              {!query && catalog.folders.map((item) => (
-                <button
-                  type="button"
-                  className="theme-media-folder-tile"
-                  key={item.path}
-                  onClick={() => selectFolder(item.path)}
-                  title={item.path}
-                >
-                  <span aria-hidden="true">📁</span>
-                  <small>{item.name}</small>
-                  <em>{item.count} files</em>
-                </button>
-              ))}
-              {catalog.items.map((asset) => {
-                const relativePath = asset.id.slice(asset.collection.length + 1)
-                const assetFolder = relativePath.includes('/')
-                  ? relativePath.slice(0, relativePath.lastIndexOf('/'))
-                  : 'root'
-                return (
-                  <button
-                    type="button"
-                    key={asset.id}
-                    className={asset.id === selectedAssetId ? 'is-selected' : ''}
-                    aria-pressed={asset.id === selectedAssetId}
-                    onClick={() => setSelectedAssetId(asset.id)}
-                    title={asset.id}
-                  >
-                    {kind === 'image' ? (
-                      <img
-                        src={mediaLibraryApi.fileUrl(asset.id)}
-                        alt={`Preview of ${asset.name}`}
-                        loading="lazy"
-                      />
-                    ) : (
-                      <span aria-hidden="true">♪</span>
-                    )}
-                    <small>{asset.name}</small>
-                    <em>{assetFolder}</em>
-                  </button>
-                )
-              })}
-              {!catalog.items.length && !catalog.folders.length && (
-                <p>No media matches this folder and search.</p>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-      {selectedAsset && (
-        <section className="theme-media-preview" aria-label="Selected media preview">
-          {kind === 'image' ? (
-            <img
-              src={mediaLibraryApi.fileUrl(selectedAsset.id)}
-              alt={`Large preview of ${selectedAsset.name}`}
-            />
-          ) : (
-            <audio controls preload="metadata" src={mediaLibraryApi.fileUrl(selectedAsset.id)}>
-              Audio preview is unavailable in this browser.
-            </audio>
-          )}
-          <div>
-            <strong>{selectedAsset.name}</strong>
-            <small>{selectedAsset.id}</small>
-            <p className="theme-media-editor__license">
-              <strong>{selectedAsset.license}</strong>
-              {selectedAsset.credit && ` · ${selectedAsset.credit}`}
-              {selectedAsset.sourceUrl.startsWith('http') && (
-                <>
-                  {' · '}
-                  <a href={selectedAsset.sourceUrl} target="_blank" rel="noreferrer">
-                    Source and license
-                  </a>
-                </>
-              )}
-            </p>
-          </div>
-        </section>
-      )}
-      {targetId && <div className="theme-media-editor__actions">
-        <button
-          type="button"
-          disabled={offset === 0}
-          onClick={() => setOffset(Math.max(0, offset - catalog.limit))}
-        >
-          Previous
-        </button>
-        <span>
-          {catalog.total
-            ? `${offset + 1}–${Math.min(offset + catalog.items.length, catalog.total)} of ${catalog.total} files`
-            : `${catalog.folders.length} folders`}
-        </span>
-        <button
-          type="button"
-          disabled={offset + catalog.limit >= catalog.total}
-          onClick={() => setOffset(offset + catalog.limit)}
-        >
-          Next
-        </button>
-        <button type="button" disabled={!selectedAssetId} onClick={applySelection}>
-          Use selected {kind}
-        </button>
-      </div>}
-      <div role="status">{status}</div>
+      <PublicMediaBrowser
+        key={`${kind}-${targetId}`}
+        kind={kind}
+        enabled={Boolean(targetId)}
+        emptyMessage="Choose a theme element above to open the PublicMedia browser."
+        actionLabel={`Use selected ${kind}`}
+        onApply={applySelection}
+      />
     </section>
   )
 }
