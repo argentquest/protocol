@@ -2,6 +2,21 @@ const GRID_SIZE = 10
 const WORLD_WIDTH = 1600
 const WORLD_HEIGHT = 900
 
+const DEFAULT_POLYGON_POINTS = [
+  [10, 15],
+  [420, 5],
+  [800, 20],
+  [1200, 5],
+  [1590, 15],
+  [1595, 450],
+  [1585, 890],
+  [1100, 895],
+  [700, 885],
+  [250, 895],
+  [5, 875],
+  [15, 400],
+]
+
 /**
  * Snaps a coordinate or dimension to the Workshop grid.
  *
@@ -11,6 +26,111 @@ const WORLD_HEIGHT = 900
  */
 export function snapToEditorGrid(value) {
   return Math.round(Number(value) / GRID_SIZE) * GRID_SIZE
+}
+
+/**
+ * Converts an arena to a schema-ready boundary of the requested shape.
+ *
+ * @pure
+ * @param {object} arena Current arena, used to preserve its registered media ID.
+ * @param {'rect'|'ellipse'|'polygon'} shape Requested boundary type.
+ * @returns {object} Converted arena configuration.
+ */
+export function convertArenaShape(arena, shape) {
+  const media = {
+    mediaId: {
+      rect: 'arena-standard',
+      ellipse: 'arena-ellipse',
+      polygon: 'arena-polygon',
+    }[shape],
+    ...(arena.visualOverrideId
+      ? { visualOverrideId: arena.visualOverrideId }
+      : {}),
+    ...(arena.audioOverrideId ? { audioOverrideId: arena.audioOverrideId } : {}),
+  }
+  if (shape === 'polygon') {
+    return {
+      shape,
+      ...media,
+      points: DEFAULT_POLYGON_POINTS.map((point) => [...point]),
+    }
+  }
+  if (shape === 'ellipse') return { shape, ...media, margin: 50 }
+  return { shape: 'rect', ...media, margin: 40, cornerRadius: 30 }
+}
+
+/**
+ * Moves one polygon arena corner on the 10-unit grid and within world bounds.
+ *
+ * @pure
+ * @param {object} arena Polygon arena configuration.
+ * @param {number} index Zero-based corner index.
+ * @param {{x:number,y:number}} point Pointer position in world units.
+ * @returns {object} Arena with the moved corner.
+ */
+export function moveArenaPoint(arena, index, point) {
+  if (arena.shape !== 'polygon' || !arena.points[index]) return arena
+  const points = arena.points.map((item) => [...item])
+  points[index] = [
+    clamp(snapToEditorGrid(point.x), 0, WORLD_WIDTH),
+    clamp(snapToEditorGrid(point.y), 0, WORLD_HEIGHT),
+  ]
+  return { ...arena, points }
+}
+
+/**
+ * Inserts a corner at the midpoint of the polygon's longest edge.
+ *
+ * @pure
+ * @param {object} arena Polygon arena configuration.
+ * @returns {{arena:object,index:number}} Updated arena and inserted corner index.
+ */
+export function addArenaPoint(arena) {
+  if (arena.shape !== 'polygon') return { arena, index: -1 }
+  let longestIndex = 0
+  let longestDistance = -1
+  for (let index = 0; index < arena.points.length; index += 1) {
+    const point = arena.points[index]
+    const next = arena.points[(index + 1) % arena.points.length]
+    const distance = (next[0] - point[0]) ** 2 + (next[1] - point[1]) ** 2
+    if (distance > longestDistance) {
+      longestDistance = distance
+      longestIndex = index
+    }
+  }
+  const nextIndex = (longestIndex + 1) % arena.points.length
+  const point = arena.points[longestIndex]
+  const next = arena.points[nextIndex]
+  const inserted = [
+    snapToEditorGrid((point[0] + next[0]) / 2),
+    snapToEditorGrid((point[1] + next[1]) / 2),
+  ]
+  const points = [...arena.points]
+  const insertionIndex = longestIndex + 1
+  points.splice(insertionIndex, 0, inserted)
+  return { arena: { ...arena, points }, index: insertionIndex }
+}
+
+/**
+ * Removes one polygon corner while preserving the three-corner minimum.
+ *
+ * @pure
+ * @param {object} arena Polygon arena configuration.
+ * @param {number} index Zero-based selected corner index.
+ * @returns {object} Updated or unchanged arena.
+ */
+export function removeArenaPoint(arena, index) {
+  if (
+    arena.shape !== 'polygon' ||
+    arena.points.length <= 3 ||
+    !arena.points[index]
+  ) {
+    return arena
+  }
+  return {
+    ...arena,
+    points: arena.points.filter((_point, pointIndex) => pointIndex !== index),
+  }
 }
 
 /**

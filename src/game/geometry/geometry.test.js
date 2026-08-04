@@ -4,6 +4,7 @@ import {
   followPointer,
   insetShape,
   shapeInsideArena,
+  validateArenaPolygon,
   shapesIntersect,
   sweepShape,
 } from './geometry.js'
@@ -40,6 +41,26 @@ describe('geometry', () => {
     const arena = { shape: 'rect', margin: 40 }
     expect(shapeInsideArena({ shape: 'circle', x: 60, y: 60, size: 30 }, arena)).toBe(true)
     expect(shapeInsideArena({ shape: 'circle', x: 45, y: 45, size: 30 }, arena)).toBe(false)
+  })
+
+  it('accepts concave arena polygons and rejects crossed outlines', () => {
+    expect(
+      validateArenaPolygon([
+        [100, 100],
+        [1500, 100],
+        [900, 450],
+        [1500, 800],
+        [100, 800],
+      ]),
+    ).toEqual([])
+    expect(
+      validateArenaPolygon([
+        [100, 100],
+        [1500, 800],
+        [1500, 100],
+        [100, 800],
+      ]),
+    ).toContain('Arena edges 1 and 3 cross or touch.')
   })
 
   it('catches swept movement through a thin obstacle', () => {

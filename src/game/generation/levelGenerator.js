@@ -3,6 +3,7 @@ import {
   normalizeShape,
   shapeInsideArena,
   shapesIntersect,
+  validateArenaPolygon,
 } from '../geometry/geometry.js'
 import { createSeededRandom, randomBetween, randomItem } from './seededRandom.js'
 import { dynamicObstacleEnvelope } from '../engine/DynamicObstacleSystem.js'
@@ -242,6 +243,9 @@ export function validateLevel(level) {
   }
   if (level.bonuses.maximumTargets > level.bonuses.targets.length) {
     errors.push('Bonus maximum exceeds configured targets.')
+  }
+  if (level.arena?.shape === 'polygon') {
+    errors.push(...validateArenaPolygon(level.arena.points))
   }
   for (const tracker of level.trackingObstacles ?? []) {
     if (!tracker.zone || tracker.maxSpeed <= 0 || tracker.acceleration <= 0) {

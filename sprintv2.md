@@ -757,6 +757,28 @@ challenges teach each behavior in isolation.
 
 ---
 
+## Sprint 26 — Irregular arenas and obstacle clarity
+
+**Status:** `DONE`
+
+| ID | Task | Size | Status | Acceptance |
+|---|---|---:|---|---|
+| V2-S26-01 | Add direct arena boundary controls | L | `DONE` | Authors convert rectangle, ellipse, and polygon arenas and manipulate numbered polygon corners on the grid. |
+| V2-S26-02 | Validate irregular polygon geometry | M | `DONE` | Concave polygons are accepted while out-of-world, degenerate, and self-intersecting boundaries are rejected before generation. |
+| V2-S26-03 | Explain obstacle behavior | M | `DONE` | Editor labels and inline guidance describe every obstacle according to its engine implementation. |
+| V2-S26-04 | Visualize hazard envelopes | M | `DONE` | Sweep axes, tracking zones, orbit paths, pulse bounds, and spinner envelopes appear as authoring-only guides. |
+| V2-S26-05 | Complete release verification | M | `DONE` | Geometry, generation, browser, docs, lint, full unit suite, and build pass. |
+
+### Sprint 26 exit criteria
+
+- Polygon arena corners are accessible, grid-snapped, and stored as authoritative level JSON.
+- A saved polygon cannot cross itself or collapse to a degenerate outline.
+- Arena containment and Pixi clipping use the same polygon points.
+- Every obstacle description matches its engine timing, motion, solidity, and switch behavior.
+- Unit, browser, documentation, lint, and production build checks pass.
+
+---
+
 ## 4. Dependency sequence
 
 ```text
@@ -786,6 +808,7 @@ Sprint 0: Decisions and branch
                                           → Sprint 23: Formatted designer reference
                                             → Sprint 24: Shared object media browser
                                               → Sprint 25: Safe personal media uploads
+                                                → Sprint 26: Irregular arenas and obstacle clarity
 ```
 
 Some tasks may overlap after their contracts stabilize. For example, WAV asset

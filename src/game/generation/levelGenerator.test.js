@@ -70,4 +70,38 @@ describe('levelGenerator', () => {
       }),
     )
   })
+
+  it('generates simple polygon arenas and rejects crossed boundaries', () => {
+    const polygonLevel = {
+      ...levels[0],
+      arena: {
+        shape: 'polygon',
+        mediaId: 'arena-polygon',
+        points: [
+          [10, 15],
+          [420, 5],
+          [800, 20],
+          [1200, 5],
+          [1590, 15],
+          [1595, 450],
+          [1585, 890],
+          [1100, 895],
+          [700, 885],
+          [250, 895],
+          [5, 875],
+          [15, 400],
+        ],
+      },
+    }
+    expect(generateLevel(polygonLevel).generationSummary.solvable).toBe(true)
+    expect(() =>
+      generateLevel({
+        ...polygonLevel,
+        arena: {
+          ...polygonLevel.arena,
+          points: [[20, 20], [1580, 880], [1580, 20], [20, 880]],
+        },
+      }),
+    ).toThrow(/edges 1 and 3 cross or touch/i)
+  })
 })

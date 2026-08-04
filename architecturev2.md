@@ -795,6 +795,22 @@ right-click context menu offers separate per-entity image and supported-event
 sound actions plus a selected-object-only JSON dialog. Object JSON is validated
 in the complete level before it can be applied.
 
+The map also owns a direct arena-boundary tool. Authors can convert between the
+schema's rectangular, elliptical, and polygonal variants. Polygon vertices use
+absolute 1600 × 900 coordinates, snap to the 10-unit grid, and expose numbered
+drag handles plus exact coordinate and add/remove controls. Concave simple
+polygons are supported. Semantic validation rejects out-of-world vertices,
+degenerate area, and intersection or contact between non-adjacent edges before
+generation. The Pixi mask and engine containment continue to consume the same
+JSON points.
+
+Authoring-only dashed overlays visualize movement contracts that static entity
+bounds cannot communicate: sweeper axes, tracking zones, orbit ellipses, pulse
+maximum bounds, and spinner envelopes. An inline behavior guide describes
+static, moving, tracking, phase, orbit, pulse, switch, and rotating obstacles
+using the engine's actual deterministic behavior. These overlays never enter
+runtime configuration or collision decisions.
+
 Theme-wide and per-entity media selection share one PublicMedia browser
 component. Folder traversal, breadcrumbs, search, pagination, image/audio
 preview, provenance, and license presentation therefore cannot drift between

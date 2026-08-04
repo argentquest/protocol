@@ -85,6 +85,18 @@ test('clones, edits, playtests, publishes, and deletes a server theme', async ({
     page.getByRole('application', { name: /10-unit level placement grid/i }),
   ).toBeVisible()
 
+  await page.getByLabel('Arena shape').selectOption('polygon')
+  await expect(
+    page.getByRole('button', { name: 'Arena corner 1', exact: true }),
+  ).toBeVisible()
+  await expect(page.locator('.arena-point-handle')).toHaveCount(12)
+  await page.getByRole('button', { name: 'Add corner' }).click()
+  await expect(page.locator('.arena-point-handle')).toHaveCount(13)
+  await page.getByRole('button', { name: 'Remove selected corner' }).click()
+  await expect(page.locator('.arena-point-handle')).toHaveCount(12)
+  await page.getByText('What each obstacle actually does').click()
+  await expect(page.getByText(/moves sinusoidally on its configured x or y axis/i)).toBeVisible()
+
   const coin = page.locator('.editor-entity--coins').first()
   await coin.click()
   const selectedEntityJson = page.getByLabel('Selected entity JSON')

@@ -67,6 +67,7 @@
 <a class="toc-depth-2" href="#start">`start`</a>
 <a class="toc-depth-2" href="#maintarget">`mainTarget`</a>
 <a class="toc-depth-2" href="#generation">`generation`</a>
+<a class="toc-depth-2" href="#obstacle-behavior-at-a-glance">Obstacle behavior at a glance</a>
 <a class="toc-depth-2" href="#manualobstacles">`manualObstacles[]`</a>
 <a class="toc-depth-2" href="#movingobstacles">`movingObstacles[]`</a>
 <a class="toc-depth-2" href="#trackingobstacles">`trackingObstacles[]`</a>
@@ -487,6 +488,12 @@ inside the ellipse.</p>
 <p><code>points</code> is an ordered array of at least three absolute <code>[x, y]</code> vertices.
 List the boundary vertices consistently clockwise or counter-clockwise and do
 not create self-intersecting edges.</p>
+<p>In the visual level editor, choose <strong>Irregular polygon</strong> under <strong>Arena
+boundary</strong>. Numbered corner handles appear directly on the map; drag them on
+the 10-unit grid or edit the selected corner&#39;s X/Y fields. <strong>Add corner</strong> splits
+the longest current edge, and <strong>Remove selected corner</strong> keeps the required
+three-corner minimum. Concave outlines are valid, but crossed/touching
+non-adjacent edges and degenerate areas fail validation.</p>
 <h2 id="token"><code>token</code><a class="heading-link" href="#token" aria-label="Link to this section">#</a></h2>
 <pre><code class="language-json">{ &quot;shape&quot;: &quot;circle&quot;, &quot;size&quot;: 40, &quot;mediaId&quot;: &quot;token-circle&quot; }
 </code></pre>
@@ -664,6 +671,54 @@ still has a collision-safe route.</p>
 <p>The generator tries a bounded number of candidates. If a requested obstacle
 cannot be placed safely, fewer than <code>obstacleCount</code> may be produced. Always use
 <strong>Regenerate</strong> or <strong>Playtest</strong> to inspect the seed-locked result.</p>
+<h2 id="obstacle-behavior-at-a-glance">Obstacle behavior at a glance<a class="heading-link" href="#obstacle-behavior-at-a-glance" aria-label="Link to this section">#</a></h2>
+<p>The editor draws dashed orange guides for sweep ranges, tracker zones, orbit
+paths, maximum pulse bounds, and spinner envelopes. These guides are authoring
+information only; the engine and Pixi renderer use the same deterministic
+time-resolved collision state described below.</p>
+<table>
+<thead>
+<tr>
+<th>Editor type</th>
+<th>What it actually does</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Static obstacle</td>
+<td>A fixed solid collision shape.</td>
+</tr>
+<tr>
+<td>Axis sweeper</td>
+<td>Moves sinusoidally along X or Y between <code>center ± amplitude</code>.</td>
+</tr>
+<tr>
+<td>Tracking obstacle</td>
+<td>Starts with the attempt, then accelerates and turns toward the token while constrained to <code>zone</code>.</td>
+</tr>
+<tr>
+<td>Phase gate</td>
+<td>Is solid first, then open, then warning before the next solid interval. Only <code>solid</code> collides.</td>
+</tr>
+<tr>
+<td>Orbiter</td>
+<td>Remains solid while moving around its authored center on an elliptical path.</td>
+</tr>
+<tr>
+<td>Pulse block</td>
+<td>Remains solid while its real collision width and height grow and shrink.</td>
+</tr>
+<tr>
+<td>Spinner</td>
+<td>Remains solid while its rectangular collision geometry rotates.</td>
+</tr>
+<tr>
+<td>Switch barrier</td>
+<td>Becomes solid or open from the referenced switch and <code>initiallySolid</code>.</td>
+</tr>
+</tbody></table>
+<p>All solid types use complete-token swept collision. One continuous overlap is
+one collision, restores the last safe token position, applies the configured
+penalty, and the third collision restarts the same deterministic layout.</p>
 <h2 id="manualobstacles"><code>manualObstacles[]</code><a class="heading-link" href="#manualobstacles" aria-label="Link to this section">#</a></h2>
 <p>Each item is a fixed solid obstacle.</p>
 <pre><code class="language-json">{

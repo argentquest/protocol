@@ -4,8 +4,12 @@ import { mediaDefinitions, soundDefinitions } from '../config/loadConfig.js'
 import { generateLevel } from '../game/generation/levelGenerator.js'
 import { authApi, mediaLibraryApi, themeApi } from './themeApi.js'
 import {
+  addArenaPoint,
+  convertArenaShape,
   entitySize,
   isResizableEntity,
+  moveArenaPoint,
+  removeArenaPoint,
   resizeEntity,
   snapToEditorGrid as snap,
 } from './levelEditorGeometry.js'
@@ -21,6 +25,41 @@ const ENTITY_GROUPS = [
 ]
 
 const RESIZE_HANDLES = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw']
+
+const OBSTACLE_GUIDE = [
+  {
+    name: 'Static obstacle',
+    implementation: 'Fixed collision shape; it never moves or changes state.',
+  },
+  {
+    name: 'Axis sweeper',
+    implementation: 'Moves sinusoidally on its configured X or Y axis using amplitude, period, and phase.',
+  },
+  {
+    name: 'Tracking obstacle',
+    implementation: 'Chases the token after the attempt starts, accelerating and turning gradually inside its rectangular zone.',
+  },
+  {
+    name: 'Phase gate',
+    implementation: 'Cycles through solid, open, and warning states; only the solid interval collides.',
+  },
+  {
+    name: 'Pulse block',
+    implementation: 'Continuously scales its real collision width and height between configured minimum and maximum values.',
+  },
+  {
+    name: 'Orbiter',
+    implementation: 'Moves around its authored center on an elliptical orbit and remains solid throughout the cycle.',
+  },
+  {
+    name: 'Spinner',
+    implementation: 'Rotates its rectangular collision geometry at a configured number of degrees per second.',
+  },
+  {
+    name: 'Switch barrier',
+    implementation: 'Changes between solid and open from a referenced switch; the template starts solid and opens while that switch is active.',
+  },
+]
 
 /**
  * Flattens editable level groups into stable editor selections.
@@ -360,6 +399,9 @@ function LevelMap({
   onSelect,
   onMove,
   onResize,
+  onArenaPointMove,
+  onArenaPointSelect,
+  selectedArenaPoint,
   onContextMenu,
   onDragStart,
   onDragEnd,
@@ -391,6 +433,10 @@ function LevelMap({
       )
       return
     }
+    if (dragRef.current.mode === 'arena-point') {
+      onArenaPointMove(dragRef.current.index, point)
+      return
+    }
     onMove(dragRef.current.selection, point)
   }
 
@@ -409,6 +455,111 @@ function LevelMap({
         dragRef.current = null
       }}
     >
+      <svg
+        className="level-editor-arena"
+        viewBox="0 0 1600 900"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        {level.arena.shape === 'polygon' ? (
+          <polygon className="level-editor-arena__boundary" points={level.arena.points.map((point) => point.join(',')).join(' ')} />
+        ) : level.arena.shape === 'ellipse' ? (
+          <ellipse
+            className="level-editor-arena__boundary"
+            cx="800"
+            cy="450"
+            rx={800 - level.arena.margin}
+            ry={450 - level.arena.margin}
+          />
+        ) : (
+          <rect
+            className="level-editor-arena__boundary"
+            x={level.arena.margin}
+            y={level.arena.margin}
+            width={1600 - level.arena.margin * 2}
+            height={900 - level.arena.margin * 2}
+            rx={level.arena.cornerRadius}
+          />
+        )}
+        <g className="level-editor-hazard-guides">
+          {(level.movingObstacles ?? []).map((obstacle) => (
+            <line
+              key={`moving-guide-${obstacle.id}`}
+              x1={obstacle.x - (obstacle.axis === 'x' ? obstacle.amplitude : 0)}
+              y1={obstacle.y - (obstacle.axis === 'y' ? obstacle.amplitude : 0)}
+              x2={obstacle.x + (obstacle.axis === 'x' ? obstacle.amplitude : 0)}
+              y2={obstacle.y + (obstacle.axis === 'y' ? obstacle.amplitude : 0)}
+            />
+          ))}
+          {(level.trackingObstacles ?? []).map((obstacle) => (
+            <rect
+              key={`tracking-guide-${obstacle.id}`}
+              x={obstacle.zone.x}
+              y={obstacle.zone.y}
+              width={obstacle.zone.width}
+              height={obstacle.zone.height}
+            />
+          ))}
+          {(level.dynamicObstacles ?? []).map((obstacle) => {
+            if (obstacle.behavior.type === 'orbit') {
+              return (
+                <ellipse
+                  key={`dynamic-guide-${obstacle.id}`}
+                  cx={obstacle.x}
+                  cy={obstacle.y}
+                  rx={obstacle.behavior.radiusX}
+                  ry={obstacle.behavior.radiusY}
+                />
+              )
+            }
+            if (obstacle.behavior.type === 'pulse') {
+              return (
+                <rect
+                  key={`dynamic-guide-${obstacle.id}`}
+                  x={obstacle.x - (obstacle.width * obstacle.behavior.maxScale) / 2}
+                  y={obstacle.y - (obstacle.height * obstacle.behavior.maxScale) / 2}
+                  width={obstacle.width * obstacle.behavior.maxScale}
+                  height={obstacle.height * obstacle.behavior.maxScale}
+                />
+              )
+            }
+            if (obstacle.behavior.type === 'rotate') {
+              return (
+                <circle
+                  key={`dynamic-guide-${obstacle.id}`}
+                  cx={obstacle.x}
+                  cy={obstacle.y}
+                  r={Math.hypot(obstacle.width, obstacle.height) / 2}
+                />
+              )
+            }
+            return null
+          })}
+        </g>
+      </svg>
+      {level.arena.shape === 'polygon' &&
+        level.arena.points.map(([x, y], index) => (
+          <button
+            type="button"
+            className={`arena-point-handle ${selectedArenaPoint === index ? 'is-selected' : ''}`}
+            aria-label={`Arena corner ${index + 1}`}
+            aria-pressed={selectedArenaPoint === index}
+            key={`arena-point-${index}`}
+            style={{ left: `${(x / 1600) * 100}%`, top: `${(y / 900) * 100}%` }}
+            onPointerDown={(event) => {
+              if (event.button !== 0) return
+              event.preventDefault()
+              event.stopPropagation()
+              dragRef.current = { mode: 'arena-point', index }
+              onArenaPointSelect(index)
+              onDragStart()
+              event.currentTarget.setPointerCapture(event.pointerId)
+            }}
+            onClick={() => onArenaPointSelect(index)}
+          >
+            <span>{index + 1}</span>
+          </button>
+        ))}
       {descriptors.map((descriptor) => {
         const size = entitySize(descriptor.entity)
         const selected =
@@ -1243,6 +1394,7 @@ function LevelEditor({
 }) {
   const [level, setLevel] = useState(initialLevel)
   const [selection, setSelection] = useState({ group: 'start', index: null })
+  const [selectedArenaPoint, setSelectedArenaPoint] = useState(null)
   const [undoStack, setUndoStack] = useState([])
   const [redoStack, setRedoStack] = useState([])
   const [entityJson, setEntityJson] = useState('')
@@ -1423,6 +1575,14 @@ function LevelEditor({
             onResize={(target, entity) => {
               setLevel(replaceEntity(level, target, entity))
             }}
+            selectedArenaPoint={selectedArenaPoint}
+            onArenaPointSelect={setSelectedArenaPoint}
+            onArenaPointMove={(index, point) => {
+              setLevel({
+                ...level,
+                arena: moveArenaPoint(level.arena, index, point),
+              })
+            }}
             onContextMenu={(target, point) => {
               setContextMenu({
                 selection: target,
@@ -1448,9 +1608,9 @@ function LevelEditor({
             }}
           />
           <p className="editor-help">
-            Drag entities on the 10-unit grid. Select an object and drag an edge
-            or corner handle to resize it. Right-click for image, sound, and
-            object-only JSON actions.
+            Drag entities on the 10-unit grid. Polygon arena corners are numbered
+            and draggable. Select an object and drag an edge or corner handle to
+            resize it. Right-click for image, sound, and object-only JSON actions.
           </p>
           {runtime.error && <div role="alert">{runtime.error}</div>}
         </section>
@@ -1491,6 +1651,145 @@ function LevelEditor({
             Change seed and regenerate
           </button>
 
+          <section className="arena-editor-controls" aria-labelledby="arena-editor-title">
+            <h2 id="arena-editor-title">Arena boundary</h2>
+            <label>
+              Arena shape
+              <select
+                value={level.arena.shape}
+                onChange={(event) => {
+                  const arena = convertArenaShape(level.arena, event.target.value)
+                  commit({ ...level, arena })
+                  setSelectedArenaPoint(arena.shape === 'polygon' ? 0 : null)
+                }}
+              >
+                <option value="rect">Rounded rectangle</option>
+                <option value="ellipse">Ellipse</option>
+                <option value="polygon">Irregular polygon</option>
+              </select>
+            </label>
+            {level.arena.shape === 'polygon' ? (
+              <>
+                <p>
+                  Drag numbered corners on the map. Concave shapes are allowed;
+                  crossed edges are rejected during validation.
+                </p>
+                <div className="arena-editor-controls__actions">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const added = addArenaPoint(level.arena)
+                      commit({ ...level, arena: added.arena })
+                      setSelectedArenaPoint(added.index)
+                    }}
+                  >
+                    Add corner
+                  </button>
+                  <button
+                    type="button"
+                    disabled={selectedArenaPoint === null || level.arena.points.length <= 3}
+                    onClick={() => {
+                      const arena = removeArenaPoint(level.arena, selectedArenaPoint)
+                      commit({ ...level, arena })
+                      setSelectedArenaPoint(
+                        arena.points.length
+                          ? Math.min(selectedArenaPoint, arena.points.length - 1)
+                          : null,
+                      )
+                    }}
+                  >
+                    Remove selected corner
+                  </button>
+                </div>
+                {selectedArenaPoint !== null && level.arena.points[selectedArenaPoint] && (
+                  <div className="arena-editor-controls__coordinates">
+                    <label>
+                      Corner {selectedArenaPoint + 1} X
+                      <input
+                        type="number"
+                        min="0"
+                        max="1600"
+                        step="10"
+                        value={level.arena.points[selectedArenaPoint][0]}
+                        onChange={(event) =>
+                          commit({
+                            ...level,
+                            arena: moveArenaPoint(level.arena, selectedArenaPoint, {
+                              x: event.target.value,
+                              y: level.arena.points[selectedArenaPoint][1],
+                            }),
+                          })
+                        }
+                      />
+                    </label>
+                    <label>
+                      Corner {selectedArenaPoint + 1} Y
+                      <input
+                        type="number"
+                        min="0"
+                        max="900"
+                        step="10"
+                        value={level.arena.points[selectedArenaPoint][1]}
+                        onChange={(event) =>
+                          commit({
+                            ...level,
+                            arena: moveArenaPoint(level.arena, selectedArenaPoint, {
+                              x: level.arena.points[selectedArenaPoint][0],
+                              y: event.target.value,
+                            }),
+                          })
+                        }
+                      />
+                    </label>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="arena-editor-controls__coordinates">
+                <label>
+                  Boundary margin
+                  <input
+                    type="number"
+                    min="0"
+                    max="400"
+                    step="10"
+                    value={level.arena.margin}
+                    onChange={(event) =>
+                      commit({
+                        ...level,
+                        arena: {
+                          ...level.arena,
+                          margin: Math.max(0, Math.min(400, snap(event.target.value))),
+                        },
+                      })
+                    }
+                  />
+                </label>
+                {level.arena.shape === 'rect' && (
+                  <label>
+                    Corner radius
+                    <input
+                      type="number"
+                      min="0"
+                      max="500"
+                      step="10"
+                      value={level.arena.cornerRadius}
+                      onChange={(event) =>
+                        commit({
+                          ...level,
+                          arena: {
+                            ...level.arena,
+                            cornerRadius: Math.max(0, Math.min(500, snap(event.target.value))),
+                          },
+                        })
+                      }
+                    />
+                  </label>
+                )}
+              </div>
+            )}
+          </section>
+
           <label>
             Add entity
             <select
@@ -1502,20 +1801,36 @@ function LevelEditor({
             >
               <option value="">Choose type…</option>
               <option value="static">Static obstacle</option>
-              <option value="moving">Moving obstacle</option>
-              <option value="tracking">Tracking obstacle</option>
-              <option value="phase">Phase obstacle</option>
-              <option value="pulse">Pulse obstacle</option>
-              <option value="orbit">Orbit obstacle</option>
-              <option value="rotate">Spinner obstacle</option>
+              <option value="moving">Axis sweeper (moves side to side)</option>
+              <option value="tracking">Tracker (chases inside a zone)</option>
+              <option value="phase">Phase gate (solid/open cycle)</option>
+              <option value="pulse">Pulse block (grows and shrinks)</option>
+              <option value="orbit">Orbiter (elliptical path)</option>
+              <option value="rotate">Spinner (rotating collision bar)</option>
               <option value="switch">Switch pad</option>
-              <option value="switchBarrier">Switch barrier</option>
+              <option value="switchBarrier">Switch-controlled barrier</option>
               <option value="conveyor">Conveyor field</option>
               <option value="radial">Radial field</option>
               <option value="coin">Coin</option>
               <option value="bonus">Bonus target</option>
             </select>
           </label>
+          <details className="obstacle-behavior-guide">
+            <summary>What each obstacle actually does</summary>
+            <div>
+              {OBSTACLE_GUIDE.map((item) => (
+                <article key={item.name}>
+                  <strong>{item.name}</strong>
+                  <p>{item.implementation}</p>
+                </article>
+              ))}
+            </div>
+            <p>
+              Any solid obstacle uses the same complete-token swept collision,
+              penalty, and last-safe-position restore rules. The third collision
+              restarts the unchanged level layout.
+            </p>
+          </details>
 
           <h2>Entity inspector</h2>
           <textarea

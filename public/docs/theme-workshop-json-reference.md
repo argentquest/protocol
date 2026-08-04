@@ -218,6 +218,13 @@ inside the ellipse.
 List the boundary vertices consistently clockwise or counter-clockwise and do
 not create self-intersecting edges.
 
+In the visual level editor, choose **Irregular polygon** under **Arena
+boundary**. Numbered corner handles appear directly on the map; drag them on
+the 10-unit grid or edit the selected corner's X/Y fields. **Add corner** splits
+the longest current edge, and **Remove selected corner** keeps the required
+three-corner minimum. Concave outlines are valid, but crossed/touching
+non-adjacent edges and degenerate areas fail validation.
+
 ## `token`
 
 ```json
@@ -336,6 +343,28 @@ still has a collision-safe route.
 The generator tries a bounded number of candidates. If a requested obstacle
 cannot be placed safely, fewer than `obstacleCount` may be produced. Always use
 **Regenerate** or **Playtest** to inspect the seed-locked result.
+
+## Obstacle behavior at a glance
+
+The editor draws dashed orange guides for sweep ranges, tracker zones, orbit
+paths, maximum pulse bounds, and spinner envelopes. These guides are authoring
+information only; the engine and Pixi renderer use the same deterministic
+time-resolved collision state described below.
+
+| Editor type | What it actually does |
+|---|---|
+| Static obstacle | A fixed solid collision shape. |
+| Axis sweeper | Moves sinusoidally along X or Y between `center ± amplitude`. |
+| Tracking obstacle | Starts with the attempt, then accelerates and turns toward the token while constrained to `zone`. |
+| Phase gate | Is solid first, then open, then warning before the next solid interval. Only `solid` collides. |
+| Orbiter | Remains solid while moving around its authored center on an elliptical path. |
+| Pulse block | Remains solid while its real collision width and height grow and shrink. |
+| Spinner | Remains solid while its rectangular collision geometry rotates. |
+| Switch barrier | Becomes solid or open from the referenced switch and `initiallySolid`. |
+
+All solid types use complete-token swept collision. One continuous overlap is
+one collision, restores the last safe token position, applies the configured
+penalty, and the third collision restarts the same deterministic layout.
 
 ## `manualObstacles[]`
 

@@ -91,6 +91,14 @@ Right-click an object (or press Shift+F10) for separate image, sound, and
 object-only JSON actions. Square and circular objects preserve their aspect
 ratio; rectangular objects can stretch independently on each axis.
 
+The **Arena boundary** controls can convert a level between rounded rectangle,
+ellipse, and irregular polygon boundaries. Polygon corners are numbered and
+drag directly on the 10-unit grid; authors can add or remove corners and edit
+exact coordinates. Concave outlines are supported, while crossed edges and
+degenerate polygons fail validation. Dashed orange guides show axis sweeps,
+tracker zones, orbit paths, maximum pulse bounds, and spinner envelopes. The
+expandable obstacle guide explains the exact engine behavior of every hazard.
+
 Object-level image and sound actions reuse the complete Theme media filesystem
 browser: recursive folders, breadcrumbs, search, paging, large preview,
 provenance, and license details behave identically in both workflows.

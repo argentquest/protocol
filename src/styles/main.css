@@ -2779,6 +2779,56 @@ input[type='range'] {
   touch-action: none;
 }
 
+.level-editor-arena {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.level-editor-arena__boundary {
+  fill: rgba(54, 215, 255, 0.045);
+  stroke: #36d7ff;
+  stroke-width: 5px;
+  vector-effect: non-scaling-stroke;
+}
+
+.level-editor-hazard-guides {
+  fill: rgba(255, 138, 61, 0.035);
+  stroke: rgba(255, 174, 107, 0.7);
+  stroke-width: 3px;
+  stroke-dasharray: 10 8;
+  vector-effect: non-scaling-stroke;
+}
+
+.arena-point-handle {
+  position: absolute;
+  z-index: 4;
+  display: grid;
+  width: 24px;
+  height: 24px;
+  transform: translate(-50%, -50%);
+  place-items: center;
+  border: 2px solid #07182a;
+  border-radius: 50%;
+  padding: 0;
+  color: #07182a;
+  background: #36d7ff;
+  box-shadow: 0 0 0 2px rgba(54, 215, 255, 0.55);
+  cursor: move;
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  font-weight: 700;
+}
+
+.arena-point-handle.is-selected {
+  color: #07182a;
+  background: #fff;
+  box-shadow: 0 0 0 3px #36d7ff;
+}
+
 .editor-entity {
   position: absolute;
   transform: translate(-50%, -50%);
@@ -2789,6 +2839,62 @@ input[type='range'] {
   background: rgba(255, 92, 61, 0.58);
   padding: 0;
   cursor: grab;
+}
+
+.arena-editor-controls {
+  display: grid;
+  gap: 0.7rem;
+  padding: 0.8rem;
+  border: 1px solid rgba(54, 215, 255, 0.24);
+  background: rgba(54, 215, 255, 0.05);
+}
+
+.arena-editor-controls h2,
+.arena-editor-controls p {
+  margin: 0;
+}
+
+.arena-editor-controls p {
+  color: var(--color-muted, #7ea8c4);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.arena-editor-controls__actions,
+.arena-editor-controls__coordinates {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.obstacle-behavior-guide {
+  border: 1px solid rgba(255, 138, 61, 0.28);
+  padding: 0.7rem;
+  background: rgba(255, 138, 61, 0.05);
+}
+
+.obstacle-behavior-guide summary {
+  cursor: pointer;
+  color: #ffc29a;
+  font-family: var(--mono);
+}
+
+.obstacle-behavior-guide > div {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.75rem;
+}
+
+.obstacle-behavior-guide article {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.obstacle-behavior-guide p {
+  margin: 0;
+  color: var(--color-muted, #7ea8c4);
+  font-size: 0.7rem;
+  line-height: 1.45;
 }
 
 .editor-entity__label {

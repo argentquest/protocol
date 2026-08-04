@@ -129,6 +129,120 @@ export function pointInPolygon(point, polygon) {
 }
 
 /**
+ * Computes the signed doubled area of a polygon.
+ *
+ * @pure
+ * @param {Array<[number,number]>} points Ordered arena vertices in world units.
+ * @returns {number} Signed doubled area in world units².
+ */
+function doubledPolygonArea(points) {
+  return points.reduce((area, point, index) => {
+    const next = points[(index + 1) % points.length]
+    return area + point[0] * next[1] - next[0] * point[1]
+  }, 0)
+}
+
+/**
+ * Reports whether two closed line segments intersect, including collinear contact.
+ *
+ * @pure
+ * @param {[number,number]} firstStart First segment start.
+ * @param {[number,number]} firstEnd First segment end.
+ * @param {[number,number]} secondStart Second segment start.
+ * @param {[number,number]} secondEnd Second segment end.
+ * @returns {boolean} Whether the segments intersect.
+ */
+function segmentsIntersect(firstStart, firstEnd, secondStart, secondEnd) {
+  /** @param {[number,number]} start Segment start. @param {[number,number]} end Segment end. @param {[number,number]} point Test point. @returns {number} Signed orientation. */
+  const orientation = (start, end, point) =>
+    (end[0] - start[0]) * (point[1] - start[1]) -
+    (end[1] - start[1]) * (point[0] - start[0])
+  /** @param {[number,number]} start Segment start. @param {[number,number]} end Segment end. @param {[number,number]} point Collinear point. @returns {boolean} Whether the point lies on the segment bounds. */
+  const onSegment = (start, end, point) =>
+    point[0] >= Math.min(start[0], end[0]) - EPSILON &&
+    point[0] <= Math.max(start[0], end[0]) + EPSILON &&
+    point[1] >= Math.min(start[1], end[1]) - EPSILON &&
+    point[1] <= Math.max(start[1], end[1]) + EPSILON
+  const firstA = orientation(firstStart, firstEnd, secondStart)
+  const firstB = orientation(firstStart, firstEnd, secondEnd)
+  const secondA = orientation(secondStart, secondEnd, firstStart)
+  const secondB = orientation(secondStart, secondEnd, firstEnd)
+  if (
+    ((firstA > EPSILON && firstB < -EPSILON) ||
+      (firstA < -EPSILON && firstB > EPSILON)) &&
+    ((secondA > EPSILON && secondB < -EPSILON) ||
+      (secondA < -EPSILON && secondB > EPSILON))
+  ) {
+    return true
+  }
+  return (
+    (Math.abs(firstA) <= EPSILON && onSegment(firstStart, firstEnd, secondStart)) ||
+    (Math.abs(firstB) <= EPSILON && onSegment(firstStart, firstEnd, secondEnd)) ||
+    (Math.abs(secondA) <= EPSILON && onSegment(secondStart, secondEnd, firstStart)) ||
+    (Math.abs(secondB) <= EPSILON && onSegment(secondStart, secondEnd, firstEnd))
+  )
+}
+
+/**
+ * Validates a simple polygon arena before generation or persistence.
+ * Concave outlines are supported; crossed edges and degenerate outlines are not.
+ *
+ * @pure
+ * @param {Array<[number,number]>} points Ordered arena vertices in world units.
+ * @returns {string[]} Actionable polygon errors.
+ */
+export function validateArenaPolygon(points) {
+  if (!Array.isArray(points) || points.length < 3) {
+    return ['Polygon arenas require at least three corners.']
+  }
+  const errors = []
+  for (const [index, point] of points.entries()) {
+    if (
+      !Array.isArray(point) ||
+      point.length !== 2 ||
+      !Number.isFinite(point[0]) ||
+      !Number.isFinite(point[1]) ||
+      point[0] < 0 ||
+      point[0] > WORLD_WIDTH ||
+      point[1] < 0 ||
+      point[1] > WORLD_HEIGHT
+    ) {
+      errors.push(`Arena corner ${index + 1} must remain inside the 1600 × 900 world.`)
+    }
+  }
+  if (errors.length) return errors
+  if (Math.abs(doubledPolygonArea(points)) < 200) {
+    errors.push('Polygon arena area is too small or degenerate.')
+  }
+  for (let first = 0; first < points.length; first += 1) {
+    const firstNext = (first + 1) % points.length
+    for (let second = first + 1; second < points.length; second += 1) {
+      const secondNext = (second + 1) % points.length
+      if (
+        first === second ||
+        firstNext === second ||
+        secondNext === first
+      ) {
+        continue
+      }
+      if (
+        segmentsIntersect(
+          points[first],
+          points[firstNext],
+          points[second],
+          points[secondNext],
+        )
+      ) {
+        errors.push(
+          `Arena edges ${first + 1} and ${second + 1} cross or touch.`,
+        )
+      }
+    }
+  }
+  return [...new Set(errors)]
+}
+
+/**
  * Computes squared distance from a point to the nearest point on a segment.
  *
  * @pure
