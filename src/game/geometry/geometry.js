@@ -531,6 +531,163 @@ export function sweepShape(
 }
 
 /**
+ * Returns the unit normal of the nearest polygon edge, oriented against travel.
+ *
+ * @pure
+ * @param {import('../types.js').Point} point Candidate token center in world units.
+ * @param {import('../types.js').Point[]} polygon World-space polygon vertices.
+ * @param {import('../types.js').Point} velocity Incoming velocity in world units/second.
+ * @returns {import('../types.js').Point} Stable unit contact normal.
+ */
+function nearestPolygonNormal(point, polygon, velocity) {
+  let bestDistance = Infinity
+  let best = { x: 1, y: 0 }
+  for (let index = 0; index < polygon.length; index += 1) {
+    const start = polygon[index]
+    const end = polygon[(index + 1) % polygon.length]
+    const candidateDistance = squaredDistanceToSegment(point, start, end)
+    if (candidateDistance >= bestDistance) continue
+    const edgeX = end.x - start.x
+    const edgeY = end.y - start.y
+    const length = Math.hypot(edgeX, edgeY) || 1
+    bestDistance = candidateDistance
+    best = { x: -edgeY / length, y: edgeX / length }
+  }
+  if (best.x * velocity.x + best.y * velocity.y > 0) {
+    return { x: -best.x, y: -best.y }
+  }
+  return best
+}
+
+/**
+ * Resolves a stable contact normal for an obstacle or arena boundary.
+ *
+ * @pure
+ * @param {object|null} obstacle Impacted obstacle, or null for the arena.
+ * @param {object} arena Arena boundary.
+ * @param {import('../types.js').Point} point Candidate token center in world units.
+ * @param {import('../types.js').Point} velocity Incoming velocity in world units/second.
+ * @returns {import('../types.js').Point} Unit normal pointing against travel.
+ */
+function impactNormal(obstacle, arena, point, velocity) {
+  if (obstacle?.shape === 'circle') {
+    const dx = point.x - obstacle.x
+    const dy = point.y - obstacle.y
+    const length = Math.hypot(dx, dy) || 1
+    const normal = { x: dx / length, y: dy / length }
+    return normal.x * velocity.x + normal.y * velocity.y > 0
+      ? { x: -normal.x, y: -normal.y }
+      : normal
+  }
+  if (obstacle) {
+    return nearestPolygonNormal(point, polygonForShape(obstacle), velocity)
+  }
+  if (arena.shape === 'ellipse') {
+    const margin = arena.margin ?? 0
+    const radiusX = WORLD_WIDTH / 2 - margin
+    const radiusY = WORLD_HEIGHT / 2 - margin
+    const outward = {
+      x: (point.x - WORLD_WIDTH / 2) / (radiusX * radiusX),
+      y: (point.y - WORLD_HEIGHT / 2) / (radiusY * radiusY),
+    }
+    const length = Math.hypot(outward.x, outward.y) || 1
+    return { x: -outward.x / length, y: -outward.y / length }
+  }
+  const polygon =
+    arena.shape === 'polygon'
+      ? arena.points.map(([x, y]) => ({ x, y }))
+      : polygonForShape({
+          shape: 'rect',
+          x: WORLD_WIDTH / 2,
+          y: WORLD_HEIGHT / 2,
+          width: WORLD_WIDTH - (arena.margin ?? 0) * 2,
+          height: WORLD_HEIGHT - (arena.margin ?? 0) * 2,
+        })
+  return nearestPolygonNormal(point, polygon, velocity)
+}
+
+/**
+ * Finds the first sampled complete-token impact along one movement segment.
+ * The returned safe point is refined by binary search and never penetrates the
+ * arena or obstacle at the resolution used by the fixed-step engine.
+ *
+ * @pure
+ * @param {object} options Trace inputs.
+ * @param {import('../types.js').Point} options.from Safe token center in world units.
+ * @param {import('../types.js').Point} options.to Requested token center in world units.
+ * @param {object} options.shape Complete token geometry at `from`.
+ * @param {object} options.arena Arena boundary.
+ * @param {object[]} options.obstacles Time-resolved obstacle geometry.
+ * @param {import('../types.js').Point} options.velocity Incoming velocity in world units/second.
+ * @returns {{hit:boolean,fraction:number,point:import('../types.js').Point,normal?:import('../types.js').Point,kind?:'boundary'|'obstacle',obstacle?:object}}
+ */
+export function traceFirstImpact({
+  from,
+  to,
+  shape,
+  arena,
+  obstacles,
+  velocity,
+}) {
+  const travel = distance(from, to)
+  const smallestDimension = obstacles.reduce(
+    (smallest, obstacle) =>
+      Math.min(smallest, obstacle.width ?? obstacle.size, obstacle.height ?? obstacle.size),
+    Math.min(shape.width, shape.height),
+  )
+  const sampleDistance = Math.max(1, smallestDimension / 6)
+  const steps = Math.max(1, Math.ceil(travel / sampleDistance))
+  let safeFraction = 0
+
+  for (let step = 1; step <= steps; step += 1) {
+    const fraction = step / steps
+    const point = {
+      x: from.x + (to.x - from.x) * fraction,
+      y: from.y + (to.y - from.y) * fraction,
+    }
+    const candidate = { ...shape, x: point.x, y: point.y }
+    const outside = !shapeInsideArena(candidate, arena)
+    const obstacle = outside
+      ? null
+      : obstacles.find((item) => shapesIntersect(candidate, item))
+    if (!outside && !obstacle) {
+      safeFraction = fraction
+      continue
+    }
+
+    let low = safeFraction
+    let high = fraction
+    for (let refinement = 0; refinement < 12; refinement += 1) {
+      const middle = (low + high) / 2
+      const middlePoint = {
+        x: from.x + (to.x - from.x) * middle,
+        y: from.y + (to.y - from.y) * middle,
+      }
+      const middleShape = { ...shape, x: middlePoint.x, y: middlePoint.y }
+      const blocked =
+        !shapeInsideArena(middleShape, arena) ||
+        obstacles.some((item) => shapesIntersect(middleShape, item))
+      if (blocked) high = middle
+      else low = middle
+    }
+    const safePoint = {
+      x: from.x + (to.x - from.x) * low,
+      y: from.y + (to.y - from.y) * low,
+    }
+    return {
+      hit: true,
+      fraction: high,
+      point: safePoint,
+      normal: impactNormal(obstacle, arena, point, velocity),
+      kind: outside ? 'boundary' : 'obstacle',
+      ...(obstacle ? { obstacle } : {}),
+    }
+  }
+
+  return { hit: false, fraction: 1, point: to }
+}
+
+/**
  * Resolves a sinusoidal moving obstacle at simulation time.
  *
  * @pure

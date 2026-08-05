@@ -140,10 +140,13 @@ describe('released V2 campaign', () => {
     expect(obstacleCells.size).toBe(12)
     expect(fingerprints.size).toBe(100)
     expect(
-      campaign.every((level) =>
-        level.obstacles.some((obstacle) => obstacle.generated),
-      ),
+      campaign
+        .filter((level) => level.id !== 'level-100')
+        .every((level) =>
+          level.obstacles.some((obstacle) => obstacle.generated),
+        ),
     ).toBe(true)
+    expect(campaign[99].obstacles).toEqual([])
   })
 
   it('keeps moving sweeps and full tracking zones inside their arenas', () => {

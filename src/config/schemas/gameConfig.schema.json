@@ -4,7 +4,7 @@
   "title": "Path Protocol V2 game configuration",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "world", "simulation", "input", "collision"],
+  "required": ["schemaVersion", "world", "simulation", "input", "collision", "kineticShot"],
   "properties": {
     "schemaVersion": { "const": 2 },
     "world": {
@@ -52,6 +52,27 @@
           "minimum": 0,
           "maximum": 20
         }
+      }
+    },
+    "kineticShot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "inputStyle", "minimumAimDistance",
+        "minimumLaunchSpeed", "maximumLaunchSpeed",
+        "aimDistanceForMaximumSpeed", "dragPerSecond", "stopSpeed",
+        "restitution", "maximumImpactsPerStep"
+      ],
+      "properties": {
+        "inputStyle": { "enum": ["drag-release", "two-click"] },
+        "minimumAimDistance": { "type": "number", "minimum": 0, "maximum": 200 },
+        "minimumLaunchSpeed": { "type": "number", "exclusiveMinimum": 0, "maximum": 2000 },
+        "maximumLaunchSpeed": { "type": "number", "exclusiveMinimum": 0, "maximum": 2000 },
+        "aimDistanceForMaximumSpeed": { "type": "number", "exclusiveMinimum": 0, "maximum": 1600 },
+        "dragPerSecond": { "type": "number", "exclusiveMinimum": 0, "maximum": 5000 },
+        "stopSpeed": { "type": "number", "minimum": 1, "maximum": 500 },
+        "restitution": { "type": "number", "minimum": 0.1, "maximum": 1 },
+        "maximumImpactsPerStep": { "type": "integer", "minimum": 1, "maximum": 12 }
       }
     }
   }

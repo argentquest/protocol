@@ -27,6 +27,7 @@ const transitions = {
     'main-reached': 'main-reached',
     'release-early': 'restarting',
     'maximum-collisions': 'restarting',
+    'maximum-shots': 'restarting',
     restart: 'restarting',
     fail: 'failed',
   },

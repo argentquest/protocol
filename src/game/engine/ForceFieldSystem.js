@@ -1,4 +1,5 @@
 import { shapesIntersect } from '../geometry/geometry.js'
+import { verticalRangesOverlap } from './VerticalMovementSystem.js'
 
 /**
  * Converts a force-field configuration into overlap geometry.
@@ -33,6 +34,16 @@ function fieldShape(field) {
 export function resolveForceFieldAcceleration(fields, token) {
   const acceleration = { x: 0, y: 0 }
   for (const field of fields ?? []) {
+    if (
+      Number.isFinite(token.elevation) &&
+      !verticalRangesOverlap(
+        token.elevation,
+        token.collisionHeight ?? token.size,
+        field,
+      )
+    ) {
+      continue
+    }
     if (!shapesIntersect(token, fieldShape(field))) continue
     if (field.type === 'conveyor') {
       const angle = (field.directionDegrees * Math.PI) / 180

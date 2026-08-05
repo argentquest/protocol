@@ -44,6 +44,17 @@
     "arena": { "$ref": "#/$defs/arena" },
     "token": { "$ref": "#/$defs/token" },
     "movement": { "$ref": "#/$defs/movement" },
+    "verticalPhysics": { "$ref": "#/$defs/verticalPhysics" },
+    "ramps": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/ramp" }
+    },
+    "terrainSurfaces": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/terrainSurface" }
+    },
+    "shotMechanic": { "$ref": "#/$defs/shotMechanic" },
+    "shotGoals": { "$ref": "#/$defs/shotGoals" },
     "start": { "$ref": "#/$defs/start" },
     "mainTarget": { "$ref": "#/$defs/mainTarget" },
     "generation": { "$ref": "#/$defs/generation" },
@@ -88,10 +99,19 @@
       "type": "string",
       "pattern": "^entity-(?:visual|audio)-[a-f0-9-]{36}$"
     },
+    "model3dId": {
+      "type": "string",
+      "pattern": "^kenney-minigolf-[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
     "coordinate": {
       "type": "number",
       "minimum": 0,
       "maximum": 1600
+    },
+    "elevation": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 2000
     },
     "positiveDimension": {
       "type": "number",
@@ -170,9 +190,13 @@
       "properties": {
         "shape": { "enum": ["circle", "rect", "diamond"] },
         "size": { "$ref": "#/$defs/positiveDimension" },
+        "elevation": { "$ref": "#/$defs/elevation" },
+        "collisionHeight": { "$ref": "#/$defs/positiveDimension" },
+        "visualHeight": { "$ref": "#/$defs/positiveDimension" },
         "mediaId": { "$ref": "#/$defs/mediaId" },
         "visualOverrideId": { "$ref": "#/$defs/overrideId" },
-        "audioOverrideId": { "$ref": "#/$defs/overrideId" }
+        "audioOverrideId": { "$ref": "#/$defs/overrideId" },
+        "model3dId": { "$ref": "#/$defs/model3dId" }
       }
     },
     "movement": {
@@ -186,6 +210,127 @@
         "keyboardSpeed": { "type": "number", "exclusiveMinimum": 0, "maximum": 2000 }
       }
     },
+    "verticalPhysics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gravity", "maximumFallSpeed", "groundHeight"],
+      "properties": {
+        "gravity": { "type": "number", "exclusiveMinimum": 0, "maximum": 10000 },
+        "maximumFallSpeed": { "type": "number", "exclusiveMinimum": 0, "maximum": 5000 },
+        "groundHeight": { "$ref": "#/$defs/elevation" },
+        "maximumStepHeight": { "type": "number", "minimum": 0, "maximum": 500 }
+      }
+    },
+    "terrainSurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "mediaId", "x", "y", "width", "height", "cornerElevations"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "mediaId": { "$ref": "#/$defs/mediaId" },
+        "visualOverrideId": { "$ref": "#/$defs/overrideId" },
+        "audioOverrideId": { "$ref": "#/$defs/overrideId" },
+        "model3dId": { "$ref": "#/$defs/model3dId" },
+        "x": { "$ref": "#/$defs/coordinate" },
+        "y": { "$ref": "#/$defs/coordinate" },
+        "width": { "$ref": "#/$defs/positiveDimension" },
+        "height": { "$ref": "#/$defs/positiveDimension" },
+        "cornerElevations": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["northWest", "northEast", "southEast", "southWest"],
+          "properties": {
+            "northWest": { "$ref": "#/$defs/elevation" },
+            "northEast": { "$ref": "#/$defs/elevation" },
+            "southEast": { "$ref": "#/$defs/elevation" },
+            "southWest": { "$ref": "#/$defs/elevation" }
+          }
+        },
+        "friction": { "type": "number", "minimum": 0, "maximum": 5000 },
+        "thickness": { "type": "number", "exclusiveMinimum": 0, "maximum": 500 }
+      }
+    },
+    "ramp": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "mediaId", "x", "y", "width", "height",
+        "directionDegrees", "launchVelocity"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "mediaId": { "$ref": "#/$defs/mediaId" },
+        "model3dId": { "$ref": "#/$defs/model3dId" },
+        "x": { "$ref": "#/$defs/coordinate" },
+        "y": { "$ref": "#/$defs/coordinate" },
+        "width": { "$ref": "#/$defs/positiveDimension" },
+        "height": { "$ref": "#/$defs/positiveDimension" },
+        "elevation": { "$ref": "#/$defs/elevation" },
+        "collisionHeight": { "$ref": "#/$defs/positiveDimension" },
+        "visualHeight": { "$ref": "#/$defs/positiveDimension" },
+        "directionDegrees": { "type": "number" },
+        "launchVelocity": { "type": "number", "exclusiveMinimum": 0, "maximum": 5000 },
+        "minimumApproachSpeed": { "type": "number", "minimum": 0, "maximum": 2000 }
+      }
+    },
+    "shotMechanic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "minimumLaunchSpeed",
+        "maximumLaunchSpeed",
+        "aimDistanceForMaximumSpeed",
+        "dragPerSecond",
+        "stopSpeed",
+        "restitution",
+        "maximumImpactsPerStep"
+      ],
+      "properties": {
+        "inputStyle": { "enum": ["drag-release", "two-click"] },
+        "minimumAimDistance": { "type": "number", "minimum": 0, "maximum": 200 },
+        "minimumLaunchSpeed": { "type": "number", "exclusiveMinimum": 0, "maximum": 2000 },
+        "maximumLaunchSpeed": { "type": "number", "exclusiveMinimum": 0, "maximum": 2000 },
+        "aimDistanceForMaximumSpeed": { "type": "number", "exclusiveMinimum": 0, "maximum": 1600 },
+        "dragPerSecond": { "type": "number", "exclusiveMinimum": 0, "maximum": 5000 },
+        "airDragPerSecond": { "type": "number", "minimum": 0, "maximum": 5000 },
+        "stopSpeed": { "type": "number", "minimum": 1, "maximum": 500 },
+        "restitution": { "type": "number", "minimum": 0.1, "maximum": 1 },
+        "maximumImpactsPerStep": { "type": "integer", "minimum": 1, "maximum": 12 }
+      }
+    },
+    "shotGoals": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "par": { "type": "integer", "minimum": 1, "maximum": 999 },
+        "perfectShots": { "type": "integer", "minimum": 1, "maximum": 999 },
+        "maximumShots": { "type": "integer", "minimum": 1, "maximum": 999 }
+      }
+    },
+    "kineticResponse": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "restitution"],
+          "properties": {
+            "type": { "enum": ["rebound", "bumper"] },
+            "restitution": { "type": "number", "minimum": 0.1, "maximum": 1.5 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type"],
+          "properties": {
+            "type": { "enum": ["stop", "reset"] }
+          }
+        }
+      ]
+    },
     "start": {
       "oneOf": [
         {
@@ -197,6 +342,10 @@
             "mediaId": { "$ref": "#/$defs/mediaId" },
             "visualOverrideId": { "$ref": "#/$defs/overrideId" },
             "audioOverrideId": { "$ref": "#/$defs/overrideId" },
+            "model3dId": { "$ref": "#/$defs/model3dId" },
+            "elevation": { "$ref": "#/$defs/elevation" },
+            "collisionHeight": { "$ref": "#/$defs/positiveDimension" },
+            "visualHeight": { "$ref": "#/$defs/positiveDimension" },
             "region": { "$ref": "#/$defs/region" }
           }
         },
@@ -209,8 +358,12 @@
             "mediaId": { "$ref": "#/$defs/mediaId" },
             "visualOverrideId": { "$ref": "#/$defs/overrideId" },
             "audioOverrideId": { "$ref": "#/$defs/overrideId" },
+            "model3dId": { "$ref": "#/$defs/model3dId" },
             "x": { "$ref": "#/$defs/coordinate" },
-            "y": { "$ref": "#/$defs/coordinate" }
+            "y": { "$ref": "#/$defs/coordinate" },
+            "elevation": { "$ref": "#/$defs/elevation" },
+            "collisionHeight": { "$ref": "#/$defs/positiveDimension" },
+            "visualHeight": { "$ref": "#/$defs/positiveDimension" }
           }
         }
       ]
@@ -226,7 +379,12 @@
             "mediaId": { "$ref": "#/$defs/mediaId" },
             "visualOverrideId": { "$ref": "#/$defs/overrideId" },
             "audioOverrideId": { "$ref": "#/$defs/overrideId" },
+            "model3dId": { "$ref": "#/$defs/model3dId" },
+            "model3dSize": { "$ref": "#/$defs/positiveDimension" },
             "region": { "$ref": "#/$defs/region" },
+            "elevation": { "$ref": "#/$defs/elevation" },
+            "collisionHeight": { "$ref": "#/$defs/positiveDimension" },
+            "visualHeight": { "$ref": "#/$defs/positiveDimension" },
             "size": { "$ref": "#/$defs/positiveDimension" }
           }
         },
@@ -239,8 +397,13 @@
             "mediaId": { "$ref": "#/$defs/mediaId" },
             "visualOverrideId": { "$ref": "#/$defs/overrideId" },
             "audioOverrideId": { "$ref": "#/$defs/overrideId" },
+            "model3dId": { "$ref": "#/$defs/model3dId" },
+            "model3dSize": { "$ref": "#/$defs/positiveDimension" },
             "x": { "$ref": "#/$defs/coordinate" },
             "y": { "$ref": "#/$defs/coordinate" },
+            "elevation": { "$ref": "#/$defs/elevation" },
+            "collisionHeight": { "$ref": "#/$defs/positiveDimension" },
+            "visualHeight": { "$ref": "#/$defs/positiveDimension" },
             "size": { "$ref": "#/$defs/positiveDimension" }
           }
         }
@@ -308,12 +471,17 @@
         "mediaId": { "$ref": "#/$defs/mediaId" },
         "visualOverrideId": { "$ref": "#/$defs/overrideId" },
         "audioOverrideId": { "$ref": "#/$defs/overrideId" },
+        "model3dId": { "$ref": "#/$defs/model3dId" },
         "shape": { "enum": ["circle", "rect", "diamond"] },
         "x": { "$ref": "#/$defs/coordinate" },
         "y": { "$ref": "#/$defs/coordinate" },
         "size": { "$ref": "#/$defs/positiveDimension" },
         "width": { "$ref": "#/$defs/positiveDimension" },
-        "height": { "$ref": "#/$defs/positiveDimension" }
+        "height": { "$ref": "#/$defs/positiveDimension" },
+        "elevation": { "$ref": "#/$defs/elevation" },
+        "collisionHeight": { "$ref": "#/$defs/positiveDimension" },
+        "visualHeight": { "$ref": "#/$defs/positiveDimension" },
+        "kineticResponse": { "$ref": "#/$defs/kineticResponse" }
       },
       "allOf": [{ "$ref": "#/$defs/shapeDimensions" }]
     },
@@ -336,12 +504,16 @@
         "mediaId": { "$ref": "#/$defs/mediaId" },
         "visualOverrideId": { "$ref": "#/$defs/overrideId" },
         "audioOverrideId": { "$ref": "#/$defs/overrideId" },
+        "model3dId": { "$ref": "#/$defs/model3dId" },
         "shape": { "enum": ["circle", "rect", "diamond"] },
         "x": { "$ref": "#/$defs/coordinate" },
         "y": { "$ref": "#/$defs/coordinate" },
         "size": { "$ref": "#/$defs/positiveDimension" },
         "width": { "$ref": "#/$defs/positiveDimension" },
         "height": { "$ref": "#/$defs/positiveDimension" },
+        "elevation": { "$ref": "#/$defs/elevation" },
+        "collisionHeight": { "$ref": "#/$defs/positiveDimension" },
+        "visualHeight": { "$ref": "#/$defs/positiveDimension" },
         "axis": { "enum": ["x", "y"] },
         "amplitude": { "type": "number", "minimum": 0, "maximum": 1000 },
         "periodMs": { "type": "integer", "minimum": 100, "maximum": 120000 },
@@ -370,11 +542,15 @@
         "mediaId": { "$ref": "#/$defs/mediaId" },
         "visualOverrideId": { "$ref": "#/$defs/overrideId" },
         "audioOverrideId": { "$ref": "#/$defs/overrideId" },
+        "model3dId": { "$ref": "#/$defs/model3dId" },
         "shape": { "enum": ["circle", "rect", "diamond"] },
         "x": { "$ref": "#/$defs/coordinate" },
         "y": { "$ref": "#/$defs/coordinate" },
         "width": { "$ref": "#/$defs/positiveDimension" },
         "height": { "$ref": "#/$defs/positiveDimension" },
+        "elevation": { "$ref": "#/$defs/elevation" },
+        "collisionHeight": { "$ref": "#/$defs/positiveDimension" },
+        "visualHeight": { "$ref": "#/$defs/positiveDimension" },
         "zone": { "$ref": "#/$defs/region" },
         "maxSpeed": { "type": "number", "exclusiveMinimum": 0, "maximum": 2000 },
         "acceleration": { "type": "number", "exclusiveMinimum": 0, "maximum": 10000 },
@@ -394,12 +570,16 @@
         "mediaId": { "$ref": "#/$defs/mediaId" },
         "visualOverrideId": { "$ref": "#/$defs/overrideId" },
         "audioOverrideId": { "$ref": "#/$defs/overrideId" },
+        "model3dId": { "$ref": "#/$defs/model3dId" },
         "shape": { "enum": ["circle", "rect", "diamond"] },
         "x": { "$ref": "#/$defs/coordinate" },
         "y": { "$ref": "#/$defs/coordinate" },
         "size": { "$ref": "#/$defs/positiveDimension" },
         "width": { "$ref": "#/$defs/positiveDimension" },
         "height": { "$ref": "#/$defs/positiveDimension" },
+        "elevation": { "$ref": "#/$defs/elevation" },
+        "collisionHeight": { "$ref": "#/$defs/positiveDimension" },
+        "visualHeight": { "$ref": "#/$defs/positiveDimension" },
         "behavior": {
           "oneOf": [
             { "$ref": "#/$defs/phaseBehavior" },
@@ -486,11 +666,15 @@
             "mediaId": { "$ref": "#/$defs/mediaId" },
             "visualOverrideId": { "$ref": "#/$defs/overrideId" },
             "audioOverrideId": { "$ref": "#/$defs/overrideId" },
+            "model3dId": { "$ref": "#/$defs/model3dId" },
             "type": { "const": "conveyor" },
             "x": { "$ref": "#/$defs/coordinate" },
             "y": { "$ref": "#/$defs/coordinate" },
             "width": { "$ref": "#/$defs/positiveDimension" },
             "height": { "$ref": "#/$defs/positiveDimension" },
+            "elevation": { "$ref": "#/$defs/elevation" },
+            "collisionHeight": { "$ref": "#/$defs/positiveDimension" },
+            "visualHeight": { "$ref": "#/$defs/positiveDimension" },
             "directionDegrees": { "type": "number" },
             "force": { "type": "number", "exclusiveMinimum": 0, "maximum": 5000 }
           }
@@ -504,10 +688,14 @@
             "mediaId": { "$ref": "#/$defs/mediaId" },
             "visualOverrideId": { "$ref": "#/$defs/overrideId" },
             "audioOverrideId": { "$ref": "#/$defs/overrideId" },
+            "model3dId": { "$ref": "#/$defs/model3dId" },
             "type": { "enum": ["repulsor", "attractor"] },
             "x": { "$ref": "#/$defs/coordinate" },
             "y": { "$ref": "#/$defs/coordinate" },
             "radius": { "$ref": "#/$defs/positiveDimension" },
+            "elevation": { "$ref": "#/$defs/elevation" },
+            "collisionHeight": { "$ref": "#/$defs/positiveDimension" },
+            "visualHeight": { "$ref": "#/$defs/positiveDimension" },
             "force": { "type": "number", "exclusiveMinimum": 0, "maximum": 5000 }
           }
         }
@@ -530,9 +718,13 @@
         "mediaId": { "$ref": "#/$defs/mediaId" },
         "visualOverrideId": { "$ref": "#/$defs/overrideId" },
         "audioOverrideId": { "$ref": "#/$defs/overrideId" },
+        "model3dId": { "$ref": "#/$defs/model3dId" },
         "x": { "$ref": "#/$defs/coordinate" },
         "y": { "$ref": "#/$defs/coordinate" },
         "size": { "$ref": "#/$defs/positiveDimension" },
+        "elevation": { "$ref": "#/$defs/elevation" },
+        "collisionHeight": { "$ref": "#/$defs/positiveDimension" },
+        "visualHeight": { "$ref": "#/$defs/positiveDimension" },
         "activation": { "enum": ["once", "timed", "toggle"] },
         "durationMs": { "type": "integer", "minimum": 0, "maximum": 120000 }
       }
@@ -546,9 +738,13 @@
         "mediaId": { "$ref": "#/$defs/mediaId" },
         "visualOverrideId": { "$ref": "#/$defs/overrideId" },
         "audioOverrideId": { "$ref": "#/$defs/overrideId" },
+        "model3dId": { "$ref": "#/$defs/model3dId" },
         "x": { "$ref": "#/$defs/coordinate" },
         "y": { "$ref": "#/$defs/coordinate" },
         "size": { "$ref": "#/$defs/positiveDimension" },
+        "elevation": { "$ref": "#/$defs/elevation" },
+        "collisionHeight": { "$ref": "#/$defs/positiveDimension" },
+        "visualHeight": { "$ref": "#/$defs/positiveDimension" },
         "value": { "type": "integer", "minimum": 1, "maximum": 1000 }
       }
     },
@@ -592,9 +788,13 @@
         "mediaId": { "$ref": "#/$defs/mediaId" },
         "visualOverrideId": { "$ref": "#/$defs/overrideId" },
         "audioOverrideId": { "$ref": "#/$defs/overrideId" },
+        "model3dId": { "$ref": "#/$defs/model3dId" },
         "x": { "$ref": "#/$defs/coordinate" },
         "y": { "$ref": "#/$defs/coordinate" },
-        "size": { "$ref": "#/$defs/positiveDimension" }
+        "size": { "$ref": "#/$defs/positiveDimension" },
+        "elevation": { "$ref": "#/$defs/elevation" },
+        "collisionHeight": { "$ref": "#/$defs/positiveDimension" },
+        "visualHeight": { "$ref": "#/$defs/positiveDimension" }
       }
     },
     "bonuses": {

@@ -8,6 +8,7 @@ import mediaRegistry from './mediaRegistry.json'
 import powerupConfig from './powerup.json'
 import soundRegistry from './soundRegistry.json'
 import themeConfig from './themeConfig.json'
+import threeMediaManifest from './generated/threeMediaManifest.json'
 import { validateConfiguration } from './validateConfig.js'
 
 const clone = (value) => structuredClone(value)
@@ -20,12 +21,76 @@ function validConfiguration() {
     themeConfig: clone(themeConfig),
     mediaRegistry: clone(mediaRegistry),
     soundRegistry: clone(soundRegistry),
+    threeMediaManifest: clone(threeMediaManifest),
   }
 }
 
 describe('V2 configuration validation', () => {
   it('accepts the complete campaign and registries', () => {
     expect(configurationStatus).toEqual({ valid: true, errors: [] })
+  })
+
+  it('accepts optional 3D properties on every authored object category', () => {
+    const configuration = validConfiguration()
+    const level = configuration.levels.find((item) => item.id === 'level-100')
+    level.terrainSurfaces = [
+      {
+        id: 'schema-terrain',
+        mediaId: 'obstacle-static-rect',
+        x: 800,
+        y: 450,
+        width: 120,
+        height: 120,
+        cornerElevations: {
+          northWest: 0,
+          northEast: 40,
+          southEast: 40,
+          southWest: 0,
+        },
+        friction: 100,
+        thickness: 10,
+      },
+    ]
+    const objects = [
+      level.token,
+      level.start,
+      level.mainTarget,
+      ...(level.ramps ?? []),
+      ...(level.manualObstacles ?? []),
+      ...(level.movingObstacles ?? []),
+      ...(level.trackingObstacles ?? []),
+      ...(level.dynamicObstacles ?? []),
+      ...(level.switches ?? []),
+      ...(level.forceFields ?? []),
+      ...(level.coins ?? []),
+      ...(level.bonuses?.targets ?? []),
+      ...(
+        configuration.levels.find((item) => item.switches?.length)?.switches ??
+        []
+      ),
+      ...(
+        configuration.levels.find((item) => item.bonuses?.targets?.length)
+          ?.bonuses.targets ?? []
+      ),
+    ]
+    for (const object of objects) {
+      object.elevation ??= 0
+      object.visualHeight ??= 60
+      object.collisionHeight ??= 1600
+    }
+
+    expect(validateConfiguration(configuration)).toEqual({ valid: true, errors: [] })
+  })
+
+  it('accepts registered 3D model choices and rejects unknown model IDs', () => {
+    const configuration = validConfiguration()
+    configuration.levels[0].token.model3dId = 'kenney-minigolf-ball-red'
+    expect(validateConfiguration(configuration)).toEqual({ valid: true, errors: [] })
+
+    configuration.levels[0].token.model3dId = 'kenney-minigolf-not-registered'
+    expect(validateConfiguration(configuration).errors).toContain(
+      'level-01: unknown model3dId "kenney-minigolf-not-registered"',
+    )
   })
 
   it('reports missing required level fields', () => {
@@ -93,5 +158,24 @@ describe('V2 configuration validation', () => {
     configuration.levels[0].coins[0].visualOverrideId =
       'public-media/images/coin.png'
     expect(validateConfiguration(configuration).valid).toBe(false)
+  })
+
+  it('rejects inconsistent kinetic shot goals', () => {
+    const configuration = validConfiguration()
+    configuration.levels[0].shotMechanic = clone(gameConfig.kineticShot)
+    configuration.levels[0].shotGoals = {
+      perfectShots: 5,
+      par: 4,
+      maximumShots: 3,
+    }
+
+    const result = validateConfiguration(configuration)
+
+    expect(result.errors).toContain(
+      'level-01: perfectShots cannot exceed shot par',
+    )
+    expect(result.errors).toContain(
+      'level-01: maximumShots cannot be below shot par',
+    )
   })
 })

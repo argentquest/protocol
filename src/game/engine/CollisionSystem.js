@@ -7,6 +7,7 @@ import {
 } from '../geometry/geometry.js'
 import { advanceTokenMotion } from './MovementSystem.js'
 import { resolveForceFieldAcceleration } from './ForceFieldSystem.js'
+import { terrainMotionAt } from './TerrainSystem.js'
 
 /**
  * Builds the token's authoritative collision shape at a candidate center.
@@ -18,7 +19,12 @@ import { resolveForceFieldAcceleration } from './ForceFieldSystem.js'
  */
 function currentToken(session, position) {
   return insetShape(
-    { ...session.level.token, x: position.x, y: position.y },
+    {
+      ...session.level.token,
+      x: position.x,
+      y: position.y,
+      elevation: session.token.elevation,
+    },
     session.collisions.tokenToleranceUnits,
   )
 }
@@ -75,16 +81,22 @@ export function advanceTokenWithCollisions(
     }
   }
   const previous = { ...session.token.position }
+  session.token.motionSegments = []
+  const forceAcceleration = resolveForceFieldAcceleration(
+    session.level.forceFields ?? [],
+    currentToken(session, session.token.position),
+  )
+  const terrainAcceleration = terrainMotionAt(session).acceleration
   const motion = advanceTokenMotion({
     position: session.token.position,
     velocity: session.token.velocity,
     input: session.input,
     movement: session.level.movement,
     stepMs,
-    externalAcceleration: resolveForceFieldAcceleration(
-      session.level.forceFields ?? [],
-      currentToken(session, session.token.position),
-    ),
+    externalAcceleration: {
+      x: forceAcceleration.x + terrainAcceleration.x,
+      y: forceAcceleration.y + terrainAcceleration.y,
+    },
   })
   const swept = sweepShape(
     session.token.lastSafePosition,
@@ -124,6 +136,7 @@ export function advanceTokenWithCollisions(
 
   session.token.previousPosition = previous
   session.token.position = motion.position
+  session.token.motionSegments = [{ from: previous, to: { ...motion.position } }]
   session.token.velocity = motion.velocity
   if (session.collisions.latched) {
     const rearmDistance =

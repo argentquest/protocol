@@ -20,7 +20,7 @@ test('keeps the home and gameplay composition stable at desktop viewports', asyn
   })
 
   await page.getByRole('button', { name: /begin calibration/i }).click()
-  const canvas = page.locator('.pixi-arena canvas')
+  const canvas = page.locator('.three-arena canvas')
   await expect(canvas).toHaveAttribute('data-engine-ready', 'true', {
     timeout: 30_000,
   })
@@ -33,5 +33,5 @@ test('keeps the home and gameplay composition stable at desktop viewports', asyn
   await page.setViewportSize({ width: 1920, height: 1080 })
   await expect(page.locator('.game-layout')).toBeVisible()
   await expect(page.locator('.hud-panel')).toBeVisible()
-  await expect(page.locator('.pixi-arena')).toBeVisible()
+  await expect(page.locator('.three-arena')).toBeVisible()
 })

@@ -66,6 +66,17 @@ Sizes express relative complexity and risk, not calendar estimates.
 | Sprint 18 | SQLite accounts and theme ownership | `DONE` |
 | Sprint 19 | Open-media texture proof theme | `DONE` |
 | Sprint 20 | Theme media library and player theme selection | `DONE` |
+| Sprint 27 | Kinetic shot mode prototype | `DONE` |
+| Sprint 28 | Persistent movement-mode selection and shot records | `DONE` |
+| Sprint 29 | Drag-release aiming and shot-goal rules | `DONE` |
+| Sprint 30 | Retire redundant Bank Shot Micro Protocol | `DONE` |
+| Sprint 31 | V3 Three.js and deterministic height foundation | `DONE` |
+| Sprint 32 | Visible-token mouse selection and camera controls | `DONE` |
+| Sprint 33 | Theme Workshop 3D height authoring | `DONE` |
+| Sprint 34 | Deterministic terrain surfaces | `DONE` |
+| Sprint 35 | Complete 3D minigolf media catalog | `DONE` |
+| Sprint 36 | Two modeled V3 test holes | `DONE` |
+| Sprint 37 | Round Green level 100 simplification | `DONE` |
 
 ---
 
@@ -779,6 +790,247 @@ challenges teach each behavior in isolation.
 
 ---
 
+## Sprint 27 — Kinetic shot mode prototype
+
+**Status:** `DONE`
+
+| ID | Task | Size | Status | Acceptance |
+|---|---|---:|---|---|
+| V2-S27-01 | Add kinetic configuration contracts | M | `DONE` | Optional shot configuration and per-static-obstacle rebound, bumper, and stop responses validate without changing existing levels. |
+| V2-S27-02 | Implement deterministic shot simulation | XL | `DONE` | Fixed-step launch intent, drag, multi-impact rebound, capped bumpers, exact stopping, distance, target sweeps, and events remain engine-owned. |
+| V2-S27-03 | Add kinetic input and Pixi feedback | L | `DONE` | Pointer and keyboard can aim and launch, steering locks in flight, and Pixi renders engine-owned aim state. |
+| V2-S27-04 | Prototype kinetic teaching content | M | `DONE` | A validated optional challenge proved rebound, bumper, arrestor, and Micro Protocol integration before the global mode shipped. The redundant challenge was retired in Sprint 30. |
+| V2-S27-05 | Complete release verification | L | `DONE` | Focused/full unit, config, lint, build, and the relevant WebGL browser journey pass. |
+
+### Sprint 27 exit criteria
+
+- Existing campaign and Micro Protocol levels retain their prior guided behavior.
+- Shot launches begin on a fixed update and cannot be steered in flight.
+- Rebounds do not count as penalty collisions, and low speed becomes exact rest.
+- Pointer and keyboard gameplay both expose an accessible aiming workflow.
+- Configuration, full unit, lint, production build, and relevant browser checks pass.
+
+---
+
+## Sprint 28 — Persistent movement-mode selection and shot records
+
+**Status:** `DONE`
+
+| ID | Task | Size | Status | Acceptance |
+|---|---|---:|---|---|
+| V2-S28-01 | Add the home movement toggle | M | `DONE` | The accessible Guided/Ricochet toggle persists in browser progress and controls subsequent play. |
+| V2-S28-02 | Project mode-specific sessions | M | `DONE` | Guided omits the optional shot mechanic; Ricochet retains authored settings or applies global defaults without mutating source levels. |
+| V2-S28-03 | Track completion shot records | M | `DONE` | Results persist current and best per-level shots, campaign-best total, and lifetime completed-run shots. |
+| V2-S28-04 | Cover selection and kinetic launch | M | `DONE` | Component, persistence, engine, and Chromium journeys verify the toggle, projections, records, and launch flow. |
+| V2-S28-05 | Complete release verification | M | `DONE` | Configuration, unit, lint, build, and relevant browser checks pass. |
+
+### Sprint 28 exit criteria
+
+- The player selects Guided or Ricochet once on the home screen, and that mode
+  controls every subsequently launched level.
+- Guided and Ricochet sessions share the authored layout without mutating it.
+- Ricochet completions expose current, per-level best, campaign-best, and
+  lifetime completed-run shot records.
+- Unit, lint, production build, and relevant Chromium checks pass.
+
+---
+
+## Sprint 29 — Drag-release aiming and shot-goal rules
+
+**Status:** `DONE`
+
+| ID | Task | Size | Status | Acceptance |
+|---|---|---:|---|---|
+| V2-S29-01 | Add drag-release kinetic input | M | `DONE` | Pointer press, pull, and release queues one inverse-direction launch on the next fixed update while keyboard aiming remains supported. |
+| V2-S29-02 | Add power and shot-goal HUD | M | `DONE` | Aim power, shots used/remaining, and authored par are accessible without frame-by-frame React transforms. |
+| V2-S29-03 | Add settled shot-budget resolution | M | `DONE` | The final permitted shot resolves target contact before a stopped unsuccessful attempt restarts. |
+| V2-S29-04 | Add ratings and rest recovery | M | `DONE` | Completions emit shot ratings, and reset surfaces recover to the last exact-rest checkpoint. |
+| V2-S29-05 | Complete release verification | M | `DONE` | Configuration, unit, lint, build, and relevant Chromium checks pass. |
+
+### Sprint 29 exit criteria
+
+- Pointer Ricochet play uses press, pull-back, release and exposes normalized power.
+- Keyboard Ricochet play retains Space/arrow controls.
+- Optional shot goals remain backward-compatible with every existing level.
+- Maximum-shot failure occurs only after the last shot stops without success.
+- Unit, lint, production build, and relevant Chromium checks pass.
+
+---
+
+## Sprint 30 — Retire redundant Bank Shot Micro Protocol
+
+**Status:** `DONE`
+
+| ID | Task | Size | Status | Acceptance |
+|---|---|---:|---|---|
+| V2-S30-01 | Remove duplicate kinetic-only protocol | S | `DONE` | The protocol registry and authored level no longer expose a redundant Bank Shot challenge. |
+| V2-S30-02 | Preserve global Ricochet mode | S | `DONE` | Campaign and remaining Micro Protocol sessions retain Ricochet physics, controls, goals, ratings, and shot records. |
+| V2-S30-03 | Align tests and documentation | S | `DONE` | Configuration coverage and product documentation describe Ricochet as a selected movement mode rather than a dedicated protocol. |
+
+### Sprint 30 exit criteria
+
+- The results screen offers only the seven mechanic-specific Micro Protocols.
+- No authored `level-208` or Bank Shot registry entry remains.
+- Guided and Ricochet mode behavior is otherwise unchanged.
+- Configuration, unit, lint, and production build checks pass.
+
+---
+
+## Sprint 31 — V3 Three.js and deterministic height foundation
+
+**Status:** `DONE`
+
+| ID | Task | Size | Status | Acceptance |
+|---|---|---:|---|---|
+| V3-S31-01 | Fork active work onto `v3` | S | `DONE` | V3 development is isolated on a named Git branch without discarding the active Ricochet worktree. |
+| V3-S31-02 | Replace gameplay presentation with Three.js | XL | `DONE` | One Three.js WebGL canvas renders existing levels through a fixed perspective camera and ground-plane raycasting. |
+| V3-S31-03 | Add deterministic vertical simulation | L | `DONE` | Optional gravity, vertical velocity, directional ramps, exact landing, and height-filtered collision remain fixed-step and engine-owned. |
+| V3-S31-04 | Integrate a licensed 3D media proof | M | `DONE` | A minimal Kenney Minigolf Kit GLB subset and its original CC0 license provide token, target, and ramp presentation with procedural fallback. |
+| V3-S31-05 | Author the first height-enabled campaign chamber | M | `DONE` | Level 100 includes a ramp and low wall while retaining a conservatively validated ground route. |
+| V3-S31-06 | Complete V3 foundation verification | L | `DONE` | Focused/full unit, configuration, lint, production build, and Chromium gameplay checks pass. |
+
+### Sprint 31 exit criteria
+
+- Existing level JSON remains schema-valid without migration.
+- A Three.js raycast maps canvas input back into the 1600 × 900 engine plane.
+- Level 100 visibly launches the token from a ramp and can clear a low obstacle.
+- Ricochet cannot accept another shot while the token remains airborne.
+- Third-party dependency and asset licenses are recorded.
+- Unit, configuration, lint, production build, and Chromium checks pass.
+
+---
+
+## Sprint 32 — Visible-token mouse selection and camera controls
+
+**Status:** `DONE`
+
+| ID | Task | Size | Status | Acceptance |
+|---|---|---:|---|---|
+| V3-S32-01 | Correct perspective token selection | M | `DONE` | Pointer-down raycasts against the visible 3D token mesh before steering continues on the ground plane. |
+| V3-S32-02 | Add bounded camera controls | M | `DONE` | Accessible buttons rotate, raise, lower, and reset the camera without mutating simulation state. |
+| V3-S32-03 | Restore visible pointer feedback | S | `DONE` | The Three.js canvas exposes a crosshair cursor instead of hiding the pointer. |
+| V3-S32-04 | Verify mouse and camera behavior | M | `DONE` | Renderer/input/component tests, lint, build, and a Chromium visible-ball/camera journey pass. |
+
+### Sprint 32 exit criteria
+
+- Clicking the rendered ball starts pointer control at every supported angle.
+- Camera elevation remains between 28 and 72 degrees.
+- Camera changes preserve world-to-screen and screen-to-world input mapping.
+- Focused automated checks and the production build pass.
+
+---
+
+## Sprint 33 — Theme Workshop 3D height authoring
+
+**Goal:** Let authors configure vertical placement, presentation, and gameplay
+contact for every selectable level object without changing existing flat levels.
+
+| ID | Task | Size | Status | Notes |
+|---|---|---:|---|---|
+| V3-S33-01 | Add selected-object height controls | M | `DONE` | The inspector selects the token or any placed entity and edits elevation, visible height, and collision height on the 10-unit grid. |
+| V3-S33-02 | Extend optional level contracts | M | `DONE` | Vertical fields remain optional across token, ramps, targets, hazards, switches, fields, and coins. |
+| V3-S33-03 | Honor authored vertical contact | M | `DONE` | Engine contact filters and Three.js meshes consume the authored properties while omitted values preserve V2 behavior. |
+| V3-S33-04 | Verify editor and runtime behavior | M | `DONE` | All 186 unit tests, configuration validation, lint, production build, and the Chromium Theme Workshop journey pass. |
+
+### Sprint 33 exit criteria
+
+- Every gameplay object available to the visual editor has explicit 3D height controls.
+- Top-down footprint `height` remains distinct from elevation, visual height, and collision height.
+- Empty vertical properties preserve existing level behavior and schema compatibility.
+- Focused automated checks and the production build pass.
+
+---
+
+## Sprint 34 — Deterministic terrain surfaces
+
+**Goal:** Make the ball aware of authored play-area height, slopes, stacked
+bridges, and surface material response without adding a third-party physics
+engine or changing flat levels.
+
+| ID | Task | Size | Status | Notes |
+|---|---|---:|---|---|
+| V3-S34-01 | Add terrain schema and sampler | L | `DONE` | Optional rectangular patches provide exact height, normal, downhill direction, friction, and stacked-layer samples. |
+| V3-S34-02 | Integrate fixed-step surface physics | XL | `DONE` | Ground support, ledge falls, landings, slope gravity, friction, stopping, and airborne drag remain deterministic. |
+| V3-S34-03 | Render and raycast authoritative terrain | L | `DONE` | Three.js uses the sampler's exact NW→SE triangles and pointer projection hits visible terrain. |
+| V3-S34-04 | Add Workshop terrain tools | L | `DONE` | Authors create platforms/bridges or slopes, resize footprints, and edit platform/corner elevations and friction. |
+| V3-S34-05 | Verify terrain behavior | L | `DONE` | All 194 unit tests, lint, production build, and the Chromium Theme Workshop creation/playtest journey pass. |
+
+### Sprint 34 exit criteria
+
+- Height and normal sampling exactly match rendered terrain triangles.
+- The ball follows connected slopes, falls from ledges, lands on the highest crossed layer, and can remain below a bridge.
+- Downhill acceleration, surface friction, exact rest, and airborne drag run only in the fixed-step engine.
+- Existing levels remain schema-valid and retain their flat behavior.
+- Full automated checks and the production build pass.
+
+---
+
+## Sprint 35 — Complete 3D minigolf media catalog
+
+**Goal:** Make the complete licensed Kenney Minigolf Kit available through one
+generated, schema-validated catalog without moving gameplay geometry into art.
+
+| ID | Task | Size | Status | Notes |
+|---|---|---:|---|---|
+| V3-S35-01 | Import complete licensed source set | M | `DONE` | All 126 supplied GLBs and matching PNG previews are stored with pack 3.1 provenance and its CC0 license. |
+| V3-S35-02 | Generate and validate a 3D manifest | M | `DONE` | One deterministic script emits public and source manifests with stable IDs, categories, roles, paths, and defaults. |
+| V3-S35-03 | Add backward-compatible model selection | M | `DONE` | Optional schema-backed `model3dId` values are validated for every renderable object while omissions retain old behavior. |
+| V3-S35-04 | Cache and apply catalog models | L | `DONE` | Three.js loads each unique GLB once, clones it per entity, and preserves procedural per-element fallback and JSON collision authority. |
+| V3-S35-05 | Expose the catalog in Theme Workshop | M | `DONE` | The object inspector groups all models by category, previews selections, and writes or clears `model3dId`. |
+| V3-S35-06 | Verify catalog integration | L | `DONE` | All 198 unit tests, lint/JSDoc/docs, the production build, the Theme Workshop journey, and all 17 Chromium gameplay journeys pass. |
+
+### Sprint 35 exit criteria
+
+- Every supplied GLB and preview is discoverable through a reproducible manifest.
+- Unknown model IDs fail configuration validation with actionable errors.
+- Repeated entities reuse a cached model load and failed models fall back independently.
+- The visual editor can select and preview any registered model without changing collision geometry.
+- Full automated checks and the production build pass.
+
+---
+
+## Sprint 36 — Two modeled V3 test holes
+
+**Goal:** Provide two immediately playable campaign-end courses that demonstrate
+the Kenney catalog, both movement modes, rebound response, and deterministic
+height gameplay.
+
+| ID | Task | Size | Status | Notes |
+|---|---|---:|---|---|
+| V3-S36-01 | Author flat model-gallery hole | M | `DONE` | Protocol 99 uses ball, start, hole, windmill, castle, gate, tunnel, and rebound-diamond models with Guided and Ricochet routes. |
+| V3-S36-02 | Author simple ramp-and-green hole | M | `DONE` | Protocol 100 uses one modeled ramp and a presentation-scaled circular green with a precise centered target. |
+| V3-S36-03 | Preserve campaign contracts | S | `DONE` | Both holes remain in the contiguous campaign; Hole 99 retains seeded diversity while the intentionally simple Hole 100 is obstacle-free. |
+| V3-S36-04 | Verify gameplay and rendering | M | `DONE` | All 200 unit tests, lint/JSDoc/docs, production build, campaign validation, and all 17 Chromium gameplay journeys pass. |
+
+### Sprint 36 exit criteria
+
+- Protocols 99 and 100 are selectable in Dev Playtest and render their assigned GLBs.
+- Both Guided and Ricochet use the same JSON geometry and shot goals.
+- Hole 100 launches from its straight ramp and lands before the centered round-green target.
+- Campaign determinism, placement, route solvability, browser tests, and build pass.
+
+---
+
+## Sprint 37 — Round Green level 100 simplification
+
+**Goal:** Reduce Protocol 100 to one clear ramp jump ending at a large circular
+green with a precise hole in its center.
+
+| ID | Task | Size | Status | Notes |
+|---|---|---:|---|---|
+| V3-S37-01 | Simplify the authored course | S | `DONE` | Level 100 now contains one straight ramp, no generated or manual hazards, and one centered round-green target. |
+| V3-S37-02 | Separate target visual and contact size | M | `DONE` | Optional `model3dSize` enlarges the round-hole GLB without enlarging authoritative target contact geometry. |
+| V3-S37-03 | Verify the redesigned hole | M | `DONE` | All 200 unit tests, campaign validation, lint/JSDoc/docs, production build, and focused Chromium selection/launch journeys pass. |
+
+### Sprint 37 exit criteria
+
+- Level 100 presents a straight run-up, one ramp, and a large round green.
+- The visible green is 440 world units wide while the centered target remains 70 units.
+- Both Guided and Ricochet can traverse the same deterministic course.
+- Full automated checks and the production build pass.
+
+---
+
 ## 4. Dependency sequence
 
 ```text
@@ -809,6 +1061,17 @@ Sprint 0: Decisions and branch
                                             → Sprint 24: Shared object media browser
                                               → Sprint 25: Safe personal media uploads
                                                 → Sprint 26: Irregular arenas and obstacle clarity
+                                                  → Sprint 27: Kinetic shot mode
+                                                    → Sprint 28: Movement-mode selection and shot records
+                                                      → Sprint 29: Drag-release aiming and shot goals
+                                                        → Sprint 30: Retire redundant Bank Shot protocol
+                                                          → Sprint 31: Three.js and deterministic height
+                                                            → Sprint 32: Mouse selection and camera controls
+                                                              → Sprint 33: Theme Workshop 3D height authoring
+                                                                → Sprint 34: Deterministic terrain surfaces
+                                                                  → Sprint 35: Complete 3D minigolf media catalog
+                                                                    → Sprint 36: Two modeled V3 test holes
+                                                                      → Sprint 37: Round Green level 100 simplification
 ```
 
 Some tasks may overlap after their contracts stabilize. For example, WAV asset

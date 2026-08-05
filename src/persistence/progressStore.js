@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'path-protocol.progress'
-const SCHEMA_VERSION = 3
+const SCHEMA_VERSION = 4
 const MAX_STORED_LEVEL = 200
 
 /**
@@ -51,6 +51,7 @@ export function createInitialProgress() {
       claimedCompletionRewards: {},
       claimedBonusRewards: {},
       claimedMicroTierRewards: {},
+      totalShotsLaunched: 0,
     },
     levels: {},
     microProtocols: {},
@@ -60,6 +61,7 @@ export function createInitialProgress() {
       effectsEnabled: true,
       effectsVolume: 0.55,
       reducedMotion: false,
+      controlMode: 'guided',
     },
   }
 }
@@ -72,7 +74,7 @@ export function createInitialProgress() {
  * @returns {unknown} Migrated value, or the original unsupported value.
  */
 function migrateProgress(value) {
-  if ([1, 2].includes(value?.schemaVersion)) {
+  if ([1, 2, 3].includes(value?.schemaVersion)) {
     return {
       ...value,
       schemaVersion: SCHEMA_VERSION,
@@ -130,6 +132,10 @@ function sanitizeProgress(savedValue) {
         typeof value.player.claimedMicroTierRewards === 'object'
           ? value.player.claimedMicroTierRewards
           : {},
+      totalShotsLaunched: Math.max(
+        0,
+        Number(value.player?.totalShotsLaunched) || 0,
+      ),
     },
     levels: value.levels && typeof value.levels === 'object' ? value.levels : {},
     microProtocols:
@@ -139,6 +145,8 @@ function sanitizeProgress(savedValue) {
     settings: {
       ...initial.settings,
       ...(value.settings ?? {}),
+      controlMode:
+        value.settings?.controlMode === 'kinetic' ? 'kinetic' : 'guided',
     },
   }
 }
@@ -205,6 +213,7 @@ export function recordLevelResult(progress, level, result, totalLevels = 100) {
     attempts: 0,
   }
   const improved = result.finalScore > previous.bestScore
+  const shotsTaken = Math.max(0, Math.floor(Number(result.shotsTaken) || 0))
   const levelRecord = {
     completed: true,
     bestScore: improved ? result.finalScore : previous.bestScore,
@@ -217,6 +226,13 @@ export function recordLevelResult(progress, level, result, totalLevels = 100) {
         ? result.actualDistance
         : Math.min(previous.bestDistance, result.actualDistance),
     attempts: previous.attempts + 1,
+    lastShots: shotsTaken,
+    bestShots:
+      shotsTaken > 0
+        ? previous.bestShots == null
+          ? shotsTaken
+          : Math.min(previous.bestShots, shotsTaken)
+        : previous.bestShots ?? null,
   }
   const completionAlreadyClaimed = Boolean(
     progress.player.claimedCompletionRewards[progressId],
@@ -247,6 +263,8 @@ export function recordLevelResult(progress, level, result, totalLevels = 100) {
           ? progress.player.claimedCompletionRewards
           : { ...progress.player.claimedCompletionRewards, [progressId]: true },
         claimedBonusRewards,
+        totalShotsLaunched:
+          (Number(progress.player.totalShotsLaunched) || 0) + shotsTaken,
       },
       levels: {
         ...progress.levels,
@@ -277,6 +295,7 @@ export function recordMicroProtocolResult(progress, protocol, result) {
     rewardClaimed: false,
   }
   const improved = result.finalScore > previous.bestScore
+  const shotsTaken = Math.max(0, Math.floor(Number(result.shotsTaken) || 0))
   const coinsEarned = previous.rewardClaimed
     ? 0
     : Number(protocol.rewardCoins) || 0
@@ -297,6 +316,8 @@ export function recordMicroProtocolResult(progress, protocol, result) {
           ...(progress.player.claimedMicroTierRewards ?? {}),
           [tierKey]: true,
         },
+        totalShotsLaunched:
+          (Number(progress.player.totalShotsLaunched) || 0) + shotsTaken,
       },
       microProtocols: {
         ...progress.microProtocols,
@@ -309,6 +330,13 @@ export function recordMicroProtocolResult(progress, protocol, result) {
               : Math.min(previous.bestTimeMs, result.elapsedMs),
           attempts: previous.attempts + 1,
           rewardClaimed: true,
+          lastShots: shotsTaken,
+          bestShots:
+            shotsTaken > 0
+              ? previous.bestShots == null
+                ? shotsTaken
+                : Math.min(previous.bestShots, shotsTaken)
+              : previous.bestShots ?? null,
         },
       },
     },
@@ -436,6 +464,20 @@ export function recordFailedAttempt(progress, levelId) {
 export function cumulativeScore(progress) {
   return Object.values(progress.levels).reduce(
     (total, level) => total + (Number(level.bestScore) || 0),
+    0,
+  )
+}
+
+/**
+ * Sums the fewest recorded kinetic shots for every completed campaign level.
+ *
+ * @pure
+ * @param {PlayerProgress} progress Current progress.
+ * @returns {number} Campaign-best shot total across completed kinetic levels.
+ */
+export function cumulativeShots(progress) {
+  return Object.values(progress.levels).reduce(
+    (total, level) => total + (Number(level.bestShots) || 0),
     0,
   )
 }

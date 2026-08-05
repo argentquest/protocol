@@ -24,7 +24,12 @@ describe('V2 input adapters', () => {
     const state = inputState()
     const onActivate = vi.fn()
     const onRelease = vi.fn()
-    const controller = createInputController(state, { onActivate, onRelease })
+    const onDirection = vi.fn()
+    const controller = createInputController(state, {
+      onActivate,
+      onRelease,
+      onDirection,
+    })
 
     controller.keyDown(' ', false)
     controller.keyDown('ArrowRight')
@@ -38,7 +43,14 @@ describe('V2 input adapters', () => {
     expect(state.active).toBe(false)
     expect(state.directions.size).toBe(0)
     expect(onActivate).toHaveBeenCalledWith('keyboard')
-    expect(onRelease).toHaveBeenCalledWith('keyboard-toggle')
+    expect(onDirection).toHaveBeenCalledWith(new Set(['ArrowDown']))
+    expect(onRelease).toHaveBeenCalledWith(
+      'keyboard-toggle',
+      expect.objectContaining({
+        mode: 'keyboard',
+        directions: new Set(['ArrowDown']),
+      }),
+    )
   })
 
   it('maps restart and numbered powers without activating movement', () => {
@@ -128,6 +140,45 @@ describe('V2 input adapters', () => {
     expect(onRelease).toHaveBeenCalledWith(
       { x: 60, y: 45 },
       'pointer-toggle',
+      expect.any(Event),
+    )
+    expect(active).toBe(false)
+  })
+
+  it('commits drag-release pointer input on pointer up when configured', () => {
+    const element = new EventTarget()
+    let active = false
+    const onRelease = vi.fn(() => {
+      active = false
+    })
+    const detach = attachPointerInput({
+      element,
+      toWorld: ({ x, y }) => ({ x, y }),
+      onPress: () => {
+        active = true
+        return true
+      },
+      onMove: vi.fn(),
+      onRelease,
+      onInterrupt: vi.fn(),
+      isActive: () => active,
+      releaseOnPointerUp: () => true,
+    })
+
+    element.dispatchEvent(
+      eventWith('pointerdown', { pointerId: 2, clientX: 40, clientY: 50 }),
+    )
+    element.dispatchEvent(
+      eventWith('pointermove', { pointerId: 2, clientX: 10, clientY: 50 }),
+    )
+    element.dispatchEvent(
+      eventWith('pointerup', { pointerId: 2, clientX: 10, clientY: 50 }),
+    )
+    detach()
+
+    expect(onRelease).toHaveBeenCalledWith(
+      { x: 10, y: 50 },
+      'pointer-release',
       expect.any(Event),
     )
     expect(active).toBe(false)

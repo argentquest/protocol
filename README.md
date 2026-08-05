@@ -1,7 +1,7 @@
 # Path Protocol
 
 [![Status: Playable](https://img.shields.io/badge/status-playable-36d7ff)](https://app.inkandquill.io/protocol/)
-[![Renderer: PixiJS WebGL](https://img.shields.io/badge/renderer-PixiJS%20WebGL-8b5cf6)](https://pixijs.com/)
+[![Renderer: Three.js WebGL](https://img.shields.io/badge/renderer-Three.js%20WebGL-8b5cf6)](https://threejs.org/)
 [![Tests: Vitest + Playwright](https://img.shields.io/badge/tests-Vitest%20%2B%20Playwright-22c55e)](#testing)
 
 Path Protocol is a 100-level desktop browser precision game. The player guides a
@@ -41,6 +41,10 @@ individual processes can also be run with `npm run dev:frontend` and
 
 The local server enables **Dev mode** by default so all 100 levels are available
 for playtesting. The home-screen toggle restores normal progression.
+Protocols **99 — Kenney Test Hole 1** and **100 — Round Green** are the V3 model
+showcases. Hole 1 demonstrates flat Guided/Ricochet play and modeled bank
+obstacles. Round Green is a deliberately simple finishing hole with one straight
+ramp and a large circular green whose precise target sits in the middle.
 
 Create and preview a production build:
 
@@ -85,6 +89,12 @@ collection sounds for 10-point and 50-point coins without changing their base
 coin type. The server copies each choice into the owned theme and the level
 stores only the generated override ID.
 
+For V3 presentation, the same inspector exposes all 126 licensed Kenney
+Minigolf Kit GLB models in a categorized catalog with image previews. An
+optional `model3dId` selects a model for any renderable entity while JSON keeps
+sole ownership of collision geometry, elevation, and terrain. Model loads are
+cached and each entity falls back independently to procedural geometry.
+
 On the level grid, select a dimensioned object and drag its edge or corner
 handles to resize its authoritative collision geometry in 10-unit increments.
 Right-click an object (or press Shift+F10) for separate image, sound, and
@@ -121,21 +131,23 @@ Markdown source.
 
 ## Architecture Overview
 
-Path Protocol V2 uses:
+Path Protocol V3 uses:
 
 - React 19 for screens, menus, dialogs, HUD, settings, and the Power Lab.
-- PixiJS with WebGL only for the real-time arena.
-- One imperative Pixi canvas mounted by React.
+- Three.js with WebGL for the perspective 3D arena.
+- One imperative Three.js canvas mounted by React.
 - A framework-neutral fixed 60 Hz game engine.
-- External SVG media loaded initially as reusable Pixi vector graphics.
+- Optional engine-owned elevation, gravity, ramps, height-aware collision, and
+  deterministic terrain surfaces with slopes, bridges, friction, and landing.
+- A generated 126-model GLB catalog with per-entity selection, cached loading,
+  and procedural geometry fallback.
 - Howler.js for effects and looping ambience.
 - WAV audio masters with WebM preferred and MP3 fallback delivery.
 - JSON Schema-validated levels, media, themes, audio, and powers.
 - Browser-local versioned progress storage.
 - Express APIs, SQLite accounts/sessions, and filesystem-backed theme packages.
-- A mixed Pixi visual cache supporting validated SVG defaults and optional PNG
-  texture overrides. The active Celestial Foundry proof theme demonstrates 29
-  open-licensed texture replacements.
+- The existing V2 SVG/PNG theme pipeline remains available alongside the
+  built-in V3 GLB catalog; owned theme GLB uploads remain future work.
 
 ```text
 React screens and HUD
@@ -143,19 +155,20 @@ React screens and HUD
         ▼
 Framework-neutral fixed 60 Hz game engine
         │ stable session transforms / logical events
-        ├──────────────► PixiJS WebGL renderer
+        ├──────────────► Three.js WebGL renderer
         └──────────────► Howler.js audio manager
 ```
 
 See:
 
+- [`architecturev3.md`](architecturev3.md) for the active V3 source of truth.
 - [`architecturev2.md`](architecturev2.md) for the V2 source of truth.
 - [`sprintv2.md`](sprintv2.md) for live implementation status.
 - [`AGENTS.md`](AGENTS.md) for repository contribution rules.
 
 The older [`architecture.md`](architecture.md) and [`sprints.md`](sprints.md)
-files describe the V1 implementation and remain historical references while V2
-is built.
+files describe the V1 implementation. V2 is now the compatibility baseline for
+the active V3 branch.
 
 ## Requirements
 
@@ -211,10 +224,28 @@ score; collisions apply penalties and the third collision restarts the level.
 
 | Input | Support | Controls |
 | --- | --- | --- |
-| Mouse or trackpad | Supported | Click the token to start, move the pointer to steer, and click again to stop. |
-| Keyboard | Supported | `Space` toggles play, arrow keys steer, number keys activate powers, and `R` restarts. |
+| Mouse or trackpad | Supported | Guided: click to toggle steering. Ricochet: press the stopped token, pull backward, and release to launch. |
+| Keyboard | Supported | Guided: `Space` toggles play and arrows steer. Ricochet: `Space` starts/commits an arrow-key aim. `R` restarts. |
 | Touch | Not supported | Desktop precision gameplay is the current product scope. |
 | Gamepad | Not supported | No gamepad mapping has been approved or implemented. |
+
+The arena's lower-right camera controls rotate left/right, raise/lower the
+view, or restore the default angle. Camera movement changes presentation only;
+pointer steering continues to raycast into the same deterministic world plane.
+
+The persistent **Movement mode** toggle on the home screen controls how every
+campaign level and Micro Protocol plays. **Guided** uses the original continuous
+steering on the same layout. In **Ricochet**, press the stopped token, pull
+opposite the desired direction, and release to launch. With the keyboard, press `Space`, hold
+an arrow direction, and press `Space` again. Steering is locked while the token
+is in flight; arena walls and obstacles ricochet the token, drag removes speed,
+and the engine sets velocity exactly to zero before the next shot can be aimed.
+Bumpers retain or add bounded speed, while arrestor surfaces stop immediately.
+Completed Ricochet runs record shots used, each level's fewest shots, the sum of
+campaign-best shots, and lifetime shots from completed runs.
+Optional shot goals add par, perfect, and maximum-shot targets. The last
+permitted shot always resolves completely before success or failure is decided.
+Reset surfaces recover the token at its most recent fully stopped position.
 
 The token accelerates toward input rather than snapping to it. The complete
 token geometry participates in obstacle and arena collision, and the actual
@@ -228,9 +259,9 @@ Dynamic obstacles add four deterministic decisions beyond static placement:
 - Contact switches open barriers once, temporarily, or as toggles.
 
 After completing a campaign chamber, the results screen offers optional Micro
-Protocols. These short challenges teach one dynamic behavior, keep separate
-records, grant only one-time rewards, and never affect campaign score or
-unlocks.
+Protocols. These short challenges teach one dynamic behavior in the selected
+movement mode, keep separate records, grant only one-time rewards, and never
+affect campaign score or unlocks.
 
 ## V2 configuration and media commands
 
@@ -403,10 +434,10 @@ tests/e2e/              Playwright browser journeys
 ## Performance & Profiling
 
 - The simulation advances at a fixed 60 Hz using a clamped accumulator.
-- Rendering runs independently through `requestAnimationFrame` and PixiJS.
+- Rendering runs independently through `requestAnimationFrame` and Three.js.
 - Resolved SVG sources are parsed once and reused as cached `GraphicsContext`
   objects.
-- Static collision geometry is precomputed and Pixi display objects are reused.
+- Static collision geometry is precomputed and Three.js scene objects are reused.
 - Trail and ghost samples are bounded to prevent unbounded memory growth.
 - The development HUD exposes rolling rendered FPS and collision diagnostics.
 - The target is 60 rendered frames per second on a representative current

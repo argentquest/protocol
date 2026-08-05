@@ -5,6 +5,7 @@ import {
   consumePowerup,
   createInitialProgress,
   cumulativeScore,
+  cumulativeShots,
   loadProgress,
   purchasePowerup,
   recordLevelResult,
@@ -80,12 +81,55 @@ describe('progressStore', () => {
     storage.setItem(STORAGE_KEY, JSON.stringify(legacy))
 
     const migrated = loadProgress(storage)
-    expect(migrated.schemaVersion).toBe(3)
+    expect(migrated.schemaVersion).toBe(4)
     expect(migrated.player.coins).toBe(17)
     expect(migrated.levels['level-01'].bestScore).toBe(8123)
     expect(migrated.settings.reducedMotion).toBe(true)
-    expect(JSON.parse(storage.getItem(STORAGE_KEY)).schemaVersion).toBe(3)
+    expect(JSON.parse(storage.getItem(STORAGE_KEY)).schemaVersion).toBe(4)
     expect(migrated.microProtocols).toEqual({})
+    expect(migrated.settings.controlMode).toBe('guided')
+    expect(migrated.player.totalShotsLaunched).toBe(0)
+  })
+
+  it('persists movement mode and tracks current, best, and campaign shots', () => {
+    const storage = memoryStorage()
+    const initial = createInitialProgress()
+    initial.settings.controlMode = 'kinetic'
+    saveProgress(initial, storage)
+    expect(loadProgress(storage).settings.controlMode).toBe('kinetic')
+
+    const level = { id: 'level-01', number: 1 }
+    const first = recordLevelResult(initial, level, {
+      finalScore: 700,
+      elapsedMs: 5000,
+      actualDistance: 800,
+      shotsTaken: 5,
+    }).progress
+    const slower = recordLevelResult(first, level, {
+      finalScore: 650,
+      elapsedMs: 5200,
+      actualDistance: 820,
+      shotsTaken: 7,
+    }).progress
+    const better = recordLevelResult(slower, level, {
+      finalScore: 750,
+      elapsedMs: 4800,
+      actualDistance: 760,
+      shotsTaken: 3,
+    }).progress
+    const guidedReplay = recordLevelResult(better, level, {
+      finalScore: 800,
+      elapsedMs: 4700,
+      actualDistance: 740,
+      shotsTaken: 0,
+    }).progress
+
+    expect(guidedReplay.levels['level-01']).toMatchObject({
+      lastShots: 0,
+      bestShots: 3,
+    })
+    expect(guidedReplay.player.totalShotsLaunched).toBe(15)
+    expect(cumulativeShots(guidedReplay)).toBe(3)
   })
 
   it('collects each configured course coin only once', () => {

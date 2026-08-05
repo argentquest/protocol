@@ -9,6 +9,7 @@
  * @param {Function} options.onRelease Toggle-release callback.
  * @param {Function} options.onInterrupt Cancellation callback.
  * @param {() => boolean} [options.isActive] Active-attempt accessor.
+ * @param {() => boolean} [options.releaseOnPointerUp] Whether release commits on pointer-up.
  * @returns {() => void} Listener cleanup function.
  */
 export function attachPointerInput({
@@ -19,6 +20,7 @@ export function attachPointerInput({
   onRelease,
   onInterrupt,
   isActive = () => false,
+  releaseOnPointerUp = () => false,
 }) {
   /** @param {PointerEvent} event Browser pointer event. @returns {{x:number,y:number}} Logical world point. */
   const pointFor = (event) => toWorld({ x: event.clientX, y: event.clientY })
@@ -31,12 +33,20 @@ export function attachPointerInput({
       return
     }
     if (!onPress(worldPoint, event)) return
+    if (releaseOnPointerUp()) element.setPointerCapture?.(event.pointerId)
     event.preventDefault()
   }
   /** @param {PointerEvent} event Browser pointer-move event. @returns {void} */
   const pointerMove = (event) => {
     if (!isActive()) return
     onMove(pointFor(event), event)
+    event.preventDefault()
+  }
+  /** @param {PointerEvent} event Browser pointer-up event. @returns {void} */
+  const pointerUp = (event) => {
+    if (!isActive() || !releaseOnPointerUp()) return
+    onRelease(pointFor(event), 'pointer-release', event)
+    element.releasePointerCapture?.(event.pointerId)
     event.preventDefault()
   }
   /** @param {PointerEvent} event Browser pointer cancellation event. @returns {void} */
@@ -48,11 +58,13 @@ export function attachPointerInput({
 
   element.addEventListener('pointerdown', pointerDown)
   element.addEventListener('pointermove', pointerMove)
+  element.addEventListener('pointerup', pointerUp)
   element.addEventListener('pointercancel', pointerCancel)
 
   return () => {
     element.removeEventListener('pointerdown', pointerDown)
     element.removeEventListener('pointermove', pointerMove)
+    element.removeEventListener('pointerup', pointerUp)
     element.removeEventListener('pointercancel', pointerCancel)
   }
 }

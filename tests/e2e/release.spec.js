@@ -10,7 +10,7 @@ async function boot(page, url = '/') {
 }
 
 async function readyCanvas(page) {
-  const canvas = page.locator('.pixi-arena canvas')
+  const canvas = page.locator('.three-arena canvas')
   await expect(canvas).toHaveAttribute('data-engine-ready', 'true', {
     timeout: 30_000,
   })

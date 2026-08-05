@@ -29,6 +29,58 @@ export function snapToEditorGrid(value) {
 }
 
 /**
+ * Sets or clears one schema-backed vertical property on an editor entity.
+ * Values are expressed in logical world units and snapped to the editor grid.
+ *
+ * @pure
+ * @param {object} entity Editable entity configuration.
+ * @param {'elevation'|'visualHeight'|'collisionHeight'} property Vertical property.
+ * @param {number|string} value New value, or an empty string to restore the default.
+ * @returns {object} Entity with the updated optional vertical property.
+ */
+export function setEntityVerticalProperty(entity, property, value) {
+  if (!['elevation', 'visualHeight', 'collisionHeight'].includes(property)) {
+    return entity
+  }
+  const next = { ...entity }
+  if (value === '') {
+    delete next[property]
+    return next
+  }
+  const number = Number(value)
+  if (!Number.isFinite(number)) return entity
+  const minimum = property === 'elevation' ? 0 : GRID_SIZE
+  next[property] = clamp(snapToEditorGrid(number), minimum, property === 'elevation' ? 2000 : 1600)
+  return next
+}
+
+/**
+ * Sets one or all terrain corner elevations on the 10-unit authoring grid.
+ *
+ * @pure
+ * @param {object} surface Terrain surface configuration.
+ * @param {'all'|'northWest'|'northEast'|'southEast'|'southWest'} corner Corner selector.
+ * @param {number|string} value Elevation in logical world units.
+ * @returns {object} Surface with updated corner elevations.
+ */
+export function setTerrainCornerElevation(surface, corner, value) {
+  const elevation = Number(value)
+  if (!Number.isFinite(elevation)) return surface
+  const snapped = clamp(snapToEditorGrid(elevation), 0, 2000)
+  const cornerElevations = { ...surface.cornerElevations }
+  if (corner === 'all') {
+    for (const key of ['northWest', 'northEast', 'southEast', 'southWest']) {
+      cornerElevations[key] = snapped
+    }
+  } else if (Object.hasOwn(cornerElevations, corner)) {
+    cornerElevations[corner] = snapped
+  } else {
+    return surface
+  }
+  return { ...surface, cornerElevations }
+}
+
+/**
  * Converts an arena to a schema-ready boundary of the requested shape.
  *
  * @pure

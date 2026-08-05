@@ -7,7 +7,7 @@ async function boot(page, url = '/') {
 }
 
 async function readyCanvas(page) {
-  const canvas = page.locator('.pixi-arena canvas')
+  const canvas = page.locator('.three-arena canvas')
   await expect(canvas).toHaveAttribute('data-engine-ready', 'true', {
     timeout: 30_000,
   })
@@ -17,10 +17,13 @@ async function readyCanvas(page) {
 
 async function worldToPage(canvas, point) {
   const box = await canvas.boundingBox()
-  const scale = Math.min(box.width / 1600, box.height / 900)
+  const projected = await canvas.evaluate(
+    (element, worldPoint) => element.__pathProtocolWorldToScreen(worldPoint),
+    point,
+  )
   return {
-    x: box.x + (box.width - 1600 * scale) / 2 + point.x * scale,
-    y: box.y + (box.height - 900 * scale) / 2 + point.y * scale,
+    x: box.x + projected.x,
+    y: box.y + projected.y,
   }
 }
 
@@ -51,6 +54,29 @@ test('navigates from the home screen to the first playable level', async ({ page
   await expect(page.getByText(/token linked/i)).toBeVisible()
 })
 
+test('selects the visible 3D ball and changes the camera angle', async ({
+  page,
+}) => {
+  await boot(page, '/?dev=1')
+  await page.getByRole('button', { name: /begin calibration/i }).click()
+  const canvas = await readyCanvas(page)
+  const visibleBall = await worldToPage(canvas, {
+    x: Number(await canvas.getAttribute('data-token-x')),
+    y: Number(await canvas.getAttribute('data-token-y')),
+    elevation: 23,
+  })
+  await page.mouse.click(visibleBall.x, visibleBall.y)
+  await expect(page.getByText(/token linked/i)).toBeVisible()
+
+  await page.getByRole('button', { name: /rotate camera right/i }).click()
+  await expect(canvas).toHaveAttribute('data-camera-azimuth', '15')
+  await page.getByRole('button', { name: /raise camera/i }).click()
+  await expect(canvas).toHaveAttribute('data-camera-elevation', '56.2')
+  await page.getByRole('button', { name: /reset camera angle/i }).click()
+  await expect(canvas).toHaveAttribute('data-camera-azimuth', '0')
+  await expect(canvas).toHaveAttribute('data-camera-elevation', '48.2')
+})
+
 test('opens the field guide and settings', async ({ page }) => {
   await boot(page)
   await page.getByRole('button', { name: /field guide/i }).click()
@@ -66,7 +92,11 @@ test('counts a continuous invalid position as one collision', async ({ page }) =
   await canvas.evaluate((element) => {
     window.__pathProtocolReleaseCanvas = element
   })
-  const token = await dataPoint(canvas, 'token')
+  const token = await worldToPage(canvas, {
+    x: Number(await canvas.getAttribute('data-token-x')),
+    y: Number(await canvas.getAttribute('data-token-y')),
+    elevation: 23,
+  })
   const outsideArena = await worldToPage(canvas, {
     x: 5,
     y: Number(await canvas.getAttribute('data-token-y')),
@@ -82,7 +112,7 @@ test('counts a continuous invalid position as one collision', async ({ page }) =
       (element) => element === window.__pathProtocolReleaseCanvas,
     ),
   ).toBe(true)
-  await expect(page.locator('.pixi-arena canvas')).toHaveCount(1)
+  await expect(page.locator('.three-arena canvas')).toHaveCount(1)
 })
 
 test('keeps the play area mounted when collecting a course coin', async ({ page }) => {
@@ -131,7 +161,7 @@ test('keeps the play area mounted when collecting a course coin', async ({ page 
       (element) => element === window.__pathProtocolCoinCanvas,
     ),
   ).toBe(true)
-  await expect(page.locator('.pixi-arena canvas')).toHaveCount(1)
+  await expect(page.locator('.three-arena canvas')).toHaveCount(1)
   await expect(canvas).toHaveAttribute('data-engine-ready', 'true')
   await page.mouse.click(token.x, token.y)
 })
@@ -160,7 +190,7 @@ test('manually restarts an active attempt with the restart shortcut', async ({ p
 test('opens any level with route diagnostics in developer playtest mode', async ({ page }) => {
   await boot(page, '/?dev=1')
   await page.getByRole('button', { name: /select level/i }).click()
-  const finalLevel = page.getByRole('button', { name: /100.*convergence 10/i })
+  const finalLevel = page.getByRole('button', { name: /100.*round green/i })
   await expect(finalLevel).toBeEnabled()
   await finalLevel.click()
   const canvas = await readyCanvas(page)
@@ -172,10 +202,42 @@ test('opens any level with route diagnostics in developer playtest mode', async 
   await expect(
     page
       .getByRole('application', {
-        name: /convergence 09 obstacle course/i,
+        name: /kenney test hole 1 obstacle course/i,
       })
       .first(),
   ).toBeVisible()
+})
+
+test('launches into deterministic height from the level 100 ramp', async ({
+  page,
+}) => {
+  await boot(page, '/?dev=1')
+  await page.getByRole('button', { name: 'Ricochet' }).click()
+  await page.getByRole('button', { name: /select level/i }).click()
+  await page.getByRole('button', { name: /100.*round green/i }).click()
+  const canvas = await readyCanvas(page)
+  await expect(canvas).toHaveAttribute('data-renderer', 'three-webgl')
+  const token = await worldToPage(canvas, {
+    x: Number(await canvas.getAttribute('data-token-x')),
+    y: Number(await canvas.getAttribute('data-token-y')),
+    elevation: 23,
+  })
+  await page.mouse.move(token.x, token.y)
+  await page.mouse.down()
+  await page.mouse.move(token.x - 240, token.y, { steps: 8 })
+  await page.mouse.up()
+  await expect(canvas).toHaveAttribute('data-shots-taken', '1')
+  await expect(canvas).toHaveAttribute('data-phase', 'active-main')
+  await expect
+    .poll(async () => Number(await canvas.getAttribute('data-token-elevation')), {
+      timeout: 5000,
+    })
+    .toBeGreaterThan(0)
+  await expect
+    .poll(async () => Number(await canvas.getAttribute('data-token-x')), {
+      timeout: 5000,
+    })
+    .toBeGreaterThan(300)
 })
 
 test('toggles developer playtest mode from the home screen', async ({ page }) => {
@@ -188,7 +250,7 @@ test('toggles developer playtest mode from the home screen', async ({ page }) =>
 
   await page.getByRole('button', { name: /select level/i }).click()
   await expect(
-    page.getByRole('button', { name: /100.*convergence 10/i }),
+    page.getByRole('button', { name: /100.*round green/i }),
   ).toBeEnabled()
 })
 
@@ -205,7 +267,7 @@ test('keeps moving obstacles animated while mouse control is active', async ({ p
   await page.mouse.click(token.x, token.y)
 })
 
-test('offers a Micro Protocol after completion and loads it in one Pixi canvas', async ({
+test('offers a Micro Protocol after completion and loads it in one Three.js canvas', async ({
   page,
 }) => {
   await boot(page, '/?dev=1')
@@ -241,12 +303,64 @@ test('offers a Micro Protocol after completion and loads it in one Pixi canvas',
   canvas = await readyCanvas(page)
 
   await expect(page.getByText(/micro protocol.*timing/i)).toBeVisible()
-  await expect(page.locator('.pixi-arena canvas')).toHaveCount(1)
+  await expect(page.locator('.three-arena canvas')).toHaveCount(1)
   const dynamicStates = JSON.parse(
     await canvas.getAttribute('data-dynamic-states'),
   )
   expect(dynamicStates.length).toBeGreaterThan(0)
   expect(dynamicStates.every((item) => item[0].startsWith('phase-'))).toBe(true)
+})
+
+test('uses the persistent home toggle for kinetic campaign movement', async ({
+  page,
+}) => {
+  await boot(page, '/?dev=1')
+  const guided = page.getByRole('button', { name: 'Guided' })
+  const ricochet = page.getByRole('button', { name: 'Ricochet' })
+  await expect(guided).toHaveAttribute('aria-pressed', 'true')
+  await ricochet.click()
+  await expect(ricochet).toHaveAttribute('aria-pressed', 'true')
+
+  await page.getByRole('button', { name: /begin calibration/i }).click()
+  const canvas = await readyCanvas(page)
+  await expect(page.getByText('Shots launched')).toBeVisible()
+  const shotStart = await dataPoint(canvas, 'token')
+  const startWorldX = Number(await canvas.getAttribute('data-token-x'))
+
+  await page.mouse.move(shotStart.x, shotStart.y)
+  await page.mouse.down()
+  await expect(canvas).toHaveAttribute('data-kinetic-phase', 'aiming')
+  await page.mouse.move(shotStart.x - 120, shotStart.y + 20)
+  await expect
+    .poll(async () => Number(await canvas.getAttribute('data-shot-power')))
+    .toBeGreaterThan(0)
+  await expect
+    .poll(async () =>
+      Number(
+        await page
+          .getByRole('progressbar', { name: /shot power/i })
+          .getAttribute('aria-valuenow'),
+      ),
+    )
+    .toBeGreaterThan(0)
+  await page.mouse.up()
+
+  await expect(canvas).toHaveAttribute('data-phase', 'active-main')
+  await expect(canvas).toHaveAttribute('data-shots-taken', '1')
+  await expect
+    .poll(async () => Number(await canvas.getAttribute('data-token-x')))
+    .toBeGreaterThan(startWorldX)
+
+  await page.keyboard.press('r')
+  await expect(canvas).toHaveAttribute('data-phase', 'ready')
+  await expect(canvas).toHaveAttribute('data-shots-taken', '0')
+  await page.keyboard.press('Space')
+  await expect(canvas).toHaveAttribute('data-kinetic-phase', 'aiming')
+  await page.keyboard.down('ArrowRight')
+  await page.keyboard.press('Space')
+  await page.keyboard.up('ArrowRight')
+  await expect(canvas).toHaveAttribute('data-phase', 'active-main')
+  await expect(canvas).toHaveAttribute('data-shots-taken', '1')
 })
 
 test('smooths token response instead of snapping to a fast mouse jump', async ({ page }) => {
@@ -255,14 +369,16 @@ test('smooths token response instead of snapping to a fast mouse jump', async ({
   const canvas = await readyCanvas(page)
   const start = await dataPoint(canvas, 'token')
   const startWorldX = Number(await canvas.getAttribute('data-token-x'))
-  const canvasBox = await canvas.boundingBox()
-  const worldScale = Math.min(canvasBox.width / 1600, canvasBox.height / 900)
-  const desiredWorldX = startWorldX + 45 / worldScale
+  const desiredWorldX = startWorldX + 120
+  const desired = await worldToPage(canvas, {
+    x: desiredWorldX,
+    y: Number(await canvas.getAttribute('data-token-y')),
+  })
   await page.mouse.move(start.x, start.y)
   await page.mouse.down()
   await page.mouse.up()
   await expect(canvas).toHaveAttribute('data-phase', 'active-main')
-  await page.mouse.move(start.x + 45, start.y)
+  await page.mouse.move(desired.x, desired.y)
   await page.waitForTimeout(30)
   const shortlyAfter = Number(await canvas.getAttribute('data-token-x'))
   expect(shortlyAfter).toBeGreaterThan(startWorldX)
@@ -272,7 +388,7 @@ test('smooths token response instead of snapping to a fast mouse jump', async ({
   expect(Math.abs(settled - desiredWorldX)).toBeLessThan(
     Math.abs(shortlyAfter - desiredWorldX),
   )
-  await page.mouse.click(start.x + 45, start.y)
+  await page.mouse.click(desired.x, desired.y)
 })
 
 test('toggles keyboard control with Space and steers with arrow keys', async ({ page }) => {

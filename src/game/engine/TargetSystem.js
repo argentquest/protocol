@@ -1,5 +1,7 @@
 import { shapesIntersect } from '../geometry/geometry.js'
 import { createSeededRandom } from '../generation/seededRandom.js'
+import { verticalRangesOverlap } from './VerticalMovementSystem.js'
+import { surfaceHeightAt } from './TerrainSystem.js'
 
 /**
  * Builds the authoritative inset token shape at its current center.
@@ -43,22 +45,38 @@ export function activeTarget(session, phase) {
 export function touchesActiveTarget(session, phase) {
   const target = activeTarget(session, phase)
   if (!target) return false
-  const from = session.token.previousPosition
-  const to = session.token.position
-  const travel = Math.hypot(to.x - from.x, to.y - from.y)
+  if (
+    session.vertical &&
+    !verticalRangesOverlap(
+      session.token.elevation,
+      session.level.token.collisionHeight ?? session.level.token.size,
+      {
+        ...target,
+        collisionHeight: target.collisionHeight ?? target.size,
+      },
+    )
+  ) {
+    return false
+  }
   const sampleDistance = Math.max(
     2,
     Math.min(session.level.token.width, session.level.token.height) / 4,
   )
-  const steps = Math.max(1, Math.ceil(travel / sampleDistance))
-  for (let step = 0; step <= steps; step += 1) {
-    const amount = step / steps
-    const token = {
-      ...tokenShape(session),
-      x: from.x + (to.x - from.x) * amount,
-      y: from.y + (to.y - from.y) * amount,
+  const segments = session.token.motionSegments?.length
+    ? session.token.motionSegments
+    : [{ from: session.token.previousPosition, to: session.token.position }]
+  for (const { from, to } of segments) {
+    const travel = Math.hypot(to.x - from.x, to.y - from.y)
+    const steps = Math.max(1, Math.ceil(travel / sampleDistance))
+    for (let step = 0; step <= steps; step += 1) {
+      const amount = step / steps
+      const token = {
+        ...tokenShape(session),
+        x: from.x + (to.x - from.x) * amount,
+        y: from.y + (to.y - from.y) * amount,
+      }
+      if (shapesIntersect(token, target)) return true
     }
-    if (shapesIntersect(token, target)) return true
   }
   return false
 }
@@ -76,7 +94,30 @@ export function checkpointAtTarget(session, target, isBonus) {
   session.token.position = { ...checkpoint }
   session.token.previousPosition = { ...checkpoint }
   session.token.lastSafePosition = { ...checkpoint }
+  session.token.lastRestPosition = { ...checkpoint }
   session.token.velocity = { x: 0, y: 0 }
+  const targetSurface = surfaceHeightAt(session.level, checkpoint)
+  session.token.elevation =
+    target.elevation ?? targetSurface.height
+  session.token.previousElevation = session.token.elevation
+  session.token.verticalVelocity = 0
+  if (session.vertical) {
+    session.vertical.grounded =
+      Math.abs(session.token.elevation - targetSurface.height) < 1e-7
+    session.vertical.surfaceId = session.vertical.grounded
+      ? targetSurface.id
+      : null
+  }
+  if (session.vertical) {
+    session.vertical.grounded = true
+    session.vertical.rampLatchId = null
+  }
+  session.token.motionSegments = []
+  if (session.kinetic) {
+    session.kinetic.phase = 'resting'
+    session.kinetic.launchRequested = false
+    session.kinetic.launchVelocity = null
+  }
   session.input.active = false
   session.input.mode = null
   session.input.directions.clear()

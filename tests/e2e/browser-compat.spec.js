@@ -6,7 +6,7 @@ test('starts WebGL gameplay and keyboard input in a supported desktop engine', a
   await page.goto('/')
   await page.getByRole('button', { name: /start game/i }).click()
   await page.getByRole('button', { name: /begin calibration/i }).click()
-  const canvas = page.locator('.pixi-arena canvas')
+  const canvas = page.locator('.three-arena canvas')
   await expect(canvas).toHaveAttribute('data-engine-ready', 'true', {
     timeout: 30_000,
   })

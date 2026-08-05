@@ -2,10 +2,10 @@
   "schemaVersion": 2,
   "id": "level-99",
   "number": 99,
-  "name": "Convergence 09",
-  "seed": "path-protocol-16x9-099-v2",
+  "name": "Kenney Test Hole 1",
+  "seed": "path-protocol-v3-kenney-hole-01",
   "difficulty": 10,
-  "briefing": "Tier 10: Convergence. Combine every protocol under tighter timing.",
+  "briefing": "Model gallery: play a direct Guided line or bank Ricochet shots around the center diamond.",
   "arena": {
     "shape": "rect",
     "mediaId": "arena-standard",
@@ -13,9 +13,10 @@
     "cornerRadius": 38
   },
   "token": {
-    "shape": "diamond",
+    "shape": "circle",
     "size": 40,
-    "mediaId": "token-diamond"
+    "mediaId": "token-circle",
+    "model3dId": "kenney-minigolf-ball-green"
   },
   "movement": {
     "maximumSpeed": 650,
@@ -23,26 +24,41 @@
     "deceleration": 2300,
     "keyboardSpeed": 450
   },
+  "shotMechanic": {
+    "inputStyle": "drag-release",
+    "minimumAimDistance": 12,
+    "minimumLaunchSpeed": 140,
+    "maximumLaunchSpeed": 760,
+    "aimDistanceForMaximumSpeed": 260,
+    "dragPerSecond": 280,
+    "airDragPerSecond": 35,
+    "stopSpeed": 24,
+    "restitution": 0.82,
+    "maximumImpactsPerStep": 6
+  },
+  "shotGoals": {
+    "par": 3,
+    "perfectShots": 2,
+    "maximumShots": 8
+  },
   "start": {
     "mode": "manual",
     "mediaId": "start-pad",
-    "x": 730,
-    "y": 483
+    "model3dId": "kenney-minigolf-start",
+    "x": 190,
+    "y": 450
   },
   "mainTarget": {
     "mode": "manual",
     "mediaId": "target-main",
-    "x": 1339,
-    "y": 749,
-    "size": 58
+    "model3dId": "kenney-minigolf-hole-round",
+    "x": 1410,
+    "y": 450,
+    "size": 76
   },
   "generation": {
-    "obstacleCount": 3,
-    "allowedShapes": [
-      "circle",
-      "rect",
-      "diamond"
-    ],
+    "obstacleCount": 1,
+    "allowedShapes": ["circle", "rect", "diamond"],
     "mediaByShape": {
       "circle": "obstacle-static-circle",
       "rect": "obstacle-static-rect",
@@ -55,221 +71,96 @@
   },
   "manualObstacles": [
     {
-      "id": "barrier-1",
+      "id": "center-bank",
+      "mediaId": "obstacle-static-diamond",
+      "model3dId": "kenney-minigolf-obstacle-diamond",
+      "shape": "diamond",
+      "x": 800,
+      "y": 450,
+      "size": 150,
+      "visualHeight": 90,
+      "kineticResponse": {
+        "type": "rebound",
+        "restitution": 0.9
+      }
+    },
+    {
+      "id": "north-windmill",
       "mediaId": "obstacle-static-circle",
+      "model3dId": "kenney-minigolf-windmill",
       "shape": "circle",
-      "x": 330,
-      "y": 353,
-      "width": 60,
-      "height": 60
+      "x": 700,
+      "y": 220,
+      "size": 180,
+      "visualHeight": 230
     },
     {
-      "id": "barrier-2",
+      "id": "south-castle",
       "mediaId": "obstacle-static-rect",
+      "model3dId": "kenney-minigolf-castle",
       "shape": "rect",
-      "x": 522,
-      "y": 198,
-      "width": 130,
-      "height": 171
+      "x": 700,
+      "y": 690,
+      "width": 200,
+      "height": 170,
+      "visualHeight": 190
     },
     {
-      "id": "barrier-3",
+      "id": "north-gate",
       "mediaId": "obstacle-static-rect",
+      "model3dId": "kenney-minigolf-structure-gate-wide",
       "shape": "rect",
-      "x": 952,
-      "y": 405,
-      "width": 122,
-      "height": 117
+      "x": 1110,
+      "y": 210,
+      "width": 230,
+      "height": 120,
+      "visualHeight": 150
     },
     {
-      "id": "barrier-4",
-      "mediaId": "obstacle-static-diamond",
-      "shape": "diamond",
-      "x": 308,
-      "y": 565,
-      "width": 96,
-      "height": 96
-    },
-    {
-      "id": "barrier-5",
-      "mediaId": "obstacle-static-diamond",
-      "shape": "diamond",
-      "x": 735,
-      "y": 258,
-      "width": 127,
-      "height": 127
-    }
-  ],
-  "movingObstacles": [
-    {
-      "id": "sweeper-1",
-      "mediaId": "obstacle-moving-circle",
-      "shape": "circle",
-      "x": 118,
-      "y": 685,
-      "size": 58,
-      "axis": "y",
-      "amplitude": 100,
-      "periodMs": 3955,
-      "phase": 4.36
-    },
-    {
-      "id": "sweeper-2",
-      "mediaId": "obstacle-moving-circle",
-      "shape": "circle",
-      "x": 1133,
-      "y": 582,
-      "size": 50,
-      "axis": "x",
-      "amplitude": 143,
-      "periodMs": 3994,
-      "phase": 4.553
-    }
-  ],
-  "trackingObstacles": [
-    {
-      "id": "tracker-1",
-      "mediaId": "obstacle-tracking-circle",
-      "shape": "circle",
-      "x": 1188,
-      "y": 415,
-      "width": 42,
-      "height": 42,
-      "zone": {
-        "x": 1064,
-        "y": 305,
-        "width": 249,
-        "height": 221
-      },
-      "maxSpeed": 116,
-      "acceleration": 207,
-      "turnRateDegreesPerSecond": 110
-    },
-    {
-      "id": "tracker-2",
-      "mediaId": "obstacle-tracking-circle",
-      "shape": "circle",
-      "x": 479,
-      "y": 684,
-      "width": 40,
-      "height": 40,
-      "zone": {
-        "x": 355,
-        "y": 580,
-        "width": 249,
-        "height": 208
-      },
-      "maxSpeed": 130,
-      "acceleration": 194,
-      "turnRateDegreesPerSecond": 124
-    }
-  ],
-  "dynamicObstacles": [
-    {
-      "id": "pulse-1",
-      "mediaId": "obstacle-pulse-block",
+      "id": "south-tunnel",
+      "mediaId": "obstacle-static-rect",
+      "model3dId": "kenney-minigolf-tunnel-wide",
       "shape": "rect",
-      "x": 957,
-      "y": 189,
-      "width": 134,
-      "height": 43,
-      "behavior": {
-        "type": "pulse",
-        "minScale": 0.52,
-        "maxScale": 1.17,
-        "periodMs": 2693,
-        "phase": -0.971
-      }
-    },
-    {
-      "id": "switch-barrier-1",
-      "mediaId": "obstacle-switch-barrier",
-      "shape": "rect",
-      "x": 1464,
-      "y": 245,
-      "width": 34,
-      "height": 221,
-      "behavior": {
-        "type": "switch",
-        "switchId": "switch-1",
-        "initiallySolid": true
-      }
-    },
-    {
-      "id": "spinner-1",
-      "mediaId": "obstacle-spinner",
-      "shape": "rect",
-      "x": 1208,
-      "y": 216,
-      "width": 220,
-      "height": 28,
-      "behavior": {
-        "type": "rotate",
-        "speedDegreesPerSecond": 105,
-        "initialDegrees": 93
-      }
+      "x": 1110,
+      "y": 690,
+      "width": 230,
+      "height": 120,
+      "visualHeight": 140
     }
   ],
-  "switches": [
-    {
-      "id": "switch-1",
-      "mediaId": "switch-pad",
-      "x": 288,
-      "y": 111,
-      "size": 44,
-      "activation": "once",
-      "durationMs": 0
-    }
-  ],
-  "forceFields": [
-    {
-      "id": "current-1",
-      "mediaId": "field-conveyor",
-      "type": "conveyor",
-      "x": 1017,
-      "y": 478,
-      "width": 347,
-      "height": 171,
-      "directionDegrees": 93,
-      "force": 281
-    }
-  ],
+  "movingObstacles": [],
+  "trackingObstacles": [],
+  "dynamicObstacles": [],
+  "switches": [],
+  "forceFields": [],
   "coins": [
     {
       "id": "coin-99",
       "mediaId": "coin-standard",
-      "x": 772,
-      "y": 799,
+      "x": 800,
+      "y": 335,
       "size": 30,
       "value": 1
     }
   ],
   "rewards": {
     "completionCoins": 5,
-    "bonusCoinsPerTarget": 3
+    "bonusCoinsPerTarget": 0
   },
   "scoring": {
     "baseMaximum": 54500,
-    "parTimeMs": 19000,
-    "parDistance": 665,
+    "parTimeMs": 18000,
+    "parDistance": 1280,
     "timeWeight": 0.5,
     "distanceWeight": 0.5,
     "collisionPenaltyRate": 0.2,
     "maximumCollisions": 3
   },
   "bonuses": {
-    "maximumTargets": 1,
-    "rewardPerTarget": 1400,
+    "maximumTargets": 0,
+    "rewardPerTarget": 0,
     "offerChanceMode": "currentScorePercent",
-    "failurePenaltyRate": 0.1,
-    "targets": [
-      {
-        "id": "bonus-a",
-        "mediaId": "target-bonus",
-        "x": 1112,
-        "y": 795,
-        "size": 48
-      }
-    ]
+    "failurePenaltyRate": 0,
+    "targets": []
   }
 }

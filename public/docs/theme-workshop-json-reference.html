@@ -63,7 +63,12 @@
 <a class="toc-depth-3" href="#elliptical-arena">Elliptical arena</a>
 <a class="toc-depth-3" href="#polygon-arena">Polygon arena</a>
 <a class="toc-depth-2" href="#token">`token`</a>
+<a class="toc-depth-2" href="#3d-height-properties">3D height properties</a>
+<a class="toc-depth-2" href="#3d-model-catalog">3D model catalog</a>
+<a class="toc-depth-2" href="#terrainsurfaces">`terrainSurfaces`</a>
 <a class="toc-depth-2" href="#movement">`movement`</a>
+<a class="toc-depth-2" href="#shotmechanic">`shotMechanic`</a>
+<a class="toc-depth-2" href="#shotgoals">`shotGoals`</a>
 <a class="toc-depth-2" href="#start">`start`</a>
 <a class="toc-depth-2" href="#maintarget">`mainTarget`</a>
 <a class="toc-depth-2" href="#generation">`generation`</a>
@@ -147,6 +152,7 @@ units/second². Properties ending in <code>Ms</code> use milliseconds.</li>
 <li><code>phase</code> uses radians. Direction and rotation properties containing <code>Degrees</code>
 use degrees. For directions, <code>0</code> points right and <code>90</code> points down.</li>
 <li>Every renderable object needs a registered, theme-neutral <code>mediaId</code>.</li>
+<li>Every renderable object may optionally select a built-in GLB with <code>model3dId</code>.</li>
 <li>Collision geometry comes from JSON, never from the artwork.</li>
 <li>IDs must be stable and unique within their relevant collection. A switch
 barrier&#39;s <code>switchId</code> must match an entry in <code>switches</code>.</li>
@@ -166,6 +172,11 @@ Workshop level.</li>
 ├── arena                        playable boundary and arena media
 ├── token                        player collision shape and media
 ├── movement                     player acceleration and speed tuning
+├── shotMechanic                 optional aim/launch/ricochet control profile
+├── shotGoals                    optional par, perfect, and shot-limit goals
+├── verticalPhysics              optional gravity and surface transition rules
+├── ramps[]                      optional vertical launch regions
+├── terrainSurfaces[]            optional platforms, bridges, and slopes
 ├── start                        manual point or generated region
 ├── mainTarget                   manual point or generated region
 ├── generation                   deterministic static-obstacle generation
@@ -255,6 +266,36 @@ Workshop level.</li>
 <td align="right">Yes</td>
 <td>Movement object</td>
 <td>Pointer and keyboard movement tuning.</td>
+</tr>
+<tr>
+<td><code>shotMechanic</code></td>
+<td align="right">No</td>
+<td>Kinetic movement object</td>
+<td>Replaces guided control with fixed-step aim, launch, rebound, drag, and exact stopping.</td>
+</tr>
+<tr>
+<td><code>shotGoals</code></td>
+<td align="right">No</td>
+<td>Kinetic goal object</td>
+<td>Adds perfect/par ratings and an optional maximum-shot attempt budget. Requires <code>shotMechanic</code>.</td>
+</tr>
+<tr>
+<td><code>verticalPhysics</code></td>
+<td align="right">No</td>
+<td>Vertical physics object</td>
+<td>Enables gravity, airborne movement, terrain support, and landing.</td>
+</tr>
+<tr>
+<td><code>ramps</code></td>
+<td align="right">No</td>
+<td>Array</td>
+<td>Adds directional vertical launch regions. Requires <code>verticalPhysics</code>.</td>
+</tr>
+<tr>
+<td><code>terrainSurfaces</code></td>
+<td align="right">No</td>
+<td>Array</td>
+<td>Adds deterministic platforms, bridges, slopes, normals, and surface friction. Requires <code>verticalPhysics</code>.</td>
 </tr>
 <tr>
 <td><code>start</code></td>
@@ -523,6 +564,136 @@ non-adjacent edges and degenerate areas fail validation.</p>
 </tbody></table>
 <p>The token center follows player intent through acceleration; it does not snap to
 the pointer. Larger tokens require larger gaps and make a course harder.</p>
+<h2 id="3d-height-properties">3D height properties<a class="heading-link" href="#3d-height-properties" aria-label="Link to this section">#</a></h2>
+<p>The visual editor&#39;s <strong>3D height</strong> panel is available for the player token and
+every placed object. All values use logical world units and snap to the 10-unit
+authoring grid.</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Constraint</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>elevation</code></td>
+<td>Optional number <code>0–2000</code></td>
+<td>Height of the object&#39;s bottom above the ground. On the token this is the initial elevation when the start does not override it.</td>
+</tr>
+<tr>
+<td><code>visualHeight</code></td>
+<td>Optional number <code>&gt;0–1600</code></td>
+<td>Three.js model height; it does not enlarge the top-down footprint.</td>
+</tr>
+<tr>
+<td><code>collisionHeight</code></td>
+<td>Optional number <code>&gt;0–1600</code></td>
+<td>Vertical interval used by obstacles, targets, switches, coins, and force fields.</td>
+</tr>
+</tbody></table>
+<p>Leave a field empty to retain the automatic backward-compatible default. A
+rectangular object&#39;s existing <code>height</code> remains its top-down Y footprint; it is
+not its 3D height.</p>
+<h2 id="3d-model-catalog">3D model catalog<a class="heading-link" href="#3d-model-catalog" aria-label="Link to this section">#</a></h2>
+<p>Every renderable entity may include an optional <code>model3dId</code>. Select it from the
+inspector&#39;s <strong>3D model</strong> catalog; the editor groups all 126 Kenney Minigolf Kit
+models by category and shows the supplied preview. The saved value is a stable
+ID such as:</p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;windmill-one&quot;,
+  &quot;mediaId&quot;: &quot;obstacle-static-rect&quot;,
+  &quot;model3dId&quot;: &quot;kenney-minigolf-windmill&quot;,
+  &quot;shape&quot;: &quot;rect&quot;,
+  &quot;x&quot;: 800,
+  &quot;y&quot;: 450,
+  &quot;width&quot;: 180,
+  &quot;height&quot;: 120
+}
+</code></pre>
+<p>Leave the selection empty to use the role default or procedural geometry.
+Tokens, targets, and ramps have built-in role defaults. Obstacles and terrain
+remain procedural unless explicitly assigned so their visible shape continues
+to match arbitrary JSON collision geometry. A model changes presentation only:
+<code>shape</code>, dimensions, elevation, collision height, and terrain corner elevations
+remain authoritative.</p>
+<p>The main target may additionally set <code>model3dSize</code> to control the model&#39;s
+maximum rendered dimension in world units independently from its collision
+<code>size</code>. This supports a large decorative green surrounding a smaller, precise
+hole. Omitting it retains the automatic target scale.</p>
+<p>The catalog is generated from the licensed source files by
+<code>npm run media:3d-manifest</code>; authors never edit the manifest by hand.</p>
+<h2 id="terrainsurfaces"><code>terrainSurfaces</code><a class="heading-link" href="#terrainsurfaces" aria-label="Link to this section">#</a></h2>
+<p>Terrain surfaces provide the authoritative height of the play area. They are
+optional and require <code>verticalPhysics</code>; omitting the array preserves flat levels.</p>
+<pre><code class="language-json">{
+  &quot;terrainSurfaces&quot;: [
+    {
+      &quot;id&quot;: &quot;fairway-rise&quot;,
+      &quot;mediaId&quot;: &quot;obstacle-static-rect&quot;,
+      &quot;x&quot;: 800,
+      &quot;y&quot;: 450,
+      &quot;width&quot;: 320,
+      &quot;height&quot;: 180,
+      &quot;cornerElevations&quot;: {
+        &quot;northWest&quot;: 0,
+        &quot;northEast&quot;: 100,
+        &quot;southEast&quot;: 100,
+        &quot;southWest&quot;: 0
+      },
+      &quot;friction&quot;: 120,
+      &quot;thickness&quot;: 10
+    }
+  ]
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Constraint and unit</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>x</code>, <code>y</code></td>
+<td>World coordinates</td>
+<td>Center of the rectangular surface footprint.</td>
+</tr>
+<tr>
+<td><code>width</code>, <code>height</code></td>
+<td><code>&gt;0–1600</code> world units</td>
+<td>Top-down footprint; resize handles edit these values.</td>
+</tr>
+<tr>
+<td><code>cornerElevations</code></td>
+<td>Four values <code>0–2000</code></td>
+<td>Absolute NW, NE, SE, and SW play-surface heights.</td>
+</tr>
+<tr>
+<td><code>friction</code></td>
+<td>Optional <code>0–5000</code> world units/second²</td>
+<td>Acceleration opposing grounded Ricochet motion.</td>
+</tr>
+<tr>
+<td><code>thickness</code></td>
+<td>Optional <code>&gt;0–500</code> world units</td>
+<td>Visible deck/skirt thickness; the sampled top remains authoritative.</td>
+</tr>
+</tbody></table>
+<p>The diagonal always runs from north-west to south-east. Equal corner values
+make a platform or bridge. Different values make slopes that provide height,
+normal, downhill direction, landing support, and gravity acceleration. Stacked
+surfaces are allowed: the ball&#39;s current elevation determines whether it stays
+under a bridge or lands on its deck.</p>
+<p>In the visual editor, add <strong>Elevated platform or bridge</strong> or <strong>Terrain slope</strong>.
+Use <strong>Platform height</strong> to level all four corners, or edit the individual corner
+elevations. A slope should meet its neighboring surface within the configured
+<code>verticalPhysics.maximumStepHeight</code> so the ball follows it instead of becoming
+airborne at an edge.</p>
+<p><code>verticalPhysics</code> requires <code>gravity</code>, <code>maximumFallSpeed</code>, and <code>groundHeight</code>.
+Its optional <code>maximumStepHeight</code> controls the largest upward transition between
+different surface layers; when omitted it defaults to 35% of token size.</p>
 <h2 id="movement"><code>movement</code><a class="heading-link" href="#movement" aria-label="Link to this section">#</a></h2>
 <pre><code class="language-json">{
   &quot;maximumSpeed&quot;: 520,
@@ -562,6 +733,123 @@ the pointer. Larger tokens require larger gaps and make a course harder.</p>
 </tbody></table>
 <p>High speed with low deceleration produces a slippery course. Test pointer and
 keyboard play after changing these values.</p>
+<h2 id="shotmechanic"><code>shotMechanic</code><a class="heading-link" href="#shotmechanic" aria-label="Link to this section">#</a></h2>
+<p>When present, this optional object overrides the global Ricochet movement
+defaults for this level. The player&#39;s home-screen movement toggle still decides
+whether the level uses Guided or Ricochet controls. In Ricochet mode, the player
+aims only while stopped; launch velocity is consumed on a fixed engine update,
+cannot be steered in flight, loses speed to drag and impacts, and becomes
+exactly zero below <code>stopSpeed</code>.</p>
+<pre><code class="language-json">{
+  &quot;inputStyle&quot;: &quot;drag-release&quot;,
+  &quot;minimumAimDistance&quot;: 8,
+  &quot;minimumLaunchSpeed&quot;: 260,
+  &quot;maximumLaunchSpeed&quot;: 820,
+  &quot;aimDistanceForMaximumSpeed&quot;: 260,
+  &quot;dragPerSecond&quot;: 260,
+  &quot;airDragPerSecond&quot;: 80,
+  &quot;stopSpeed&quot;: 36,
+  &quot;restitution&quot;: 0.78,
+  &quot;maximumImpactsPerStep&quot;: 4
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Constraint and unit</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>inputStyle</code></td>
+<td><code>drag-release</code> or <code>two-click</code></td>
+<td>Pointer gesture. Omit in a level override to use drag-release.</td>
+</tr>
+<tr>
+<td><code>minimumAimDistance</code></td>
+<td><code>0–200</code> world units</td>
+<td>Minimum drag/aim distance accepted as a shot.</td>
+</tr>
+<tr>
+<td><code>minimumLaunchSpeed</code></td>
+<td><code>&gt;0–2000</code> world units/second</td>
+<td>Speed for the shortest non-zero aim.</td>
+</tr>
+<tr>
+<td><code>maximumLaunchSpeed</code></td>
+<td><code>&gt;0–2000</code> world units/second</td>
+<td>Launch and bumper speed cap; at least the minimum.</td>
+</tr>
+<tr>
+<td><code>aimDistanceForMaximumSpeed</code></td>
+<td><code>&gt;0–1600</code> world units</td>
+<td>Pointer distance that produces maximum launch speed.</td>
+</tr>
+<tr>
+<td><code>dragPerSecond</code></td>
+<td><code>&gt;0–5000</code> world units/second²</td>
+<td>Linear speed removed per second.</td>
+</tr>
+<tr>
+<td><code>airDragPerSecond</code></td>
+<td>Optional <code>0–5000</code> world units/second²</td>
+<td>Horizontal speed removed while airborne; defaults to <code>dragPerSecond</code>.</td>
+</tr>
+<tr>
+<td><code>stopSpeed</code></td>
+<td><code>1–500</code> world units/second</td>
+<td>Threshold that snaps velocity to exact zero; below the minimum launch speed.</td>
+</tr>
+<tr>
+<td><code>restitution</code></td>
+<td><code>0.1–1</code></td>
+<td>Default speed fraction retained after reflection.</td>
+</tr>
+<tr>
+<td><code>maximumImpactsPerStep</code></td>
+<td>Integer <code>1–12</code></td>
+<td>Safety cap for corner loops during one fixed update.</td>
+</tr>
+</tbody></table>
+<p>Kinetic levels accept static obstacles and deterministic terrain surfaces.
+Leave moving, tracking, dynamic, and force-field arrays empty. Powers are
+unavailable during kinetic play.</p>
+<h2 id="shotgoals"><code>shotGoals</code><a class="heading-link" href="#shotgoals" aria-label="Link to this section">#</a></h2>
+<p>This optional object adds shot-based objectives to a kinetic level. The object
+must contain at least one field; <code>perfectShots</code> requires <code>par</code>.</p>
+<pre><code class="language-json">{
+  &quot;perfectShots&quot;: 2,
+  &quot;par&quot;: 4,
+  &quot;maximumShots&quot;: 8
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Constraint</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>perfectShots</code></td>
+<td>Integer <code>1–999</code>, no greater than <code>par</code> when both exist</td>
+<td>Highest shot count receiving a Perfect rating.</td>
+</tr>
+<tr>
+<td><code>par</code></td>
+<td>Integer <code>1–999</code></td>
+<td>Baseline for Under Par, Par, and Over Par ratings.</td>
+</tr>
+<tr>
+<td><code>maximumShots</code></td>
+<td>Integer <code>1–999</code>, at least <code>par</code> when both exist</td>
+<td>Attempt limit. The last shot finishes moving before failure is evaluated.</td>
+</tr>
+</tbody></table>
+<p>The HUD shows shot power, par, and the configured limit. A completion retains
+the existing best-shot record. Guided play ignores these kinetic goals.</p>
 <h2 id="start"><code>start</code><a class="heading-link" href="#start" aria-label="Link to this section">#</a></h2>
 <p>The start defines the initial <strong>token center</strong>.</p>
 <p>Manual form:</p>
@@ -733,6 +1021,16 @@ penalty, and the third collision restarts the same deterministic layout.</p>
 </code></pre>
 <p>Required properties are <code>id</code>, <code>mediaId</code>, <code>shape</code>, <code>x</code>, <code>y</code>, plus <code>size</code> or the
 pair <code>width</code>/<code>height</code>.</p>
+<p>Kinetic levels may add one optional contact response:</p>
+<pre><code class="language-json">&quot;kineticResponse&quot;: { &quot;type&quot;: &quot;rebound&quot;, &quot;restitution&quot;: 0.88 }
+</code></pre>
+<ul>
+<li><code>rebound</code> reflects velocity and retains the configured <code>0.1–1.5</code> fraction of speed.</li>
+<li><code>bumper</code> uses the same reflection but may add speed up to the level maximum.</li>
+<li><code>stop</code> has no restitution and immediately sets velocity to exact zero.</li>
+<li><code>reset</code> stops and returns the token to its most recent fully settled position.</li>
+</ul>
+<p>An obstacle without <code>kineticResponse</code> uses the level&#39;s default restitution.</p>
 <h2 id="movingobstacles"><code>movingObstacles[]</code><a class="heading-link" href="#movingobstacles" aria-label="Link to this section">#</a></h2>
 <p>Moving obstacles oscillate around their configured center on one axis. Their
 complete sweep must remain inside the arena.</p>

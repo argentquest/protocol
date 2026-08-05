@@ -9,6 +9,7 @@ import powerupSchema from './schemas/powerup.schema.json'
 import resolvedMediaManifestSchema from './schemas/resolvedMediaManifest.schema.json'
 import soundRegistrySchema from './schemas/soundRegistry.schema.json'
 import themeSchema from './schemas/theme.schema.json'
+import threeMediaManifestSchema from './schemas/threeMediaManifest.schema.json'
 
 const schemaEntries = {
   audioSettings: audioSettingsSchema,
@@ -21,6 +22,7 @@ const schemaEntries = {
   resolvedMediaManifest: resolvedMediaManifestSchema,
   soundRegistry: soundRegistrySchema,
   themes: themeSchema,
+  threeMediaManifest: threeMediaManifestSchema,
 }
 
 /**
@@ -112,9 +114,36 @@ function levelMediaIds(level) {
     ...(level.dynamicObstacles ?? []).map((item) => item.mediaId),
     ...(level.switches ?? []).map((item) => item.mediaId),
     ...(level.forceFields ?? []).map((item) => item.mediaId),
+    ...(level.ramps ?? []).map((item) => item.mediaId),
+    ...(level.terrainSurfaces ?? []).map((item) => item.mediaId),
     ...(level.coins ?? []).map((item) => item.mediaId),
     ...(level.bonuses?.targets ?? []).map((item) => item.mediaId),
   ].filter(Boolean)
+}
+
+/**
+ * Collects optional 3D model references from every renderable level object.
+ *
+ * @pure
+ * @param {object} level Level configuration.
+ * @returns {string[]} Referenced model IDs.
+ */
+function levelModelIds(level) {
+  return [
+    level.token,
+    level.start,
+    level.mainTarget,
+    ...(level.terrainSurfaces ?? []),
+    ...(level.ramps ?? []),
+    ...(level.manualObstacles ?? []),
+    ...(level.movingObstacles ?? []),
+    ...(level.trackingObstacles ?? []),
+    ...(level.dynamicObstacles ?? []),
+    ...(level.switches ?? []),
+    ...(level.forceFields ?? []),
+    ...(level.coins ?? []),
+    ...(level.bonuses?.targets ?? []),
+  ].map((item) => item?.model3dId).filter(Boolean)
 }
 
 /**
@@ -163,7 +192,7 @@ function validateLevelRelationships(
   levels,
   mediaIds,
   errors,
-  { requireContiguous = true } = {},
+  { requireContiguous = true, modelIds = null } = {},
 ) {
   const levelIds = levels.map((level) => level.id)
   const levelNumbers = levels.map((level) => level.number)
@@ -194,6 +223,61 @@ function validateLevelRelationships(
     }
     if (level.generation?.minSize > level.generation?.maxSize) {
       errors.push(`${level.id}: generation minSize cannot exceed maxSize`)
+    }
+    if (
+      level.shotMechanic &&
+      level.shotMechanic.minimumLaunchSpeed >
+        level.shotMechanic.maximumLaunchSpeed
+    ) {
+      errors.push(`${level.id}: minimumLaunchSpeed cannot exceed maximumLaunchSpeed`)
+    }
+    if (
+      level.shotMechanic &&
+      level.shotMechanic.stopSpeed >= level.shotMechanic.minimumLaunchSpeed
+    ) {
+      errors.push(`${level.id}: shot stopSpeed must be below minimumLaunchSpeed`)
+    }
+    if (level.shotGoals && !level.shotMechanic) {
+      errors.push(`${level.id}: shotGoals requires shotMechanic`)
+    }
+    if ((level.ramps?.length ?? 0) > 0 && !level.verticalPhysics) {
+      errors.push(`${level.id}: ramps require verticalPhysics`)
+    }
+    if ((level.terrainSurfaces?.length ?? 0) > 0 && !level.verticalPhysics) {
+      errors.push(`${level.id}: terrainSurfaces require verticalPhysics`)
+    }
+    if (
+      level.shotGoals?.perfectShots !== undefined &&
+      level.shotGoals?.par === undefined
+    ) {
+      errors.push(`${level.id}: perfectShots requires shot par`)
+    }
+    if (
+      level.shotGoals?.perfectShots !== undefined &&
+      level.shotGoals?.par !== undefined &&
+      level.shotGoals.perfectShots > level.shotGoals.par
+    ) {
+      errors.push(`${level.id}: perfectShots cannot exceed shot par`)
+    }
+    if (
+      level.shotGoals?.maximumShots !== undefined &&
+      level.shotGoals?.par !== undefined &&
+      level.shotGoals.maximumShots < level.shotGoals.par
+    ) {
+      errors.push(`${level.id}: maximumShots cannot be below shot par`)
+    }
+    if (
+      level.shotMechanic &&
+      [
+        ...(level.movingObstacles ?? []),
+        ...(level.trackingObstacles ?? []),
+        ...(level.dynamicObstacles ?? []),
+        ...(level.forceFields ?? []),
+      ].length
+    ) {
+      errors.push(
+        `${level.id}: kinetic levels currently support static obstacles only`,
+      )
     }
     if (level.bonuses?.maximumTargets > level.bonuses?.targets?.length) {
       errors.push(`${level.id}: maximumTargets exceeds configured bonus targets`)
@@ -227,6 +311,13 @@ function validateLevelRelationships(
         errors.push(`${level.id}: unknown mediaId "${mediaId}"`)
       }
     }
+    if (modelIds) {
+      for (const modelId of levelModelIds(level)) {
+        if (!modelIds.has(modelId)) {
+          errors.push(`${level.id}: unknown model3dId "${modelId}"`)
+        }
+      }
+    }
 
     const objectIds = [
       ...(level.manualObstacles ?? []),
@@ -235,6 +326,8 @@ function validateLevelRelationships(
       ...(level.dynamicObstacles ?? []),
       ...(level.switches ?? []),
       ...(level.forceFields ?? []),
+      ...(level.ramps ?? []),
+      ...(level.terrainSurfaces ?? []),
       ...(level.coins ?? []),
       ...(level.bonuses?.targets ?? []),
     ].map((item) => item.id)
@@ -286,6 +379,7 @@ export function validateConfiguration({
   themeConfig,
   mediaRegistry,
   soundRegistry,
+  threeMediaManifest = null,
 }) {
   const validators = getValidators()
   const errors = []
@@ -312,6 +406,9 @@ export function validateConfiguration({
     validate('microProtocols', 'microProtocols', microProtocolConfig)
   }
   validate('soundRegistry', 'soundRegistry', soundRegistry)
+  if (threeMediaManifest) {
+    validate('threeMediaManifest', 'threeMediaManifest', threeMediaManifest)
+  }
   levels.forEach((level) => validate('level', level.id ?? 'unknown-level', level))
   microLevels.forEach((level) =>
     validate('level', level.id ?? 'unknown-micro-level', level),
@@ -330,10 +427,26 @@ export function validateConfiguration({
   validateRegistries(mediaRegistry, soundRegistry, errors)
   const mediaIds = new Set(mediaRegistry.media.map((entry) => entry.mediaId))
   const soundIds = new Set(soundRegistry.sounds.map((entry) => entry.soundId))
-  validateLevelRelationships(levels, mediaIds, errors)
+  const modelIds = threeMediaManifest
+    ? new Set(threeMediaManifest.models.map((entry) => entry.modelId))
+    : null
+  validateLevelRelationships(levels, mediaIds, errors, { modelIds })
   validateLevelRelationships(microLevels, mediaIds, errors, {
     requireContiguous: false,
+    modelIds,
   })
+  if (threeMediaManifest) {
+    for (const duplicate of duplicateValues(
+      threeMediaManifest.models.map((entry) => entry.modelId),
+    )) {
+      errors.push(`threeMediaManifest: duplicate modelId "${duplicate}"`)
+    }
+    for (const [role, modelId] of Object.entries(threeMediaManifest.defaults)) {
+      if (!modelIds.has(modelId)) {
+        errors.push(`threeMediaManifest: ${role} default references unknown modelId "${modelId}"`)
+      }
+    }
+  }
   const microLevelIds = new Set(microLevels.map((level) => level.id))
   for (const protocol of microProtocolConfig?.protocols ?? []) {
     if (!microLevelIds.has(protocol.levelId)) {

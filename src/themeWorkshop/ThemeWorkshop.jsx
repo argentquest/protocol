@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import GameView from '../game/GameView.jsx'
-import { mediaDefinitions, soundDefinitions } from '../config/loadConfig.js'
+import {
+  mediaDefinitions,
+  soundDefinitions,
+  threeModelCatalog,
+} from '../config/loadConfig.js'
 import { generateLevel } from '../game/generation/levelGenerator.js'
 import { authApi, mediaLibraryApi, themeApi } from './themeApi.js'
 import {
@@ -11,10 +15,14 @@ import {
   moveArenaPoint,
   removeArenaPoint,
   resizeEntity,
+  setEntityVerticalProperty,
+  setTerrainCornerElevation,
   snapToEditorGrid as snap,
 } from './levelEditorGeometry.js'
 
 const ENTITY_GROUPS = [
+  'terrainSurfaces',
+  'ramps',
   'manualObstacles',
   'movingObstacles',
   'trackingObstacles',
@@ -25,8 +33,27 @@ const ENTITY_GROUPS = [
 ]
 
 const RESIZE_HANDLES = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw']
+const THREE_MODEL_CATEGORIES = Object.entries(
+  threeModelCatalog.models.reduce((groups, model) => {
+    groups[model.category] ??= []
+    groups[model.category].push(model)
+    return groups
+  }, {}),
+).sort(([first], [second]) => first.localeCompare(second))
 
 const OBSTACLE_GUIDE = [
+  {
+    name: 'Terrain platform / bridge',
+    implementation: 'Four equal corner elevations create a flat elevated deck. Stacked decks remain independently reachable by ball elevation.',
+  },
+  {
+    name: 'Terrain slope',
+    implementation: 'Different corner elevations define two exact triangles that provide support height, surface normal, downhill gravity, and friction.',
+  },
+  {
+    name: 'Launch ramp',
+    implementation: 'Launches a grounded token vertically when crossed in its configured direction and at sufficient speed.',
+  },
   {
     name: 'Static obstacle',
     implementation: 'Fixed collision shape; it never moves or changes state.',
@@ -109,7 +136,11 @@ function entityDescriptors(level) {
  */
 function getEntity(level, selection) {
   if (!selection) return null
-  if (selection.group === 'start' || selection.group === 'mainTarget') {
+  if (
+    selection.group === 'token' ||
+    selection.group === 'start' ||
+    selection.group === 'mainTarget'
+  ) {
     return level[selection.group]
   }
   if (selection.group === 'bonusTargets') {
@@ -128,7 +159,11 @@ function getEntity(level, selection) {
  * @returns {object} Updated level document.
  */
 function replaceEntity(level, selection, entity) {
-  if (selection.group === 'start' || selection.group === 'mainTarget') {
+  if (
+    selection.group === 'token' ||
+    selection.group === 'start' ||
+    selection.group === 'mainTarget'
+  ) {
     return { ...level, [selection.group]: entity }
   }
   if (selection.group === 'bonusTargets') {
@@ -152,6 +187,7 @@ function replaceEntity(level, selection, entity) {
 function removeEntity(level, selection) {
   if (
     !selection ||
+    selection.group === 'token' ||
     selection.group === 'start' ||
     selection.group === 'mainTarget'
   ) {
@@ -189,6 +225,55 @@ function addEntity(level, type) {
   const sequence = Date.now().toString(36)
   const common = { x: 800, y: 450 }
   const templates = {
+    platform: {
+      group: 'terrainSurfaces',
+      entity: {
+        id: `platform-${sequence}`,
+        mediaId: 'obstacle-static-rect',
+        ...common,
+        width: 260,
+        height: 180,
+        cornerElevations: {
+          northWest: 80,
+          northEast: 80,
+          southEast: 80,
+          southWest: 80,
+        },
+        friction: 180,
+        thickness: 10,
+      },
+    },
+    slope: {
+      group: 'terrainSurfaces',
+      entity: {
+        id: `slope-${sequence}`,
+        mediaId: 'obstacle-static-rect',
+        ...common,
+        width: 260,
+        height: 180,
+        cornerElevations: {
+          northWest: 0,
+          northEast: 80,
+          southEast: 80,
+          southWest: 0,
+        },
+        friction: 120,
+        thickness: 10,
+      },
+    },
+    ramp: {
+      group: 'ramps',
+      entity: {
+        id: `ramp-${sequence}`,
+        mediaId: 'obstacle-static-rect',
+        ...common,
+        width: 170,
+        height: 105,
+        directionDegrees: 0,
+        launchVelocity: 480,
+        minimumApproachSpeed: 150,
+      },
+    },
     static: {
       group: 'manualObstacles',
       entity: {
@@ -381,10 +466,22 @@ function addEntity(level, type) {
       },
     }
   }
-  return {
+  const next = {
     ...level,
     [template.group]: [...(level[template.group] ?? []), template.entity],
   }
+  if (
+    ['terrainSurfaces', 'ramps'].includes(template.group) &&
+    !next.verticalPhysics
+  ) {
+    next.verticalPhysics = {
+      gravity: 900,
+      maximumFallSpeed: 1400,
+      groundHeight: 0,
+      maximumStepHeight: 12,
+    }
+  }
+  return next
 }
 
 /**
@@ -1408,6 +1505,17 @@ function LevelEditor({
   const [playtest, setPlaytest] = useState(false)
   const initialRender = useRef(true)
   const dragSnapshot = useRef(null)
+  const inspectorEntities = useMemo(
+    () => [
+      { group: 'token', index: null, entity: level.token, label: 'Player token' },
+      ...entityDescriptors(level),
+    ],
+    [level],
+  )
+  const selectedEntity = getEntity(level, selection)
+  const selectedThreeModel = threeModelCatalog.models.find(
+    (model) => model.modelId === selectedEntity?.model3dId,
+  )
 
   const runtime = useMemo(() => {
     try {
@@ -1800,6 +1908,9 @@ function LevelEditor({
               }}
             >
               <option value="">Choose type…</option>
+              <option value="platform">Elevated platform or bridge</option>
+              <option value="slope">Terrain slope</option>
+              <option value="ramp">Launch ramp</option>
               <option value="static">Static obstacle</option>
               <option value="moving">Axis sweeper (moves side to side)</option>
               <option value="tracking">Tracker (chases inside a zone)</option>
@@ -1833,6 +1944,245 @@ function LevelEditor({
           </details>
 
           <h2>Entity inspector</h2>
+          <label>
+            Selected object
+            <select
+              aria-label="Selected object"
+              value={`${selection.group}:${selection.index ?? 'root'}`}
+              onChange={(event) => {
+                const [group, rawIndex] = event.target.value.split(':')
+                setSelection({
+                  group,
+                  index: rawIndex === 'root' ? null : Number(rawIndex),
+                })
+              }}
+            >
+              {inspectorEntities.map((descriptor) => (
+                <option
+                  key={`${descriptor.group}:${descriptor.index ?? 'root'}`}
+                  value={`${descriptor.group}:${descriptor.index ?? 'root'}`}
+                >
+                  {descriptor.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          {selection.group === 'terrainSurfaces' ? (
+            <fieldset className="entity-height-controls">
+              <legend>Terrain surface</legend>
+              <label>
+                Platform height — all corners (world units)
+                <input
+                  aria-label="Terrain platform height"
+                  type="number"
+                  min="0"
+                  max="2000"
+                  step="10"
+                  value={
+                    new Set(
+                      Object.values(selectedEntity?.cornerElevations ?? {}),
+                    ).size === 1
+                      ? selectedEntity.cornerElevations.northWest
+                      : ''
+                  }
+                  placeholder="Mixed slope"
+                  onChange={(event) =>
+                    commit(
+                      replaceEntity(
+                        level,
+                        selection,
+                        setTerrainCornerElevation(
+                          selectedEntity,
+                          'all',
+                          event.target.value,
+                        ),
+                      ),
+                    )
+                  }
+                />
+              </label>
+              {[
+                ['northWest', 'North-west elevation'],
+                ['northEast', 'North-east elevation'],
+                ['southEast', 'South-east elevation'],
+                ['southWest', 'South-west elevation'],
+              ].map(([corner, label]) => (
+                <label key={corner}>
+                  {label} (world units)
+                  <input
+                    aria-label={label}
+                    type="number"
+                    min="0"
+                    max="2000"
+                    step="10"
+                    value={selectedEntity.cornerElevations[corner]}
+                    onChange={(event) =>
+                      commit(
+                        replaceEntity(
+                          level,
+                          selection,
+                          setTerrainCornerElevation(
+                            selectedEntity,
+                            corner,
+                            event.target.value,
+                          ),
+                        ),
+                      )
+                    }
+                  />
+                </label>
+              ))}
+              <label>
+                Surface friction (world units/second²)
+                <input
+                  aria-label="Terrain surface friction"
+                  type="number"
+                  min="0"
+                  max="5000"
+                  step="10"
+                  value={selectedEntity.friction ?? ''}
+                  placeholder="Shot drag default"
+                  onChange={(event) => {
+                    const next = { ...selectedEntity }
+                    if (event.target.value === '') delete next.friction
+                    else next.friction = Math.max(0, Math.min(5000, snap(event.target.value)))
+                    commit(replaceEntity(level, selection, next))
+                  }}
+                />
+              </label>
+              <p>
+                Equal corners make a platform or bridge. Different corners make
+                a deterministic slope; the NW→SE triangle split is shared by
+                simulation and Three.js.
+              </p>
+            </fieldset>
+          ) : (
+          <fieldset className="entity-height-controls">
+            <legend>3D height</legend>
+            <label>
+              Elevation above ground (world units)
+              <input
+                aria-label="Object elevation"
+                type="number"
+                min="0"
+                max="2000"
+                step="10"
+                value={selectedEntity?.elevation ?? ''}
+                placeholder="0"
+                onChange={(event) =>
+                  commit(
+                    replaceEntity(
+                      level,
+                      selection,
+                      setEntityVerticalProperty(
+                        selectedEntity,
+                        'elevation',
+                        event.target.value,
+                      ),
+                    ),
+                  )
+                }
+              />
+            </label>
+            <label>
+              Visible 3D height (world units)
+              <input
+                aria-label="Object visual height"
+                type="number"
+                min="10"
+                max="1600"
+                step="10"
+                value={selectedEntity?.visualHeight ?? ''}
+                placeholder="Automatic"
+                onChange={(event) =>
+                  commit(
+                    replaceEntity(
+                      level,
+                      selection,
+                      setEntityVerticalProperty(
+                        selectedEntity,
+                        'visualHeight',
+                        event.target.value,
+                      ),
+                    ),
+                  )
+                }
+              />
+            </label>
+            <label>
+              Collision height (world units)
+              <input
+                aria-label="Object collision height"
+                type="number"
+                min="10"
+                max="1600"
+                step="10"
+                value={selectedEntity?.collisionHeight ?? ''}
+                placeholder="Automatic"
+                onChange={(event) =>
+                  commit(
+                    replaceEntity(
+                      level,
+                      selection,
+                      setEntityVerticalProperty(
+                        selectedEntity,
+                        'collisionHeight',
+                        event.target.value,
+                      ),
+                    ),
+                  )
+                }
+              />
+            </label>
+            <p>
+              Elevation moves the object off the ground. Visible height changes
+              its model only; collision height controls vertical gameplay contact.
+              Empty values keep the backward-compatible automatic defaults.
+            </p>
+          </fieldset>
+          )}
+          <fieldset className="entity-model-controls">
+            <legend>3D model</legend>
+            <label>
+              Kenney Minigolf model
+              <select
+                aria-label="Object 3D model"
+                value={selectedEntity?.model3dId ?? ''}
+                onChange={(event) => {
+                  const next = { ...selectedEntity }
+                  if (event.target.value) next.model3dId = event.target.value
+                  else delete next.model3dId
+                  commit(replaceEntity(level, selection, next))
+                }}
+              >
+                <option value="">Automatic or procedural default</option>
+                {THREE_MODEL_CATEGORIES.map(([category, models]) => (
+                  <optgroup key={category} label={category}>
+                    {models.map((model) => (
+                      <option key={model.modelId} value={model.modelId}>
+                        {model.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+            </label>
+            {selectedThreeModel && (
+              <div className="entity-model-preview">
+                <img
+                  src={`${import.meta.env.BASE_URL}${selectedThreeModel.previewSrc}`}
+                  alt={`${selectedThreeModel.name} 3D model preview`}
+                />
+                <p>
+                  {selectedThreeModel.name} · {selectedThreeModel.category} · CC0
+                </p>
+              </div>
+            )}
+            <p>
+              Model choice affects presentation only. Collision and terrain
+              geometry remain owned by this object's JSON dimensions.
+            </p>
+          </fieldset>
           <textarea
             className="entity-json"
             aria-label="Selected entity JSON"
@@ -1844,8 +2194,8 @@ function LevelEditor({
             onClick={() => {
               try {
                 const parsed = JSON.parse(entityJson)
-                parsed.x = snap(parsed.x)
-                parsed.y = snap(parsed.y)
+                if (Number.isFinite(Number(parsed.x))) parsed.x = snap(parsed.x)
+                if (Number.isFinite(Number(parsed.y))) parsed.y = snap(parsed.y)
                 commit(replaceEntity(level, selection, parsed))
                 setStatus('Inspector changes applied locally.')
               } catch {
@@ -1884,6 +2234,7 @@ function LevelEditor({
             type="button"
             disabled={
               selection?.group === 'start' ||
+              selection?.group === 'token' ||
               selection?.group === 'mainTarget'
             }
             onClick={() => {

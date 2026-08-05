@@ -7,6 +7,7 @@ import {
 } from '../geometry/geometry.js'
 import { createSeededRandom, randomBetween, randomItem } from './seededRandom.js'
 import { dynamicObstacleEnvelope } from '../engine/DynamicObstacleSystem.js'
+import { surfaceHeightAt } from '../engine/TerrainSystem.js'
 import { WORLD_HEIGHT, WORLD_WIDTH } from '../world.js'
 
 /**
@@ -18,13 +19,36 @@ import { WORLD_HEIGHT, WORLD_WIDTH } from '../world.js'
  */
 function resolvePoint(specification, random) {
   if (specification.mode !== 'generated') {
-    return { x: specification.x, y: specification.y }
+    const point = {
+      x: specification.x,
+      y: specification.y,
+    }
+    if (specification.elevation !== undefined) {
+      point.elevation = specification.elevation
+    }
+    if (specification.visualHeight !== undefined) {
+      point.visualHeight = specification.visualHeight
+    }
+    if (specification.collisionHeight !== undefined) {
+      point.collisionHeight = specification.collisionHeight
+    }
+    return point
   }
   const region = specification.region
-  return {
+  const point = {
     x: randomBetween(random, region.x, region.x + region.width),
     y: randomBetween(random, region.y, region.y + region.height),
   }
+  if (specification.elevation !== undefined) {
+    point.elevation = specification.elevation
+  }
+  if (specification.visualHeight !== undefined) {
+    point.visualHeight = specification.visualHeight
+  }
+  if (specification.collisionHeight !== undefined) {
+    point.collisionHeight = specification.collisionHeight
+  }
+  return point
 }
 
 /**
@@ -306,6 +330,11 @@ export function validateGeneratedPlacement(level) {
     ...level.bonusTargets,
   ]
   const pickups = [...orderedTargets, ...level.coins, ...(level.switches ?? [])]
+  for (const surface of level.terrainSurfaces ?? []) {
+    if (!shapeInsideArena({ ...surface, shape: 'rect' }, level.arena)) {
+      errors.push(`${surface.id} is outside the arena`)
+    }
+  }
   for (const entity of [...hazards, ...pickups]) {
     if (!shapeInsideArena(entity, level.arena)) {
       errors.push(`${entity.id ?? entity.mediaId} is outside the arena`)
@@ -398,6 +427,10 @@ export function generateLevel(level) {
   const random = createSeededRandom(level.seed)
   const startPoint = resolvePoint(level.start, random)
   const targetPoint = resolvePoint(level.mainTarget, random)
+  if (level.terrainSurfaces?.length) {
+    startPoint.elevation ??= surfaceHeightAt(level, startPoint).height
+    targetPoint.elevation ??= surfaceHeightAt(level, targetPoint).height
+  }
   const token = normalizeShape({
     ...level.token,
     x: startPoint.x,
@@ -406,16 +439,41 @@ export function generateLevel(level) {
   const mainTarget = normalizeShape({
     visualOverrideId: level.mainTarget.visualOverrideId,
     audioOverrideId: level.mainTarget.audioOverrideId,
+    model3dId: level.mainTarget.model3dId,
+    model3dSize: level.mainTarget.model3dSize,
     id: 'main-target',
     mediaId: level.mainTarget.mediaId,
     shape: 'circle',
     size: level.mainTarget.size,
     x: targetPoint.x,
     y: targetPoint.y,
+    elevation: targetPoint.elevation,
+    collisionHeight: targetPoint.collisionHeight,
+    visualHeight: targetPoint.visualHeight,
   })
-  const bonusTargets = level.bonuses.targets.map((target) =>
-    normalizeShape({ ...target, shape: 'circle', width: target.size, height: target.size }),
-  )
+  const bonusTargets = level.bonuses.targets.map((target) => {
+    const normalized = normalizeShape({
+      ...target,
+      shape: 'circle',
+      width: target.size,
+      height: target.size,
+    })
+    if (
+      normalized.elevation === undefined &&
+      level.terrainSurfaces?.length
+    ) {
+      normalized.elevation = surfaceHeightAt(level, normalized).height
+    }
+    return normalized
+  })
+  const ramps = (level.ramps ?? []).map((ramp) => ({
+    ...ramp,
+    elevation:
+      ramp.elevation ??
+      (level.terrainSurfaces?.length
+        ? surfaceHeightAt(level, ramp).height
+        : undefined),
+  }))
   const manualObstacles = (level.manualObstacles ?? []).map(normalizeObstacle)
   const movingObstacles = (level.movingObstacles ?? []).map(normalizeObstacle)
   const trackingObstacles = (level.trackingObstacles ?? []).map(normalizeObstacle)
@@ -533,9 +591,11 @@ export function generateLevel(level) {
     movingObstacles,
     trackingObstacles,
     dynamicObstacles,
+    ramps,
     coins,
     switches,
     forceFields,
+    terrainSurfaces: level.terrainSurfaces ?? [],
   })
   if (placementErrors.length) {
     throw new Error(`${level.id}: ${placementErrors.join('; ')}.`)
@@ -591,6 +651,7 @@ export function generateLevel(level) {
     movingObstacles,
     trackingObstacles,
     dynamicObstacles,
+    ramps,
     coins,
     switches,
     forceFields,

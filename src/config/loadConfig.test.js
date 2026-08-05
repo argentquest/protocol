@@ -47,6 +47,13 @@ describe('game configuration', () => {
     expect(gameplayConfig.input.pointerResponsePerSecond).toBeLessThanOrEqual(12)
     expect(gameplayConfig.input.keyboardSpeedUnitsPerSecond).toBeGreaterThan(0)
     expect(gameplayConfig.collision.tokenToleranceUnits).toBe(4)
+    expect(gameplayConfig.kineticShot.minimumLaunchSpeed).toBeGreaterThan(0)
+    expect(gameplayConfig.kineticShot.inputStyle).toBe('drag-release')
+    expect(gameplayConfig.kineticShot.minimumAimDistance).toBeGreaterThan(0)
+    expect(gameplayConfig.kineticShot.maximumLaunchSpeed).toBeGreaterThan(
+      gameplayConfig.kineticShot.minimumLaunchSpeed,
+    )
+    expect(gameplayConfig.kineticShot.stopSpeed).toBeGreaterThan(0)
   })
 
   it('loads seven mechanic-matched Micro Protocols outside campaign progression', () => {
@@ -66,5 +73,29 @@ describe('game configuration', () => {
       ),
     ).toBe(true)
     expect(configurationStatus.valid).toBe(true)
+  })
+
+  it('loads two modeled V3 test holes at the end of the campaign', () => {
+    const firstHole = levels[98]
+    const secondHole = levels[99]
+
+    expect(firstHole.name).toBe('Kenney Test Hole 1')
+    expect(firstHole.token.model3dId).toBe('kenney-minigolf-ball-green')
+    expect(firstHole.manualObstacles.map((item) => item.model3dId)).toEqual(
+      expect.arrayContaining([
+        'kenney-minigolf-windmill',
+        'kenney-minigolf-castle',
+        'kenney-minigolf-obstacle-diamond',
+      ]),
+    )
+    expect(secondHole.name).toBe('Round Green')
+    expect(secondHole.ramps[0].model3dId).toBe('kenney-minigolf-ramp-large')
+    expect(secondHole.generation.obstacleCount).toBe(0)
+    expect(secondHole.manualObstacles).toEqual([])
+    expect(secondHole.mainTarget.model3dId).toBe(
+      'kenney-minigolf-hole-round',
+    )
+    expect(secondHole.mainTarget.model3dSize).toBe(440)
+    expect(secondHole.mainTarget.size).toBe(70)
   })
 })

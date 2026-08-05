@@ -1,0 +1,1395 @@
+{
+  "schemaVersion": 1,
+  "packId": "kenney-minigolf",
+  "packVersion": "3.1",
+  "license": "CC0-1.0",
+  "sourceUrl": "https://kenney.nl/assets/minigolf-kit",
+  "defaults": {
+    "token": "kenney-minigolf-ball-blue",
+    "target": "kenney-minigolf-flag-blue",
+    "ramp": "kenney-minigolf-ramp",
+    "obstacle": "kenney-minigolf-obstacle-block"
+  },
+  "models": [
+    {
+      "modelId": "kenney-minigolf-ball-blue",
+      "name": "Ball Blue",
+      "category": "ball",
+      "roles": [
+        "token"
+      ],
+      "src": "media/3d/kenney-minigolf/ball-blue.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/ball-blue.png"
+    },
+    {
+      "modelId": "kenney-minigolf-ball-green",
+      "name": "Ball Green",
+      "category": "ball",
+      "roles": [
+        "token"
+      ],
+      "src": "media/3d/kenney-minigolf/ball-green.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/ball-green.png"
+    },
+    {
+      "modelId": "kenney-minigolf-ball-red",
+      "name": "Ball Red",
+      "category": "ball",
+      "roles": [
+        "token"
+      ],
+      "src": "media/3d/kenney-minigolf/ball-red.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/ball-red.png"
+    },
+    {
+      "modelId": "kenney-minigolf-block-borders",
+      "name": "Block Borders",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/block-borders.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/block-borders.png"
+    },
+    {
+      "modelId": "kenney-minigolf-block",
+      "name": "Block",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/block.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/block.png"
+    },
+    {
+      "modelId": "kenney-minigolf-bump-down-walls",
+      "name": "Bump Down Walls",
+      "category": "ramp",
+      "roles": [
+        "ramp",
+        "terrain"
+      ],
+      "src": "media/3d/kenney-minigolf/bump-down-walls.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/bump-down-walls.png"
+    },
+    {
+      "modelId": "kenney-minigolf-bump-down",
+      "name": "Bump Down",
+      "category": "ramp",
+      "roles": [
+        "ramp",
+        "terrain"
+      ],
+      "src": "media/3d/kenney-minigolf/bump-down.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/bump-down.png"
+    },
+    {
+      "modelId": "kenney-minigolf-bump-walls",
+      "name": "Bump Walls",
+      "category": "ramp",
+      "roles": [
+        "ramp",
+        "terrain"
+      ],
+      "src": "media/3d/kenney-minigolf/bump-walls.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/bump-walls.png"
+    },
+    {
+      "modelId": "kenney-minigolf-bump",
+      "name": "Bump",
+      "category": "ramp",
+      "roles": [
+        "ramp",
+        "terrain"
+      ],
+      "src": "media/3d/kenney-minigolf/bump.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/bump.png"
+    },
+    {
+      "modelId": "kenney-minigolf-castle",
+      "name": "Castle",
+      "category": "obstacle",
+      "roles": [
+        "obstacle",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/castle.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/castle.png"
+    },
+    {
+      "modelId": "kenney-minigolf-club-blue",
+      "name": "Club Blue",
+      "category": "club",
+      "roles": [
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/club-blue.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/club-blue.png"
+    },
+    {
+      "modelId": "kenney-minigolf-club-green",
+      "name": "Club Green",
+      "category": "club",
+      "roles": [
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/club-green.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/club-green.png"
+    },
+    {
+      "modelId": "kenney-minigolf-club-red",
+      "name": "Club Red",
+      "category": "club",
+      "roles": [
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/club-red.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/club-red.png"
+    },
+    {
+      "modelId": "kenney-minigolf-corner",
+      "name": "Corner",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/corner.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/corner.png"
+    },
+    {
+      "modelId": "kenney-minigolf-crest",
+      "name": "Crest",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/crest.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/crest.png"
+    },
+    {
+      "modelId": "kenney-minigolf-end",
+      "name": "End",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/end.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/end.png"
+    },
+    {
+      "modelId": "kenney-minigolf-flag-blue",
+      "name": "Flag Blue",
+      "category": "flag",
+      "roles": [
+        "target",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/flag-blue.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/flag-blue.png"
+    },
+    {
+      "modelId": "kenney-minigolf-flag-green",
+      "name": "Flag Green",
+      "category": "flag",
+      "roles": [
+        "target",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/flag-green.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/flag-green.png"
+    },
+    {
+      "modelId": "kenney-minigolf-flag-large-blue",
+      "name": "Flag Large Blue",
+      "category": "flag",
+      "roles": [
+        "target",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/flag-large-blue.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/flag-large-blue.png"
+    },
+    {
+      "modelId": "kenney-minigolf-flag-large-green",
+      "name": "Flag Large Green",
+      "category": "flag",
+      "roles": [
+        "target",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/flag-large-green.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/flag-large-green.png"
+    },
+    {
+      "modelId": "kenney-minigolf-flag-large-red",
+      "name": "Flag Large Red",
+      "category": "flag",
+      "roles": [
+        "target",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/flag-large-red.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/flag-large-red.png"
+    },
+    {
+      "modelId": "kenney-minigolf-flag-red",
+      "name": "Flag Red",
+      "category": "flag",
+      "roles": [
+        "target",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/flag-red.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/flag-red.png"
+    },
+    {
+      "modelId": "kenney-minigolf-gap",
+      "name": "Gap",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/gap.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/gap.png"
+    },
+    {
+      "modelId": "kenney-minigolf-hill-corner",
+      "name": "Hill Corner",
+      "category": "ramp",
+      "roles": [
+        "ramp",
+        "terrain"
+      ],
+      "src": "media/3d/kenney-minigolf/hill-corner.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/hill-corner.png"
+    },
+    {
+      "modelId": "kenney-minigolf-hill-round",
+      "name": "Hill Round",
+      "category": "ramp",
+      "roles": [
+        "ramp",
+        "terrain"
+      ],
+      "src": "media/3d/kenney-minigolf/hill-round.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/hill-round.png"
+    },
+    {
+      "modelId": "kenney-minigolf-hill-square",
+      "name": "Hill Square",
+      "category": "ramp",
+      "roles": [
+        "ramp",
+        "terrain"
+      ],
+      "src": "media/3d/kenney-minigolf/hill-square.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/hill-square.png"
+    },
+    {
+      "modelId": "kenney-minigolf-hole-open",
+      "name": "Hole Open",
+      "category": "hole",
+      "roles": [
+        "target",
+        "terrain"
+      ],
+      "src": "media/3d/kenney-minigolf/hole-open.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/hole-open.png"
+    },
+    {
+      "modelId": "kenney-minigolf-hole-round",
+      "name": "Hole Round",
+      "category": "hole",
+      "roles": [
+        "target",
+        "terrain"
+      ],
+      "src": "media/3d/kenney-minigolf/hole-round.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/hole-round.png"
+    },
+    {
+      "modelId": "kenney-minigolf-hole-square",
+      "name": "Hole Square",
+      "category": "hole",
+      "roles": [
+        "target",
+        "terrain"
+      ],
+      "src": "media/3d/kenney-minigolf/hole-square.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/hole-square.png"
+    },
+    {
+      "modelId": "kenney-minigolf-inner-corner",
+      "name": "Inner Corner",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/inner-corner.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/inner-corner.png"
+    },
+    {
+      "modelId": "kenney-minigolf-narrow-block",
+      "name": "Narrow Block",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/narrow-block.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/narrow-block.png"
+    },
+    {
+      "modelId": "kenney-minigolf-narrow-round",
+      "name": "Narrow Round",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/narrow-round.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/narrow-round.png"
+    },
+    {
+      "modelId": "kenney-minigolf-narrow-square",
+      "name": "Narrow Square",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/narrow-square.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/narrow-square.png"
+    },
+    {
+      "modelId": "kenney-minigolf-obstacle-block",
+      "name": "Obstacle Block",
+      "category": "obstacle",
+      "roles": [
+        "obstacle",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/obstacle-block.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/obstacle-block.png"
+    },
+    {
+      "modelId": "kenney-minigolf-obstacle-diamond",
+      "name": "Obstacle Diamond",
+      "category": "obstacle",
+      "roles": [
+        "obstacle",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/obstacle-diamond.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/obstacle-diamond.png"
+    },
+    {
+      "modelId": "kenney-minigolf-obstacle-triangle",
+      "name": "Obstacle Triangle",
+      "category": "obstacle",
+      "roles": [
+        "obstacle",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/obstacle-triangle.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/obstacle-triangle.png"
+    },
+    {
+      "modelId": "kenney-minigolf-open",
+      "name": "Open",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/open.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/open.png"
+    },
+    {
+      "modelId": "kenney-minigolf-ramp-high",
+      "name": "Ramp High",
+      "category": "ramp",
+      "roles": [
+        "ramp",
+        "terrain"
+      ],
+      "src": "media/3d/kenney-minigolf/ramp-high.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/ramp-high.png"
+    },
+    {
+      "modelId": "kenney-minigolf-ramp-large-side",
+      "name": "Ramp Large Side",
+      "category": "ramp",
+      "roles": [
+        "ramp",
+        "terrain"
+      ],
+      "src": "media/3d/kenney-minigolf/ramp-large-side.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/ramp-large-side.png"
+    },
+    {
+      "modelId": "kenney-minigolf-ramp-large",
+      "name": "Ramp Large",
+      "category": "ramp",
+      "roles": [
+        "ramp",
+        "terrain"
+      ],
+      "src": "media/3d/kenney-minigolf/ramp-large.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/ramp-large.png"
+    },
+    {
+      "modelId": "kenney-minigolf-ramp-low",
+      "name": "Ramp Low",
+      "category": "ramp",
+      "roles": [
+        "ramp",
+        "terrain"
+      ],
+      "src": "media/3d/kenney-minigolf/ramp-low.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/ramp-low.png"
+    },
+    {
+      "modelId": "kenney-minigolf-ramp-medium",
+      "name": "Ramp Medium",
+      "category": "ramp",
+      "roles": [
+        "ramp",
+        "terrain"
+      ],
+      "src": "media/3d/kenney-minigolf/ramp-medium.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/ramp-medium.png"
+    },
+    {
+      "modelId": "kenney-minigolf-ramp-sharp",
+      "name": "Ramp Sharp",
+      "category": "ramp",
+      "roles": [
+        "ramp",
+        "terrain"
+      ],
+      "src": "media/3d/kenney-minigolf/ramp-sharp.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/ramp-sharp.png"
+    },
+    {
+      "modelId": "kenney-minigolf-ramp-side",
+      "name": "Ramp Side",
+      "category": "ramp",
+      "roles": [
+        "ramp",
+        "terrain"
+      ],
+      "src": "media/3d/kenney-minigolf/ramp-side.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/ramp-side.png"
+    },
+    {
+      "modelId": "kenney-minigolf-ramp-square",
+      "name": "Ramp Square",
+      "category": "ramp",
+      "roles": [
+        "ramp",
+        "terrain"
+      ],
+      "src": "media/3d/kenney-minigolf/ramp-square.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/ramp-square.png"
+    },
+    {
+      "modelId": "kenney-minigolf-ramp",
+      "name": "Ramp",
+      "category": "ramp",
+      "roles": [
+        "ramp",
+        "terrain"
+      ],
+      "src": "media/3d/kenney-minigolf/ramp.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/ramp.png"
+    },
+    {
+      "modelId": "kenney-minigolf-round-corner-a",
+      "name": "Round Corner A",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/round-corner-a.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/round-corner-a.png"
+    },
+    {
+      "modelId": "kenney-minigolf-round-corner-b",
+      "name": "Round Corner B",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/round-corner-b.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/round-corner-b.png"
+    },
+    {
+      "modelId": "kenney-minigolf-round-corner-c",
+      "name": "Round Corner C",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/round-corner-c.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/round-corner-c.png"
+    },
+    {
+      "modelId": "kenney-minigolf-round-large-corner-open",
+      "name": "Round Large Corner Open",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/round-large-corner-open.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/round-large-corner-open.png"
+    },
+    {
+      "modelId": "kenney-minigolf-round-large-corner",
+      "name": "Round Large Corner",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/round-large-corner.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/round-large-corner.png"
+    },
+    {
+      "modelId": "kenney-minigolf-side",
+      "name": "Side",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/side.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/side.png"
+    },
+    {
+      "modelId": "kenney-minigolf-skew-corner",
+      "name": "Skew Corner",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/skew-corner.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/skew-corner.png"
+    },
+    {
+      "modelId": "kenney-minigolf-skew-large-corner-open",
+      "name": "Skew Large Corner Open",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/skew-large-corner-open.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/skew-large-corner-open.png"
+    },
+    {
+      "modelId": "kenney-minigolf-skew-large-corner",
+      "name": "Skew Large Corner",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/skew-large-corner.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/skew-large-corner.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-concave-cap-back",
+      "name": "Spline Concave Cap Back",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-concave-cap-back.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-concave-cap-back.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-concave-cap-front",
+      "name": "Spline Concave Cap Front",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-concave-cap-front.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-concave-cap-front.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-concave-corner-large-ramp",
+      "name": "Spline Concave Corner Large Ramp",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-concave-corner-large-ramp.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-concave-corner-large-ramp.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-concave-corner-large",
+      "name": "Spline Concave Corner Large",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-concave-corner-large.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-concave-corner-large.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-concave-corner-small-ramp",
+      "name": "Spline Concave Corner Small Ramp",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-concave-corner-small-ramp.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-concave-corner-small-ramp.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-concave-corner-small",
+      "name": "Spline Concave Corner Small",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-concave-corner-small.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-concave-corner-small.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-concave-curve",
+      "name": "Spline Concave Curve",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-concave-curve.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-concave-curve.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-concave-looping",
+      "name": "Spline Concave Looping",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-concave-looping.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-concave-looping.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-concave-straight-bend-large",
+      "name": "Spline Concave Straight Bend Large",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-concave-straight-bend-large.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-concave-straight-bend-large.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-concave-straight-bend",
+      "name": "Spline Concave Straight Bend",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-concave-straight-bend.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-concave-straight-bend.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-concave-straight-bump-down",
+      "name": "Spline Concave Straight Bump Down",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-concave-straight-bump-down.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-concave-straight-bump-down.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-concave-straight-bump-up",
+      "name": "Spline Concave Straight Bump Up",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-concave-straight-bump-up.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-concave-straight-bump-up.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-concave-straight-hill-beginning",
+      "name": "Spline Concave Straight Hill Beginning",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-concave-straight-hill-beginning.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-concave-straight-hill-beginning.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-concave-straight-hill-complete-half",
+      "name": "Spline Concave Straight Hill Complete Half",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-concave-straight-hill-complete-half.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-concave-straight-hill-complete-half.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-concave-straight-hill-complete",
+      "name": "Spline Concave Straight Hill Complete",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-concave-straight-hill-complete.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-concave-straight-hill-complete.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-concave-straight-hill-end",
+      "name": "Spline Concave Straight Hill End",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-concave-straight-hill-end.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-concave-straight-hill-end.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-concave-straight-skew-left-side",
+      "name": "Spline Concave Straight Skew Left Side",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-concave-straight-skew-left-side.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-concave-straight-skew-left-side.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-concave-straight-skew-left",
+      "name": "Spline Concave Straight Skew Left",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-concave-straight-skew-left.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-concave-straight-skew-left.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-concave-straight-skew-right-side",
+      "name": "Spline Concave Straight Skew Right Side",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-concave-straight-skew-right-side.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-concave-straight-skew-right-side.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-concave-straight-skew-right",
+      "name": "Spline Concave Straight Skew Right",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-concave-straight-skew-right.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-concave-straight-skew-right.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-concave-straight",
+      "name": "Spline Concave Straight",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-concave-straight.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-concave-straight.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-concave",
+      "name": "Spline Concave",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-concave.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-concave.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-default-cap-back",
+      "name": "Spline Default Cap Back",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-default-cap-back.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-default-cap-back.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-default-cap-front",
+      "name": "Spline Default Cap Front",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-default-cap-front.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-default-cap-front.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-default-corner-large-ramp",
+      "name": "Spline Default Corner Large Ramp",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-default-corner-large-ramp.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-default-corner-large-ramp.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-default-corner-large",
+      "name": "Spline Default Corner Large",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-default-corner-large.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-default-corner-large.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-default-corner-small-ramp",
+      "name": "Spline Default Corner Small Ramp",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-default-corner-small-ramp.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-default-corner-small-ramp.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-default-corner-small",
+      "name": "Spline Default Corner Small",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-default-corner-small.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-default-corner-small.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-default-curve",
+      "name": "Spline Default Curve",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-default-curve.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-default-curve.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-default-looping",
+      "name": "Spline Default Looping",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-default-looping.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-default-looping.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-default-straight-bend-large",
+      "name": "Spline Default Straight Bend Large",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-default-straight-bend-large.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-default-straight-bend-large.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-default-straight-bend",
+      "name": "Spline Default Straight Bend",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-default-straight-bend.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-default-straight-bend.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-default-straight-bump-down",
+      "name": "Spline Default Straight Bump Down",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-default-straight-bump-down.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-default-straight-bump-down.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-default-straight-bump-up",
+      "name": "Spline Default Straight Bump Up",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-default-straight-bump-up.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-default-straight-bump-up.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-default-straight-hill-beginning",
+      "name": "Spline Default Straight Hill Beginning",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-default-straight-hill-beginning.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-default-straight-hill-beginning.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-default-straight-hill-complete-half",
+      "name": "Spline Default Straight Hill Complete Half",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-default-straight-hill-complete-half.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-default-straight-hill-complete-half.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-default-straight-hill-complete",
+      "name": "Spline Default Straight Hill Complete",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-default-straight-hill-complete.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-default-straight-hill-complete.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-default-straight-hill-end",
+      "name": "Spline Default Straight Hill End",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-default-straight-hill-end.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-default-straight-hill-end.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-default-straight-skew-left-side",
+      "name": "Spline Default Straight Skew Left Side",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-default-straight-skew-left-side.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-default-straight-skew-left-side.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-default-straight-skew-left",
+      "name": "Spline Default Straight Skew Left",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-default-straight-skew-left.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-default-straight-skew-left.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-default-straight-skew-right-side",
+      "name": "Spline Default Straight Skew Right Side",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-default-straight-skew-right-side.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-default-straight-skew-right-side.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-default-straight-skew-right",
+      "name": "Spline Default Straight Skew Right",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-default-straight-skew-right.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-default-straight-skew-right.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-default-straight",
+      "name": "Spline Default Straight",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-default-straight.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-default-straight.png"
+    },
+    {
+      "modelId": "kenney-minigolf-spline-default",
+      "name": "Spline Default",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/spline-default.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/spline-default.png"
+    },
+    {
+      "modelId": "kenney-minigolf-split-start",
+      "name": "Split Start",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/split-start.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/split-start.png"
+    },
+    {
+      "modelId": "kenney-minigolf-split-t",
+      "name": "Split T",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/split-t.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/split-t.png"
+    },
+    {
+      "modelId": "kenney-minigolf-split-walls-to-open",
+      "name": "Split Walls To Open",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/split-walls-to-open.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/split-walls-to-open.png"
+    },
+    {
+      "modelId": "kenney-minigolf-split",
+      "name": "Split",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/split.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/split.png"
+    },
+    {
+      "modelId": "kenney-minigolf-square-corner-a",
+      "name": "Square Corner A",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/square-corner-a.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/square-corner-a.png"
+    },
+    {
+      "modelId": "kenney-minigolf-start",
+      "name": "Start",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/start.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/start.png"
+    },
+    {
+      "modelId": "kenney-minigolf-straight",
+      "name": "Straight",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/straight.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/straight.png"
+    },
+    {
+      "modelId": "kenney-minigolf-structure-gate-building",
+      "name": "Structure Gate Building",
+      "category": "obstacle",
+      "roles": [
+        "obstacle",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/structure-gate-building.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/structure-gate-building.png"
+    },
+    {
+      "modelId": "kenney-minigolf-structure-gate-wide",
+      "name": "Structure Gate Wide",
+      "category": "obstacle",
+      "roles": [
+        "obstacle",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/structure-gate-wide.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/structure-gate-wide.png"
+    },
+    {
+      "modelId": "kenney-minigolf-structure-gate",
+      "name": "Structure Gate",
+      "category": "obstacle",
+      "roles": [
+        "obstacle",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/structure-gate.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/structure-gate.png"
+    },
+    {
+      "modelId": "kenney-minigolf-structure-gates",
+      "name": "Structure Gates",
+      "category": "obstacle",
+      "roles": [
+        "obstacle",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/structure-gates.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/structure-gates.png"
+    },
+    {
+      "modelId": "kenney-minigolf-structure-windmill",
+      "name": "Structure Windmill",
+      "category": "obstacle",
+      "roles": [
+        "obstacle",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/structure-windmill.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/structure-windmill.png"
+    },
+    {
+      "modelId": "kenney-minigolf-support-bottom",
+      "name": "Support Bottom",
+      "category": "support",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/support-bottom.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/support-bottom.png"
+    },
+    {
+      "modelId": "kenney-minigolf-support-low-bottom",
+      "name": "Support Low Bottom",
+      "category": "support",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/support-low-bottom.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/support-low-bottom.png"
+    },
+    {
+      "modelId": "kenney-minigolf-support-low",
+      "name": "Support Low",
+      "category": "support",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/support-low.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/support-low.png"
+    },
+    {
+      "modelId": "kenney-minigolf-support",
+      "name": "Support",
+      "category": "support",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/support.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/support.png"
+    },
+    {
+      "modelId": "kenney-minigolf-supports-bottom",
+      "name": "Supports Bottom",
+      "category": "support",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/supports-bottom.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/supports-bottom.png"
+    },
+    {
+      "modelId": "kenney-minigolf-supports-low-bottom",
+      "name": "Supports Low Bottom",
+      "category": "support",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/supports-low-bottom.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/supports-low-bottom.png"
+    },
+    {
+      "modelId": "kenney-minigolf-supports-low",
+      "name": "Supports Low",
+      "category": "support",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/supports-low.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/supports-low.png"
+    },
+    {
+      "modelId": "kenney-minigolf-supports",
+      "name": "Supports",
+      "category": "support",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/supports.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/supports.png"
+    },
+    {
+      "modelId": "kenney-minigolf-tunnel-double",
+      "name": "Tunnel Double",
+      "category": "obstacle",
+      "roles": [
+        "obstacle",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/tunnel-double.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/tunnel-double.png"
+    },
+    {
+      "modelId": "kenney-minigolf-tunnel-narrow",
+      "name": "Tunnel Narrow",
+      "category": "obstacle",
+      "roles": [
+        "obstacle",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/tunnel-narrow.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/tunnel-narrow.png"
+    },
+    {
+      "modelId": "kenney-minigolf-tunnel-wide",
+      "name": "Tunnel Wide",
+      "category": "obstacle",
+      "roles": [
+        "obstacle",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/tunnel-wide.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/tunnel-wide.png"
+    },
+    {
+      "modelId": "kenney-minigolf-wall-left",
+      "name": "Wall Left",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/wall-left.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/wall-left.png"
+    },
+    {
+      "modelId": "kenney-minigolf-wall-right",
+      "name": "Wall Right",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/wall-right.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/wall-right.png"
+    },
+    {
+      "modelId": "kenney-minigolf-walls-to-open",
+      "name": "Walls To Open",
+      "category": "course",
+      "roles": [
+        "terrain",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/walls-to-open.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/walls-to-open.png"
+    },
+    {
+      "modelId": "kenney-minigolf-windmill",
+      "name": "Windmill",
+      "category": "obstacle",
+      "roles": [
+        "obstacle",
+        "decoration"
+      ],
+      "src": "media/3d/kenney-minigolf/windmill.glb",
+      "previewSrc": "media/3d/kenney-minigolf/previews/windmill.png"
+    }
+  ]
+}

@@ -19,6 +19,7 @@ vi.mock('howler', () => {
 })
 
 import App, { ConfigurationErrorScreen, Results } from './App.jsx'
+import { levelForControlMode } from './controlMode.js'
 
 describe('App', () => {
   afterEach(cleanup)
@@ -76,13 +77,35 @@ describe('App', () => {
     expect(screen.getByRole('heading', { name: /convert coins/i })).toBeInTheDocument()
   })
 
+  it('persists the home movement toggle and applies ricochet to campaign play', async () => {
+    await boot()
+    const guided = screen.getByRole('button', { name: 'Guided' })
+    const ricochet = screen.getByRole('button', { name: 'Ricochet' })
+
+    expect(guided).toHaveAttribute('aria-pressed', 'true')
+    expect(ricochet).toHaveAttribute('aria-pressed', 'false')
+    fireEvent.click(ricochet)
+
+    expect(ricochet).toHaveAttribute('aria-pressed', 'true')
+    expect(
+      JSON.parse(window.localStorage.getItem('path-protocol.progress')).settings
+        .controlMode,
+    ).toBe('kinetic')
+
+    fireEvent.click(screen.getByRole('button', { name: /begin calibration/i }))
+    expect(
+      screen.getByRole('application', { name: /foundation 01 obstacle course/i }),
+    ).toBeInTheDocument()
+    expect(screen.getByText('Shots launched')).toBeInTheDocument()
+  })
+
   it('unlocks every level and exposes diagnostics in developer playtest mode', async () => {
     window.history.replaceState({}, '', '/?dev=1')
     await boot()
 
     expect(screen.getByText(/dev playtest/i)).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: /select level/i }))
-    const finalLevel = screen.getByRole('button', { name: /100.*convergence 10/i })
+    const finalLevel = screen.getByRole('button', { name: /100.*round green/i })
     expect(finalLevel).toBeEnabled()
     fireEvent.click(finalLevel)
 
@@ -103,7 +126,7 @@ describe('App', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /select level/i }))
     expect(
-      screen.getByRole('button', { name: /100.*convergence 10/i }),
+      screen.getByRole('button', { name: /100.*round green/i }),
     ).toBeEnabled()
   })
 
@@ -175,5 +198,59 @@ describe('App', () => {
     )
     expect(onMicro).toHaveBeenCalledWith('phase-window')
     expect(screen.getByText(/separate from campaign score/i)).toBeInTheDocument()
+  })
+
+  it('shows kinetic par rating and campaign shot records on results', () => {
+    render(
+      <Results
+        level={{ id: 'level-999', number: 999 }}
+        result={{
+          routeFactor: 0.9,
+          timeFactor: 0.8,
+          finalScore: 900,
+          attainableMaximum: 1000,
+          elapsedMs: 6000,
+          actualDistance: 800,
+          collisions: 0,
+          collisionPenalty: 0,
+          earnedBonuses: 0,
+          shotsTaken: 3,
+          shotPar: 4,
+          shotRating: 'under-par',
+        }}
+        improved
+        cumulative={900}
+        campaignShots={12}
+        onReplay={() => {}}
+        onNext={() => {}}
+        onLevels={() => {}}
+        devMode={false}
+        protocols={[]}
+        microRecords={{}}
+        microNotice={null}
+        onMicro={() => {}}
+      />,
+    )
+
+    expect(screen.getByText('Shots used')).toBeInTheDocument()
+    expect(screen.getByText(/under par · par 4 · 12 campaign-best shots/i)).toBeInTheDocument()
+  })
+
+  it('projects either movement mode without mutating authored levels', () => {
+    const configured = {
+      id: 'level-999',
+      shotMechanic: { maximumLaunchSpeed: 800 },
+    }
+    const guidedLevel = { id: 'level-01' }
+    const defaults = { maximumLaunchSpeed: 700, stopSpeed: 30 }
+
+    expect(levelForControlMode(configured, 'guided')).toEqual({ id: 'level-999' })
+    expect(levelForControlMode(configured, 'kinetic', defaults)).toEqual(configured)
+    expect(levelForControlMode(guidedLevel, 'kinetic', defaults)).toEqual({
+      id: 'level-01',
+      shotMechanic: defaults,
+    })
+    expect(configured).toHaveProperty('shotMechanic')
+    expect(guidedLevel).not.toHaveProperty('shotMechanic')
   })
 })

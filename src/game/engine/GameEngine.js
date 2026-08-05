@@ -22,6 +22,17 @@ import {
   isPowerActive,
 } from './PowerSystem.js'
 import { updateContactSwitches } from './SwitchSystem.js'
+import { advanceKineticToken, launchVelocity } from './KineticMovementSystem.js'
+import {
+  isShotBudgetExhausted,
+  rateShotResult,
+  resolveShotGoals,
+} from './ShotGoalSystem.js'
+import {
+  activateContactRamp,
+  advanceVerticalMotion,
+  obstaclesAtTokenElevation,
+} from './VerticalMovementSystem.js'
 
 /**
  * Owns one deterministic level session and exposes intent-oriented game actions.
@@ -103,6 +114,66 @@ export class GameEngine {
     })
   }
 
+  /**
+   * Arms aim input for an opt-in kinetic level without starting its clock.
+   *
+   * @param {'pointer'|'keyboard'} inputMode Active aiming device.
+   * @returns {boolean} Whether aiming was accepted.
+   */
+  beginKineticAim(inputMode) {
+    if (!this.session.kinetic) return false
+    if (!['ready', 'bonus-ready', 'active-main', 'active-bonus'].includes(this.machine.state)) {
+      return false
+    }
+    if (this.session.kinetic.phase === 'in-flight') return false
+    if (this.session.vertical && !this.session.vertical.grounded) return false
+    this.session.kinetic.phase = 'aiming'
+    this.session.kinetic.aimStart = {
+      ...(inputMode === 'pointer'
+        ? this.session.input.desiredPosition
+        : this.session.token.position),
+    }
+    this.session.input.mode = inputMode
+    this.session.input.active = true
+    return true
+  }
+
+  /**
+   * Queues one deterministic shot for consumption by the next fixed update.
+   *
+   * @param {import('../types.js').Point} aim Aim displacement in logical world units.
+   * @param {'pointer'|'keyboard'} inputMode Input device that requested the launch.
+   * @returns {boolean} Whether a non-zero shot was queued.
+   */
+  queueKineticShot(aim, inputMode) {
+    if (!this.session.kinetic || this.session.kinetic.phase !== 'aiming') return false
+    if (isShotBudgetExhausted(this.session)) return false
+    const velocity = launchVelocity(aim, this.session.level.shotMechanic)
+    if (!velocity) return false
+    if (['ready', 'bonus-ready'].includes(this.machine.state)) {
+      this.startAttempt(inputMode)
+    } else {
+      this.session.input.active = true
+      this.session.input.mode = inputMode
+    }
+    this.session.kinetic.launchVelocity = velocity
+    this.session.kinetic.launchRequested = true
+    this.session.input.active = false
+    this.session.input.mode = null
+    this.session.input.directions.clear()
+    return true
+  }
+
+  /** Cancels kinetic aiming without launching or ending the active level. */
+  cancelKineticAim() {
+    if (!this.session.kinetic || this.session.kinetic.phase !== 'aiming') return false
+    this.session.kinetic.phase = 'resting'
+    this.session.input.active = false
+    this.session.input.mode = null
+    this.session.input.directions.clear()
+    return true
+  }
+
   /** Updates elapsed attempt time from the monotonic clock, in milliseconds. */
   updateElapsed() {
     if (this.session.startedAtMs !== null) {
@@ -123,6 +194,20 @@ export class GameEngine {
     }
     if (!['active-main', 'active-bonus'].includes(this.machine.state)) {
       return { updated: false, collision: false }
+    }
+
+    if (this.session.kinetic?.launchRequested) {
+      this.session.token.velocity = { ...this.session.kinetic.launchVelocity }
+      this.session.kinetic.launchVelocity = null
+      this.session.kinetic.launchRequested = false
+      this.session.kinetic.phase = 'in-flight'
+      this.session.kinetic.shotsTaken += 1
+      this.session.kinetic.impactsThisShot = 0
+      this.events.emit('shot.launched', {
+        levelId: this.session.levelId,
+        shot: this.session.kinetic.shotsTaken,
+        velocity: { ...this.session.token.velocity },
+      })
     }
 
     this.session.simulationTimeMs += stepMs
@@ -156,25 +241,89 @@ export class GameEngine {
       ...this.session.level.obstacles,
       ...hazards.previous,
     ]
+    const heightObstacles = obstaclesAtTokenElevation(
+      this.session,
+      collisionOptions.obstacles ?? allObstacles,
+    )
+    const heightPreviousObstacles = obstaclesAtTokenElevation(
+      this.session,
+      collisionOptions.previousObstacles ??
+        (collisionOptions.obstacles ? collisionOptions.obstacles : previousObstacles),
+    )
     const obstacleShield =
       Boolean(collisionOptions.obstacleShield) ||
       isPowerActive(this.session, 'obstacleShield', nowMs)
     const fullShield =
       Boolean(collisionOptions.fullShield) ||
       isPowerActive(this.session, 'fullShield', nowMs)
-    const result = advanceTokenWithCollisions(
-      this.session,
-      stepMs,
-      {
-        ...collisionOptions,
-        obstacles: collisionOptions.obstacles ?? allObstacles,
-        previousObstacles:
-          collisionOptions.previousObstacles ??
-          (collisionOptions.obstacles ? collisionOptions.obstacles : previousObstacles),
-        obstacleShield,
-        fullShield,
-      },
-    )
+    const result = this.session.kinetic
+      ? advanceKineticToken(
+          this.session,
+          stepMs,
+          heightObstacles,
+        )
+      : advanceTokenWithCollisions(
+          this.session,
+          stepMs,
+          {
+            ...collisionOptions,
+            obstacles: heightObstacles,
+            previousObstacles: heightPreviousObstacles,
+            obstacleShield,
+            fullShield,
+          },
+        )
+    const verticalResult = advanceVerticalMotion(this.session, stepMs)
+    if (
+      result.stopped &&
+      this.session.vertical &&
+      !this.session.vertical.grounded
+    ) {
+      result.stopped = false
+      this.session.kinetic.phase = 'in-flight'
+      this.session.input.active = true
+    }
+    const activatedRamp = activateContactRamp(this.session)
+    if (activatedRamp) {
+      if (this.session.kinetic) this.session.kinetic.phase = 'in-flight'
+      this.events.emit('vertical.launched', {
+        levelId: this.session.levelId,
+        rampId: activatedRamp.id,
+        verticalVelocity: this.session.token.verticalVelocity,
+      })
+    }
+    if (verticalResult.landed) {
+      this.events.emit('vertical.landed', {
+        levelId: this.session.levelId,
+        elevation: this.session.token.elevation,
+      })
+    }
+    if (this.session.kinetic) {
+      for (const impact of result.impacts) {
+        this.session.kinetic.impactsThisShot += 1
+        this.events.emit('shot.impacted', {
+          levelId: this.session.levelId,
+          shot: this.session.kinetic.shotsTaken,
+          ...impact,
+        })
+      }
+      if (result.stopped) {
+        this.events.emit('shot.stopped', {
+          levelId: this.session.levelId,
+          shot: this.session.kinetic.shotsTaken,
+          point: { ...this.session.token.position },
+        })
+      }
+    }
+    if (this.session.kinetic) {
+      for (const impact of result.impacts) {
+        appendTrailSample(
+          this.session.trails.active,
+          impact.point,
+          this.session.trails.maximumSamples,
+        )
+      }
+    }
     if (result.collisionStarted) {
       appendTrailSample(
         this.session.trails.active,
@@ -269,6 +418,28 @@ export class GameEngine {
         bonusOffered: Boolean(bonus),
       }
     }
+    if (this.session.kinetic && result.stopped && isShotBudgetExhausted(this.session)) {
+      if (this.machine.state === 'active-bonus') {
+        const completion = this.releaseAttempt('maximum-shots')
+        return {
+          ...result,
+          updated: true,
+          restarted: false,
+          shotLimitReached: true,
+          ...completion,
+        }
+      }
+      this.machine.transition('maximum-shots', {
+        shotsTaken: this.session.kinetic.shotsTaken,
+      })
+      this.restart('maximum-shots')
+      return {
+        ...result,
+        updated: true,
+        restarted: true,
+        shotLimitReached: true,
+      }
+    }
     return { ...result, updated: true, restarted: false }
   }
 
@@ -279,6 +450,11 @@ export class GameEngine {
    * @returns {object} Activation result and optional failure reason.
    */
   activatePowerByKey(key) {
+    if (this.session.kinetic) {
+      const result = { activated: false, reason: 'kinetic-mode' }
+      this.events.emit('power.unavailable', result)
+      return result
+    }
     if (this.session.startedAtMs === null) {
       return { activated: false, reason: 'attempt-not-started' }
     }
@@ -376,11 +552,16 @@ export class GameEngine {
       })
     }
     for (const reward of rewards) this.events.emit('reward.claimed', reward)
+    const shotGoals = resolveShotGoals(this.session.level)
+    const shotsTaken = this.session.kinetic?.shotsTaken ?? 0
     this.events.emit('attempt.completed', {
       score,
       earnedBonuses: this.session.targets.earnedBonuses,
       bonusFailed,
       rewards,
+      shotsTaken,
+      shotPar: shotGoals.par,
+      shotRating: rateShotResult(shotsTaken, shotGoals),
     })
   }
 

@@ -18,6 +18,7 @@ import { loadStartupMedia } from '../game/media/startupLoader.js'
 import { sharedVectorAssetCache } from '../game/rendering/pixi/VectorAssetCache.js'
 import {
   cumulativeScore,
+  cumulativeShots,
   collectCourseCoin,
   consumePowerup,
   loadProgress,
@@ -28,6 +29,7 @@ import {
   resetProgress,
   saveProgress,
 } from '../persistence/progressStore.js'
+import { levelForControlMode } from './controlMode.js'
 
 const PRESENTATION_THEME_KEY = 'path-protocol.presentation-theme'
 
@@ -177,6 +179,9 @@ function HomeScreen({
   devMode,
   onToggleDevMode,
   totalLevels,
+  controlMode,
+  onControlModeChange,
+  campaignShots,
 }) {
   const completedCount = Object.values(progress.levels).filter((level) => level.completed).length
   const hasProgress = completedCount > 0
@@ -201,6 +206,28 @@ function HomeScreen({
           Guide a live protocol token through generated hazard chambers. Every extra
           movement costs efficiency. Every contact costs 20%.
         </p>
+        <div className="home-mode-selector" role="group" aria-label="Movement mode">
+          <span>Movement mode</span>
+          <button
+            type="button"
+            aria-pressed={controlMode === 'guided'}
+            onClick={() => onControlModeChange('guided')}
+          >
+            Guided
+          </button>
+          <button
+            type="button"
+            aria-pressed={controlMode === 'kinetic'}
+            onClick={() => onControlModeChange('kinetic')}
+          >
+            Ricochet
+          </button>
+          <small>
+            {controlMode === 'kinetic'
+              ? `${campaignShots} campaign-best · ${progress.player.totalShotsLaunched} completed-run shots`
+              : 'Original continuous steering'}
+          </small>
+        </div>
         <div className="hero-actions">
           <button className="primary-button" type="button" onClick={onPlay}>
             <span>{hasProgress ? 'Continue protocol' : 'Begin calibration'}</span>
@@ -275,7 +302,11 @@ function HomeScreen({
             </g>
           </svg>
           <div className="hero-frame__footer">
-            <span>INPUT // HOLD + DRAG</span>
+            <span>
+              {controlMode === 'kinetic'
+                ? 'INPUT // AIM + LAUNCH'
+                : 'INPUT // HOLD + DRAG'}
+            </span>
             <span>VECTOR LOCKED</span>
           </div>
         </div>
@@ -362,6 +393,11 @@ function LevelSelect({
                 <span>
                   Best <b>{(record?.bestScore ?? 0).toLocaleString()}</b>
                 </span>
+                {record?.bestShots > 0 && (
+                  <span>
+                    Fewest shots <b>{record.bestShots}</b>
+                  </span>
+                )}
               </div>
               <div className="difficulty-bar">
                 <i
@@ -496,6 +532,12 @@ function Instructions() {
           <div className="guide-icon guide-icon--score"><i /></div>
           <h2>Collect and power up</h2>
           <p>Touch one-time coins, purchase charges in the Power Lab, and activate them anytime with number keys 1–5.</p>
+        </article>
+        <article>
+          <span className="guide-index">07</span>
+          <div className="guide-icon guide-icon--token"><i /></div>
+          <h2>Set your movement mode</h2>
+          <p>Use the home-screen toggle for Guided movement or Ricochet play: press the stopped token, pull backward, and release to launch. Shot goals track power, par, limits, and exact stops.</p>
         </article>
       </section>
       <div className="guide-callout">
@@ -656,9 +698,16 @@ export function Results({
   microNotice,
   onMicro,
   totalLevels,
+  campaignShots = 0,
 }) {
   const efficiency = Math.round(result.routeFactor * 100)
   const timeRating = Math.round(result.timeFactor * 100)
+  const shotRating = {
+    perfect: 'Perfect',
+    'under-par': 'Under par',
+    par: 'Par',
+    'over-par': 'Over par',
+  }[result.shotRating]
   return (
     <main className="results-screen">
       <div className="results-orbit" aria-hidden="true">
@@ -688,12 +737,22 @@ export function Results({
           <small>-{Math.round(result.collisionPenalty).toLocaleString()} points</small>
         </div>
         <div>
-          <span>Bonus relays</span>
-          <strong>{result.earnedBonuses}</strong>
+          <span>{result.shotsTaken > 0 ? 'Shots used' : 'Bonus relays'}</span>
+          <strong>
+            {result.shotsTaken > 0 ? result.shotsTaken : result.earnedBonuses}
+          </strong>
           <small>
-            {result.coinsEarned
-              ? `+${result.coinsEarned} reward coins`
-              : `Total score ${cumulative.toLocaleString()}`}
+            {result.shotsTaken > 0
+              ? [
+                  shotRating,
+                  result.shotPar ? `Par ${result.shotPar}` : null,
+                  `${campaignShots} campaign-best shots`,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')
+              : result.coinsEarned
+                ? `+${result.coinsEarned} reward coins`
+                : `Total score ${cumulative.toLocaleString()}`}
           </small>
         </div>
       </div>
@@ -802,8 +861,18 @@ function PathProtocolApp() {
     currentMicroProtocol?.level ??
     campaignLevels.find((level) => level.id === selectedLevelId) ??
     campaignLevels[0]
-  const currentLevel = useMemo(() => generateLevel(selectedConfig), [selectedConfig])
+  const runtimeConfig = useMemo(
+    () =>
+      levelForControlMode(
+        selectedConfig,
+        progress.settings.controlMode,
+        gameplayConfig.kineticShot,
+      ),
+    [selectedConfig, progress.settings.controlMode],
+  )
+  const currentLevel = useMemo(() => generateLevel(runtimeConfig), [runtimeConfig])
   const totalScore = cumulativeScore(progress)
+  const totalShots = cumulativeShots(progress)
   const audioRef = useRef(null)
   const audioLifecycleRef = useRef(null)
   const loadedMediaKeyRef = useRef(null)
@@ -963,6 +1032,12 @@ function PathProtocolApp() {
     setSelectedMicroId(protocolId)
     setMicroNotice(null)
     navigate('game')
+  }
+
+  /** @param {'guided'|'kinetic'} mode Persistent campaign movement mode. @returns {void} */
+  const changeControlMode = (mode) => {
+    if (!['guided', 'kinetic'].includes(mode)) return
+    handleSettings({ ...progress.settings, controlMode: mode })
   }
 
   /** Advances results to the next campaign level or level selection. */
@@ -1165,6 +1240,9 @@ function PathProtocolApp() {
           devMode={devMode}
           onToggleDevMode={toggleDevMode}
           totalLevels={campaignLevels.length}
+          controlMode={progress.settings.controlMode}
+          onControlModeChange={changeControlMode}
+          campaignShots={totalShots}
         />
       )}
       {screen === 'levels' && (
@@ -1206,7 +1284,7 @@ function PathProtocolApp() {
       )}
       {screen === 'game' && (
         <GameView
-          key={`${activeThemeId}:${currentLevel.internalId ?? currentLevel.id}`}
+          key={`${activeThemeId}:${currentLevel.internalId ?? currentLevel.id}:${progress.settings.controlMode}`}
           level={currentLevel}
           levelBest={
             currentMicroProtocol
@@ -1280,6 +1358,7 @@ function PathProtocolApp() {
           microNotice={microNotice}
           onMicro={playMicroProtocol}
           totalLevels={campaignLevels.length}
+          campaignShots={totalShots}
         />
       )}
 

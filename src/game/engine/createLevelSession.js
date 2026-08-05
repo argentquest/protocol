@@ -1,6 +1,7 @@
 import { generateLevel } from '../generation/levelGenerator.js'
 import { currentMovingObstacle } from '../geometry/geometry.js'
 import { resolveDynamicObstacles } from './DynamicObstacleSystem.js'
+import { surfaceHeightAt, supportSurfaceAt } from './TerrainSystem.js'
 
 /** @pure @param {{x:number,y:number}} point World point. @returns {{x:number,y:number}} Detached point copy. */
 function copyPoint(point) {
@@ -47,6 +48,19 @@ export function createLevelSession(
 ) {
   const level = generatedLevel ?? generate(levelConfig)
   const start = copyPoint(level.startPoint)
+  const authoredStartElevation =
+    level.startPoint.elevation ?? level.token.elevation
+  const highestStartSurface = surfaceHeightAt(level, start)
+  const initialElevation =
+    authoredStartElevation ?? highestStartSurface.height
+  const initialSupport = supportSurfaceAt(
+    level,
+    start,
+    initialElevation,
+    level.verticalPhysics?.maximumStepHeight ?? level.token.size * 0.35,
+  )
+  const startsGrounded =
+    Math.abs(initialElevation - initialSupport.height) < 1e-7
   return {
     level,
     levelId: level.id,
@@ -64,8 +78,20 @@ export function createLevelSession(
       position: copyPoint(start),
       previousPosition: copyPoint(start),
       lastSafePosition: copyPoint(start),
+      lastRestPosition: copyPoint(start),
       velocity: { x: 0, y: 0 },
+      elevation: initialElevation,
+      previousElevation: initialElevation,
+      verticalVelocity: 0,
+      motionSegments: [],
     },
+    vertical: level.verticalPhysics
+      ? {
+          grounded: startsGrounded,
+          surfaceId: startsGrounded ? initialSupport.id : null,
+          rampLatchId: null,
+        }
+      : null,
     input: {
       mode: null,
       active: false,
@@ -73,6 +99,16 @@ export function createLevelSession(
       directions: new Set(),
       requestedPowerKey: null,
     },
+    kinetic: level.shotMechanic
+      ? {
+          phase: 'resting',
+          launchRequested: false,
+          launchVelocity: null,
+          shotsTaken: 0,
+          impactsThisShot: 0,
+          aimStart: copyPoint(start),
+        }
+      : null,
     collisions: {
       count: 0,
       latched: false,

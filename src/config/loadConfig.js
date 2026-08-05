@@ -4,6 +4,7 @@ import gameConfig from './gameConfig.json'
 import mediaRegistry from './mediaRegistry.json'
 import soundRegistry from './soundRegistry.json'
 import microProtocolConfig from './microProtocols.json'
+import threeMediaManifest from './generated/threeMediaManifest.json'
 import { validateConfiguration } from './validateConfig.js'
 
 const levelModules = import.meta.glob('./levels/*.json', {
@@ -35,6 +36,7 @@ export const configurationStatus = import.meta.env.PROD
       themeConfig,
       mediaRegistry,
       soundRegistry,
+      threeMediaManifest,
     })
 
 export const activeTheme = themeConfig.themes[themeConfig.activeTheme]
@@ -45,6 +47,7 @@ export const gameplayConfig = gameConfig
 export const mediaDefinitions = mediaRegistry.media
 export const soundDefinitions = soundRegistry.sounds
 export const mediaVersion = mediaRegistry.mediaVersion
+export const threeModelCatalog = threeMediaManifest
 
 /**
  * Resolves a level by stable ID, falling back to the first campaign level.

@@ -325,6 +325,62 @@ Contact switches support one-shot, timed, and toggle activation. Raw input never
 activates a switch directly; activation occurs during the fixed engine update
 after complete-token contact is evaluated.
 
+### 10.2 Kinetic shot mode
+
+Kinetic movement replaces guided movement with deterministic aim-and-launch
+play. React owns one persistent home-screen `Movement mode` toggle, stored as
+`settings.controlMode`; changing it does not alter authored level JSON.
+
+At session creation React makes an immutable mode-specific projection:
+
+- `guided` omits an authored `shotMechanic` and preserves original controls;
+- `kinetic` uses an authored `shotMechanic` when present, otherwise injects the
+  global defaults from `gameConfig.kineticShot`;
+- every campaign level and Micro Protocol therefore supports either movement
+  mode on the same authored/generated layout;
+- the selected mode remains active for subsequent levels until changed at home.
+
+- Pointer play presses the stopped token, pulls opposite the intended launch
+  direction, and releases to queue a shot. An authored `two-click` input style
+  remains available as an override.
+- Keyboard play presses Space to aim, holds an arrow direction, and presses
+  Space again to queue a shot.
+- Launch intent is converted to velocity and consumed only by the next fixed
+  engine update.
+- Steering is locked in flight.
+- Linear drag and configured restitution affect speed in world units/second.
+- Arena boundaries and static obstacles reflect velocity without incrementing
+  the penalized collision counter.
+- Static obstacles may override the default response with `rebound`, `bumper`,
+  `stop`, or `reset`; reset returns to `lastRestPosition`, which updates only
+  when the token reaches exact rest or a target checkpoint.
+- Motion below `stopSpeed` becomes literal zero velocity, permitting the next
+  aim without residual sliding.
+- Multi-impact steps retain ordered path segments for target sweeps, distance,
+  and trail rendering.
+- Authored shot-mechanic levels remain restricted to validated static rebound
+  surfaces; global Ricochet projection can still use the campaign's fixed-step,
+  time-resolved hazards as collision surfaces.
+- Consumable powers are unavailable in Ricochet sessions.
+
+Kinetic phase (`resting`, `aiming`, or `in-flight`) is engine session state
+inside `active-main`/`active-bonus`; it does not duplicate the global game state
+machine. Pixi renders the aim line and engine transforms but never predicts or
+resolves an authoritative rebound.
+
+Completion payloads include `shotsTaken`. Persistence keeps the latest and
+fewest positive shot count per campaign level, sums those best records for the
+campaign shot total, and accumulates lifetime launched shots from completed
+campaign and Micro Protocol runs. Guided completions never overwrite a kinetic
+shot record.
+
+Optional `shotGoals` define par, a perfect threshold, and a maximum shot
+budget. The HUD exposes live power, shots used/remaining, and par. Consuming the
+last shot never fails an in-flight token: target contact is resolved first,
+then an exhausted main attempt restarts only if the token has stopped without
+success. Completion emits a deterministic perfect/under-par/par/over-par
+rating.
+
 ## 11. Trail rendering and scoring distance
 
 The player's actual path remains visible.
@@ -795,6 +851,29 @@ right-click context menu offers separate per-entity image and supported-event
 sound actions plus a selected-object-only JSON dialog. Object JSON is validated
 in the complete level before it can be applied.
 
+The selected-object inspector also exposes independent vertical properties in
+logical world units. `elevation` places the bottom of an object above the ground,
+`visualHeight` controls its Three.js presentation, and `collisionHeight` controls
+the authoritative vertical contact interval. These properties are optional on
+the token and every placed entity, so levels that omit them retain their existing
+flat-course defaults. The token is selectable in the inspector even though its
+live position remains engine-owned.
+
+Terrain surfaces are a separate selectable object category because their
+top-down `height` is a footprint dimension rather than a vertical extrusion.
+Each surface owns north-west, north-east, south-east, and south-west absolute
+elevations. Equal corners form a platform or bridge; unequal corners form the
+two deterministic slope triangles consumed identically by the engine and
+Three.js. The editor exposes a set-all platform height plus individual corner
+controls and surface friction.
+
+V3 also exposes the complete built-in 3D model catalog in the selected-object
+inspector. Any renderable entity may store an optional schema-validated
+`model3dId`; the catalog provides grouped choices and previews from its generated
+manifest. Model selection affects presentation only. JSON footprint geometry,
+vertical collision, and terrain surfaces remain authoritative, and failed model
+loads retain procedural fallback geometry.
+
 The map also owns a direct arena-boundary tool. Authors can convert between the
 schema's rectangular, elliptical, and polygonal variants. Polygon vertices use
 absolute 1600 × 900 coordinates, snap to the 10-unit grid, and expose numbered
@@ -1000,8 +1079,8 @@ pipeline and therefore never mount multiple live gameplay canvases.
 - First clears may grant a small configured one-time coin reward.
 - Failure or exit returns to the parent campaign result.
 - Power charges and course-coin progress are not consumed.
-- Their compact layouts teach phase, orbit, pulse, and switch behaviors before
-  those behaviors are combined in later campaign levels.
+- Their compact layouts teach phase, orbit, pulse, switch, and force-field
+  behaviors before those behaviors are combined in later campaign levels.
 
 ## 22. Development diagnostics
 

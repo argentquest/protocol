@@ -14,5 +14,16 @@
   },
   "collision": {
     "tokenToleranceUnits": 4
+  },
+  "kineticShot": {
+    "inputStyle": "drag-release",
+    "minimumAimDistance": 8,
+    "minimumLaunchSpeed": 260,
+    "maximumLaunchSpeed": 820,
+    "aimDistanceForMaximumSpeed": 260,
+    "dragPerSecond": 260,
+    "stopSpeed": 36,
+    "restitution": 0.78,
+    "maximumImpactsPerStep": 4
   }
 }

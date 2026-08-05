@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://path-protocol.local/schemas/threeMediaManifest.schema.json",
+  "title": "Path Protocol generated 3D media manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "packId",
+    "packVersion",
+    "license",
+    "sourceUrl",
+    "defaults",
+    "models"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "packId": { "const": "kenney-minigolf" },
+    "packVersion": { "const": "3.1" },
+    "license": { "const": "CC0-1.0" },
+    "sourceUrl": { "type": "string", "pattern": "^https://" },
+    "defaults": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["token", "target", "ramp", "obstacle"],
+      "properties": {
+        "token": { "$ref": "#/$defs/modelId" },
+        "target": { "$ref": "#/$defs/modelId" },
+        "ramp": { "$ref": "#/$defs/modelId" },
+        "obstacle": { "$ref": "#/$defs/modelId" }
+      }
+    },
+    "models": {
+      "type": "array",
+      "minItems": 126,
+      "maxItems": 126,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["modelId", "name", "category", "roles", "src", "previewSrc"],
+        "properties": {
+          "modelId": { "$ref": "#/$defs/modelId" },
+          "name": { "type": "string", "minLength": 1 },
+          "category": {
+            "enum": ["ball", "club", "flag", "hole", "ramp", "obstacle", "support", "course"]
+          },
+          "roles": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "enum": ["token", "target", "ramp", "terrain", "obstacle", "decoration"]
+            }
+          },
+          "src": { "type": "string", "pattern": "^media/3d/kenney-minigolf/[a-z0-9-]+\\.glb$" },
+          "previewSrc": { "type": "string", "pattern": "^media/3d/kenney-minigolf/previews/[a-z0-9-]+\\.png$" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "modelId": {
+      "type": "string",
+      "pattern": "^kenney-minigolf-[a-z0-9]+(?:-[a-z0-9]+)*$"
+    }
+  }
+}

@@ -4,6 +4,7 @@ import {
   isSafePosition,
   shapesIntersect,
 } from '../geometry/geometry.js'
+import { verticalRangesOverlap } from './VerticalMovementSystem.js'
 
 /**
  * Tests a timed power against a monotonic real-time timestamp.
@@ -93,6 +94,19 @@ export function collectContactCoins(session, magnetRadius = 0) {
   const claimed = []
   for (const coin of session.level.coins) {
     if (session.collectedCoinIds.has(coin.id)) continue
+    if (
+      session.vertical &&
+      !verticalRangesOverlap(
+        session.token.elevation,
+        session.level.token.collisionHeight ?? session.level.token.size,
+        {
+          ...coin,
+          collisionHeight: coin.collisionHeight ?? coin.size,
+        },
+      )
+    ) {
+      continue
+    }
     const inMagnetRange =
       magnetRadius > 0 &&
       distance(session.token.position, coin) <=

@@ -7,11 +7,12 @@ const directionKeys = new Set([
 
 /**
  * @typedef {object} InputCallbacks
- * @property {(mode: 'pointer'|'keyboard') => void} [onActivate] Attempt-start callback.
- * @property {(reason: string) => void} [onRelease] Attempt-release callback.
+ * @property {(mode: 'pointer'|'keyboard') => boolean|void} [onActivate] Attempt-start callback.
+ * @property {(reason: string, intent: object) => void} [onRelease] Attempt-release callback.
  * @property {() => void} [onRestart] Manual-restart callback.
  * @property {(key: string) => void} [onPower] Power-key callback.
  * @property {(reason: string, wasActive: boolean) => void} [onInterrupt] Focus-loss callback.
+ * @property {(directions: Set<string>) => void} [onDirection] Direction-intent callback.
  */
 
 /**
@@ -32,15 +33,16 @@ export function createInputController(inputState, callbacks = {}) {
     onRestart = () => {},
     onPower = () => {},
     onInterrupt = () => {},
+    onDirection = () => {},
   } = callbacks
 
   /** @param {'pointer'|'keyboard'} mode Requested control mode. @returns {void} */
   function activate(mode) {
     const inputState = getInputState()
     if (inputState.active) return false
+    if (onActivate(mode) === false) return false
     inputState.active = true
     inputState.mode = mode
-    onActivate(mode)
     return true
   }
 
@@ -48,10 +50,15 @@ export function createInputController(inputState, callbacks = {}) {
   function release(reason = 'released') {
     const inputState = getInputState()
     if (!inputState.active) return false
+    const intent = {
+      mode: inputState.mode,
+      desiredPosition: { ...inputState.desiredPosition },
+      directions: new Set(inputState.directions),
+    }
     inputState.active = false
     inputState.mode = null
     inputState.directions.clear()
-    onRelease(reason)
+    onRelease(reason, intent)
     return true
   }
 
@@ -67,6 +74,7 @@ export function createInputController(inputState, callbacks = {}) {
     const inputState = getInputState()
     if (directionKeys.has(key)) {
       inputState.directions.add(key)
+      onDirection(new Set(inputState.directions))
       return { handled: true, action: 'direction' }
     }
     if (key === ' ') {
@@ -92,6 +100,7 @@ export function createInputController(inputState, callbacks = {}) {
     const inputState = getInputState()
     if (!directionKeys.has(key)) return false
     inputState.directions.delete(key)
+    onDirection(new Set(inputState.directions))
     return true
   }
 

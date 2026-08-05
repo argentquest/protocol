@@ -2,10 +2,10 @@
   "schemaVersion": 2,
   "id": "level-100",
   "number": 100,
-  "name": "Convergence 10",
-  "seed": "path-protocol-16x9-100-v2",
+  "name": "Round Green",
+  "seed": "path-protocol-v3-round-green-100",
   "difficulty": 10,
-  "briefing": "Tier 10: Convergence. Combine every protocol under tighter timing.",
+  "briefing": "A simple finishing hole: take the straight ramp and settle into the hole at the center of the large round green.",
   "arena": {
     "shape": "rect",
     "mediaId": "arena-standard",
@@ -15,7 +15,8 @@
   "token": {
     "shape": "circle",
     "size": 40,
-    "mediaId": "token-circle"
+    "mediaId": "token-circle",
+    "model3dId": "kenney-minigolf-ball-red"
   },
   "movement": {
     "maximumSpeed": 650,
@@ -23,196 +24,99 @@
     "deceleration": 2300,
     "keyboardSpeed": 450
   },
+  "verticalPhysics": {
+    "gravity": 1150,
+    "maximumFallSpeed": 950,
+    "groundHeight": 0,
+    "maximumStepHeight": 24
+  },
+  "shotMechanic": {
+    "inputStyle": "drag-release",
+    "minimumAimDistance": 12,
+    "minimumLaunchSpeed": 150,
+    "maximumLaunchSpeed": 760,
+    "aimDistanceForMaximumSpeed": 260,
+    "dragPerSecond": 270,
+    "airDragPerSecond": 20,
+    "stopSpeed": 22,
+    "restitution": 0.78,
+    "maximumImpactsPerStep": 6
+  },
+  "shotGoals": {
+    "par": 2,
+    "perfectShots": 1,
+    "maximumShots": 6
+  },
+  "ramps": [
+    {
+      "id": "round-green-ramp",
+      "mediaId": "obstacle-static-rect",
+      "model3dId": "kenney-minigolf-ramp-large",
+      "x": 520,
+      "y": 450,
+      "width": 210,
+      "height": 140,
+      "directionDegrees": 0,
+      "launchVelocity": 500,
+      "minimumApproachSpeed": 140,
+      "visualHeight": 105
+    }
+  ],
   "start": {
     "mode": "manual",
     "mediaId": "start-pad",
-    "x": 1035,
-    "y": 534
+    "model3dId": "kenney-minigolf-start",
+    "x": 220,
+    "y": 450
   },
   "mainTarget": {
     "mode": "manual",
     "mediaId": "target-main",
-    "x": 420,
-    "y": 377,
-    "size": 58
+    "model3dId": "kenney-minigolf-hole-round",
+    "model3dSize": 440,
+    "x": 1150,
+    "y": 450,
+    "collisionHeight": 50,
+    "size": 70
   },
   "generation": {
-    "obstacleCount": 3,
-    "allowedShapes": [
-      "circle",
-      "rect",
-      "diamond"
-    ],
+    "obstacleCount": 0,
+    "allowedShapes": ["circle", "rect", "diamond"],
     "mediaByShape": {
       "circle": "obstacle-static-circle",
       "rect": "obstacle-static-rect",
       "diamond": "obstacle-static-diamond"
     },
-    "minSize": 50,
-    "maxSize": 120,
-    "minimumGap": 52,
+    "minSize": 42,
+    "maxSize": 58,
+    "minimumGap": 70,
     "pathGrid": 20
   },
-  "manualObstacles": [
-    {
-      "id": "barrier-1",
-      "mediaId": "obstacle-static-circle",
-      "shape": "circle",
-      "x": 996,
-      "y": 756,
-      "width": 118,
-      "height": 118
-    },
-    {
-      "id": "barrier-2",
-      "mediaId": "obstacle-static-rect",
-      "shape": "rect",
-      "x": 867,
-      "y": 275,
-      "width": 78,
-      "height": 168
-    }
-  ],
-  "movingObstacles": [
-    {
-      "id": "sweeper-1",
-      "mediaId": "obstacle-moving-circle",
-      "shape": "circle",
-      "x": 667,
-      "y": 684,
-      "size": 53,
-      "axis": "y",
-      "amplitude": 102,
-      "periodMs": 2866,
-      "phase": 5.651
-    }
-  ],
-  "trackingObstacles": [
-    {
-      "id": "tracker-1",
-      "mediaId": "obstacle-tracking-circle",
-      "shape": "circle",
-      "x": 207,
-      "y": 778,
-      "width": 36,
-      "height": 36,
-      "zone": {
-        "x": 106,
-        "y": 641,
-        "width": 203,
-        "height": 179
-      },
-      "maxSpeed": 127,
-      "acceleration": 180,
-      "turnRateDegreesPerSecond": 123
-    }
-  ],
-  "dynamicObstacles": [
-    {
-      "id": "phase-1",
-      "mediaId": "obstacle-phase-gate",
-      "shape": "rect",
-      "x": 324,
-      "y": 105,
-      "width": 231,
-      "height": 32,
-      "behavior": {
-        "type": "phase",
-        "cycleMs": 4133,
-        "solidMs": 1683,
-        "warningMs": 450,
-        "offsetMs": 945
-      }
-    },
-    {
-      "id": "orbiter-1",
-      "mediaId": "obstacle-orbiter",
-      "shape": "circle",
-      "x": 1324,
-      "y": 445,
-      "size": 37,
-      "behavior": {
-        "type": "orbit",
-        "radiusX": 108,
-        "radiusY": 123,
-        "periodMs": 3524,
-        "phase": 3.08
-      }
-    },
-    {
-      "id": "spinner-1",
-      "mediaId": "obstacle-spinner",
-      "shape": "rect",
-      "x": 394,
-      "y": 683,
-      "width": 238,
-      "height": 28,
-      "behavior": {
-        "type": "rotate",
-        "speedDegreesPerSecond": 89,
-        "initialDegrees": 135
-      }
-    }
-  ],
+  "manualObstacles": [],
+  "movingObstacles": [],
+  "trackingObstacles": [],
+  "dynamicObstacles": [],
   "switches": [],
-  "forceFields": [
-    {
-      "id": "current-1",
-      "mediaId": "field-conveyor",
-      "type": "conveyor",
-      "x": 1377,
-      "y": 484,
-      "width": 269,
-      "height": 111,
-      "directionDegrees": -88,
-      "force": 349
-    },
-    {
-      "id": "radial-1",
-      "mediaId": "field-radial",
-      "type": "attractor",
-      "x": 847,
-      "y": 231,
-      "radius": 131,
-      "force": 681
-    }
-  ],
-  "coins": [
-    {
-      "id": "coin-100",
-      "mediaId": "coin-standard",
-      "x": 151,
-      "y": 516,
-      "size": 30,
-      "value": 1
-    }
-  ],
+  "forceFields": [],
+  "coins": [],
   "rewards": {
     "completionCoins": 5,
-    "bonusCoinsPerTarget": 3
+    "bonusCoinsPerTarget": 0
   },
   "scoring": {
     "baseMaximum": 55000,
-    "parTimeMs": 19000,
-    "parDistance": 635,
+    "parTimeMs": 16000,
+    "parDistance": 980,
     "timeWeight": 0.5,
     "distanceWeight": 0.5,
     "collisionPenaltyRate": 0.2,
     "maximumCollisions": 3
   },
   "bonuses": {
-    "maximumTargets": 1,
-    "rewardPerTarget": 1400,
+    "maximumTargets": 0,
+    "rewardPerTarget": 0,
     "offerChanceMode": "currentScorePercent",
-    "failurePenaltyRate": 0.1,
-    "targets": [
-      {
-        "id": "bonus-a",
-        "mediaId": "target-bonus",
-        "x": 848,
-        "y": 494,
-        "size": 48
-      }
-    ]
+    "failurePenaltyRate": 0,
+    "targets": []
   }
 }

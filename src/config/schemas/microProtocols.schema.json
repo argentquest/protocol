@@ -37,7 +37,7 @@
           "unlockLevel": { "type": "integer", "minimum": 1, "maximum": 100 },
           "tier": { "type": "integer", "minimum": 1, "maximum": 10 },
           "kind": {
-            "enum": ["timing", "prediction", "precision", "switching", "control"]
+            "enum": ["timing", "prediction", "precision", "switching", "control", "kinetic"]
           }
         }
       }

@@ -16,7 +16,9 @@
     "media:audio:force": "node scripts/convert-audio.mjs --force",
     "media:validate-audio": "node scripts/validate-audio-media.mjs",
     "media:manifests": "node scripts/build-media-manifests.mjs",
-    "media:prepare": "npm run media:wav:defaults && npm run media:audio && npm run media:validate-svg && npm run media:validate-audio && npm run media:manifests && npm run media:validate-themes",
+    "media:3d-manifest": "node scripts/build-3d-manifest.mjs",
+    "media:3d-manifest:check": "node scripts/build-3d-manifest.mjs --check",
+    "media:prepare": "npm run media:wav:defaults && npm run media:audio && npm run media:validate-svg && npm run media:validate-audio && npm run media:manifests && npm run media:3d-manifest && npm run media:validate-themes",
     "media:validate-themes": "node scripts/validate-themes.mjs",
     "config:validate": "vitest run src/config/validateConfig.test.js src/config/loadConfig.test.js",
     "preview": "node server/index.js",
@@ -24,7 +26,7 @@
     "server:test": "vitest run server/themeApi.test.js",
     "lint": "eslint . && npm run docs:validate",
     "docs:build": "node scripts/build-designer-help.mjs",
-    "docs:validate": "node scripts/build-designer-help.mjs --check && node scripts/validate-jsdoc.mjs",
+    "docs:validate": "node scripts/build-designer-help.mjs --check && node scripts/validate-jsdoc.mjs && npm run media:3d-manifest:check",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "npm run build && node scripts/run-e2e.mjs --project=chromium",
@@ -39,7 +41,8 @@
     "howler": "2.2.4",
     "pixi.js": "8.19.0",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "three": "^0.179.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.31.0",

@@ -89,6 +89,16 @@ describe('contact switch system', () => {
     expect(session.dynamicObstacles[0].solid).toBe(true)
   })
 
+  it('does not activate a switch below an airborne token', () => {
+    const session = sessionFor('once')
+    session.vertical = { grounded: false }
+    session.token.elevation = 100
+    session.level.switches[0].collisionHeight = 20
+
+    expect(updateContactSwitches(session)).toEqual([])
+    expect(session.switchStates.get('switch-a').active).toBe(false)
+  })
+
   it('emits switch activation from the complete engine flow', () => {
     const protocol = microProtocols.find((item) => item.id === 'switchback')
     const generated = generateLevel(protocol.level)

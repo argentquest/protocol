@@ -49,6 +49,7 @@
  * @property {number} distance Actual token-center travel in logical world units.
  * @property {number} collisions Number of discrete collision events.
  * @property {number} score Current calculated score in points.
+ * @property {{phase:string,shotsTaken:number,speed:number,aimPoint:Point,aimVector:Point,aimPower:number,par:number|null,maximumShots:number|null,shotsRemaining:number|null}|null} kinetic Kinetic shot presentation state.
  */
 
 /**

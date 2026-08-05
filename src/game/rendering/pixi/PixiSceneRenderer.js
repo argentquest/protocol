@@ -352,6 +352,62 @@ export class PixiSceneRenderer {
     this.app.canvas.dataset.routeScanVisible = String(
       Boolean(session.routeScanPath?.length),
     )
+    this.app.canvas.dataset.kineticPhase = session.kinetic?.phase ?? ''
+    this.app.canvas.dataset.shotsTaken = String(session.kinetic?.shotsTaken ?? 0)
+    const kineticAimVector = session.kinetic
+      ? session.input.mode === 'pointer' &&
+        (session.level.shotMechanic.inputStyle ?? 'drag-release') ===
+          'drag-release'
+        ? {
+            x: session.kinetic.aimStart.x - session.input.desiredPosition.x,
+            y: session.kinetic.aimStart.y - session.input.desiredPosition.y,
+          }
+        : {
+            x: session.input.desiredPosition.x - session.token.position.x,
+            y: session.input.desiredPosition.y - session.token.position.y,
+          }
+      : null
+    this.app.canvas.dataset.shotPower = String(
+      kineticAimVector
+        ? Math.min(
+            1,
+            Math.hypot(kineticAimVector.x, kineticAimVector.y) /
+              session.level.shotMechanic.aimDistanceForMaximumSpeed,
+          )
+        : 0,
+    )
+    this.app.canvas.dataset.shotsRemaining = String(
+      session.level?.shotGoals?.maximumShots === undefined
+        ? ''
+        : Math.max(
+            0,
+            session.level.shotGoals.maximumShots - session.kinetic.shotsTaken,
+          ),
+    )
+    if (session.kinetic?.phase === 'aiming') {
+      const aim = session.input.desiredPosition
+      const launchEnd = {
+        x: session.token.position.x + kineticAimVector.x,
+        y: session.token.position.y + kineticAimVector.y,
+      }
+      if (
+        session.input.mode === 'pointer' &&
+        (session.level.shotMechanic.inputStyle ?? 'drag-release') ===
+          'drag-release'
+      ) {
+        this.effectGraphics
+          .moveTo(session.token.position.x, session.token.position.y)
+          .lineTo(aim.x, aim.y)
+          .stroke({ color: 0xffd166, width: 3, alpha: 0.42 })
+      }
+      this.effectGraphics
+        .moveTo(session.token.position.x, session.token.position.y)
+        .lineTo(launchEnd.x, launchEnd.y)
+        .stroke({ color: 0xffd166, width: 4, alpha: 0.9 })
+      this.effectGraphics
+        .circle(launchEnd.x, launchEnd.y, 7)
+        .fill({ color: 0xffd166, alpha: 0.9 })
+    }
     if (activeEffects.has('obstacleShield') || activeEffects.has('fullShield')) {
       const radius = Math.max(this.level.token.width, this.level.token.height) / 2 + 12
       this.effectGraphics

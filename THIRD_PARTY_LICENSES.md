@@ -25,6 +25,7 @@ when a dependency is added or upgraded.
 | Playwright | Browser automation | 1.61.1 | Apache-2.0 | <https://github.com/microsoft/playwright> |
 | ESLint | Static analysis | 9.39.5 | MIT | <https://github.com/eslint/eslint> |
 | Marked | Build-time Markdown-to-HTML rendering for designer help | 18.0.7 | MIT | <https://github.com/markedjs/marked> |
+| Three.js | V3 WebGL scene, camera, raycasting, meshes, and GLB loading | 0.179.0 | MIT | <https://github.com/mrdoob/three.js> |
 | FFmpeg | WAV-to-WebM/MP3 conversion in build and theme authoring workflows | 5.1.9-0+deb12u1 | GPL-enabled Debian build (`--enable-gpl`) | <https://ffmpeg.org/> |
 | ffmpeg-static | Repository-local FFmpeg binary for repeatable media preparation | 5.3.0 | GPL-3.0-or-later package distribution; bundled FFmpeg license depends on build configuration | <https://github.com/eugeneware/ffmpeg-static> |
 
@@ -69,6 +70,7 @@ duplicate row.
 |---|---|---|---|---|
 | Future Lab | _No overrides yet_ | — | Inherits defaults | — |
 | Celestial Foundry | Tokens and spacecraft hazards | `public/media/themes/celestial-foundry/{tokens,obstacles}/*.png` | Unlucky Studio Complete Spaceship Game Art Pack | CC0-1.0 |
+| V3 default 3D | Complete 126-model GLB catalog and matching editor previews | `public/media/3d/kenney-minigolf/{*.glb,previews/*.png}` | Kenney Minigolf Kit 3.1 | CC0-1.0 |
 | Celestial Foundry | Structures, units, and machinery | `public/media/themes/celestial-foundry/obstacles/*.png` | Kenney Sci-Fi RTS | CC0-1.0 |
 | Celestial Foundry | Puzzle hazards, coins, and powers | `public/media/themes/celestial-foundry/{obstacles,coins,powers}/*.png` | Kenney Puzzle Pack 2 | CC0-1.0 |
 | Celestial Foundry | Doors, switches, saws, and crates | `public/media/themes/celestial-foundry/{targets,obstacles}/*.png` | pzUH / GameArt2D Free Sci-Fi Platformer Tileset | CC0-1.0 |

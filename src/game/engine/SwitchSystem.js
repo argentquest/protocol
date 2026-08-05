@@ -1,5 +1,6 @@
 import { insetShape, shapesIntersect } from '../geometry/geometry.js'
 import { resolveDynamicObstacles } from './DynamicObstacleSystem.js'
+import { verticalRangesOverlap } from './VerticalMovementSystem.js'
 
 /**
  * Tests contact switches against the complete token and applies edge-triggered
@@ -19,7 +20,14 @@ export function updateContactSwitches(session) {
   const changes = []
   for (const item of session.level.switches ?? []) {
     const state = session.switchStates.get(item.id)
-    const touching = shapesIntersect(token, item)
+    const touching =
+      (!session.vertical ||
+        verticalRangesOverlap(
+          session.token.elevation,
+          session.level.token.collisionHeight ?? session.level.token.size,
+          item,
+        )) &&
+      shapesIntersect(token, item)
     if (touching && !state.contacting) {
       if (item.activation === 'toggle') {
         state.active = !state.active

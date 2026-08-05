@@ -114,6 +114,46 @@ test('clones, edits, playtests, publishes, and deletes a server theme', async ({
     selectedEntityJson.evaluate((element) => JSON.parse(element.value).size),
   ).toBeGreaterThan(originalCoinSize)
 
+  await page.getByLabel('Object elevation').fill('50')
+  await page.getByLabel('Object visual height').fill('70')
+  await page.getByLabel('Object collision height').fill('40')
+  await expect.poll(() =>
+    selectedEntityJson.evaluate((element) => {
+      const entity = JSON.parse(element.value)
+      return [entity.elevation, entity.visualHeight, entity.collisionHeight]
+    }),
+  ).toEqual([50, 70, 40])
+
+  await page.getByLabel('Selected object').selectOption('token:root')
+  await expect(selectedEntityJson).toHaveValue(/"mediaId": "token-/)
+  await page.getByLabel('Object visual height').fill('60')
+  await expect.poll(() =>
+    selectedEntityJson.evaluate((element) => JSON.parse(element.value).visualHeight),
+  ).toBe(60)
+
+  await page.getByLabel('Add entity').selectOption('slope')
+  await page.getByLabel('Selected object').selectOption('terrainSurfaces:0')
+  await expect(page.getByLabel('North-west elevation')).toHaveValue('0')
+  await page.getByLabel('Terrain platform height').fill('90')
+  await page.getByLabel('North-east elevation').fill('130')
+  await expect.poll(() =>
+    selectedEntityJson.evaluate((element) => JSON.parse(element.value).cornerElevations),
+  ).toEqual({
+    northWest: 90,
+    northEast: 130,
+    southEast: 90,
+    southWest: 90,
+  })
+  await page
+    .getByLabel('Object 3D model')
+    .selectOption('kenney-minigolf-windmill')
+  await expect(
+    page.getByRole('img', { name: 'Windmill 3D model preview' }),
+  ).toBeVisible()
+  await expect.poll(() =>
+    selectedEntityJson.evaluate((element) => JSON.parse(element.value).model3dId),
+  ).toBe('kenney-minigolf-windmill')
+
   await coin.click({ button: 'right' })
   const objectMenu = page.getByRole('menu', { name: 'Selected object actions' })
   await expect(objectMenu.getByRole('menuitem', { name: /change image/i })).toBeVisible()
@@ -182,7 +222,7 @@ test('clones, edits, playtests, publishes, and deletes a server theme', async ({
   await expect(page.getByText(/valid save completed/i)).toBeVisible()
 
   await page.getByRole('button', { name: 'Playtest' }).click()
-  await expect(page.locator('.pixi-arena canvas')).toHaveAttribute(
+  await expect(page.locator('.three-arena canvas')).toHaveAttribute(
     'data-engine-ready',
     'true',
     { timeout: 30_000 },

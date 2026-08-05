@@ -7,11 +7,9 @@ import { tokenContainsPoint } from './engine/CollisionSystem.js'
 import { createInputController } from './input/InputController.js'
 import { attachKeyboardInput } from './input/KeyboardInput.js'
 import { attachPointerInput } from './input/PointerInput.js'
-import PixiCanvas from './rendering/pixi/PixiCanvas.jsx'
-import { PixiEngineAdapter } from './rendering/pixi/PixiEngineAdapter.js'
-import { PixiSceneRenderer } from './rendering/pixi/PixiSceneRenderer.js'
-import { sharedVectorAssetCache } from './rendering/pixi/VectorAssetCache.js'
-import { screenToWorld } from './rendering/pixi/Viewport.js'
+import ThreeCanvas from './rendering/three/ThreeCanvas.jsx'
+import { ThreeEngineAdapter } from './rendering/three/ThreeEngineAdapter.js'
+import { ThreeSceneRenderer } from './rendering/three/ThreeSceneRenderer.js'
 
 /**
  * Resolves power inventory, granting test charges only in development mode.
@@ -58,7 +56,7 @@ function entitySoundId(entity, fallbackSoundId, manifest) {
 }
 
 /**
- * Coordinates one React-owned gameplay screen around an imperative Pixi canvas.
+ * Coordinates one React-owned gameplay screen around an imperative Three.js canvas.
  *
  * @param {object} props Validated level, player state, media, and callbacks.
  * @returns {import('react').JSX.Element} Active game view.
@@ -104,7 +102,11 @@ export default function GameView({
   const engineDisposeTimerRef = useRef(null)
   const [hud, setHud] = useState(() => engine.snapshot())
   const [phase, setPhase] = useState('ready')
-  const [message, setMessage] = useState('Click the token to begin')
+  const [message, setMessage] = useState(
+    level.shotMechanic
+      ? 'Press the token, pull back to aim, then release to launch'
+      : 'Click the token to begin',
+  )
   const [bonusPrompt, setBonusPrompt] = useState(false)
   const [debugVisible, setDebugVisible] = useState(devMode)
   const [rendererError, setRendererError] = useState(null)
@@ -135,6 +137,11 @@ export default function GameView({
    */
   const activatePowerup = useCallback(
     (power) => {
+      if (engine.session.kinetic) {
+        audio.play('power-unavailable')
+        setMessage('Powers are offline in Ricochet mode')
+        return false
+      }
       const available = Number(engine.session.powerInventory.get(power.id)) || 0
       if (available <= 0) {
         audio.play('power-unavailable')
@@ -174,6 +181,31 @@ export default function GameView({
         )
         publishHud()
       }),
+      engine.events.subscribe('shot.launched', ({ payload }) => {
+        audio.play('drag-start')
+        setMessage(`Shot ${payload.shot} launched — steering locked`)
+        publishHud()
+      }),
+      engine.events.subscribe('shot.impacted', ({ payload }) => {
+        audio.play('collision')
+        setMessage(
+          payload.response === 'stop'
+            ? 'Arrestor engaged — aim the next shot'
+            : 'Ricochet',
+        )
+      }),
+      engine.events.subscribe('shot.stopped', () => {
+        setMessage('Token stopped — click it or press Space to aim again')
+        publishHud()
+      }),
+      engine.events.subscribe('vertical.launched', () => {
+        setMessage('Ramp launch — clear the obstacle')
+        publishHud()
+      }),
+      engine.events.subscribe('vertical.landed', () => {
+        setMessage('Landing confirmed')
+        publishHud()
+      }),
       engine.events.subscribe('target.reached', ({ payload }) => {
         audio.play(entitySoundId(payload.target, 'target-reached', mediaManifest))
         setMessage('Target reached')
@@ -205,11 +237,15 @@ export default function GameView({
             : `${payload.switch.id} toggled — barrier restored`,
         )
       }),
-      engine.events.subscribe('attempt.restarted', () => {
+      engine.events.subscribe('attempt.restarted', ({ payload }) => {
         adapterRef.current?.resetAttempt()
         audio.play('attempt-failed')
         setBonusPrompt(false)
-        setMessage('Attempt restarted — click the token to begin')
+        setMessage(
+          payload.reason === 'maximum-shots'
+            ? 'Shot limit reached — chamber recalibrated'
+            : 'Attempt restarted — click the token to begin',
+        )
         onAttemptFailed()
         publishHud()
       }),
@@ -224,6 +260,9 @@ export default function GameView({
           collisions: engine.session.collisions.count,
           earnedBonuses: engine.session.targets.earnedBonuses,
           bonusFailed: payload.bonusFailed,
+          shotsTaken: payload.shotsTaken,
+          shotPar: payload.shotPar,
+          shotRating: payload.shotRating,
         })
       }),
     ]
@@ -263,20 +302,16 @@ export default function GameView({
   }, [engine])
 
   /**
-   * Connects the mounted Pixi renderer to engine, input, audio, and event adapters.
+   * Connects the mounted Three.js renderer to engine, input, audio, and event adapters.
    *
-   * @param {object} renderer Initialized Pixi scene renderer.
+   * @param {object} renderer Initialized Three.js scene renderer.
    * @returns {() => void} Adapter cleanup callback.
    */
   const onRendererReady = useCallback(
     async (app, container) => {
-      if (!mediaManifest) throw new Error('The media manifest is not ready.')
-      const assetCache = await sharedVectorAssetCache.loadManifest(mediaManifest)
-      const renderer = await new PixiSceneRenderer({
+      const renderer = await new ThreeSceneRenderer({
         app,
         level,
-        manifest: mediaManifest,
-        assetCache,
         development: devMode,
         reducedMotion,
         tokenCollisionTolerance,
@@ -286,6 +321,20 @@ export default function GameView({
 
       const controller = createInputController(() => engine.session.input, {
         onActivate: (mode) => {
+          if (engine.session.kinetic) {
+            const accepted = engine.beginKineticAim(mode)
+            if (accepted) {
+              setMessage(
+                mode === 'pointer'
+                  ? (engine.session.level.shotMechanic.inputStyle ??
+                      'drag-release') === 'drag-release'
+                    ? 'Pull opposite the launch direction, then release'
+                    : 'Aim with the pointer, then click to launch'
+                  : 'Hold an arrow direction, then press Space to launch',
+              )
+            }
+            return accepted
+          }
           engine.startAttempt(mode)
           audio.play('drag-start')
           setMessage(
@@ -294,13 +343,81 @@ export default function GameView({
               : 'Keyboard link active — steer with arrow keys',
           )
         },
-        onRelease: (reason) => engine.releaseAttempt(reason),
+        onRelease: (reason, intent) => {
+          if (!engine.session.kinetic) return engine.releaseAttempt(reason)
+          if (
+            !['pointer-release', 'pointer-toggle', 'keyboard-toggle'].includes(
+              reason,
+            )
+          ) {
+            return engine.cancelKineticAim()
+          }
+          const inputStyle =
+            engine.session.level.shotMechanic.inputStyle ?? 'drag-release'
+          const aim =
+            intent.mode === 'keyboard'
+              ? {
+                  x:
+                    Number(intent.directions.has('ArrowRight')) -
+                    Number(intent.directions.has('ArrowLeft')),
+                  y:
+                    Number(intent.directions.has('ArrowDown')) -
+                    Number(intent.directions.has('ArrowUp')),
+                }
+              : inputStyle === 'drag-release'
+                ? {
+                    x:
+                      engine.session.kinetic.aimStart.x -
+                      intent.desiredPosition.x,
+                    y:
+                      engine.session.kinetic.aimStart.y -
+                      intent.desiredPosition.y,
+                  }
+                : {
+                    x:
+                      intent.desiredPosition.x -
+                      engine.session.token.position.x,
+                    y:
+                      intent.desiredPosition.y -
+                      engine.session.token.position.y,
+                  }
+          const scale = engine.session.level.shotMechanic.aimDistanceForMaximumSpeed
+          const queued = engine.queueKineticShot(
+            intent.mode === 'keyboard'
+              ? { x: aim.x * scale, y: aim.y * scale }
+              : aim,
+            intent.mode,
+          )
+          if (!queued) {
+            engine.cancelKineticAim()
+            setMessage('Pull farther from the token before releasing')
+          }
+          return queued
+        },
         onRestart: () => {
           engine.restart('manual')
         },
         onPower: (key) => {
           const power = powerups.find((item) => item.key === key)
           if (power) activatePowerup(power)
+        },
+        onDirection: (directions) => {
+          if (!engine.session.kinetic || engine.session.kinetic.phase !== 'aiming') {
+            return
+          }
+          const x =
+            Number(directions.has('ArrowRight')) -
+            Number(directions.has('ArrowLeft'))
+          const y =
+            Number(directions.has('ArrowDown')) -
+            Number(directions.has('ArrowUp'))
+          const magnitude = Math.hypot(x, y)
+          if (!magnitude) return
+          const length = engine.session.level.shotMechanic.aimDistanceForMaximumSpeed
+          controller.setPointer({
+            x: engine.session.token.position.x + (x / magnitude) * length,
+            y: engine.session.token.position.y + (y / magnitude) * length,
+          })
         },
         onInterrupt: (reason, wasActive) => {
           if (wasActive) setMessage(`Input interrupted: ${reason}`)
@@ -312,22 +429,34 @@ export default function GameView({
     /** @param {{x:number,y:number}} point Client coordinates in CSS pixels. @returns {{x:number,y:number}} Logical world coordinates. */
     const toWorld = ({ x, y }) => {
         const bounds = canvas.getBoundingClientRect()
-        return screenToWorld(
-          { x: x - bounds.left, y: y - bounds.top },
-          renderer.viewport,
-        )
+        return renderer.screenToWorld({ x: x - bounds.left, y: y - bounds.top })
       }
       const detachPointer = attachPointerInput({
         element: canvas,
         toWorld,
-        onPress: (point) => {
-          if (!['ready', 'bonus-ready'].includes(engine.machine.state)) return false
+        onPress: (point, event) => {
+          const allowedState = engine.session.kinetic
+            ? ['ready', 'bonus-ready', 'active-main', 'active-bonus'].includes(
+                engine.machine.state,
+              ) && engine.session.kinetic.phase === 'resting'
+            : ['ready', 'bonus-ready'].includes(engine.machine.state)
+          if (!allowedState) return false
           const token = {
             ...engine.session.level.token,
             ...engine.session.token.position,
           }
-          if (!tokenContainsPoint(token, point)) return false
-          controller.setPointer(point)
+          const bounds = canvas.getBoundingClientRect()
+          const screenPoint = {
+            x: event.clientX - bounds.left,
+            y: event.clientY - bounds.top,
+          }
+          if (
+            !renderer.tokenHitTest(screenPoint) &&
+            !tokenContainsPoint(token, point)
+          ) {
+            return false
+          }
+          controller.setPointer({ ...engine.session.token.position })
           return controller.activate('pointer')
         },
         onMove: (point) => controller.setPointer(point),
@@ -338,7 +467,12 @@ export default function GameView({
         onInterrupt: (reason) => controller.interrupt(reason),
         isActive: () =>
           engine.session.input.active &&
-          engine.session.input.mode === 'pointer',
+          engine.session.input.mode === 'pointer' &&
+          (!engine.session.kinetic || engine.session.kinetic.phase === 'aiming'),
+        releaseOnPointerUp: () =>
+          Boolean(engine.session.kinetic) &&
+          (engine.session.level.shotMechanic.inputStyle ?? 'drag-release') ===
+            'drag-release',
       })
       const detachKeyboard = attachKeyboardInput({
         target: window,
@@ -350,7 +484,7 @@ export default function GameView({
         detachKeyboard()
       }
 
-    /** Resizes the Pixi renderer to its current CSS pixel bounds. */
+    /** Resizes the Three.js renderer to its current CSS pixel bounds. */
     const resize = () =>
         renderer.resize(container.clientWidth, container.clientHeight)
       const observer =
@@ -360,9 +494,10 @@ export default function GameView({
       observer?.observe(container)
       resizeCleanupRef.current = () => observer?.disconnect()
 
-      const adapter = new PixiEngineAdapter({ engine, renderer })
+      const adapter = new ThreeEngineAdapter({ engine, renderer })
       adapterRef.current = adapter
       adapter.start()
+      canvas.dataset.engineReady = 'true'
     },
     [
       activatePowerup,
@@ -370,7 +505,6 @@ export default function GameView({
       devMode,
       engine,
       level,
-      mediaManifest,
       powerups,
       reducedMotion,
       tokenCollisionTolerance,
@@ -378,7 +512,7 @@ export default function GameView({
     ],
   )
 
-  /** @param {Error} error Pixi initialization failure. @returns {void} */
+  /** @param {Error} error Three.js initialization failure. @returns {void} */
   const handleRendererError = useCallback((error) => {
     setRendererError(error)
   }, [])
@@ -386,7 +520,11 @@ export default function GameView({
   /** Restarts the same deterministic level layout and resets adapter time. */
   const restart = () => {
     if (engine.machine.state === 'ready') {
-      setMessage('Chamber ready — click the token')
+      setMessage(
+        engine.session.kinetic
+          ? 'Chamber ready — click the token to aim'
+          : 'Chamber ready — click the token',
+      )
       return
     }
     engine.restart('manual')
@@ -406,7 +544,7 @@ export default function GameView({
     setBonusPrompt(false)
   }
 
-  /** Toggles engine/Pixi diagnostics for the active game view. */
+  /** Toggles engine/Three.js diagnostics for the active game view. */
   const toggleDebug = () => {
     setDebugVisible((visible) => {
       const next = !visible
@@ -416,6 +554,16 @@ export default function GameView({
       }
       return next
     })
+  }
+
+  /** @param {number} azimuth Horizontal degrees. @param {number} elevation Vertical degrees. */
+  const adjustCamera = (azimuth, elevation) => {
+    rendererRef.current?.adjustCamera(azimuth, elevation)
+  }
+
+  /** Restores the default perspective camera. */
+  const resetCamera = () => {
+    rendererRef.current?.resetCamera()
   }
 
   return (
@@ -451,12 +599,58 @@ export default function GameView({
         />
         <div className="arena-shell">
           <div className="arena-corners" aria-hidden="true" />
-          <PixiCanvas
-            className="pixi-arena"
+          <ThreeCanvas
+            className="three-arena"
             ariaLabel={`${level.name} obstacle course`}
             onReady={onRendererReady}
             onError={handleRendererError}
           />
+          <div
+            className="camera-controls"
+            role="group"
+            aria-label="Camera angle controls"
+          >
+            <button
+              type="button"
+              onClick={() => adjustCamera(-15, 0)}
+              aria-label="Rotate camera left"
+              title="Rotate camera left"
+            >
+              ↶
+            </button>
+            <button
+              type="button"
+              onClick={() => adjustCamera(0, 8)}
+              aria-label="Raise camera"
+              title="Raise camera"
+            >
+              ↑
+            </button>
+            <button
+              type="button"
+              onClick={resetCamera}
+              aria-label="Reset camera angle"
+              title="Reset camera angle"
+            >
+              ●
+            </button>
+            <button
+              type="button"
+              onClick={() => adjustCamera(0, -8)}
+              aria-label="Lower camera"
+              title="Lower camera"
+            >
+              ↓
+            </button>
+            <button
+              type="button"
+              onClick={() => adjustCamera(15, 0)}
+              aria-label="Rotate camera right"
+              title="Rotate camera right"
+            >
+              ↷
+            </button>
+          </div>
           {rendererError && (
             <div className="renderer-error" role="alert">
               WebGL renderer unavailable: {rendererError.message}

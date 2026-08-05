@@ -38,6 +38,23 @@ describe('force fields and rotating obstacles', () => {
     expect(acceleration.y).toBeCloseTo(0)
   })
 
+  it('applies an elevated force field only when token height overlaps it', () => {
+    const field = {
+      type: 'conveyor',
+      x: 500,
+      y: 450,
+      width: 200,
+      height: 100,
+      elevation: 100,
+      collisionHeight: 30,
+      directionDegrees: 0,
+      force: 300,
+    }
+
+    expect(resolveForceFieldAcceleration([field], { ...token, size: 40, elevation: 0 })).toEqual({ x: 0, y: 0 })
+    expect(resolveForceFieldAcceleration([field], { ...token, size: 40, elevation: 110 }).x).toBeCloseTo(300)
+  })
+
   it('resolves spinner angle from deterministic hazard time', () => {
     const spinner = resolveDynamicObstacle(
       {

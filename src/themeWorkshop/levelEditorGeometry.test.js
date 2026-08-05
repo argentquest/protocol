@@ -7,6 +7,8 @@ import {
   moveArenaPoint,
   removeArenaPoint,
   resizeEntity,
+  setEntityVerticalProperty,
+  setTerrainCornerElevation,
   snapToEditorGrid,
 } from './levelEditorGeometry.js'
 
@@ -45,6 +47,49 @@ describe('Theme Workshop level editor geometry', () => {
     expect(isResizableEntity({ x: 100, y: 100, size: 40 })).toBe(true)
     expect(entitySize({ radius: 25 })).toEqual({ width: 50, height: 50 })
     expect(snapToEditorGrid(46)).toBe(50)
+  })
+
+  it('authors optional vertical properties without changing footprint height', () => {
+    const entity = { x: 200, y: 200, width: 100, height: 80 }
+    const elevated = setEntityVerticalProperty(entity, 'elevation', 47)
+    const visible = setEntityVerticalProperty(elevated, 'visualHeight', 63)
+    const collidable = setEntityVerticalProperty(visible, 'collisionHeight', 91)
+
+    expect(collidable).toEqual({
+      ...entity,
+      elevation: 50,
+      visualHeight: 60,
+      collisionHeight: 90,
+    })
+    expect(setEntityVerticalProperty(collidable, 'visualHeight', '')).not.toHaveProperty('visualHeight')
+    expect(entity).toEqual({ x: 200, y: 200, width: 100, height: 80 })
+  })
+
+  it('sets one terrain corner or levels all four corners', () => {
+    const surface = {
+      cornerElevations: {
+        northWest: 0,
+        northEast: 80,
+        southEast: 80,
+        southWest: 0,
+      },
+    }
+    expect(
+      setTerrainCornerElevation(surface, 'northWest', 47).cornerElevations,
+    ).toEqual({
+      northWest: 50,
+      northEast: 80,
+      southEast: 80,
+      southWest: 0,
+    })
+    expect(
+      setTerrainCornerElevation(surface, 'all', 93).cornerElevations,
+    ).toEqual({
+      northWest: 90,
+      northEast: 90,
+      southEast: 90,
+      southWest: 90,
+    })
   })
 
   it('converts an arena to an editable irregular polygon', () => {

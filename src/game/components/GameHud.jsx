@@ -131,26 +131,72 @@ export default function GameHud({
         </div>
       </div>
       <div className="bonus-readout">
-        <span>Bonus relays</span>
+        <span>
+          {level.shotMechanic
+            ? hud.kinetic?.maximumShots === null
+              ? 'Shots launched'
+              : 'Shots used / limit'
+            : 'Bonus relays'}
+        </span>
         <strong>
-          {hud.earnedBonuses}/{level.bonuses.maximumTargets}
+          {level.shotMechanic
+            ? hud.kinetic?.maximumShots === null
+              ? hud.kinetic?.shotsTaken ?? 0
+              : `${hud.kinetic?.shotsTaken ?? 0} / ${hud.kinetic.maximumShots}`
+            : `${hud.earnedBonuses}/${level.bonuses.maximumTargets}`}
         </strong>
+        {level.shotMechanic &&
+          (hud.kinetic?.shotsRemaining !== null || hud.kinetic?.par !== null) && (
+          <small>
+            {[
+              hud.kinetic?.shotsRemaining === null
+                ? null
+                : `${hud.kinetic.shotsRemaining} remaining`,
+              hud.kinetic?.par === null ? null : `Par ${hud.kinetic.par}`,
+            ]
+              .filter(Boolean)
+              .join(' · ')}
+          </small>
+        )}
       </div>
+      {level.shotMechanic && (
+        <div className="shot-power">
+          <div>
+            <span>Shot power</span>
+            <strong>{Math.round((hud.kinetic?.aimPower ?? 0) * 100)}%</strong>
+          </div>
+          <div
+            className="shot-power__track"
+            role="progressbar"
+            aria-label="Shot power"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow={Math.round((hud.kinetic?.aimPower ?? 0) * 100)}
+          >
+            <i style={{ width: `${(hud.kinetic?.aimPower ?? 0) * 100}%` }} />
+          </div>
+        </div>
+      )}
       <p className="status-message" data-phase={phase}>
         <span className="status-dot" />
         {message}
       </p>
       <p className="hud-hint">
-        Click the token to start mouse control and click again to stop, or toggle
-        keyboard control with Space. The token’s full shape must clear every edge.
+        {level.shotMechanic
+          ? (level.shotMechanic.inputStyle ?? 'drag-release') === 'drag-release'
+            ? 'Press the stopped token, pull opposite the launch direction, and release. With keyboard, press Space, hold an arrow direction, then press Space again. Steering is locked in flight.'
+            : 'Click the stopped token, aim, and click again to launch. With keyboard, press Space, hold an arrow direction, then press Space again. Steering is locked in flight.'
+          : 'Click the token to start mouse control and click again to stop, or toggle keyboard control with Space. The token’s full shape must clear every edge.'}
       </p>
-      <PowerTray
-        powerups={powerups}
-        activePowerIds={activePowerIds}
-        inventory={inventory}
-        devMode={devMode}
-        onActivate={onActivatePowerup}
-      />
+      {!level.shotMechanic && (
+        <PowerTray
+          powerups={powerups}
+          activePowerIds={activePowerIds}
+          inventory={inventory}
+          devMode={devMode}
+          onActivate={onActivatePowerup}
+        />
+      )}
       {devMode && (
         <DebugPanel
           hud={hud}
