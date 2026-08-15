@@ -154,6 +154,22 @@ test('clones, edits, playtests, publishes, and deletes a server theme', async ({
     selectedEntityJson.evaluate((element) => JSON.parse(element.value).model3dId),
   ).toBe('kenney-minigolf-windmill')
 
+  await page.getByLabel('Add entity').selectOption('wall')
+  await page.getByLabel('Selected object').selectOption('walls:0')
+  await expect(page.getByLabel('Wall orientation')).toHaveValue('0')
+  await page.getByLabel('Wall orientation').fill('45')
+  await page.getByLabel('Wall bounce restitution').fill('0.9')
+  await expect.poll(() =>
+    selectedEntityJson.evaluate((element) => {
+      const entity = JSON.parse(element.value)
+      return [entity.kind, entity.orientation, entity.restitution]
+    }),
+  ).toEqual(['interior', 45, 0.9])
+  await expect(page.locator('.editor-entity--walls')).toHaveCSS(
+    'transform',
+    /matrix/,
+  )
+
   await coin.click({ button: 'right' })
   const objectMenu = page.getByRole('menu', { name: 'Selected object actions' })
   await expect(objectMenu.getByRole('menuitem', { name: /change image/i })).toBeVisible()

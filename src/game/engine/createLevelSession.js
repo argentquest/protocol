@@ -9,6 +9,33 @@ function copyPoint(point) {
 }
 
 /**
+ * Normalizes a wall entity with a default ricochet response and one shared
+ * rotation for authoritative collision and Three.js presentation.
+ *
+ * @pure
+ * @param {object} wall Authored wall entity.
+ * @returns {object} Wall with default fields applied.
+ */
+function normalizeWall(wall) {
+  const restitution = Math.max(
+    0.1,
+    Math.min(1, Number(wall.restitution ?? 0.85)),
+  )
+  const rotationRadians = ((Number(wall.orientation ?? 0) % 360) * Math.PI) / 180
+  return {
+    ...wall,
+    kind: wall.kind ?? 'interior',
+    restitution,
+    rotationRadians,
+    visualRotationRadians: rotationRadians,
+    kineticResponse: wall.kineticResponse ?? {
+      type: 'rebound',
+      restitution,
+    },
+  }
+}
+
+/**
  * Creates mutable deterministic simulation state for a tracking obstacle.
  *
  * @pure
@@ -119,6 +146,8 @@ export function createLevelSession(
         Number(tokenCollisionTolerance) || 0,
       ),
     },
+    walls: (level.walls ?? []).map((wall) => normalizeWall(wall)),
+    wallImpacts: [],
     distance: {
       actual: 0,
       reachedPoints: [copyPoint(start)],

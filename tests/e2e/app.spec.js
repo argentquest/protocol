@@ -85,7 +85,7 @@ test('opens the field guide and settings', async ({ page }) => {
   await expect(page.getByRole('heading', { name: /operator settings/i })).toBeVisible()
 })
 
-test('counts a continuous invalid position as one collision', async ({ page }) => {
+test('stops Guided movement at a perimeter wall without a hazard penalty', async ({ page }) => {
   await boot(page)
   await page.getByRole('button', { name: /begin calibration/i }).click()
   const canvas = await readyCanvas(page)
@@ -103,10 +103,10 @@ test('counts a continuous invalid position as one collision', async ({ page }) =
   })
   await page.mouse.click(token.x, token.y)
   await page.mouse.move(outsideArena.x, outsideArena.y, { steps: 35 })
-  await expect(page.locator('.collision-pips .is-hit')).toHaveCount(1)
-  await expect(page.getByText(/2 remaining/i)).toBeVisible()
-  await page.mouse.click(outsideArena.x, outsideArena.y)
-  await expect(page.getByText(/attempt restarted/i)).toBeVisible()
+  await expect(page.locator('.collision-pips .is-hit')).toHaveCount(0)
+  await expect
+    .poll(async () => Number(await canvas.getAttribute('data-token-x')))
+    .toBeGreaterThan(20)
   expect(
     await canvas.evaluate(
       (element) => element === window.__pathProtocolReleaseCanvas,
@@ -464,7 +464,7 @@ test('starts gradual tracking and activates numbered powers after play begins', 
   await page.mouse.click(token.x, token.y)
 })
 
-test('applies obstacle-only and full-shield boundary rules', async ({ page }) => {
+test('applies obstacle-only and full-shield perimeter-wall rules', async ({ page }) => {
   await boot(page, '/?dev=1')
   await page.getByRole('button', { name: /begin calibration/i }).click()
   let canvas = await readyCanvas(page)
@@ -476,7 +476,7 @@ test('applies obstacle-only and full-shield boundary rules', async ({ page }) =>
   await page.mouse.click(token.x, token.y)
   await page.keyboard.press('1')
   await page.mouse.move(outsideArena.x, outsideArena.y, { steps: 20 })
-  await expect(page.locator('.collision-pips .is-hit')).toHaveCount(1)
+  await expect(page.locator('.collision-pips .is-hit')).toHaveCount(0)
   await page.keyboard.press('r')
 
   canvas = await readyCanvas(page)

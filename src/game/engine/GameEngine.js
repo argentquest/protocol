@@ -236,6 +236,7 @@ export class GameEngine {
       ? slowPower.slowMultiplier
       : 1
     const hazards = advanceHazards(this.session, stepMs, slowScale)
+    const walls = this.session.walls ?? this.session.level.walls ?? []
     const allObstacles = [...this.session.level.obstacles, ...hazards.current]
     const previousObstacles = [
       ...this.session.level.obstacles,
@@ -260,7 +261,7 @@ export class GameEngine {
       ? advanceKineticToken(
           this.session,
           stepMs,
-          heightObstacles,
+          [...heightObstacles, ...walls],
         )
       : advanceTokenWithCollisions(
           this.session,
@@ -271,6 +272,7 @@ export class GameEngine {
             previousObstacles: heightPreviousObstacles,
             obstacleShield,
             fullShield,
+            walls,
           },
         )
     const verticalResult = advanceVerticalMotion(this.session, stepMs)

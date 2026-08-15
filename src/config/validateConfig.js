@@ -116,6 +116,7 @@ function levelMediaIds(level) {
     ...(level.forceFields ?? []).map((item) => item.mediaId),
     ...(level.ramps ?? []).map((item) => item.mediaId),
     ...(level.terrainSurfaces ?? []).map((item) => item.mediaId),
+    ...(level.walls ?? []).map((item) => item.mediaId),
     ...(level.coins ?? []).map((item) => item.mediaId),
     ...(level.bonuses?.targets ?? []).map((item) => item.mediaId),
   ].filter(Boolean)
@@ -143,7 +144,53 @@ function levelModelIds(level) {
     ...(level.forceFields ?? []),
     ...(level.coins ?? []),
     ...(level.bonuses?.targets ?? []),
+    ...(level.walls ?? []),
   ].map((item) => item?.model3dId).filter(Boolean)
+}
+
+/**
+ * Resolves each level entity to the 3D presentation role its authored
+ * `model3dId` must support. Mirror of the renderer's entity roles so the
+ * manifest `roles` contract is enforced at validation time.
+ *
+ * @param {object} level Validated level config.
+ * @returns {Array<{modelId:string, role:string, label:string}>} Model assignments.
+ */
+function levelModelAssignments(level) {
+  const assignments = []
+  /** @param {object} item Renderable entity. @param {string} role Required catalog role. @param {string} label Validation label. @returns {void} */
+  const add = (item, role, label) => {
+    if (item?.model3dId) {
+      assignments.push({ modelId: item.model3dId, role, label })
+    }
+  }
+  add(level.token, 'token', `${level.id}/token`)
+  add(level.mainTarget, 'target', `${level.id}/mainTarget`)
+  // Only entities whose renderer role maps cleanly to a manifest role are
+  // role-checked. Coins, switches, and force fields use procedural or
+  // multi-purpose models and are validated for existence, not role fit.
+  for (const group of [
+    ['terrainSurfaces', 'terrain'],
+    ['ramps', 'ramp'],
+    ['manualObstacles', 'obstacle'],
+    ['movingObstacles', 'obstacle'],
+    ['trackingObstacles', 'obstacle'],
+    ['dynamicObstacles', 'obstacle'],
+  ]) {
+    const [key, role] = group
+    for (const item of level[key] ?? []) {
+      add(item, role, `${level.id}/${item.id}`)
+    }
+  }
+  for (const wall of level.walls ?? []) {
+    if (wall.model3dId) {
+      add(wall, 'obstacle', `${level.id}/${wall.id}`)
+    }
+  }
+  for (const target of level.bonuses?.targets ?? []) {
+    add(target, 'target', `${level.id}/${target.id}`)
+  }
+  return assignments
 }
 
 /**
@@ -192,7 +239,7 @@ function validateLevelRelationships(
   levels,
   mediaIds,
   errors,
-  { requireContiguous = true, modelIds = null } = {},
+  { requireContiguous = true, modelIds = null, modelRoles = null } = {},
 ) {
   const levelIds = levels.map((level) => level.id)
   const levelNumbers = levels.map((level) => level.number)
@@ -318,6 +365,16 @@ function validateLevelRelationships(
         }
       }
     }
+    if (modelRoles) {
+      for (const assignment of levelModelAssignments(level)) {
+        const supported = modelRoles.get(assignment.modelId)
+        if (supported && !supported.includes(assignment.role)) {
+          errors.push(
+            `${assignment.label}: model3dId "${assignment.modelId}" does not support role "${assignment.role}"`,
+          )
+        }
+      }
+    }
 
     const objectIds = [
       ...(level.manualObstacles ?? []),
@@ -430,10 +487,17 @@ export function validateConfiguration({
   const modelIds = threeMediaManifest
     ? new Set(threeMediaManifest.models.map((entry) => entry.modelId))
     : null
-  validateLevelRelationships(levels, mediaIds, errors, { modelIds })
+  const modelRoles = threeMediaManifest
+    ? new Map(threeMediaManifest.models.map((entry) => [entry.modelId, entry.roles]))
+    : null
+  validateLevelRelationships(levels, mediaIds, errors, {
+    modelIds,
+    modelRoles,
+  })
   validateLevelRelationships(microLevels, mediaIds, errors, {
     requireContiguous: false,
     modelIds,
+    modelRoles,
   })
   if (threeMediaManifest) {
     for (const duplicate of duplicateValues(

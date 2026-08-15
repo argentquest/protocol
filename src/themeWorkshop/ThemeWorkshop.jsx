@@ -10,6 +10,7 @@ import { authApi, mediaLibraryApi, themeApi } from './themeApi.js'
 import {
   addArenaPoint,
   convertArenaShape,
+  createInteriorWall,
   entitySize,
   isResizableEntity,
   moveArenaPoint,
@@ -17,10 +18,12 @@ import {
   resizeEntity,
   setEntityVerticalProperty,
   setTerrainCornerElevation,
+  setWallProperty,
   snapToEditorGrid as snap,
 } from './levelEditorGeometry.js'
 
 const ENTITY_GROUPS = [
+  'walls',
   'terrainSurfaces',
   'ramps',
   'manualObstacles',
@@ -42,6 +45,10 @@ const THREE_MODEL_CATEGORIES = Object.entries(
 ).sort(([first], [second]) => first.localeCompare(second))
 
 const OBSTACLE_GUIDE = [
+  {
+    name: 'Interior wall',
+    implementation: 'A resizable and rotatable rebound surface for shaping a mini-golf fairway. Wall contact does not count as a hazard collision.',
+  },
   {
     name: 'Terrain platform / bridge',
     implementation: 'Four equal corner elevations create a flat elevated deck. Stacked decks remain independently reachable by ball elevation.',
@@ -225,6 +232,10 @@ function addEntity(level, type) {
   const sequence = Date.now().toString(36)
   const common = { x: 800, y: 450 }
   const templates = {
+    wall: {
+      group: 'walls',
+      entity: createInteriorWall(`wall-${sequence}`),
+    },
     platform: {
       group: 'terrainSurfaces',
       entity: {
@@ -679,6 +690,7 @@ function LevelMap({
               top: `${(descriptor.entity.y / 900) * 100}%`,
               width: `max(12px, ${(size.width / 1600) * 100}%)`,
               height: `max(12px, ${(size.height / 900) * 100}%)`,
+              transform: `translate(-50%, -50%) rotate(${descriptor.entity.orientation ?? 0}deg)`,
             }}
             onPointerDown={(event) => {
               if (event.button !== 0) return
@@ -1609,7 +1621,6 @@ function LevelEditor({
           mediaManifest={editorManifest}
           reducedMotion={reducedMotion}
           tokenCollisionTolerance={gameplayConfig.collision.tokenToleranceUnits}
-          collisionGuideStyle={{ color: 0x36d7ff, width: 2 }}
           pointerResponsePerSecond={gameplayConfig.input.pointerResponsePerSecond}
           keyboardSpeedUnitsPerSecond={
             gameplayConfig.input.keyboardSpeedUnitsPerSecond
@@ -1911,6 +1922,7 @@ function LevelEditor({
               <option value="platform">Elevated platform or bridge</option>
               <option value="slope">Terrain slope</option>
               <option value="ramp">Launch ramp</option>
+              <option value="wall">Interior mini-golf wall</option>
               <option value="static">Static obstacle</option>
               <option value="moving">Axis sweeper (moves side to side)</option>
               <option value="tracking">Tracker (chases inside a zone)</option>
@@ -2140,6 +2152,63 @@ function LevelEditor({
               Empty values keep the backward-compatible automatic defaults.
             </p>
           </fieldset>
+          )}
+          {selection.group === 'walls' && (
+            <fieldset className="entity-height-controls">
+              <legend>Wall behavior</legend>
+              <label>
+                Orientation (degrees)
+                <input
+                  aria-label="Wall orientation"
+                  type="number"
+                  min="0"
+                  max="359.9"
+                  step="5"
+                  value={selectedEntity.orientation ?? 0}
+                  onChange={(event) =>
+                    commit(
+                      replaceEntity(
+                        level,
+                        selection,
+                        setWallProperty(
+                          selectedEntity,
+                          'orientation',
+                          event.target.value,
+                        ),
+                      ),
+                    )
+                  }
+                />
+              </label>
+              <label>
+                Bounce restitution
+                <input
+                  aria-label="Wall bounce restitution"
+                  type="number"
+                  min="0.1"
+                  max="1"
+                  step="0.05"
+                  value={selectedEntity.restitution ?? 0.85}
+                  onChange={(event) =>
+                    commit(
+                      replaceEntity(
+                        level,
+                        selection,
+                        setWallProperty(
+                          selectedEntity,
+                          'restitution',
+                          event.target.value,
+                        ),
+                      ),
+                    )
+                  }
+                />
+              </label>
+              <p>
+                Walls rebound Ricochet shots and stop Guided movement without
+                adding a collision penalty. Drag or resize the wall on the map.
+              </p>
+            </fieldset>
           )}
           <fieldset className="entity-model-controls">
             <legend>3D model</legend>

@@ -81,6 +81,54 @@ export function setTerrainCornerElevation(surface, corner, value) {
 }
 
 /**
+ * Creates a schema-ready interior mini-golf wall at the center of the course.
+ * Dimensions and elevations are expressed in logical world units.
+ *
+ * @pure
+ * @param {string} id Stable wall ID unique within the level.
+ * @returns {object} Editable interior wall configuration.
+ */
+export function createInteriorWall(id) {
+  return {
+    id,
+    mediaId: 'obstacle-static-rect',
+    shape: 'rect',
+    x: 800,
+    y: 450,
+    width: 240,
+    height: 20,
+    visualHeight: 36,
+    collisionHeight: 36,
+    orientation: 0,
+    kind: 'interior',
+    restitution: 0.85,
+  }
+}
+
+/**
+ * Updates a numeric wall property while enforcing its schema range.
+ * Orientation is measured in degrees; restitution is a unitless coefficient.
+ *
+ * @pure
+ * @param {object} wall Editable wall configuration.
+ * @param {'orientation'|'restitution'} property Wall property to update.
+ * @param {number|string} value Candidate numeric value.
+ * @returns {object} Updated wall, or the original wall for invalid input.
+ */
+export function setWallProperty(wall, property, value) {
+  const number = Number(value)
+  if (!Number.isFinite(number)) return wall
+  if (property === 'orientation') {
+    const normalized = ((number % 360) + 360) % 360
+    return { ...wall, orientation: Math.round(normalized * 10) / 10 }
+  }
+  if (property === 'restitution') {
+    return { ...wall, restitution: Math.min(1, Math.max(0.1, number)) }
+  }
+  return wall
+}
+
+/**
  * Converts an arena to a schema-ready boundary of the requested shape.
  *
  * @pure

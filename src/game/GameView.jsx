@@ -7,9 +7,9 @@ import { tokenContainsPoint } from './engine/CollisionSystem.js'
 import { createInputController } from './input/InputController.js'
 import { attachKeyboardInput } from './input/KeyboardInput.js'
 import { attachPointerInput } from './input/PointerInput.js'
-import ThreeCanvas from './rendering/three/ThreeCanvas.jsx'
 import { ThreeEngineAdapter } from './rendering/three/ThreeEngineAdapter.js'
 import { ThreeSceneRenderer } from './rendering/three/ThreeSceneRenderer.js'
+import ThreeCanvas from './rendering/three/ThreeCanvas.jsx'
 
 /**
  * Resolves power inventory, granting test charges only in development mode.
@@ -81,7 +81,6 @@ export default function GameView({
   mediaManifest,
   reducedMotion = false,
   tokenCollisionTolerance = 0,
-  collisionGuideStyle,
   microProtocol = null,
 }) {
   const [engine] = useState(
@@ -100,6 +99,9 @@ export default function GameView({
   const inputCleanupRef = useRef(() => {})
   const resizeCleanupRef = useRef(() => {})
   const engineDisposeTimerRef = useRef(null)
+  const isMountedRef = useRef(true)
+  const arenaShellRef = useRef(null)
+  const [isMaximized, setIsMaximized] = useState(false)
   const [hud, setHud] = useState(() => engine.snapshot())
   const [phase, setPhase] = useState('ready')
   const [message, setMessage] = useState(
@@ -282,12 +284,16 @@ export default function GameView({
   ])
 
   useEffect(() => {
+    // React StrictMode replays the cleanup before the real mount, so the guard
+    // must be reset to true whenever this effect (re)runs.
+    isMountedRef.current = true
     if (engineDisposeTimerRef.current !== null) {
       window.clearTimeout(engineDisposeTimerRef.current)
       engineDisposeTimerRef.current = null
     }
 
     return () => {
+      isMountedRef.current = false
       inputCleanupRef.current()
       resizeCleanupRef.current()
       adapterRef.current?.destroy()
@@ -315,8 +321,11 @@ export default function GameView({
         development: devMode,
         reducedMotion,
         tokenCollisionTolerance,
-        collisionGuideStyle,
       }).build()
+      if (!isMountedRef.current) {
+        renderer.destroy()
+        return
+      }
       rendererRef.current = renderer
 
       const controller = createInputController(() => engine.session.input, {
@@ -508,11 +517,10 @@ export default function GameView({
       powerups,
       reducedMotion,
       tokenCollisionTolerance,
-      collisionGuideStyle,
     ],
   )
 
-  /** @param {Error} error Three.js initialization failure. @returns {void} */
+  /** @param {Error} error Renderer initialization failure. @returns {void} */
   const handleRendererError = useCallback((error) => {
     setRendererError(error)
   }, [])
@@ -566,6 +574,27 @@ export default function GameView({
     rendererRef.current?.resetCamera()
   }
 
+  /** Toggles the arena between its normal size and browser fullscreen. */
+  const toggleMax = () => {
+    const shell = arenaShellRef.current
+    if (!shell) return
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {})
+    } else if (shell.requestFullscreen) {
+      shell.requestFullscreen().catch(() => {})
+    }
+  }
+
+  useEffect(() => {
+    /** Synchronizes React presentation state with the browser fullscreen element. */
+    const onFullscreenChange = () => {
+      setIsMaximized(Boolean(document.fullscreenElement))
+    }
+    document.addEventListener('fullscreenchange', onFullscreenChange)
+    return () =>
+      document.removeEventListener('fullscreenchange', onFullscreenChange)
+  }, [])
+
   return (
     <main className="game-screen">
       <GameHeader
@@ -597,8 +626,17 @@ export default function GameView({
           }
           onActivatePowerup={activatePowerup}
         />
-        <div className="arena-shell">
+        <div className="arena-shell" ref={arenaShellRef}>
           <div className="arena-corners" aria-hidden="true" />
+          <button
+            type="button"
+            className="max-toggle"
+            onClick={toggleMax}
+            aria-label={isMaximized ? 'Exit fullscreen' : 'Fullscreen the play area'}
+            title={isMaximized ? 'Exit fullscreen' : 'Fullscreen the play area'}
+          >
+            {isMaximized ? 'MIN' : 'MAX'}
+          </button>
           <ThreeCanvas
             className="three-arena"
             ariaLabel={`${level.name} obstacle course`}
@@ -610,50 +648,50 @@ export default function GameView({
             role="group"
             aria-label="Camera angle controls"
           >
-            <button
-              type="button"
-              onClick={() => adjustCamera(-15, 0)}
-              aria-label="Rotate camera left"
-              title="Rotate camera left"
-            >
-              ↶
-            </button>
-            <button
-              type="button"
-              onClick={() => adjustCamera(0, 8)}
-              aria-label="Raise camera"
-              title="Raise camera"
-            >
-              ↑
-            </button>
-            <button
-              type="button"
-              onClick={resetCamera}
-              aria-label="Reset camera angle"
-              title="Reset camera angle"
-            >
-              ●
-            </button>
-            <button
-              type="button"
-              onClick={() => adjustCamera(0, -8)}
-              aria-label="Lower camera"
-              title="Lower camera"
-            >
-              ↓
-            </button>
-            <button
-              type="button"
-              onClick={() => adjustCamera(15, 0)}
-              aria-label="Rotate camera right"
-              title="Rotate camera right"
-            >
-              ↷
-            </button>
+              <button
+                type="button"
+                onClick={() => adjustCamera(-15, 0)}
+                aria-label="Rotate camera left"
+                title="Rotate camera left"
+              >
+                ↶
+              </button>
+              <button
+                type="button"
+                onClick={() => adjustCamera(0, 8)}
+                aria-label="Raise camera"
+                title="Raise camera"
+              >
+                ↑
+              </button>
+              <button
+                type="button"
+                onClick={resetCamera}
+                aria-label="Reset camera angle"
+                title="Reset camera angle"
+              >
+                ●
+              </button>
+              <button
+                type="button"
+                onClick={() => adjustCamera(0, -8)}
+                aria-label="Lower camera"
+                title="Lower camera"
+              >
+                ↓
+              </button>
+              <button
+                type="button"
+                onClick={() => adjustCamera(15, 0)}
+                aria-label="Rotate camera right"
+                title="Rotate camera right"
+              >
+                ↷
+              </button>
           </div>
           {rendererError && (
             <div className="renderer-error" role="alert">
-              WebGL renderer unavailable: {rendererError.message}
+              {rendererError.message}
             </div>
           )}
         </div>

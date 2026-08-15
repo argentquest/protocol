@@ -67,6 +67,29 @@ function normalizeObstacle(obstacle) {
 }
 
 /**
+ * Normalizes a wall entity with a default ricochet response and one shared
+ * rotation for authoritative collision and Three.js presentation.
+ *
+ * @pure
+ * @param {object} wall Authored wall entity.
+ * @returns {object} Wall with default fields applied.
+ */
+function normalizeWall(wall) {
+  const restitution = Math.max(
+    0.1,
+    Math.min(1, Number(wall.restitution ?? 0.85)),
+  )
+  const rotationRadians = ((Number(wall.orientation ?? 0) % 360) * Math.PI) / 180
+  return normalizeShape({
+    ...wall,
+    kind: wall.kind ?? 'interior',
+    restitution,
+    rotationRadians,
+    visualRotationRadians: rotationRadians,
+  })
+}
+
+/**
  * Tests a placement candidate against reserved geometry with clearance.
  *
  * @pure
@@ -363,6 +386,13 @@ export function validateGeneratedPlacement(level) {
       ) {
         continue
       }
+      // Perimeter walls form a continuous boundary and may touch at corners.
+      if (
+        uniqueEntities[first].kind === 'perimeter' &&
+        uniqueEntities[second].kind === 'perimeter'
+      ) {
+        continue
+      }
       if (shapesIntersect(uniqueEntities[first], uniqueEntities[second])) {
         errors.push(`${uniqueEntities[first].id} overlaps ${uniqueEntities[second].id}`)
       }
@@ -409,6 +439,120 @@ export function validateGeneratedPlacement(level) {
     }
   }
   return [...new Set(errors)]
+}
+
+/**
+ * Resolves the bounding box of the arena play area.
+ *
+ * @pure
+ * @param {object} arena Authored arena configuration.
+ * @returns {{x:number,y:number,width:number,height:number}} Bounding box in world units.
+ */
+function arenaBoundingBox(arena) {
+  if (arena.shape === 'ellipse' || arena.shape === 'rect') {
+    const margin = Number(arena.margin ?? 0)
+    return {
+      x: margin,
+      y: margin,
+      width: WORLD_WIDTH - margin * 2,
+      height: WORLD_HEIGHT - margin * 2,
+    }
+  }
+  if (arena.shape === 'polygon' && arena.points) {
+    let minX = Infinity
+    let minY = Infinity
+    let maxX = -Infinity
+    let maxY = -Infinity
+    for (const [x, y] of arena.points) {
+      if (x < minX) minX = x
+      if (y < minY) minY = y
+      if (x > maxX) maxX = x
+      if (y > maxY) maxY = y
+    }
+    return {
+      x: minX,
+      y: minY,
+      width: maxX - minX,
+      height: maxY - minY,
+    }
+  }
+  return { x: 0, y: 0, width: WORLD_WIDTH, height: WORLD_HEIGHT }
+}
+
+/**
+ * Generates a default four-wall perimeter that bounds the arena play area.
+ * The walls are thin and positioned just inside the arena margin so the
+ * token can never reach the arena boundary edge from the interior.
+ * Horizontal walls are shortened by `thickness` at each end so the corners
+ * do not overlap the vertical walls.
+ *
+ * Currently only supports rectangular and elliptical arenas; polygon arenas
+ * require authored interior walls.
+ *
+ * @pure
+ * @param {object} level Authored level configuration.
+ * @returns {object[]} Normalized perimeter walls for the level.
+ */
+function generatePerimeterWalls(level) {
+  if (level.disablePerimeterWalls) return []
+  const arena = level.arena
+  if (!arena) return []
+  if (arena.shape !== 'rect' && arena.shape !== 'ellipse') return []
+  const box = arenaBoundingBox(arena)
+  const thickness = 14
+  const halfT = thickness / 2
+  /** @pure @param {string} suffix Wall-side suffix. @returns {string} Stable generated wall ID. */
+  const id = (suffix) => `perimeter-wall-${suffix}`
+  return [
+    {
+      id: id('top'),
+      mediaId: 'wall-default',
+      model3dId: 'kenney-minigolf-straight',
+      shape: 'rect',
+      x: box.x + box.width / 2,
+      y: box.y + halfT,
+      width: Math.max(0, box.width - 2 * thickness),
+      height: thickness,
+      kind: 'perimeter',
+      orientation: 0,
+    },
+    {
+      id: id('bottom'),
+      mediaId: 'wall-default',
+      model3dId: 'kenney-minigolf-straight',
+      shape: 'rect',
+      x: box.x + box.width / 2,
+      y: box.y + box.height - halfT,
+      width: Math.max(0, box.width - 2 * thickness),
+      height: thickness,
+      kind: 'perimeter',
+      orientation: 0,
+    },
+    {
+      id: id('left'),
+      mediaId: 'wall-default',
+      model3dId: 'kenney-minigolf-straight',
+      shape: 'rect',
+      x: box.x + halfT + 0.01,
+      y: box.y + box.height / 2,
+      width: Math.max(0, box.height - 2 * thickness),
+      height: thickness,
+      kind: 'perimeter',
+      orientation: 90,
+    },
+    {
+      id: id('right'),
+      mediaId: 'wall-default',
+      model3dId: 'kenney-minigolf-straight',
+      shape: 'rect',
+      x: box.x + box.width - halfT - 0.01,
+      y: box.y + box.height / 2,
+      width: Math.max(0, box.height - 2 * thickness),
+      height: thickness,
+      kind: 'perimeter',
+      orientation: 90,
+    },
+  ].map(normalizeWall)
 }
 
 /**
@@ -499,6 +643,9 @@ export function generateLevel(level) {
   const coins = (level.coins ?? []).map((coin) =>
     normalizeShape({ ...coin, shape: 'circle', width: coin.size, height: coin.size }),
   )
+  const authoredWalls = (level.walls ?? []).map(normalizeWall)
+  const perimeterWalls = generatePerimeterWalls(level, random)
+  const walls = [...authoredWalls, ...perimeterWalls]
   const generatedObstacles = []
   const reserved = [
     { ...token, width: token.width * 3.5, height: token.height * 3.5 },
@@ -509,6 +656,7 @@ export function generateLevel(level) {
       height: target.height * 2.7,
     })),
     ...manualObstacles,
+    ...walls,
     ...coins.map((coin) => ({
       ...coin,
       width: coin.width * 2.2,
@@ -535,7 +683,12 @@ export function generateLevel(level) {
       ) {
         continue
       }
-      const proposed = [...manualObstacles, ...generatedObstacles, candidate]
+      const proposed = [
+        ...manualObstacles,
+        ...generatedObstacles,
+        ...authoredWalls,
+        candidate,
+      ]
       if (
         !pathExists({
           arena: level.arena,
@@ -557,6 +710,7 @@ export function generateLevel(level) {
   const obstacles = [...manualObstacles, ...generatedObstacles]
   const configuredHazards = [
     ...obstacles,
+    ...walls,
     ...movingObstacles,
     ...trackingObstacles,
     ...dynamicObstacles.flatMap(dynamicObstacleEnvelope),
@@ -587,7 +741,7 @@ export function generateLevel(level) {
     token,
     mainTarget,
     bonusTargets,
-    obstacles,
+    obstacles: [...obstacles, ...walls],
     movingObstacles,
     trackingObstacles,
     dynamicObstacles,
@@ -606,7 +760,7 @@ export function generateLevel(level) {
     token,
     start: startPoint,
     target: targetPoint,
-    obstacles,
+    obstacles: [...obstacles, ...authoredWalls],
     gridSize: level.generation.pathGrid,
   })
 
@@ -622,7 +776,7 @@ export function generateLevel(level) {
         token,
         start: previousTarget,
         target: bonusTarget,
-        obstacles,
+        obstacles: [...obstacles, ...authoredWalls],
         gridSize: level.generation.pathGrid,
       })
     ) {
@@ -638,7 +792,7 @@ export function generateLevel(level) {
     token,
     start: startPoint,
     target: targetPoint,
-    obstacles,
+    obstacles: [...obstacles, ...authoredWalls],
     gridSize: level.generation.pathGrid,
   })
 
@@ -648,6 +802,7 @@ export function generateLevel(level) {
     token,
     mainTarget,
     obstacles,
+    walls,
     movingObstacles,
     trackingObstacles,
     dynamicObstacles,

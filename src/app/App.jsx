@@ -15,7 +15,6 @@ import { createAudioManager } from '../game/audio/audioManager.js'
 import { recordPlaytestRun } from '../game/debug/playtestLog.js'
 import { generateLevel } from '../game/generation/levelGenerator.js'
 import { loadStartupMedia } from '../game/media/startupLoader.js'
-import { sharedVectorAssetCache } from '../game/rendering/pixi/VectorAssetCache.js'
 import {
   cumulativeScore,
   cumulativeShots,
@@ -897,7 +896,6 @@ function PathProtocolApp() {
       loadedMediaKeyRef.current &&
       loadedMediaKeyRef.current !== mediaKey
     ) {
-      sharedVectorAssetCache.clear()
       audioRef.current.dispose()
       audioRef.current = createAudioManager(progressRef.current.settings)
     }
@@ -925,7 +923,9 @@ function PathProtocolApp() {
         return response.json()
       },
       baseUrl: import.meta.env.BASE_URL,
-      loadVisual: (entry) => sharedVectorAssetCache.load(entry),
+      // V3 visual models are loaded and cached by the Three.js renderer.
+      // Legacy theme artwork stays in the manifest for Workshop previews only.
+      loadVisual: async () => {},
       loadAudio: (entry) => audioRef.current.loadSound(entry),
       onProgress: (snapshot) => {
         if (!cancelled) setStartup({ status: 'loading', error: null, ...snapshot })
@@ -1324,13 +1324,6 @@ function PathProtocolApp() {
           tokenCollisionTolerance={
             gameplayConfig.collision.tokenToleranceUnits
           }
-          collisionGuideStyle={{
-            color: Number.parseInt(
-              presentationTheme.colors.collisionGuide.slice(1),
-              16,
-            ),
-            width: presentationTheme.effects.collisionGuideWidth,
-          }}
           pointerResponsePerSecond={gameplayConfig.input.pointerResponsePerSecond}
           keyboardSpeedUnitsPerSecond={
             gameplayConfig.input.keyboardSpeedUnitsPerSecond

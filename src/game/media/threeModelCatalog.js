@@ -46,5 +46,7 @@ export function threeAssetUrl(
   relativePath,
   baseUrl = import.meta.env.BASE_URL,
 ) {
-  return `${baseUrl}${relativePath}`
+  const base = String(baseUrl ?? '')
+  const normalizedBase = base.endsWith('/') ? base : `${base}/`
+  return `${normalizedBase}${String(relativePath).replace(/^\/+/, '')}`
 }

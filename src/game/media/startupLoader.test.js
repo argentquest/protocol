@@ -69,14 +69,6 @@ describe('startup media loader', () => {
 
   it('resolves manifests and every media source beneath a deployment subpath', async () => {
     const manifest = {
-      pixi: {
-        bundles: [
-          {
-            name: 'visuals',
-            assets: [{ alias: 'token', src: '/media/default/token.svg?v=1' }],
-          },
-        ],
-      },
       visuals: [
         { mediaId: 'token', src: '/media/default/token.svg?v=1' },
       ],
@@ -93,9 +85,6 @@ describe('startup media loader', () => {
 
     const resolved = resolveManifestUrls(manifest, '/protocol/')
 
-    expect(resolved.pixi.bundles[0].assets[0].src).toBe(
-      '/protocol/media/default/token.svg?v=1',
-    )
     expect(resolved.visuals[0].src).toBe(
       '/protocol/media/default/token.svg?v=1',
     )

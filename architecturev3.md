@@ -8,8 +8,8 @@ boundaries while replacing gameplay presentation with a Three.js WebGL scene
 and adding optional engine-owned elevation.
 
 Existing level JSON remains valid. A level without `verticalPhysics`, `ramps`,
-or `terrainSurfaces` retains flat gameplay, even though it is presented by the
-3D camera.
+`terrainSurfaces`, or authored `walls` retains flat gameplay, even though it is
+presented by the 3D camera.
 
 ## Runtime ownership
 
@@ -24,7 +24,7 @@ Framework-neutral fixed 60 Hz engine
 ```
 
 - React mounts one imperative Three.js canvas and owns no frame-by-frame
-  transforms.
+  transforms. A WebGL initialization failure is reported as a startup error.
 - The engine owns horizontal movement, vertical velocity, gravity, ramp
   activation, height-aware collision, targets, scoring, and deterministic time.
 - Three.js owns the bounded perspective camera, raycasting, meshes, GLB loading,
@@ -99,6 +99,19 @@ raycasts pointer movement against rendered terrain before falling back to base
 ground. The Theme Workshop creates flat platform/bridge and slope templates,
 resizes their X/Y footprints, and edits all four elevations on the 10-unit grid.
 
+## Mini-golf walls
+
+Levels may author `walls` independently from penalized obstacles. Each wall has
+a JSON-owned footprint, elevation/collision height, orientation in degrees, and
+a restitution coefficient. The engine uses the rotated footprint for collision
+and Ricochet response; Three.js applies the same rotation to its procedural or
+catalog model. Wall contact stops Guided movement and rebounds Ricochet shots
+without incrementing the hazard-collision counter.
+
+Rectangular and elliptical arenas receive deterministic generated perimeter
+walls unless disabled. The Theme Workshop exposes authored interior walls as
+selectable, draggable, resizable, rotatable objects with editable restitution.
+
 ## Media
 
 V3 ships all 126 GLB models and matching preview images from Kenney's Minigolf
@@ -134,8 +147,9 @@ and generated manifest are stored together under `public/media/3d`.
 3. Add optional deterministic elevation, ramps, low obstacles, and landing.
 4. Extend theme packaging with optional owned GLB presentation overrides.
 5. Add vertical route/shot solvability checks for authored terrain courses.
-6. Remove the dormant Pixi gameplay adapter after Theme Workshop parity and
-   migration tests no longer depend on it.
+6. Retire the V2 Pixi adapter and keep Three.js as the only gameplay renderer.
+7. Add editable, engine-owned mini-golf walls with shared collision and visual
+   orientation.
 
 ## Current limitations
 

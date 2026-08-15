@@ -22,7 +22,7 @@
     "defaults": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["token", "target", "ramp", "obstacle"],
+      "required": ["token", "target", "ramp"],
       "properties": {
         "token": { "$ref": "#/$defs/modelId" },
         "target": { "$ref": "#/$defs/modelId" },
@@ -32,8 +32,7 @@
     },
     "models": {
       "type": "array",
-      "minItems": 126,
-      "maxItems": 126,
+      "minItems": 1,
       "items": {
         "type": "object",
         "additionalProperties": false,

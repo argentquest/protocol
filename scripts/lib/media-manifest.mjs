@@ -366,14 +366,6 @@ export async function resolveThemeManifest({
     schemaVersion: 1,
     mediaVersion,
     theme: themeName,
-    pixi: {
-      bundles: [
-        {
-          name: `${themeName}-visuals-v${mediaVersion}`,
-          assets: orderedVisuals.map(({ alias, src }) => ({ alias, src })),
-        },
-      ],
-    },
     visuals: orderedVisuals,
     audio: orderedAudio,
   }

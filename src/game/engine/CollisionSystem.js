@@ -10,6 +10,40 @@ import { resolveForceFieldAcceleration } from './ForceFieldSystem.js'
 import { terrainMotionAt } from './TerrainSystem.js'
 
 /**
+ * Identifies which wall (if any) the swept token collides with first.
+ *
+ * @pure
+ * @param {{x:number,y:number}} from Last safe token center in world units.
+ * @param {{x:number,y:number}} to Requested token center in world units.
+ * @param {object} shape Authoritative token collision shape.
+ * @param {object[]} walls Wall entities with collision geometry.
+ * @returns {{hit:boolean, wall:object|null, point:{x:number,y:number}|null}} Wall hit info.
+ */
+function probeWallCollision(from, to, shape, walls) {
+  if (!walls || walls.length === 0) {
+    return { hit: false, wall: null, point: null }
+  }
+  const travel = distance(from, to)
+  const smallestDimension = Math.min(shape.width, shape.height)
+  const sampleDistance = Math.max(2, smallestDimension / 4)
+  const steps = Math.max(1, Math.ceil(travel / sampleDistance))
+  for (let step = 1; step <= steps; step += 1) {
+    const amount = step / steps
+    const candidate = {
+      ...shape,
+      x: from.x + (to.x - from.x) * amount,
+      y: from.y + (to.y - from.y) * amount,
+    }
+    for (const wall of walls) {
+      if (shapesIntersect(candidate, wall)) {
+        return { hit: true, wall, point: { ...candidate } }
+      }
+    }
+  }
+  return { hit: false, wall: null, point: null }
+}
+
+/**
  * Builds the token's authoritative collision shape at a candidate center.
  *
  * @pure
@@ -57,6 +91,7 @@ export function tokenContainsPoint(token, point) {
  * @param {object[]} [options.previousObstacles=options.obstacles] Obstacle shapes from the previous fixed step.
  * @param {boolean} [options.obstacleShield=false] Ignore obstacle collisions.
  * @param {boolean} [options.fullShield=false] Ignore obstacle and boundary collisions.
+ * @param {object[]} [options.walls=[]] Wall entities; bounce on contact without counting as a hazard.
  * @returns {object} Movement and discrete collision outcome.
  */
 export function advanceTokenWithCollisions(
@@ -67,6 +102,7 @@ export function advanceTokenWithCollisions(
     previousObstacles = obstacles,
     obstacleShield = false,
     fullShield = false,
+    walls = [],
   } = {},
 ) {
   if (!session.input.active) {
@@ -98,10 +134,32 @@ export function advanceTokenWithCollisions(
       y: forceAcceleration.y + terrainAcceleration.y,
     },
   })
+  const tokenShape = currentToken(session, session.token.lastSafePosition)
+  const wallHit = probeWallCollision(
+    session.token.lastSafePosition,
+    motion.position,
+    tokenShape,
+    walls,
+  )
+  if (wallHit.hit && !fullShield) {
+    session.token.position = { ...session.token.lastSafePosition }
+    session.token.previousPosition = previous
+    session.token.velocity = { x: 0, y: 0 }
+    return {
+      moved: false,
+      collision: true,
+      collisionStarted: false,
+      collisionType: 'wall',
+      wallId: wallHit.wall.id,
+      point: wallHit.point,
+      maximumCollisions: false,
+      traveled: 0,
+    }
+  }
   const swept = sweepShape(
     session.token.lastSafePosition,
     motion.position,
-    currentToken(session, session.token.lastSafePosition),
+    tokenShape,
     session.level.arena,
     obstacles,
     previousObstacles,

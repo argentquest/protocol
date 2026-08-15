@@ -43,18 +43,6 @@ export function resolveManifestUrls(manifest, requestedBaseUrl = '/') {
   if (baseUrl === '/') return manifest
   return {
     ...manifest,
-    pixi: manifest.pixi
-      ? {
-          ...manifest.pixi,
-          bundles: (manifest.pixi.bundles ?? []).map((bundle) => ({
-            ...bundle,
-            assets: (bundle.assets ?? []).map((asset) => ({
-              ...asset,
-              src: resolveAssetUrl(asset.src, baseUrl),
-            })),
-          })),
-        }
-      : manifest.pixi,
     visuals: manifest.visuals.map((entry) => ({
       ...entry,
       src: resolveAssetUrl(entry.src, baseUrl),

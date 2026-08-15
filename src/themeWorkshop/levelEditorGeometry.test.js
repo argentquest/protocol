@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   addArenaPoint,
   convertArenaShape,
+  createInteriorWall,
   entitySize,
   isResizableEntity,
   moveArenaPoint,
@@ -9,6 +10,7 @@ import {
   resizeEntity,
   setEntityVerticalProperty,
   setTerrainCornerElevation,
+  setWallProperty,
   snapToEditorGrid,
 } from './levelEditorGeometry.js'
 
@@ -90,6 +92,22 @@ describe('Theme Workshop level editor geometry', () => {
       southEast: 90,
       southWest: 90,
     })
+  })
+
+  it('creates and edits a schema-ready interior mini-golf wall', () => {
+    const wall = createInteriorWall('wall-editor-test')
+
+    expect(wall).toMatchObject({
+      id: 'wall-editor-test',
+      shape: 'rect',
+      kind: 'interior',
+      width: 240,
+      height: 20,
+      orientation: 0,
+      restitution: 0.85,
+    })
+    expect(setWallProperty(wall, 'orientation', -45).orientation).toBe(315)
+    expect(setWallProperty(wall, 'restitution', 2).restitution).toBe(1)
   })
 
   it('converts an arena to an editable irregular polygon', () => {

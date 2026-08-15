@@ -863,12 +863,6 @@ export async function createThemeStore({
     audio.sort((first, second) => first.soundId.localeCompare(second.soundId))
     return {
       ...manifest,
-      pixi: {
-        bundles: manifest.pixi.bundles.map((bundle) => ({
-          ...bundle,
-          assets: visuals.map(({ alias, src }) => ({ alias, src })),
-        })),
-      },
       visuals,
       audio,
     }

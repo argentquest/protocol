@@ -1031,6 +1031,27 @@ green with a precise hole in its center.
 
 ---
 
+## Sprint 38 — Three-only mini-golf walls
+
+**Goal:** Retire the obsolete 2D gameplay path and make mini-golf walls fully
+authorable in the 3D Theme Workshop.
+
+| ID | Task | Size | Status | Notes |
+|---|---|---:|---|---|
+| V3-S38-01 | Remove the Pixi gameplay renderer | M | `DONE` | Deleted the fallback adapter, tests, runtime imports, and dependency while retaining Workshop media metadata. |
+| V3-S38-02 | Add Workshop wall authoring | M | `DONE` | Interior walls can be added, selected, dragged, resized, rotated, assigned a model, and given a restitution value. |
+| V3-S38-03 | Share wall collision and visual orientation | M | `DONE` | Engine collision and Three.js presentation consume the same authored angle and fitted footprint. |
+| V3-S38-04 | Verify the migration | M | `DONE` | Full unit tests, lint, production build, and Chromium browser journeys pass. |
+
+### Sprint 38 exit criteria
+
+- Three.js is the only gameplay renderer and PixiJS is not a runtime dependency.
+- The Theme Workshop can create, edit, validate, save, and playtest interior walls.
+- Wall orientation matches authoritative collision and visual presentation.
+- Full automated checks and the production build pass.
+
+---
+
 ## 4. Dependency sequence
 
 ```text
@@ -1072,6 +1093,7 @@ Sprint 0: Decisions and branch
                                                                   → Sprint 35: Complete 3D minigolf media catalog
                                                                     → Sprint 36: Two modeled V3 test holes
                                                                       → Sprint 37: Round Green level 100 simplification
+                                                                        → Sprint 38: Three-only mini-golf walls
 ```
 
 Some tasks may overlap after their contracts stabilize. For example, WAV asset

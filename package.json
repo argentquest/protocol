@@ -7,7 +7,7 @@
     "predev": "npm run docs:build && npm run config:validate && npm run media:prepare",
     "dev": "concurrently --kill-others-on-fail --names frontend,server --prefix-colors cyan,magenta \"npm run dev:frontend\" \"npm run dev:server\"",
     "dev:frontend": "vite",
-    "dev:server": "node --watch server/index.js",
+    "dev:server": "node --watch-path=server --watch-path=src --watch-path=scripts server/index.js",
     "prebuild": "npm run docs:build && npm run config:validate && npm run media:prepare",
     "build": "vite build && node scripts/prepare-sites-build.mjs",
     "media:validate-svg": "node scripts/validate-svg-media.mjs",
@@ -39,7 +39,6 @@
     "express": "^5.1.0",
     "ffmpeg-static": "^5.3.0",
     "howler": "2.2.4",
-    "pixi.js": "8.19.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "three": "^0.179.0"

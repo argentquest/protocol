@@ -94,7 +94,7 @@ export function resolveDynamicObstacle(
 }
 
 /**
- * Resolves every dynamic obstacle while retaining non-solid entries for Pixi.
+ * Resolves every dynamic obstacle while retaining non-solid entries for rendering.
  *
  * @pure
  * @param {object[]} obstacles Validated dynamic-obstacle configurations.

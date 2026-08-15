@@ -38,6 +38,10 @@ import { WORLD_HEIGHT, WORLD_WIDTH } from '../../world.js'
 
 const HALF_WORLD_WIDTH = WORLD_WIDTH / 2
 const HALF_WORLD_HEIGHT = WORLD_HEIGHT / 2
+// Module-level shared GLTF cache so catalog models are fetched once per
+// session instead of re-downloaded for every mounted renderer instance.
+const sharedModelLoader = new GLTFLoader()
+const sharedModelPromises = new Map()
 const COLORS = Object.freeze({
   arena: 0x173c31,
   arenaEdge: 0x8ce8c1,
@@ -52,6 +56,8 @@ const COLORS = Object.freeze({
   field: 0x43a5ff,
   terrain: 0x3f7d5f,
   coin: 0xffd166,
+  wall: 0xc98a4b,
+  perimeterWall: 0xb07038,
   trail: 0x70f6ff,
   aim: 0xffd166,
 })
@@ -80,13 +86,66 @@ function extrusion(item) {
   return Number(item.visualHeight) || Math.max(22, Math.min(90, Math.min(size.width, size.height) * 0.7))
 }
 
+/**
+ * Creates a BufferGeometry backed by a fixed-capacity position buffer so the
+ * GPU buffer is uploaded in place every frame instead of re-allocating.
+ *
+ * @param {number} maxPoints Maximum number of line vertices.
+ * @returns {BufferGeometry} Line geometry with a reusable position attribute.
+ */
+function createLineGeometry(maxPoints) {
+  const geometry = new BufferGeometry()
+  geometry.setAttribute(
+    'position',
+    new Float32BufferAttribute(new Float32Array(maxPoints * 3), 3),
+  )
+  geometry.setDrawRange(0, 0)
+  return geometry
+}
+
+/**
+ * Writes trail points into a pooled line geometry in place.
+ *
+ * @param {BufferGeometry} geometry Pooled line geometry.
+ * @param {object[]} points World-space sample points.
+ * @param {number} baseHeight Vertical offset for the line layer.
+ * @returns {void}
+ */
+function updateLineGeometry(geometry, points, baseHeight) {
+  const position = geometry.attributes.position
+  const count = Math.min(points.length, position.count)
+  for (let index = 0; index < count; index += 1) {
+    const point = points[index]
+    position.setXYZ(
+      index,
+      point.x - HALF_WORLD_WIDTH,
+      baseHeight + (point.z ?? 0),
+      point.y - HALF_WORLD_HEIGHT,
+    )
+  }
+  geometry.setDrawRange(0, count)
+  position.needsUpdate = true
+  geometry.computeBoundingSphere()
+}
+
 /** @param {object} object Three object. @param {number} opacity Opacity from 0 to 1. @returns {void} */
 function setOpacity(object, opacity) {
+  const targetOpacity = Math.max(0, Math.min(1, opacity))
+  const transparent = targetOpacity < 1
+  const materialList = []
   object.traverse((child) => {
     if (!child.material) return
-    child.material.transparent = opacity < 1
-    child.material.opacity = opacity
-    child.material.depthWrite = opacity >= 1
+    const materials = Array.isArray(child.material)
+      ? child.material
+      : [child.material]
+    for (const material of materials) {
+      if (!material || materialList.includes(material)) continue
+      materialList.push(material)
+      material.transparent = transparent
+      material.opacity = targetOpacity
+      material.depthWrite = !transparent
+      material.needsUpdate = true
+    }
   })
 }
 
@@ -142,6 +201,9 @@ function createEntityMesh(item, color, role = 'obstacle') {
   mesh.castShadow = role !== 'field' && role !== 'start' && role !== 'target'
   mesh.receiveShadow = true
   if (item.shape === 'diamond') mesh.rotation.y = Math.PI / 4
+  if (item.visualRotationRadians !== undefined && item.shape !== 'diamond') {
+    mesh.rotation.y = -item.visualRotationRadians
+  }
   const baseHeight = role === 'token'
     ? (item.visualHeight ?? dimensions.width) / 2
     : role === 'target' || role === 'start'
@@ -156,6 +218,7 @@ function createEntityMesh(item, color, role = 'obstacle') {
   mesh.userData.baseVerticalSize = verticalSize
   mesh.userData.role = role
   mesh.userData.baseHeight = baseHeight
+  mesh.userData.baseScale = mesh.scale.clone()
   return mesh
 }
 
@@ -302,10 +365,11 @@ export class ThreeSceneRenderer {
     this.debugGraphics = new Group()
     this.debugGraphics.visible = development
     this.trailLine = null
+    this.trailLineGeometry = null
     this.aimGroup = new Group()
     this.ghostGroup = new Group()
-    this.modelLoader = new GLTFLoader()
-    this.modelPromises = new Map()
+    this.modelLoader = sharedModelLoader
+    this.modelPromises = sharedModelPromises
     this.scene.add(this.debugGraphics, this.aimGroup, this.ghostGroup)
   }
 
@@ -364,6 +428,13 @@ export class ThreeSceneRenderer {
       this.bonusEntityIds.push(bonus.id)
     }
     for (const item of this.level.obstacles) this.addEntity(item, COLORS.obstacle)
+    for (const wall of this.level.walls ?? []) {
+      this.addEntity(
+        { ...wall, shape: wall.shape ?? 'rect' },
+        wall.kind === 'perimeter' ? COLORS.perimeterWall : COLORS.wall,
+        'wall',
+      )
+    }
     for (const item of this.level.movingObstacles) this.addEntity(item, COLORS.moving)
     for (const item of this.level.trackingObstacles) this.addEntity(item, COLORS.tracking)
     for (const item of this.level.dynamicObstacles ?? []) this.addEntity(item, COLORS.dynamic)
@@ -464,7 +535,13 @@ export class ThreeSceneRenderer {
     const presentationSize =
       Number(item.model3dSize) ||
       (role === 'target' ? footprintSize * 1.8 : footprintSize)
-    this.placeModel(model, item, presentationSize)
+    if (role === 'wall') {
+      this.placeWallModel(model, item)
+      model.rotation.y = -(item.visualRotationRadians ?? 0)
+    } else {
+      this.placeModel(model, item, presentationSize)
+    }
+    model.userData.baseScale = model.scale.clone()
     if (role === 'ramp') {
       model.rotation.y = -(item.directionDegrees * Math.PI) / 180
     }
@@ -498,6 +575,31 @@ export class ThreeSceneRenderer {
       model.scale.y *= item.visualHeight / Math.max(scaledHeight, 0.0001)
       scaled = new Box3().setFromObject(model)
     }
+    const center = scaled.getCenter(new Vector3())
+    model.position.sub(center)
+    const floor = scaled.min.y - center.y
+    model.position.add(scenePoint(item.x, item.y, -floor + entityElevation(item)))
+    model.userData.baseHeight = model.position.y - entityElevation(item)
+  }
+
+  /**
+   * Fits a rectangular catalog model to an authored wall footprint.
+   * Wall width, depth, and height are measured in logical world units.
+   *
+   * @param {Group} model Loaded wall model.
+   * @param {object} item Authored wall configuration.
+   * @returns {void}
+   */
+  placeWallModel(model, item) {
+    const box = new Box3().setFromObject(model)
+    const dimensions = box.getSize(new Vector3())
+    const wallFootprint = footprint(item)
+    model.scale.set(
+      wallFootprint.width / Math.max(dimensions.x, 0.0001),
+      extrusion(item) / Math.max(dimensions.y, 0.0001),
+      wallFootprint.height / Math.max(dimensions.z, 0.0001),
+    )
+    const scaled = new Box3().setFromObject(model)
     const center = scaled.getCenter(new Vector3())
     model.position.sub(center)
     const floor = scaled.min.y - center.y
@@ -611,9 +713,19 @@ export class ThreeSceneRenderer {
       point.y,
       point.elevation ?? 0,
     ).project(this.camera)
+    const viewport = this.viewport ?? { width: 1, height: 1 }
+    // Clamp homogeneous-w and cap out-of-view / behind-camera projections so
+    // the result is always a finite, on-canvas coordinate.
+    if (
+      !Number.isFinite(projected.x) ||
+      !Number.isFinite(projected.y) ||
+      !Number.isFinite(projected.z)
+    ) {
+      return { x: viewport.width, y: viewport.height }
+    }
     return {
-      x: ((projected.x + 1) / 2) * this.viewport.width,
-      y: ((1 - projected.y) / 2) * this.viewport.height,
+      x: Math.max(0, Math.min(viewport.width, ((projected.x + 1) / 2) * viewport.width)),
+      y: Math.max(0, Math.min(viewport.height, ((1 - projected.y) / 2) * viewport.height)),
     }
   }
 
@@ -655,12 +767,19 @@ export class ThreeSceneRenderer {
     }
     for (const obstacle of session.dynamicObstacles ?? []) {
       const entity = this.entities.get(obstacle.id)
-      const configured = this.level.dynamicObstacles.find((item) => item.id === obstacle.id)
+      const configured = (this.level.dynamicObstacles ?? []).find(
+        (item) => item.id === obstacle.id,
+      )
       if (!entity || !configured) continue
       this.setEntityPosition(entity, obstacle.x, obstacle.y)
+      const baseScale = entity.userData?.baseScale
+      const baseX = baseScale?.x ?? 1
+      const baseZ = baseScale?.z ?? 1
+      const widthRatio = obstacle.width / (configured.width || obstacle.width)
+      const heightRatio = obstacle.height / (configured.height || obstacle.height)
+      entity.scale.x = baseX * widthRatio
+      entity.scale.z = baseZ * heightRatio
       entity.rotation.y = -(obstacle.rotationRadians ?? 0)
-      entity.scale.x = obstacle.width / configured.width
-      entity.scale.z = obstacle.height / configured.height
       setOpacity(entity, obstacle.state === 'open' ? 0.18 : obstacle.state === 'warning' ? 0.55 : 1)
     }
     for (const coin of this.level.coins) {
@@ -679,12 +798,38 @@ export class ThreeSceneRenderer {
       }
     }
 
+    const activeTrail = session.trails.active
     if (this.trailLine) {
-      this.scene.remove(this.trailLine)
-      disposeObject(this.trailLine)
+      if (
+        activeTrail.length >= 2 &&
+        activeTrail.length <= this.trailLineGeometry.attributes.position.count
+      ) {
+        updateLineGeometry(this.trailLineGeometry, activeTrail, 7)
+      } else {
+        // Trail has been reset or needs a larger pooled buffer.
+        this.scene.remove(this.trailLine)
+        disposeObject(this.trailLine)
+        this.trailLine = null
+        this.trailLineGeometry = null
+        if (activeTrail.length >= 2) {
+          this.trailLineGeometry = createLineGeometry(activeTrail.length)
+          updateLineGeometry(this.trailLineGeometry, activeTrail, 7)
+          this.trailLine = new Line(
+            this.trailLineGeometry,
+            new LineBasicMaterial({ color: COLORS.trail }),
+          )
+          this.scene.add(this.trailLine)
+        }
+      }
+    } else if (activeTrail.length >= 2) {
+      this.trailLineGeometry = createLineGeometry(activeTrail.length)
+      updateLineGeometry(this.trailLineGeometry, activeTrail, 7)
+      this.trailLine = new Line(
+        this.trailLineGeometry,
+        new LineBasicMaterial({ color: COLORS.trail }),
+      )
+      this.scene.add(this.trailLine)
     }
-    this.trailLine = this.createLine(session.trails.active, COLORS.trail)
-    if (this.trailLine) this.scene.add(this.trailLine)
 
     while (this.aimGroup.children.length) {
       const child = this.aimGroup.children.pop()
@@ -729,7 +874,8 @@ export class ThreeSceneRenderer {
         ? ''
         : Math.max(
             0,
-            session.level.shotGoals.maximumShots - session.kinetic.shotsTaken,
+            session.level.shotGoals.maximumShots -
+              (session.kinetic?.shotsTaken ?? 0),
           ),
     )
     canvas.dataset.trailSamples = String(session.trails.active.length)
@@ -748,6 +894,7 @@ export class ThreeSceneRenderer {
     this.scene.clear()
     this.entities.clear()
     this.entityPresentations.clear()
-    this.modelPromises.clear()
+    // Shared catalog sources are intentionally retained for the next mount;
+    // destroying this instance only disposes the clones in this.scene.
   }
 }

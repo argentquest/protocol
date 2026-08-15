@@ -135,19 +135,20 @@ Path Protocol V3 uses:
 
 - React 19 for screens, menus, dialogs, HUD, settings, and the Power Lab.
 - Three.js with WebGL for the perspective 3D arena.
-- One imperative Three.js canvas mounted by React.
+- One imperative Three.js renderer canvas mounted by React.
 - A framework-neutral fixed 60 Hz game engine.
 - Optional engine-owned elevation, gravity, ramps, height-aware collision, and
   deterministic terrain surfaces with slopes, bridges, friction, and landing.
-- A generated 126-model GLB catalog with per-entity selection, cached loading,
-  and procedural geometry fallback.
+- A generated 126-model GLB catalog with per-entity selection, shared cached
+  loading, and procedural geometry fallback.
 - Howler.js for effects and looping ambience.
 - WAV audio masters with WebM preferred and MP3 fallback delivery.
 - JSON Schema-validated levels, media, themes, audio, and powers.
 - Browser-local versioned progress storage.
 - Express APIs, SQLite accounts/sessions, and filesystem-backed theme packages.
-- The existing V2 SVG/PNG theme pipeline remains available alongside the
-  built-in V3 GLB catalog; owned theme GLB uploads remain future work.
+- The existing SVG/PNG theme catalog remains available to the Theme Workshop;
+  gameplay uses the built-in V3 GLB catalog and procedural Three.js geometry.
+  Owned theme GLB uploads remain future work.
 
 ```text
 React screens and HUD

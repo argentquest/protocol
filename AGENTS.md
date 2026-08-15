@@ -3,14 +3,15 @@
 ## Purpose
 
 This file provides repository instructions for coding agents working on
-**Path Protocol V2**.
+**Path Protocol V3**.
 
 Path Protocol is a 100-level desktop browser precision game. React owns the
-application UI, PixiJS renders the real-time arena through WebGL, a pure
-fixed-step engine owns gameplay, and Howler.js owns audio.
+application UI, Three.js renders the real-time arena through WebGL, a pure
+fixed-step engine owns gameplay, and
+Howler.js owns audio.
 
-V2 is a new architecture on `feature/pixijs-rearchitecture`. Do not preserve
-the V1 React/SVG renderer or synthesized Web Audio implementation for backward
+V3 is the current architecture. The PixiJS V2 and React/SVG V1 renderers and
+synthesized Web Audio implementation are not preserved for backward
 compatibility.
 
 ## Sources of truth
@@ -18,15 +19,17 @@ compatibility.
 Read these files before architectural or gameplay changes:
 
 1. [`architecturev2.md`](architecturev2.md) — authoritative V2 product and
-   technical architecture.
+   technical architecture (historical baseline for the V3 renderer work).
 2. [`sprintv2.md`](sprintv2.md) — live implementation sequence and task status.
-3. `src/config/schemas/*.json` — authoritative configuration contracts.
+3. `src/config/schemas/*.json` — authoritative configuration contracts,
+   including `threeMediaManifest.schema.json` for the 3D model catalog.
 4. `src/config/levels/*.json` — level-specific gameplay configuration.
 5. Generated media manifests — resolved default and theme asset contracts once
    implemented.
 
 `architecture.md` and `sprints.md` describe V1 and are historical references.
-When V1 and V2 disagree, follow the V2 documents.
+When V1 and V2 disagree, follow the V2 documents. When V2 and the V3 renderer
+work disagree, follow the V3 implementation (`src/game/rendering/`).
 
 Update `sprintv2.md` in the same change that completes a tracked task. A sprint
 must pass its relevant automated checks and meet its exit criteria before work
@@ -37,11 +40,13 @@ moves to the next sprint.
 - React 19 for screens, navigation, dialogs, HUD, settings, and shops.
 - Vite for development and production builds.
 - Modern JavaScript with ES modules.
-- PixiJS using WebGL only for gameplay rendering.
-- One imperative Pixi canvas mounted and disposed by React.
+- Three.js (WebGL) as the only gameplay renderer.
+- One imperative Three.js canvas mounted and disposed by React.
 - A framework-neutral fixed 60 Hz game engine.
-- External SVG source media loaded initially as Pixi vector
-  `GraphicsContext` objects.
+- GLB model assets from the Kenney Minigolf pack for 3D presentation, mapped
+  onto JSON-owned collision geometry.
+- SVG/PNG source media retained for Theme Workshop catalogs and previews, not
+  gameplay rendering.
 - Howler.js for effects and looping ambience.
 - WAV audio masters with generated WebM and MP3 delivery files.
 - JSON and versioned JSON Schema for levels, media, themes, audio, game settings,
@@ -75,17 +80,20 @@ persistent JSON theme folders.
 
 The engine:
 
-- Must not import React, PixiJS, Howler, browser DOM APIs, or persistence code.
+- Must not import React, Three.js, Howler, browser DOM APIs, or
+  persistence code.
 - Owns the gameplay state machine, fixed-step updates, movement, collision,
   targets, bonuses, hazards, coins, powers, and score inputs.
 - Emits discrete gameplay events and throttled serializable HUD snapshots.
 
-The Pixi adapter:
+The renderer (`src/game/rendering/three/`):
 
-- Owns the WebGL application, viewport, scene graph, external SVG contexts,
-  entity display objects, trails, effects, and debug overlays.
+- Three.js (`rendering/three/`) owns the WebGL application, perspective camera,
+  scene graph, GLB catalog models, trails, effects, and debug overlays.
+- Exposes the playback surface (`resize`, `update`, `screenToWorld`,
+  `tokenHitTest`, `destroy`) while gameplay stays renderer-agnostic.
 - Must not own scoring, progression, persistence, or gameplay decisions.
-- Must create stable display objects and update their transforms without
+- Must create stable scene objects and update their transforms without
   rebuilding the scene every frame.
 
 React:
@@ -93,7 +101,7 @@ React:
 - Owns startup, menus, navigation, HUD presentation, dialogs, settings, results,
   level selection, and the Power Lab.
 - Must not receive raw pointer movement or frame-by-frame entity transforms.
-- Mounts exactly one imperative Pixi canvas for the arena.
+- Mounts exactly one imperative renderer canvas for the arena.
 
 Howler:
 
@@ -213,8 +221,8 @@ hand-maintain a second list that can drift from the files.
   `renderMode: "texture"`; invalid or missing PNGs fall back per element.
 - Cache each texture once and preserve aspect ratio for proportion-sensitive
   objects. Collision geometry remains JSON-owned.
-- Vector assets must avoid SVG features unsupported by Pixi parsing, including
-  blur/drop-shadow filters and unsupported patterns.
+- SVG/PNG catalog assets are preview and authoring media only; they do not define
+  gameplay presentation or collision.
 - Collision geometry comes from JSON, never from artwork bounds.
 - Rectangular objects may stretch to configured width and height. Tokens,
   circles, coins, and other proportion-sensitive objects preserve aspect ratio.
@@ -242,12 +250,13 @@ hand-maintain a second list that can drift from the files.
 
 - Run game simulation at exactly 60 updates per second.
 - Use a clamped accumulator so an inactive tab cannot create an update spiral.
-- Render independently through the Pixi ticker.
+- Render independently from the simulation via `requestAnimationFrame`.
 - Use a monotonic real-time clock for scoring.
 - Raw pointer and keyboard handlers only update input state.
 - Never perform collision, hazard updates, score calculation, or React state
   updates directly in pointer-move handlers.
-- Convert canvas coordinates through one shared viewport module.
+- Convert canvas coordinates through each renderer's shared viewport/camera
+  transform.
 
 ## Collision and movement rules
 
@@ -276,10 +285,12 @@ hand-maintain a second list that can drift from the files.
 ## Performance expectations
 
 - Target 60 rendered frames per second on a representative current desktop.
-- Parse each resolved vector SVG once and reuse its `GraphicsContext`.
+- Cache GLB model sources once at module scope and clone them per entity to avoid
+  re-downloading per level mount.
 - Precompute static collision geometry.
-- Avoid hot-loop allocation where practical.
-- Reuse Pixi display objects and effects.
+- Avoid hot-loop allocation where practical; pool reusable line geometry and
+  update buffers in place.
+- Reuse Three.js display objects and effects.
 - Bound trail and ghost-trail samples.
 - Do not add workers, spatial indexes, texture mode, or audio sprites before
   profiling identifies a need.
@@ -291,7 +302,7 @@ hand-maintain a second list that can drift from the files.
 - Provide Space and arrow-key gameplay.
 - Never use sound or color as the sole feedback for important events.
 - Respect reduced-motion settings without changing gameplay rules.
-- Give the Pixi canvas an accessible name and nearby instructions.
+- Give the renderer canvas an accessible name and nearby instructions.
 
 ## Testing and sprint gates
 
@@ -335,14 +346,16 @@ Before moving to the next sprint:
 
 ## Definition of done
 
-V2 work is complete when:
+V3 work is complete when:
 
-- PixiJS WebGL is the only gameplay renderer.
+- Three.js WebGL is the only gameplay renderer.
 - React owns no frame-by-frame gameplay state.
 - The engine is deterministic and framework-neutral.
 - All 100 levels and every default media asset validate.
+- The 3D model catalog resolves GLB sources and maps them onto JSON-owned
+  collision geometry without altering gameplay.
 - Theme overrides resolve one element at a time.
-- External vector media preload and reuse cached contexts.
+- Theme Workshop media catalogs remain schema-valid and independently resolved.
 - Howler uses WebM first with MP3 fallback and looping default ambience.
 - Pointer and keyboard controls are smooth and consistent.
 - Score, progression, coins, powers, and persistence match the architecture.

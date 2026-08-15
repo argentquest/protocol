@@ -4,43 +4,11 @@
   "title": "Path Protocol resolved theme manifest",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "mediaVersion", "theme", "pixi", "visuals", "audio"],
+  "required": ["schemaVersion", "mediaVersion", "theme", "visuals", "audio"],
   "properties": {
     "schemaVersion": { "const": 1 },
     "mediaVersion": { "type": "integer", "minimum": 1 },
     "theme": { "type": "string", "pattern": "^(default|[a-z0-9]+(?:-[a-z0-9]+)*)$" },
-    "pixi": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["bundles"],
-      "properties": {
-        "bundles": {
-          "type": "array",
-          "minItems": 1,
-          "maxItems": 1,
-          "items": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["name", "assets"],
-            "properties": {
-              "name": { "type": "string", "minLength": 1 },
-              "assets": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "required": ["alias", "src"],
-                  "properties": {
-                    "alias": { "type": "string", "minLength": 1 },
-                    "src": { "type": "string", "pattern": "\\.(?:png|svg)\\?v=[0-9]+$" }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "visuals": {
       "type": "array",
       "items": {
