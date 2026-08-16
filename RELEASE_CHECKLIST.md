@@ -47,11 +47,28 @@
 ## Container and rollout
 
 - [x] Build the Docker image from a clean cache.
-- [x] Confirm `/healthz`, SPA fallback, media, and cache headers.
-- [x] Confirm Node, npm, and FFmpeg are absent from the runtime image.
+- [x] Confirm `/api/health`, SPA fallback, media, and cache headers.
+- [x] Confirm the production Node server, Theme Workshop API, and persistent
+  data volume are present in the runtime image.
+- [x] Confirm build-only dependencies and the system FFmpeg package are absent
+  from the runtime image; `ffmpeg-static` remains for author audio imports.
 - [ ] Record the candidate commit and image digest.
 - [ ] Preserve the previous deployable image as the rollback target.
 - [x] Run one clean-browser start, level completion, reload, and settings test.
+- [ ] Verify the public URL serves built `/assets/` files and does not expose
+  `/@vite/client`, `/src/`, or hot-module reload endpoints.
+- [ ] Verify the reverse proxy strips the configured public path prefix for both
+  frontend and `/api` requests.
+- [ ] Confirm GA4 Realtime receives a consented production page view.
+
+## GitHub release
+
+- [ ] Update `CHANGELOG.md` with the release date and version.
+- [ ] Confirm the candidate commit has passing quality, Chromium, and CodeQL
+  checks.
+- [ ] Tag the verified candidate using semantic versioning.
+- [ ] Publish GitHub release notes with upgrade, deployment, license, and known
+  limitation details.
 
 Previously verified image:
 `sha256:58474e702ff5f25fb2f6ef2954f725c8d4b22ba38bffb549d418942c42863af2`.

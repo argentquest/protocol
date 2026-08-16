@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+echo "WARNING: Dockerfile.dev starts Vite development services and must not be used in production."
+
 # Patch dev:frontend to bind to all interfaces
 cd /app || exit 1
 node -e "

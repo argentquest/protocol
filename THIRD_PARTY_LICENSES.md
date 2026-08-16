@@ -4,6 +4,10 @@ This file records third-party dependencies and asset provenance for Path
 Protocol V3. Exact installed versions must be updated from `package-lock.json`
 when a dependency is added or upgraded.
 
+Required end-user attribution and executable-distribution cautions are
+summarized in [`NOTICE.md`](NOTICE.md). Preserve that notice in source and
+packaged distributions.
+
 ## Runtime dependencies
 
 | Component | Purpose | Version | License | Source |
@@ -34,6 +38,12 @@ The clean-cache Docker build verified FFmpeg 5.1.9-0+deb12u1 with
 `--enable-gpl`. The production server uses the pinned `ffmpeg-static` runtime
 dependency when an author imports media. The recorded npm audit result must be
 refreshed before release.
+
+The `ffmpeg-static` package installs its GPL license text and identifies the
+upstream source locations for each platform binary. Anyone distributing the
+runtime container or another packaged build must preserve those materials and
+verify the corresponding-source obligations for the exact binary shipped. The
+project's MIT License does not relicense that executable.
 
 ## Project-authored media
 

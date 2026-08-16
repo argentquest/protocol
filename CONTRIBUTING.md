@@ -56,3 +56,9 @@ Update `sprintv2.md` when completing a tracked task.
 Keep pull requests focused and explain the user-visible outcome, contract
 changes, test evidence, and license impact. By contributing, you agree that your
 contribution is licensed under the repository's MIT License.
+
+Maintainers squash-merge focused pull requests after required GitHub checks
+pass. Update [`CHANGELOG.md`](CHANGELOG.md) when a change affects players,
+theme authors, contributors, deployment, compatibility, or security. Releases
+follow [`RELEASE_CHECKLIST.md`](RELEASE_CHECKLIST.md) and are tagged only after
+the hosted production version has been verified.
