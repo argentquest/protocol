@@ -24,7 +24,7 @@
   "scripts": {
     "predev": "npm run docs:build && npm run config:validate && npm run media:prepare",
     "dev": "concurrently --kill-others-on-fail --names frontend,server --prefix-colors cyan,magenta \"npm run dev:frontend\" \"npm run dev:server\"",
-    "dev:frontend": "vite",
+    "dev:frontend": "vite --host 0.0.0.0",
     "dev:server": "node --watch-path=server --watch-path=src --watch-path=scripts server/index.js",
     "prebuild": "npm run docs:build && npm run config:validate && npm run media:prepare",
     "build": "vite build && node scripts/prepare-sites-build.mjs",
