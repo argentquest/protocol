@@ -61,14 +61,25 @@ function relayLevel() {
 }
 
 describe('V2 targets, scoring, bonuses, and trails', () => {
-  it('recognizes edge contact using the complete token shape', () => {
+  it('requires the token center to enter the main hole footprint', () => {
     const session = createLevelSession(relayLevel(), {
       generatedLevel: relayLevel(),
     })
-    session.token.position = { x: 230, y: 500 }
+    session.token.position = { x: 240, y: 500 }
     expect(touchesActiveTarget(session, 'active-main')).toBe(true)
-    session.token.position = { x: 229.9, y: 500 }
+    session.token.position = { x: 239.9, y: 500 }
     expect(touchesActiveTarget(session, 'active-main')).toBe(false)
+  })
+
+  it('retains full-token edge contact for optional bonus targets', () => {
+    const level = relayLevel()
+    const session = createLevelSession(level, { generatedLevel: level })
+    session.targets.activeBonusIndex = 0
+    session.token.position = { x: 280, y: 500 }
+
+    expect(touchesActiveTarget(session, 'active-bonus')).toBe(true)
+    session.token.position = { x: 279.9, y: 500 }
+    expect(touchesActiveTarget(session, 'active-bonus')).toBe(false)
   })
 
   it('offers bonuses deterministically from score percentage and order', () => {

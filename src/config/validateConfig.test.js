@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import gameConfig from './gameConfig.json'
+import kenneyCourseTemplateConfig from './kenneyCourseTemplates.json'
 import {
   configurationStatus,
   levels,
@@ -22,6 +23,7 @@ function validConfiguration() {
     mediaRegistry: clone(mediaRegistry),
     soundRegistry: clone(soundRegistry),
     threeMediaManifest: clone(threeMediaManifest),
+    kenneyCourseTemplateConfig: clone(kenneyCourseTemplateConfig),
   }
 }
 
@@ -90,6 +92,17 @@ describe('V2 configuration validation', () => {
     configuration.levels[0].token.model3dId = 'kenney-minigolf-not-registered'
     expect(validateConfiguration(configuration).errors).toContain(
       'level-01: unknown model3dId "kenney-minigolf-not-registered"',
+    )
+  })
+
+  it('validates Kenney placement templates against catalog roles', () => {
+    const configuration = validConfiguration()
+    expect(validateConfiguration(configuration)).toEqual({ valid: true, errors: [] })
+
+    configuration.kenneyCourseTemplateConfig.templates[0].model3dId =
+      'kenney-minigolf-ball-blue'
+    expect(validateConfiguration(configuration).errors).toContain(
+      'kenneyCourseTemplates/straight-fairway: model3dId "kenney-minigolf-ball-blue" does not support role "terrain"',
     )
   })
 

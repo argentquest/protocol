@@ -1,8 +1,11 @@
 import { expect, test } from '@playwright/test'
+import { dismissAnalytics, selectDefaultTheme } from './appSetup.js'
 
 async function boot(page) {
   await page.goto('/')
+  await dismissAnalytics(page)
   await page.getByRole('button', { name: /start game/i }).click()
+  await selectDefaultTheme(page)
   await expect(page.getByRole('heading', { name: /find the line/i })).toBeVisible()
 }
 

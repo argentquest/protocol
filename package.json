@@ -2,6 +2,24 @@
   "name": "path-protocol",
   "private": true,
   "version": "0.1.0",
+  "description": "A deterministic 100-level browser precision game and theme editor.",
+  "license": "MIT",
+  "author": {
+    "name": "Eric Silver",
+    "email": "esilver@argentquest.com",
+    "url": "https://www.linkedin.com/in/eric-silver-tx/"
+  },
+  "homepage": "https://app.inkandquill.io/protocol/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/argentquest/protocol.git"
+  },
+  "bugs": {
+    "url": "https://github.com/argentquest/protocol/issues"
+  },
+  "engines": {
+    "node": ">=20.19"
+  },
   "type": "module",
   "scripts": {
     "predev": "npm run docs:build && npm run config:validate && npm run media:prepare",
@@ -23,6 +41,7 @@
     "config:validate": "vitest run src/config/validateConfig.test.js src/config/loadConfig.test.js",
     "preview": "node server/index.js",
     "start": "node server/index.js",
+    "admin:grant": "node scripts/grant-admin.mjs",
     "server:test": "vitest run server/themeApi.test.js",
     "lint": "eslint . && npm run docs:validate",
     "docs:build": "node scripts/build-designer-help.mjs",

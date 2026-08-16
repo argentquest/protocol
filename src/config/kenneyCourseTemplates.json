@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "templates": [
+    {
+      "id": "straight-fairway",
+      "name": "Straight fairway",
+      "description": "A long playable green with procedural side-wall collision.",
+      "kind": "lane",
+      "model3dId": "kenney-minigolf-straight",
+      "width": 520,
+      "height": 280,
+      "visualHeight": 36,
+      "wallThickness": 20
+    },
+    {
+      "id": "open-green",
+      "name": "Open green",
+      "description": "An open course tile for starts, holes, and connecting areas.",
+      "kind": "lane",
+      "model3dId": "kenney-minigolf-open",
+      "width": 360,
+      "height": 300,
+      "visualHeight": 30,
+      "wallThickness": 0
+    },
+    {
+      "id": "round-corner",
+      "name": "Round corner",
+      "description": "A broad curved presentation tile with an editable ground footprint.",
+      "kind": "lane",
+      "model3dId": "kenney-minigolf-round-large-corner",
+      "width": 320,
+      "height": 320,
+      "visualHeight": 36,
+      "wallThickness": 0
+    },
+    {
+      "id": "launch-ramp",
+      "name": "Launch ramp",
+      "description": "A playable ramp with engine-owned launch speed and direction.",
+      "kind": "ramp",
+      "model3dId": "kenney-minigolf-ramp",
+      "width": 190,
+      "height": 130,
+      "visualHeight": 70
+    },
+    {
+      "id": "walled-bump",
+      "name": "Walled bump",
+      "description": "A compact launch feature using the matching walled bump model.",
+      "kind": "ramp",
+      "model3dId": "kenney-minigolf-bump-walls",
+      "width": 190,
+      "height": 150,
+      "visualHeight": 70
+    },
+    {
+      "id": "windmill-hazard",
+      "name": "Windmill hazard",
+      "description": "A fixed obstacle with an explicit rectangular collision footprint.",
+      "kind": "obstacle",
+      "model3dId": "kenney-minigolf-structure-windmill",
+      "width": 110,
+      "height": 110,
+      "visualHeight": 170
+    },
+    {
+      "id": "wide-gate",
+      "name": "Wide gate",
+      "description": "A gate obstacle whose JSON footprint can be resized to tune passage.",
+      "kind": "obstacle",
+      "model3dId": "kenney-minigolf-structure-gate-wide",
+      "width": 150,
+      "height": 60,
+      "visualHeight": 120
+    },
+    {
+      "id": "wide-tunnel",
+      "name": "Wide tunnel",
+      "description": "A tunnel presentation with a conservative editable collision footprint.",
+      "kind": "obstacle",
+      "model3dId": "kenney-minigolf-tunnel-wide",
+      "width": 150,
+      "height": 90,
+      "visualHeight": 100
+    },
+    {
+      "id": "diamond-rebound",
+      "name": "Diamond rebound",
+      "description": "A compact rebound obstacle for bank-shot layouts.",
+      "kind": "obstacle",
+      "model3dId": "kenney-minigolf-obstacle-diamond",
+      "width": 90,
+      "height": 90,
+      "visualHeight": 80
+    }
+  ]
+}

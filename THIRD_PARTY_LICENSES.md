@@ -1,7 +1,7 @@
 # Third-Party Software and Media
 
 This file records third-party dependencies and asset provenance for Path
-Protocol V2. Exact installed versions must be updated from `package-lock.json`
+Protocol V3. Exact installed versions must be updated from `package-lock.json`
 when a dependency is added or upgraded.
 
 ## Runtime dependencies
@@ -11,10 +11,13 @@ when a dependency is added or upgraded.
 | React | Application UI | 19.2.8 | MIT | <https://github.com/facebook/react> |
 | React DOM | Browser React renderer | 19.2.8 | MIT | <https://github.com/facebook/react> |
 | Ajv | JSON Schema validation | 8.20.0 | MIT | <https://github.com/ajv-validator/ajv> |
-| PixiJS | WebGL gameplay renderer | 8.19.0 | MIT | <https://github.com/pixijs/pixijs> |
+| Three.js | WebGL scene, camera, raycasting, meshes, and GLB loading | 0.179.0 | MIT | <https://github.com/mrdoob/three.js> |
 | Howler.js | Browser effects and ambience | 2.2.4 | MIT | <https://github.com/goldfire/howler.js> |
+| Express | Same-origin Theme Workshop API and production server | 5.1.0 | MIT | <https://github.com/expressjs/express> |
+| better-sqlite3 | Account and hashed-session persistence | 12.2.0 | MIT | <https://github.com/WiseLibs/better-sqlite3> |
 | Busboy | Streaming multipart upload parsing | 1.6.0 | MIT | <https://github.com/mscdex/busboy> |
 | streamsearch | Busboy streaming boundary search | 1.1.0 | MIT | <https://github.com/mscdex/streamsearch> |
+| ffmpeg-static | Repository-local FFmpeg binary for media import conversion | 5.3.0 | GPL-3.0-or-later package distribution; bundled FFmpeg license depends on build configuration | <https://github.com/eugeneware/ffmpeg-static> |
 
 ## Build and development dependencies
 
@@ -25,9 +28,7 @@ when a dependency is added or upgraded.
 | Playwright | Browser automation | 1.61.1 | Apache-2.0 | <https://github.com/microsoft/playwright> |
 | ESLint | Static analysis | 9.39.5 | MIT | <https://github.com/eslint/eslint> |
 | Marked | Build-time Markdown-to-HTML rendering for designer help | 18.0.7 | MIT | <https://github.com/markedjs/marked> |
-| Three.js | V3 WebGL scene, camera, raycasting, meshes, and GLB loading | 0.179.0 | MIT | <https://github.com/mrdoob/three.js> |
 | FFmpeg | WAV-to-WebM/MP3 conversion in build and theme authoring workflows | 5.1.9-0+deb12u1 | GPL-enabled Debian build (`--enable-gpl`) | <https://ffmpeg.org/> |
-| ffmpeg-static | Repository-local FFmpeg binary for repeatable media preparation | 5.3.0 | GPL-3.0-or-later package distribution; bundled FFmpeg license depends on build configuration | <https://github.com/eugeneware/ffmpeg-static> |
 
 The clean-cache Docker build verified FFmpeg 5.1.9-0+deb12u1 with
 `--enable-gpl`. The production server uses the pinned `ffmpeg-static` runtime
@@ -36,10 +37,10 @@ refreshed before release.
 
 ## Project-authored media
 
-The V2 default SVG library will be derived from the existing Path Protocol
+The V3 default SVG library is derived from the existing Path Protocol
 code-generated visuals and is project-authored.
 
-The V2 default WAV effects and ambience require an entry in the table below as
+The V3 default WAV effects and ambience have an entry in the table below for
 each asset is created:
 
 | Media ID | File | Origin | License | Notes |
@@ -94,4 +95,4 @@ duplicate row.
 - Record generated assets and the tool or process that created them.
 - Do not copy third-party demo assets merely because they are bundled with a
   library.
-- Complete the final license audit before the V2 release is marked ready.
+- Complete the final license audit before the V3 release is marked ready.

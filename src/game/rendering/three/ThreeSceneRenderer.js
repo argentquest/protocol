@@ -535,8 +535,8 @@ export class ThreeSceneRenderer {
     const presentationSize =
       Number(item.model3dSize) ||
       (role === 'target' ? footprintSize * 1.8 : footprintSize)
-    if (role === 'wall') {
-      this.placeWallModel(model, item)
+    if (role === 'wall' || item.model3dFit === 'footprint') {
+      this.placeFootprintModel(model, item)
       model.rotation.y = -(item.visualRotationRadians ?? 0)
     } else {
       this.placeModel(model, item, presentationSize)
@@ -583,14 +583,14 @@ export class ThreeSceneRenderer {
   }
 
   /**
-   * Fits a rectangular catalog model to an authored wall footprint.
-   * Wall width, depth, and height are measured in logical world units.
+   * Fits a rectangular catalog model to an authored JSON footprint.
+   * Width, depth, and visible height are measured in logical world units.
    *
-   * @param {Group} model Loaded wall model.
-   * @param {object} item Authored wall configuration.
+   * @param {Group} model Loaded catalog model.
+   * @param {object} item Authored entity configuration.
    * @returns {void}
    */
-  placeWallModel(model, item) {
+  placeFootprintModel(model, item) {
     const box = new Box3().setFromObject(model)
     const dimensions = box.getSize(new Vector3())
     const wallFootprint = footprint(item)

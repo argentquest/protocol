@@ -2,7 +2,7 @@
 
 ## Status
 
-V3 is the active architecture on the `v3` branch. It preserves the V2 React,
+V3 is the active architecture on the default `main` branch. It preserves the V2 React,
 fixed-step engine, JSON configuration, Howler audio, persistence, and server
 boundaries while replacing gameplay presentation with a Three.js WebGL scene
 and adding optional engine-owned elevation.
@@ -139,6 +139,37 @@ to procedural geometry.
 
 The pack is CC0. Its original license, provenance, complete model set, previews,
 and generated manifest are stored together under `public/media/3d`.
+
+## Public themes, moderation, and account storage
+
+The public campaign directory contains the read-only default campaign and all
+published themes not disabled by a site administrator. A first-time visitor
+selects from that complete directory, and browser progress remains namespaced
+to the selected theme and immutable internal level IDs.
+
+Theme owners may edit and publish their own themes. Account storage is measured
+across retained personal uploads and copied media in every theme owned by the
+account. The server serializes quota-affecting mutations and rejects a write
+before it would exceed `PATH_PROTOCOL_ACCOUNT_MEDIA_QUOTA_BYTES`, which defaults
+to 500 MiB.
+
+The server-side `npm run admin:grant -- --email ...` command assigns the
+persisted `admin` role to an existing account in SQLite. Registration never
+grants administrator access from an unverified claimed email. Administrators
+can review all themes and their owners, disable or enable community themes, and
+permanently delete them. Disabled themes disappear from
+anonymous listings and cannot be read, cloned, or republished by their owner;
+administrators retain review access. The source-controlled default campaign
+cannot be disabled or deleted.
+
+## Privacy-preserving analytics
+
+Production builds may provide a public GA4 measurement ID through
+`VITE_GA_MEASUREMENT_ID`. The application does not load Google Analytics until
+the visitor explicitly accepts the analytics notice. Acceptance or decline is
+stored locally, and an invalid or empty measurement ID disables the integration.
+No account email, password, uploaded media, or level content is sent as a custom
+analytics value.
 
 ## Migration stages
 

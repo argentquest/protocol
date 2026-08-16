@@ -358,6 +358,9 @@ At session creation React makes an immutable mode-specific projection:
   aim without residual sliding.
 - Multi-impact steps retain ordered path segments for target sweeps, distance,
   and trail rendering.
+- A main hole is reached only when the token center enters the authored target
+  footprint. Optional bonus targets retain complete-token edge contact so their
+  established pursuit difficulty does not change.
 - Authored shot-mechanic levels remain restricted to validated static rebound
   surfaces; global Ricochet projection can still use the campaign's fixed-step,
   time-resolved hazards as collision surfaces.
@@ -873,6 +876,14 @@ inspector. Any renderable entity may store an optional schema-validated
 manifest. Model selection affects presentation only. JSON footprint geometry,
 vertical collision, and terrain surfaces remain authoritative, and failed model
 loads retain procedural fallback geometry.
+
+V3 course-piece templates are a schema-validated authoring convenience, not a
+new runtime entity type. A placement expands immediately into the existing
+terrain-surface, wall, ramp, or static-obstacle contracts and stores the chosen
+`model3dId` on those entities. Optional `model3dFit: "footprint"` fits the GLB
+to the authored top-down width and height plus `visualHeight`; it never derives
+collision from model bounds. The one-click Kenney demonstration workflow uses
+the same clone, add-level, validate, and save APIs as manual authoring.
 
 The map also owns a direct arena-boundary tool. Authors can convert between the
 schema's rectangular, elliptical, and polygonal variants. Polygon vertices use

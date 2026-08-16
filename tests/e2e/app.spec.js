@@ -1,9 +1,12 @@
 import { expect, test } from '@playwright/test'
+import { dismissAnalytics, selectDefaultTheme } from './appSetup.js'
 
 async function boot(page, url = '/') {
   await page.goto(url)
+  await dismissAnalytics(page)
   await expect(page.getByRole('heading', { name: /starting up/i })).toBeVisible()
   await page.getByRole('button', { name: /start game/i }).click()
+  await selectDefaultTheme(page)
 }
 
 async function readyCanvas(page) {
@@ -217,14 +220,21 @@ test('launches into deterministic height from the level 100 ramp', async ({
   await page.getByRole('button', { name: /100.*round green/i }).click()
   const canvas = await readyCanvas(page)
   await expect(canvas).toHaveAttribute('data-renderer', 'three-webgl')
+  const tokenWorldX = Number(await canvas.getAttribute('data-token-x'))
+  const tokenWorldY = Number(await canvas.getAttribute('data-token-y'))
   const token = await worldToPage(canvas, {
-    x: Number(await canvas.getAttribute('data-token-x')),
-    y: Number(await canvas.getAttribute('data-token-y')),
+    x: tokenWorldX,
+    y: tokenWorldY,
+    elevation: 23,
+  })
+  const pull = await worldToPage(canvas, {
+    x: tokenWorldX - 240,
+    y: tokenWorldY,
     elevation: 23,
   })
   await page.mouse.move(token.x, token.y)
   await page.mouse.down()
-  await page.mouse.move(token.x - 240, token.y, { steps: 8 })
+  await page.mouse.move(pull.x, pull.y, { steps: 8 })
   await page.mouse.up()
   await expect(canvas).toHaveAttribute('data-shots-taken', '1')
   await expect(canvas).toHaveAttribute('data-phase', 'active-main')
@@ -385,9 +395,10 @@ test('smooths token response instead of snapping to a fast mouse jump', async ({
   expect(shortlyAfter).toBeLessThan(startWorldX + 200)
   await page.waitForTimeout(450)
   const settled = Number(await canvas.getAttribute('data-token-x'))
-  expect(Math.abs(settled - desiredWorldX)).toBeLessThan(
-    Math.abs(shortlyAfter - desiredWorldX),
-  )
+  // The fixed-step controller may cross the exact desired coordinate between
+  // browser samples. Verify bounded settling instead of comparing two
+  // timing-sensitive samples around that crossing.
+  expect(Math.abs(settled - desiredWorldX)).toBeLessThan(5)
   await page.mouse.click(desired.x, desired.y)
 })
 

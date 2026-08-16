@@ -61,6 +61,17 @@ function requireUser(request) {
   return request.user
 }
 
+/** @param {import('express').Request & {user?: object}} request Incoming request. @returns {object} Authenticated administrator. */
+function requireAdmin(request) {
+  const user = requireUser(request)
+  if (!user.isAdmin) {
+    throw Object.assign(new Error('Site administrator access is required.'), {
+      status: 403,
+    })
+  }
+  return user
+}
+
 /**
  * Adapts an asynchronous route handler to Express error middleware.
  *
@@ -255,6 +266,47 @@ export async function createServerApp({
       response.json({ themes: await store.listOwnedThemes(user.id) })
     }),
   )
+  app.get(
+    '/api/admin/themes',
+    asyncRoute(async (request, response) => {
+      requireAdmin(request)
+      const themes = await store.listAllThemes()
+      response.json({
+        themes: themes.map((theme) => ({
+          ...theme,
+          owner: theme.ownerUserId
+            ? authStore.getPublicUser(theme.ownerUserId)
+            : null,
+        })),
+      })
+    }),
+  )
+  app.patch(
+    '/api/admin/themes/:themeId',
+    asyncRoute(async (request, response) => {
+      const admin = requireAdmin(request)
+      if (typeof request.body?.disabled !== 'boolean') {
+        throw Object.assign(new Error('disabled must be a boolean.'), {
+          status: 400,
+        })
+      }
+      response.json(
+        await store.setDisabled(
+          request.params.themeId,
+          request.body.disabled,
+          admin.id,
+        ),
+      )
+    }),
+  )
+  app.delete(
+    '/api/admin/themes/:themeId',
+    asyncRoute(async (request, response) => {
+      requireAdmin(request)
+      await store.deleteThemeAsAdmin(request.params.themeId)
+      response.status(204).end()
+    }),
+  )
   app.post(
     '/api/themes',
     asyncRoute(async (request, response) => {
@@ -265,14 +317,24 @@ export async function createServerApp({
   app.get(
     '/api/themes/:themeId',
     asyncRoute(async (request, response) => {
-      response.json(await store.getTheme(request.params.themeId, request.user?.id))
+      response.json(
+        await store.getTheme(
+          request.params.themeId,
+          request.user?.id,
+          request.user?.isAdmin,
+        ),
+      )
     }),
   )
   app.get(
     '/api/themes/:themeId/campaign',
     asyncRoute(async (request, response) => {
       response.json(
-        await store.getCampaign(request.params.themeId, request.user?.id),
+        await store.getCampaign(
+          request.params.themeId,
+          request.user?.id,
+          request.user?.isAdmin,
+        ),
       )
     }),
   )
@@ -280,7 +342,11 @@ export async function createServerApp({
     '/api/themes/:themeId/media-manifest',
     asyncRoute(async (request, response) => {
       response.json(
-        await store.getMediaManifest(request.params.themeId, request.user?.id),
+        await store.getMediaManifest(
+          request.params.themeId,
+          request.user?.id,
+          request.user?.isAdmin,
+        ),
       )
     }),
   )
@@ -292,6 +358,7 @@ export async function createServerApp({
           request.params.themeId,
           request.user?.id,
           request.query.path,
+          request.user?.isAdmin,
         ),
       )
     }),
@@ -304,6 +371,7 @@ export async function createServerApp({
           request.params.themeId,
           request.user?.id,
           request.query.path,
+          request.user?.isAdmin,
         ),
       )
     }),

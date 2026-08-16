@@ -18,18 +18,20 @@ compatibility.
 
 Read these files before architectural or gameplay changes:
 
-1. [`architecturev2.md`](architecturev2.md) — authoritative V2 product and
-   technical architecture (historical baseline for the V3 renderer work).
-2. [`sprintv2.md`](sprintv2.md) — live implementation sequence and task status.
-3. `src/config/schemas/*.json` — authoritative configuration contracts,
+1. [`architecturev3.md`](architecturev3.md) — current V3 product and technical
+   architecture.
+2. [`architecturev2.md`](architecturev2.md) — historical product baseline for
+   contracts not yet restated in the V3 document.
+3. [`sprintv2.md`](sprintv2.md) — live V3 implementation sequence and task status.
+4. `src/config/schemas/*.json` — authoritative configuration contracts,
    including `threeMediaManifest.schema.json` for the 3D model catalog.
-4. `src/config/levels/*.json` — level-specific gameplay configuration.
-5. Generated media manifests — resolved default and theme asset contracts once
+5. `src/config/levels/*.json` — level-specific gameplay configuration.
+6. Generated media manifests — resolved default and theme asset contracts once
    implemented.
 
 `architecture.md` and `sprints.md` describe V1 and are historical references.
-When V1 and V2 disagree, follow the V2 documents. When V2 and the V3 renderer
-work disagree, follow the V3 implementation (`src/game/rendering/`).
+When historical documents disagree, follow `architecturev3.md` and the V3
+implementation (`src/game/rendering/`).
 
 Update `sprintv2.md` in the same change that completes a tracked task. A sprint
 must pass its relevant automated checks and meet its exit criteria before work

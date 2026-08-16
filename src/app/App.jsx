@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import AnalyticsConsent from '../analytics/AnalyticsConsent.jsx'
 import {
   configuredThemeName,
   configurationStatus,
@@ -31,6 +32,7 @@ import {
 import { levelForControlMode } from './controlMode.js'
 
 const PRESENTATION_THEME_KEY = 'path-protocol.presentation-theme'
+const CAMPAIGN_THEME_KEY = 'path-protocol.campaign-theme'
 
 /**
  * Reads the last selected presentation theme from browser storage.
@@ -106,6 +108,45 @@ function StartupScreen({ startup, onStart, onRetry }) {
           Retry startup
         </button>
       )}
+    </main>
+  )
+}
+
+/**
+ * Lets a first-time visitor choose any currently published campaign before
+ * entering the game shell.
+ *
+ * @param {object} props Public theme selection state.
+ * @returns {import('react').JSX.Element} First-visit theme chooser.
+ */
+function PublicThemeChooser({ themes, loading, error, onSelect }) {
+  return (
+    <main className="public-theme-chooser">
+      <ProtocolMark />
+      <p className="eyebrow">Choose your first campaign</p>
+      <h1>Pick a public theme</h1>
+      <p>
+        Every published community theme is available without an account. You
+        can switch campaigns again later from Theme Workshop.
+      </p>
+      {loading && <p role="status">Loading public themes…</p>}
+      {error && <p role="alert">{error} The Default campaign is still available.</p>}
+      <section className="public-theme-chooser__grid" aria-label="Public themes">
+        {themes.map((theme) => (
+          <article key={theme.id}>
+            <p className="eyebrow">{theme.levelCount} levels</p>
+            <h2>{theme.name}</h2>
+            <p>{theme.description}</p>
+            <button
+              className="primary-button"
+              type="button"
+              onClick={() => onSelect(theme.id)}
+            >
+              Play {theme.name}
+            </button>
+          </article>
+        ))}
+      </section>
     </main>
   )
 }
@@ -320,6 +361,42 @@ function HomeScreen({
           <small>Time × route efficiency</small>
         </div>
       </section>
+      <footer className="project-attribution">
+        <span>
+          Path Protocol is open-source software under the{' '}
+          <a
+            href="https://github.com/argentquest/protocol/blob/main/LICENSE"
+            target="_blank"
+            rel="noreferrer"
+          >
+            MIT License
+          </a>
+          .
+        </span>
+        <span>
+          Developed by{' '}
+          <a
+            href="https://www.linkedin.com/in/eric-silver-tx/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Eric Silver
+          </a>{' '}
+          of ArgentQuest ·{' '}
+          <a href="mailto:esilver@argentquest.com">esilver@argentquest.com</a>
+        </span>
+        <span>
+          <a
+            href="https://app.inkandquill.io/protocol/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Play the hosted game
+          </a>{' '}
+          · Complimentary hosting provided by ArgentQuest ·{' '}
+          <a href={`${import.meta.env.BASE_URL}PRIVACY.html`}>Privacy</a>
+        </span>
+      </footer>
     </main>
   )
 }
@@ -833,7 +910,12 @@ function initialDevMode() {
 function PathProtocolApp() {
   const [devMode, setDevMode] = useState(initialDevMode)
   const [progress, setProgress] = useState(() => loadProgress())
-  const [activeThemeId, setActiveThemeId] = useState('default')
+  const initialCampaignThemeRef = useRef(
+    window.localStorage.getItem(CAMPAIGN_THEME_KEY) ?? 'default',
+  )
+  const [activeThemeId, setActiveThemeId] = useState(
+    initialCampaignThemeRef.current,
+  )
   const [activeThemeName, setActiveThemeName] = useState('Default')
   const [presentationThemeName, setPresentationThemeName] = useState(
     initialPresentationTheme,
@@ -854,6 +936,19 @@ function PathProtocolApp() {
     error: null,
   })
   const [started, setStarted] = useState(false)
+  const [themeChoiceRequired, setThemeChoiceRequired] = useState(
+    () => window.localStorage.getItem(CAMPAIGN_THEME_KEY) === null,
+  )
+  const [publicThemes, setPublicThemes] = useState([
+    {
+      id: 'default',
+      name: 'Default',
+      description: 'The official 100-level Path Protocol campaign.',
+      levelCount: levelConfigs.length,
+    },
+  ])
+  const [publicThemesLoading, setPublicThemesLoading] = useState(true)
+  const [publicThemesError, setPublicThemesError] = useState('')
   const currentMicroProtocol =
     microProtocols.find((protocol) => protocol.id === selectedMicroId) ?? null
   const selectedConfig =
@@ -969,6 +1064,48 @@ function PathProtocolApp() {
       queueMicrotask(() => {
         if (audioLifecycleRef.current === lifecycle) audioRef.current?.dispose()
       })
+    }
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    themeApi
+      .list()
+      .then(({ themes }) => {
+        if (!cancelled) setPublicThemes(themes)
+      })
+      .catch((error) => {
+        if (!cancelled) setPublicThemesError(error.message)
+      })
+      .finally(() => {
+        if (!cancelled) setPublicThemesLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    if (initialCampaignThemeRef.current === 'default') return
+    let cancelled = false
+    themeApi
+      .campaign(initialCampaignThemeRef.current)
+      .then((campaign) => {
+        if (cancelled) return
+        setActiveThemeName(campaign.theme.name)
+        setCampaignLevels(campaign.levels)
+        setSelectedLevelId(campaign.levels[0].id)
+      })
+      .catch(() => {
+        if (cancelled) return
+        window.localStorage.removeItem(CAMPAIGN_THEME_KEY)
+        setActiveThemeId('default')
+        setActiveThemeName('Default')
+        setCampaignLevels(levelConfigs)
+        setThemeChoiceRequired(true)
+      })
+    return () => {
+      cancelled = true
     }
   }, [])
 
@@ -1201,6 +1338,22 @@ function PathProtocolApp() {
     )
   }
 
+  if (themeChoiceRequired) {
+    return (
+      <PublicThemeChooser
+        themes={publicThemes}
+        loading={publicThemesLoading}
+        error={publicThemesError}
+        onSelect={async (themeId) => {
+          await playTheme(themeId)
+          window.localStorage.setItem(CAMPAIGN_THEME_KEY, themeId)
+          setThemeChoiceRequired(false)
+          navigate('home')
+        }}
+      />
+    )
+  }
+
   return (
     <div
       className={`app-shell ${progress.settings.reducedMotion ? 'reduce-motion' : ''}`}
@@ -1395,7 +1548,17 @@ export function ConfigurationErrorScreen({ errors }) {
  */
 export default function App() {
   if (!configurationStatus.valid) {
-    return <ConfigurationErrorScreen errors={configurationStatus.errors} />
+    return (
+      <>
+        <ConfigurationErrorScreen errors={configurationStatus.errors} />
+        <AnalyticsConsent />
+      </>
+    )
   }
-  return <PathProtocolApp />
+  return (
+    <>
+      <PathProtocolApp />
+      <AnalyticsConsent />
+    </>
+  )
 }

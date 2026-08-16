@@ -1,15 +1,17 @@
 # Downloaded open media sources
 
-This directory preserves the original third-party archives and extracted source
-media considered for Path Protocol themes. Runtime-ready selections are copied
-into `public/media/themes`; files here are source material and are not served by
-the application.
+This directory preserves extracted third-party source media considered for Path
+Protocol themes. Runtime-ready selections are copied into
+`public/media/themes`; files here are authoring material and are not served by
+the application. Original ZIP archives are intentionally not duplicated in the
+repository after extraction; their source URLs and verified SHA-256 values
+remain in the provenance ledger below.
 
 Every downloaded pack below is published under Creative Commons Zero 1.0
 (CC0). The original license files included by publishers remain beside the
 extracted media where provided.
 
-| Archive | Publisher | Source page | SHA-256 |
+| Source archive | Publisher | Source page | Verified SHA-256 |
 |---|---|---|---|
 | `kenney_sci-fi-rts.zip` | Kenney | <https://kenney.nl/assets/sci-fi-rts> | `093cb6adbd5aa3ae49da1c91ca3045251656df254c11903b3bfa8594a7a160ea` |
 | `unlucky-studio-complete-spaceship-art.zip` | Unlucky Studio | <https://opengameart.org/content/complete-spaceship-game-art-pack> | `cccd4b2dd5b8fc193447eb1066f46ce704c5e4acee18a0707c174725990c3144` |
@@ -22,7 +24,7 @@ extracted media where provided.
 
 The verified extraction contains 2,416 PNG files, 387 SVG files, and publisher
 source/support files. Archives were checked for unsafe traversal paths before
-extraction.
+extraction and then removed from the repository to keep public clones smaller.
 
 ## Theme Builder catalog
 

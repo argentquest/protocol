@@ -6,7 +6,7 @@ import {
   threeModelCatalog,
 } from '../config/loadConfig.js'
 import { generateLevel } from '../game/generation/levelGenerator.js'
-import { authApi, mediaLibraryApi, themeApi } from './themeApi.js'
+import { adminApi, authApi, mediaLibraryApi, themeApi } from './themeApi.js'
 import {
   addArenaPoint,
   convertArenaShape,
@@ -21,6 +21,11 @@ import {
   setWallProperty,
   snapToEditorGrid as snap,
 } from './levelEditorGeometry.js'
+import {
+  createKenneyDemoLevel,
+  kenneyCourseTemplates,
+  placeKenneyCourseTemplate,
+} from './kenneyCourseBuilder.js'
 
 const ENTITY_GROUPS = [
   'walls',
@@ -94,6 +99,57 @@ const OBSTACLE_GUIDE = [
     implementation: 'Changes between solid and open from a referenced switch; the template starts solid and opens while that switch is active.',
   },
 ]
+
+/**
+ * Presents data-driven Kenney placement presets that expand into normal level
+ * entities with JSON-owned gameplay geometry.
+ *
+ * @param {{onPlace:(templateId:string)=>void}} props Placement callback.
+ * @returns {import('react').JSX.Element} Course-builder palette.
+ */
+function KenneyCoursePalette({ onPlace }) {
+  return (
+    <section className="kenney-course-palette" aria-labelledby="kenney-course-palette-title">
+      <div>
+        <p className="eyebrow">CC0 modular course kit</p>
+        <h2 id="kenney-course-palette-title">Kenney Course Builder</h2>
+        <p>
+          Add a fitted visual together with editable JSON terrain, ramp, wall,
+          or obstacle geometry. New pieces appear at the center of the grid.
+        </p>
+      </div>
+      <div className="kenney-course-palette__grid">
+        {kenneyCourseTemplates.map((template) => {
+          const model = threeModelCatalog.models.find(
+            (candidate) => candidate.modelId === template.model3dId,
+          )
+          return (
+            <article key={template.id}>
+              {model && (
+                <img
+                  src={`${import.meta.env.BASE_URL}${model.previewSrc}`}
+                  alt=""
+                />
+              )}
+              <div>
+                <strong>{template.name}</strong>
+                <small>{template.kind} · {template.width} × {template.height} units</small>
+                <p>{template.description}</p>
+              </div>
+              <button type="button" onClick={() => onPlace(template.id)}>
+                Add {template.name}
+              </button>
+            </article>
+          )
+        })}
+      </div>
+      <p>
+        After placement, use the normal entity inspector to move, resize, change
+        the model, or edit the generated collision JSON.
+      </p>
+    </section>
+  )
+}
 
 /**
  * Flattens editable level groups into stable editor selections.
@@ -1909,6 +1965,16 @@ function LevelEditor({
             )}
           </section>
 
+          <KenneyCoursePalette
+            onPlace={(templateId) => {
+              const placement = placeKenneyCourseTemplate(level, templateId)
+              if (!placement) return
+              commit(placement.level)
+              setSelection(placement.selection)
+              setStatus('Kenney template added locally; autosave will validate it.')
+            }}
+          />
+
           <label>
             Add entity
             <select
@@ -2650,6 +2716,7 @@ export default function ThemeWorkshop({
 }) {
   const [themes, setThemes] = useState([])
   const [editableThemes, setEditableThemes] = useState([])
+  const [adminThemes, setAdminThemes] = useState([])
   const [activeTheme, setActiveTheme] = useState(null)
   const [editingLevel, setEditingLevel] = useState(null)
   const [status, setStatus] = useState('Loading themes…')
@@ -2667,6 +2734,7 @@ export default function ThemeWorkshop({
       const publicResult = await themeApi.list()
       setThemes(publicResult.themes)
       setEditableThemes(user ? (await themeApi.mine()).themes : [])
+      setAdminThemes(user?.isAdmin ? (await adminApi.themes()).themes : [])
       if (activeThemeId) {
         const refreshed = await themeApi.get(activeThemeId)
         setActiveTheme(refreshed)
@@ -2868,6 +2936,53 @@ export default function ThemeWorkshop({
         >
           Clone campaign
         </button>
+        <div className="kenney-demo-action">
+          <div>
+            <strong>Kenney Course Builder demonstration</strong>
+            <p>
+              Clone the default campaign and append a validated showcase level
+              built from the new placement templates.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                setStatus('Creating Kenney demonstration theme…')
+                const created = await themeApi.clone({
+                  sourceThemeId: 'default',
+                  name: 'Kenney Course Builder Demo',
+                  description:
+                    'An editable campaign clone with a template-built Minigolf Kit showcase level.',
+                })
+                const clonedTheme = await themeApi.get(created.id)
+                const added = await themeApi.addLevel(
+                  created.id,
+                  clonedTheme.levels[0].internalId,
+                )
+                const demoLevel = createKenneyDemoLevel(added)
+                await themeApi.saveLevel(created.id, added.internalId, demoLevel)
+                const readyTheme = await themeApi.get(created.id)
+                setEditableThemes((items) => [
+                  ...items.filter((theme) => theme.id !== readyTheme.id),
+                  readyTheme,
+                ])
+                setActiveTheme(readyTheme)
+                setEditingLevel(demoLevel)
+                setStatus('Kenney demonstration theme created.')
+              } catch (error) {
+                setStatus(
+                  `Could not create demonstration: ${[
+                    error.message,
+                    ...(error.details ?? []),
+                  ].join(' ')}`,
+                )
+              }
+            }}
+          >
+            Create demo theme and level
+          </button>
+        </div>
       </section>}
 
       <section className="theme-gallery">
@@ -2893,6 +3008,58 @@ export default function ThemeWorkshop({
           </article>
         ))}
       </section>
+
+      {user?.isAdmin && (
+        <section className="theme-gallery admin-theme-gallery">
+          <div>
+            <p className="eyebrow">Site administration</p>
+            <h2>Theme moderation</h2>
+            <p>
+              Review every submitted theme, remove it from public discovery, or
+              permanently delete its levels and copied media.
+            </p>
+          </div>
+          {!adminThemes.length && <p>No user-created themes require review.</p>}
+          {adminThemes.map((theme) => (
+            <article key={theme.id}>
+              <h3>{theme.name}</h3>
+              <p>{theme.description}</p>
+              <small>
+                {theme.owner?.username ?? 'Unknown owner'} · {theme.levelCount}{' '}
+                levels · {theme.disabled ? 'Disabled' : theme.public ? 'Public' : 'Private'}
+              </small>
+              <button type="button" onClick={() => onPlayTheme(theme.id)}>
+                Review theme
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  await adminApi.setDisabled(theme.id, !theme.disabled)
+                  await refresh()
+                }}
+              >
+                {theme.disabled ? 'Enable theme' : 'Disable theme'}
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (
+                    !window.confirm(
+                      `Delete ${theme.name} and all of its stored media permanently?`,
+                    )
+                  ) {
+                    return
+                  }
+                  await adminApi.deleteTheme(theme.id)
+                  await refresh()
+                }}
+              >
+                Delete as administrator
+              </button>
+            </article>
+          ))}
+        </section>
+      )}
 
       <section className="theme-gallery">
         <h2>Your editable themes</h2>

@@ -3,7 +3,9 @@ FROM node:20.19-bookworm-slim AS build
 WORKDIR /app
 
 ARG VITE_BASE_PATH=/
+ARG VITE_GA_MEASUREMENT_ID=G-2ZWLL7P02J
 ENV VITE_BASE_PATH=${VITE_BASE_PATH}
+ENV VITE_GA_MEASUREMENT_ID=${VITE_GA_MEASUREMENT_ID}
 
 RUN apt-get update \
     && apt-get install --yes --no-install-recommends ffmpeg \

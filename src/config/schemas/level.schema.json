@@ -107,6 +107,10 @@
       "type": "string",
       "pattern": "^kenney-minigolf-[a-z0-9]+(?:-[a-z0-9]+)*$"
     },
+    "model3dFit": {
+      "enum": ["uniform", "footprint"],
+      "description": "Presentation-only catalog model fitting mode; gameplay collision remains JSON-owned."
+    },
     "coordinate": {
       "type": "number",
       "minimum": 0,
@@ -237,6 +241,7 @@
         "visualOverrideId": { "$ref": "#/$defs/overrideId" },
         "audioOverrideId": { "$ref": "#/$defs/overrideId" },
         "model3dId": { "$ref": "#/$defs/model3dId" },
+        "model3dFit": { "$ref": "#/$defs/model3dFit" },
         "x": { "$ref": "#/$defs/coordinate" },
         "y": { "$ref": "#/$defs/coordinate" },
         "width": { "$ref": "#/$defs/positiveDimension" },
@@ -253,6 +258,7 @@
           }
         },
         "friction": { "type": "number", "minimum": 0, "maximum": 5000 },
+        "visualHeight": { "type": "number", "exclusiveMinimum": 0, "maximum": 500 },
         "thickness": { "type": "number", "exclusiveMinimum": 0, "maximum": 500 }
       }
     },
@@ -267,6 +273,7 @@
         "id": { "type": "string", "minLength": 1 },
         "mediaId": { "$ref": "#/$defs/mediaId" },
         "model3dId": { "$ref": "#/$defs/model3dId" },
+        "model3dFit": { "$ref": "#/$defs/model3dFit" },
         "x": { "$ref": "#/$defs/coordinate" },
         "y": { "$ref": "#/$defs/coordinate" },
         "width": { "$ref": "#/$defs/positiveDimension" },
@@ -476,6 +483,7 @@
         "visualOverrideId": { "$ref": "#/$defs/overrideId" },
         "audioOverrideId": { "$ref": "#/$defs/overrideId" },
         "model3dId": { "$ref": "#/$defs/model3dId" },
+        "model3dFit": { "$ref": "#/$defs/model3dFit" },
         "shape": { "enum": ["circle", "rect", "diamond"] },
         "x": { "$ref": "#/$defs/coordinate" },
         "y": { "$ref": "#/$defs/coordinate" },

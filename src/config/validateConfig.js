@@ -1,6 +1,7 @@
 import Ajv2020 from 'ajv/dist/2020.js'
 import audioSettingsSchema from './schemas/audioSettings.schema.json'
 import gameConfigSchema from './schemas/gameConfig.schema.json'
+import kenneyCourseTemplatesSchema from './schemas/kenneyCourseTemplates.schema.json'
 import levelSchema from './schemas/level.schema.json'
 import mediaManifestSchema from './schemas/mediaManifest.schema.json'
 import mediaRegistrySchema from './schemas/mediaRegistry.schema.json'
@@ -14,6 +15,7 @@ import threeMediaManifestSchema from './schemas/threeMediaManifest.schema.json'
 const schemaEntries = {
   audioSettings: audioSettingsSchema,
   gameConfig: gameConfigSchema,
+  kenneyCourseTemplates: kenneyCourseTemplatesSchema,
   level: levelSchema,
   mediaManifest: mediaManifestSchema,
   mediaRegistry: mediaRegistrySchema,
@@ -437,6 +439,7 @@ export function validateConfiguration({
   mediaRegistry,
   soundRegistry,
   threeMediaManifest = null,
+  kenneyCourseTemplateConfig = null,
 }) {
   const validators = getValidators()
   const errors = []
@@ -466,6 +469,13 @@ export function validateConfiguration({
   if (threeMediaManifest) {
     validate('threeMediaManifest', 'threeMediaManifest', threeMediaManifest)
   }
+  if (kenneyCourseTemplateConfig) {
+    validate(
+      'kenneyCourseTemplates',
+      'kenneyCourseTemplates',
+      kenneyCourseTemplateConfig,
+    )
+  }
   levels.forEach((level) => validate('level', level.id ?? 'unknown-level', level))
   microLevels.forEach((level) =>
     validate('level', level.id ?? 'unknown-micro-level', level),
@@ -490,6 +500,30 @@ export function validateConfiguration({
   const modelRoles = threeMediaManifest
     ? new Map(threeMediaManifest.models.map((entry) => [entry.modelId, entry.roles]))
     : null
+  if (kenneyCourseTemplateConfig && modelRoles) {
+    for (const duplicate of duplicateValues(
+      kenneyCourseTemplateConfig.templates.map((template) => template.id),
+    )) {
+      errors.push(`kenneyCourseTemplates: duplicate id "${duplicate}"`)
+    }
+    const requiredRole = {
+      lane: 'terrain',
+      ramp: 'ramp',
+      obstacle: 'obstacle',
+    }
+    for (const template of kenneyCourseTemplateConfig.templates) {
+      const roles = modelRoles.get(template.model3dId)
+      if (!roles) {
+        errors.push(
+          `kenneyCourseTemplates/${template.id}: unknown model3dId "${template.model3dId}"`,
+        )
+      } else if (!roles.includes(requiredRole[template.kind])) {
+        errors.push(
+          `kenneyCourseTemplates/${template.id}: model3dId "${template.model3dId}" does not support role "${requiredRole[template.kind]}"`,
+        )
+      }
+    }
+  }
   validateLevelRelationships(levels, mediaIds, errors, {
     modelIds,
     modelRoles,

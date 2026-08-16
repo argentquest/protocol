@@ -36,11 +36,13 @@ export function activeTarget(session, phase) {
 
 /**
  * Sweeps the token's traveled segment for contact with the active target.
+ * The main hole is captured only after the token center enters its configured
+ * footprint. Optional bonus targets retain full-token edge contact.
  *
  * @pure
  * @param {object} session Active engine session.
  * @param {string} phase Current state-machine phase.
- * @returns {boolean} Whether any part of the token touched the target.
+ * @returns {boolean} Whether the active target's capture rule was satisfied.
  */
 export function touchesActiveTarget(session, phase) {
   const target = activeTarget(session, phase)
@@ -75,7 +77,11 @@ export function touchesActiveTarget(session, phase) {
         x: from.x + (to.x - from.x) * amount,
         y: from.y + (to.y - from.y) * amount,
       }
-      if (shapesIntersect(token, target)) return true
+      const contactShape =
+        phase === 'active-main'
+          ? { ...token, shape: 'circle', size: 0, width: 0, height: 0 }
+          : token
+      if (shapesIntersect(contactShape, target)) return true
     }
   }
   return false

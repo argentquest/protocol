@@ -1,4 +1,4 @@
-# Path Protocol V2 Performance
+# Path Protocol V3 Performance
 
 ## Targets
 
@@ -15,7 +15,7 @@
 the fixed-step simulation, measures browser animation frames for 1.5 seconds,
 and records the unmasked WebGL renderer. The test also verifies:
 
-- Pixi publishes a nonzero rendered-FPS diagnostic.
+- Three.js publishes a nonzero rendered-FPS diagnostic.
 - tracking entities remain active;
 - trail storage stays within its configured cap;
 - the simulation remains responsive to keyboard activation.
@@ -29,14 +29,14 @@ FPS on a hardware-accelerated desktop using `?dev=1`.
 
 - Pointer events only update desired input state; simulation and moving hazards
   continue on the fixed-step loop.
-- External SVG text and Pixi `GraphicsContext` objects are cached across levels.
-- Pixi entities are built once and updated imperatively instead of recreated by
-  React.
+- GLB model sources are cached once and cloned for individual scene entities.
+- Three.js scene objects are built once and updated imperatively instead of
+  recreated by React.
 - HUD snapshots are throttled independently from render frames.
 - Trails are compacted and capped; only two ghost attempts are retained.
 - Moving hazards are derived from simulation time and tracking hazards use
   bounded fixed-step acceleration and turning.
-- Reduced motion omits nonessential ghost rendering.
+- Reduced motion omits nonessential ghost and presentation effects.
 
 No measured application-specific bottleneck justified a Web Worker, spatial
 index, or texture conversion in this release. Those optimizations remain

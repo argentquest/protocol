@@ -125,6 +125,18 @@ export const themeApi = {
     apiRequest(`/api/themes/${themeId}`, { method: 'DELETE' }),
 }
 
+/** Site-administrator theme moderation operations. */
+export const adminApi = {
+  themes: () => apiRequest('/api/admin/themes'),
+  setDisabled: (themeId, disabled) =>
+    apiRequest(`/api/admin/themes/${themeId}`, {
+      method: 'PATCH',
+      body: { disabled },
+    }),
+  deleteTheme: (themeId) =>
+    apiRequest(`/api/admin/themes/${themeId}`, { method: 'DELETE' }),
+}
+
 /** Shared public-catalog and authenticated personal-upload media operations. */
 export const mediaLibraryApi = {
   list: ({

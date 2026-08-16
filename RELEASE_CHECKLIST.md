@@ -1,9 +1,9 @@
-# Path Protocol V2 Release Checklist
+# Path Protocol V3 Release Checklist
 
 ## Contracts and campaign
 
-- [x] All JSON documents pass their V2 schemas.
-- [x] All 30 level IDs, versions, and fixed-seed fingerprints are locked.
+- [x] All JSON documents pass their V3-compatible schemas.
+- [x] All 100 level IDs, versions, and fixed-seed fingerprints are locked.
 - [x] Initial placements, moving envelopes, tracking zones, and ordered routes
   pass full-token validation.
 - [x] Score maxima increase across the campaign and movement settings are
@@ -11,8 +11,9 @@
 
 ## Media and licenses
 
-- [x] All 24 default SVG media assets validate.
+- [x] All default SVG media assets validate.
 - [x] All 15 WAV masters, WebM files, and MP3 fallbacks validate.
+- [x] The generated 126-model Kenney GLB catalog and previews validate.
 - [x] Theme manifests resolve one element at a time with mandatory defaults.
 - [x] Manifest URLs include `mediaVersion` cache aliases.
 - [x] Dependency and project-authored media licenses are recorded in
@@ -20,13 +21,14 @@
 
 ## Application
 
-- [x] PixiJS runs in WebGL mode and owns one imperative canvas.
+- [x] Three.js runs in WebGL mode and owns one imperative canvas.
 - [x] Howler unlocks after explicit interaction and retries WebM, MP3, then
   HTML5 playback.
 - [x] Progress schema migration preserves scores, unlocks, coins, claims,
   powers, and settings.
 - [x] Keyboard input, accessible control names, and reduced motion are covered.
-- [x] V1 SVG renderer, input hook, oscillator audio, and runtime state are gone.
+- [x] The legacy SVG and Pixi gameplay renderers, oscillator audio, and runtime
+  state are gone.
 
 ## Verification
 

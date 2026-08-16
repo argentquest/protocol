@@ -26,9 +26,28 @@ describe('App', () => {
 
   beforeEach(() => {
     window.localStorage.clear()
+    window.localStorage.setItem('path-protocol.campaign-theme', 'default')
     window.confirm = vi.fn(() => true)
     window.history.replaceState({}, '', '/')
     global.fetch = vi.fn(async (url) => {
+      if (String(url) === '/api/themes') {
+        return {
+          ok: true,
+          status: 200,
+          headers: new Headers({ 'content-type': 'application/json' }),
+          text: async () =>
+            JSON.stringify({
+              themes: [
+                {
+                  id: 'default',
+                  name: 'Default',
+                  description: 'Official campaign',
+                  levelCount: 100,
+                },
+              ],
+            }),
+        }
+      }
       if (String(url).includes('/manifests/')) {
         return { ok: true, json: async () => mediaManifest }
       }
@@ -45,6 +64,60 @@ describe('App', () => {
     fireEvent.click(await screen.findByRole('button', { name: /start game/i }))
     await screen.findByRole('heading', { name: /find the line/i })
   }
+
+  it('offers every public theme to a first-time visitor', async () => {
+    window.localStorage.removeItem('path-protocol.campaign-theme')
+    global.fetch.mockImplementation(async (url) => {
+      if (String(url) === '/api/themes') {
+        return {
+          ok: true,
+          status: 200,
+          headers: new Headers({ 'content-type': 'application/json' }),
+          text: async () =>
+            JSON.stringify({
+              themes: [
+                {
+                  id: 'default',
+                  name: 'Default',
+                  description: 'Official campaign',
+                  levelCount: 100,
+                },
+                {
+                  id: 'community-course',
+                  name: 'Community Course',
+                  description: 'A published player campaign',
+                  levelCount: 12,
+                },
+              ],
+            }),
+        }
+      }
+      if (String(url).includes('/manifests/')) {
+        return { ok: true, json: async () => mediaManifest }
+      }
+      return {
+        ok: true,
+        text: async () =>
+          '<svg viewBox="0 0 100 100"><path d="M0 0h100v100H0z"/></svg>',
+      }
+    })
+
+    render(<App />)
+    fireEvent.click(await screen.findByRole('button', { name: /start game/i }))
+    expect(
+      await screen.findByRole('heading', { name: /pick a public theme/i }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /play community course/i }),
+    ).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /play default/i }))
+    expect(
+      await screen.findByRole('heading', { name: /find the line/i }),
+    ).toBeInTheDocument()
+    expect(window.localStorage.getItem('path-protocol.campaign-theme')).toBe(
+      'default',
+    )
+  })
 
   it('opens the protocol archive and starts the unlocked first level', async () => {
     await boot()

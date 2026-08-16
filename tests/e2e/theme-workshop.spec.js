@@ -1,8 +1,11 @@
 import { expect, test } from '@playwright/test'
+import { dismissAnalytics, selectDefaultTheme } from './appSetup.js'
 
 async function boot(page) {
   await page.goto('/')
+  await dismissAnalytics(page)
   await page.getByRole('button', { name: /start game/i }).click()
+  await selectDefaultTheme(page)
   await expect(page.getByRole('heading', { name: /find the line/i })).toBeVisible()
 }
 
@@ -277,4 +280,51 @@ test('clones, edits, playtests, publishes, and deletes a server theme', async ({
   ).toBeVisible()
   await page.getByRole('button', { name: /log out/i }).click()
   await expect(page.getByRole('heading', { name: /create an account/i })).toBeVisible()
+})
+
+test('creates and playtests the Kenney course-builder demonstration', async ({
+  page,
+}) => {
+  await boot(page)
+  await page.getByRole('button', { name: /theme workshop/i }).click()
+
+  const username = `kenney_demo_${Date.now()}`
+  await page.getByLabel('Username').fill(username)
+  await page.getByLabel('Email address').fill(`${username}@example.test`)
+  await page.getByLabel('Password').fill('browser-password-42')
+  await page.getByRole('button', { name: 'Register', exact: true }).click()
+  await expect(page.getByText(`Signed in as ${username}`)).toBeVisible()
+
+  await page
+    .getByRole('button', { name: 'Create demo theme and level' })
+    .click()
+  await expect(
+    page.getByRole('heading', { name: /Kenney Builder Showcase/i }),
+  ).toBeVisible({ timeout: 45_000 })
+  await expect(
+    page.getByRole('heading', { name: 'Kenney Course Builder' }),
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Add Straight fairway' }),
+  ).toBeVisible()
+  await expect(page.getByLabel('Selected entity JSON')).toHaveValue(
+    /kenney-minigolf-ball-green/,
+  )
+
+  await page.getByRole('button', { name: /validate and save/i }).click()
+  await expect(page.getByText(/valid save completed/i)).toBeVisible()
+  await page.getByRole('button', { name: 'Playtest' }).click()
+  await expect(page.locator('.three-arena canvas')).toHaveAttribute(
+    'data-engine-ready',
+    'true',
+    { timeout: 30_000 },
+  )
+  await page.getByRole('button', { name: /return to editor/i }).click()
+  await page.getByRole('button', { name: /close editor/i }).click()
+
+  page.once('dialog', (dialog) => dialog.accept())
+  await page.getByRole('button', { name: /delete theme/i }).click()
+  await expect(
+    page.getByRole('heading', { name: 'Theme Workshop' }),
+  ).toBeVisible()
 })

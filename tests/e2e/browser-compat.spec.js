@@ -1,10 +1,13 @@
 import { expect, test } from '@playwright/test'
+import { dismissAnalytics, selectDefaultTheme } from './appSetup.js'
 
 test('starts WebGL gameplay and keyboard input in a supported desktop engine', async ({
   page,
 }) => {
   await page.goto('/')
+  await dismissAnalytics(page)
   await page.getByRole('button', { name: /start game/i }).click()
+  await selectDefaultTheme(page)
   await page.getByRole('button', { name: /begin calibration/i }).click()
   const canvas = page.locator('.three-arena canvas')
   await expect(canvas).toHaveAttribute('data-engine-ready', 'true', {

@@ -4,6 +4,7 @@ import gameConfig from './gameConfig.json'
 import mediaRegistry from './mediaRegistry.json'
 import soundRegistry from './soundRegistry.json'
 import microProtocolConfig from './microProtocols.json'
+import kenneyCourseTemplateConfig from './kenneyCourseTemplates.json'
 import threeMediaManifest from './generated/threeMediaManifest.json'
 import { validateConfiguration } from './validateConfig.js'
 
@@ -37,6 +38,7 @@ export const configurationStatus = import.meta.env.PROD
       mediaRegistry,
       soundRegistry,
       threeMediaManifest,
+      kenneyCourseTemplateConfig,
     })
 
 export const activeTheme = themeConfig.themes[themeConfig.activeTheme]
@@ -48,6 +50,7 @@ export const mediaDefinitions = mediaRegistry.media
 export const soundDefinitions = soundRegistry.sounds
 export const mediaVersion = mediaRegistry.mediaVersion
 export const threeModelCatalog = threeMediaManifest
+export const kenneyCourseTemplates = kenneyCourseTemplateConfig.templates
 
 /**
  * Resolves a level by stable ID, falling back to the first campaign level.

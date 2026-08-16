@@ -112,6 +112,96 @@ describe('accounts and Theme Workshop API', () => {
     expect(login.body.user.username).toBe('designer')
   })
 
+  it('lets a server-granted administrator review, disable, enable, and delete any theme', async () => {
+    const admin = request.agent(app)
+    const owner = request.agent(app)
+    const visitor = request.agent(app)
+    const adminRegistration = await register(admin, 'siteadmin')
+    const ownerRegistration = await register(owner, 'communityowner')
+    expect(adminRegistration.body.user).toMatchObject({
+      role: 'user',
+      isAdmin: false,
+    })
+    const grantedAdmin = app.locals.authStore.grantAdminByEmail(
+      'siteadmin@example.test',
+    )
+    expect(grantedAdmin).toMatchObject({
+      role: 'admin',
+      isAdmin: true,
+    })
+    expect(ownerRegistration.body.user).toMatchObject({
+      role: 'user',
+      isAdmin: false,
+    })
+
+    const clone = await owner.post('/api/themes').send({
+      sourceThemeId: 'default',
+      name: 'Community Review Theme',
+      description: 'Awaiting moderation.',
+    })
+    await owner.patch(`/api/themes/${clone.body.id}`).send({ public: true })
+
+    expect((await visitor.get('/api/admin/themes')).status).toBe(401)
+    expect((await owner.get('/api/admin/themes')).status).toBe(403)
+    const review = await admin.get('/api/admin/themes')
+    expect(review.status).toBe(200)
+    expect(review.body.themes).toContainEqual(
+      expect.objectContaining({
+        id: clone.body.id,
+        public: true,
+        disabled: false,
+        owner: expect.objectContaining({ username: 'communityowner' }),
+      }),
+    )
+
+    const disabled = await admin
+      .patch(`/api/admin/themes/${clone.body.id}`)
+      .send({ disabled: true })
+    expect(disabled.body.disabled).toBe(true)
+    expect(
+      (await visitor.get('/api/themes')).body.themes.map((theme) => theme.id),
+    ).not.toContain(clone.body.id)
+    expect((await visitor.get(`/api/themes/${clone.body.id}/campaign`)).status).toBe(
+      404,
+    )
+    expect((await owner.get(`/api/themes/${clone.body.id}/campaign`)).status).toBe(
+      200,
+    )
+    expect((await admin.get(`/api/themes/${clone.body.id}/campaign`)).status).toBe(
+      200,
+    )
+    expect(
+      (
+        await owner
+          .patch(`/api/themes/${clone.body.id}`)
+          .send({ public: true })
+      ).status,
+    ).toBe(409)
+
+    expect(
+      (
+        await admin
+          .patch(`/api/admin/themes/${clone.body.id}`)
+          .send({ disabled: false })
+      ).body.disabled,
+    ).toBe(false)
+    expect(
+      (await visitor.get('/api/themes')).body.themes.map((theme) => theme.id),
+    ).toContain(clone.body.id)
+
+    expect((await admin.delete(`/api/admin/themes/${clone.body.id}`)).status).toBe(
+      204,
+    )
+    expect((await owner.get(`/api/themes/${clone.body.id}`)).status).toBe(404)
+    expect(
+      (
+        await admin
+          .patch('/api/admin/themes/default')
+          .send({ disabled: true })
+      ).status,
+    ).toBe(409)
+  })
+
   it('clones all default levels into an account-owned private theme', async () => {
     const owner = request.agent(app)
     await register(owner)

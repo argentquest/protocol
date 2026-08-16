@@ -61,6 +61,8 @@ function visibleUser(row) {
         username: row.username,
         email: row.email,
         emailConfirmed: Boolean(row.email_confirmed),
+        role: row.role ?? 'user',
+        isAdmin: row.role === 'admin',
       }
     : null
 }
@@ -73,7 +75,10 @@ function visibleUser(row) {
  * @param {boolean} [options.confirmEmail=false] Whether new users require confirmation.
  * @returns {object} Account and session operations.
  */
-export function createAuthStore({ databasePath, confirmEmail = false }) {
+export function createAuthStore({
+  databasePath,
+  confirmEmail = false,
+}) {
   const database = new Database(databasePath)
   database.pragma('foreign_keys = ON')
   if (databasePath !== ':memory:') database.pragma('journal_mode = WAL')
@@ -85,6 +90,7 @@ export function createAuthStore({ databasePath, confirmEmail = false }) {
       password_hash TEXT NOT NULL,
       password_salt TEXT NOT NULL,
       email_confirmed INTEGER NOT NULL DEFAULT 1,
+      role TEXT NOT NULL DEFAULT 'user',
       created_at TEXT NOT NULL
     );
     CREATE TABLE IF NOT EXISTS sessions (
@@ -96,14 +102,17 @@ export function createAuthStore({ databasePath, confirmEmail = false }) {
     CREATE INDEX IF NOT EXISTS sessions_user_id ON sessions(user_id);
     CREATE INDEX IF NOT EXISTS sessions_expires_at ON sessions(expires_at);
   `)
-
+  const userColumns = database.prepare('PRAGMA table_info(users)').all()
+  if (!userColumns.some((column) => column.name === 'role')) {
+    database.exec("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user'")
+  }
   const findUser = database.prepare(
     'SELECT * FROM users WHERE username = ? COLLATE NOCASE OR email = ? COLLATE NOCASE',
   )
   const insertUser = database.prepare(`
     INSERT INTO users (
-      id, username, email, password_hash, password_salt, email_confirmed, created_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+      id, username, email, password_hash, password_salt, email_confirmed, role, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `)
   const insertSession = database.prepare(`
     INSERT INTO sessions (token_hash, user_id, expires_at, created_at)
@@ -117,6 +126,10 @@ export function createAuthStore({ databasePath, confirmEmail = false }) {
   `)
   const deleteSession = database.prepare('DELETE FROM sessions WHERE token_hash = ?')
   const deleteExpired = database.prepare('DELETE FROM sessions WHERE expires_at <= ?')
+  const readUserById = database.prepare('SELECT * FROM users WHERE id = ?')
+  const promoteAdminByEmail = database.prepare(
+    "UPDATE users SET role = 'admin' WHERE email = ? COLLATE NOCASE",
+  )
 
   /**
    * Derives a password digest with scrypt and the stored per-user salt.
@@ -176,6 +189,7 @@ export function createAuthStore({ databasePath, confirmEmail = false }) {
         digest,
         salt,
         confirmEmail ? 0 : 1,
+        'user',
         new Date().toISOString(),
       )
     } catch (error) {
@@ -238,6 +252,15 @@ export function createAuthStore({ databasePath, confirmEmail = false }) {
 
   return {
     close: () => database.close(),
+    /** @param {string} email Existing account email. @returns {object} Promoted public user. */
+    grantAdminByEmail(email) {
+      const normalized = normalizeEmail(email)
+      if (!normalized || promoteAdminByEmail.run(normalized).changes !== 1) {
+        throw new Error('No account exists for that email address.')
+      }
+      return visibleUser(findUser.get(normalized, normalized))
+    },
+    getPublicUser: (userId) => visibleUser(readUserById.get(userId)),
     login,
     logout,
     register,

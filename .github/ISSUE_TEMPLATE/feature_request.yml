@@ -1,0 +1,24 @@
+name: Feature request
+description: Propose a focused product, accessibility, editor, or developer improvement.
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or opportunity
+      description: What user need would this address?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed outcome
+      description: Describe the behavior rather than only an implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Architecture and gameplay impact
+      description: Note deterministic-engine, schema, renderer, accessibility, or licensing implications.

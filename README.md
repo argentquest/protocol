@@ -3,6 +3,7 @@
 [![Status: Playable](https://img.shields.io/badge/status-playable-36d7ff)](https://app.inkandquill.io/protocol/)
 [![Renderer: Three.js WebGL](https://img.shields.io/badge/renderer-Three.js%20WebGL-8b5cf6)](https://threejs.org/)
 [![Tests: Vitest + Playwright](https://img.shields.io/badge/tests-Vitest%20%2B%20Playwright-22c55e)](#testing)
+[![License: MIT](https://img.shields.io/badge/license-MIT-22c55e)](LICENSE)
 
 Path Protocol is a 100-level desktop browser precision game. The player guides a
 dimensioned token through deterministic obstacle courses, avoids stationary and
@@ -14,6 +15,10 @@ scores comparable without repeating a small set of route lanes.
 
 Play the current release at
 [app.inkandquill.io/protocol](https://app.inkandquill.io/protocol/).
+Hosting is provided as a complimentary service from ArgentQuest.
+
+Developed by [Eric Silver](https://www.linkedin.com/in/eric-silver-tx/) of
+ArgentQuest. Contact: [esilver@argentquest.com](mailto:esilver@argentquest.com).
 
 ## Quickstart
 
@@ -45,6 +50,8 @@ Protocols **99 — Kenney Test Hole 1** and **100 — Round Green** are the V3 m
 showcases. Hole 1 demonstrates flat Guided/Ricochet play and modeled bank
 obstacles. Round Green is a deliberately simple finishing hole with one straight
 ramp and a large circular green whose precise target sits in the middle.
+Completing a main hole requires the ball center to enter its configured target
+footprint; merely touching the hole with the ball's outside edge is not enough.
 
 Create and preview a production build:
 
@@ -95,6 +102,14 @@ optional `model3dId` selects a model for any renderable entity while JSON keeps
 sole ownership of collision geometry, elevation, and terrain. Model loads are
 cached and each entity falls back independently to procedural geometry.
 
+The level editor also includes a **Kenney Course Builder** palette. Its
+schema-validated fairway, green, ramp, and hazard templates place fitted GLB
+presentation together with ordinary editable terrain, wall, ramp, and obstacle
+JSON. Authors can reshape every generated entity after placement. From the
+Theme Workshop dashboard, **Create demo theme and level** clones the default
+campaign, appends a solvable showcase hole, saves it through the normal server
+validation path, and opens it in the editor.
+
 On the level grid, select a dimensioned object and drag its edge or corner
 handles to resize its authoritative collision geometry in 10-unit increments.
 Right-click an object (or press Shift+F10) for separate image, sound, and
@@ -120,6 +135,23 @@ to its owner under **My uploads**. The quota meter includes both retained
 uploads and media copied across all themes owned by the account. Deleting an
 uploaded source reclaims its bytes without changing self-contained theme
 copies.
+
+First-time visitors choose from the official campaign and every enabled public
+theme before entering the game. After the owner has registered normally, stop
+the server and grant moderation access directly against its private SQLite
+database:
+
+```powershell
+$env:PATH_PROTOCOL_DB_PATH = './data/path-protocol.sqlite'
+npm run admin:grant -- --email esilver@argentquest.com
+```
+
+The explicit server-side grant prevents someone from becoming an administrator
+merely by registering with a known public email address. Administrators can
+review every theme, disable or re-enable community publication, and permanently
+delete abusive themes. The default campaign remains read-only and cannot be
+disabled or deleted. The default account-wide media limit is 500 MiB and can be
+changed with `PATH_PROTOCOL_ACCOUNT_MEDIA_QUOTA_BYTES`.
 
 Each level editor also provides a popup full-level JSON editor. It formats JSON,
 reports parse errors, and validates drafts against the authoritative level JSON
@@ -401,6 +433,20 @@ whether the proxy preserves or strips the prefix. Rebuilding is required after
 changing `VITE_BASE_PATH` because Vite writes the prefix into the production
 bundle.
 
+### Production analytics
+
+The production build is configured for Google Analytics 4 measurement ID
+`G-2ZWLL7P02J`. The identifier is public configuration, not a secret. Analytics
+is disabled until a visitor explicitly accepts the in-app analytics notice;
+declining does not load Google's script. To use a different property or disable
+analytics for a build, set `VITE_GA_MEASUREMENT_ID` to another valid `G-...` ID
+or an empty value before running `npm run build`.
+
+The privacy notice is published at `/PRIVACY.html`. Deployments that enforce a
+Content Security Policy must permit scripts from `www.googletagmanager.com` and
+connections to `*.google-analytics.com`; the provided Nginx configuration
+already includes those sources.
+
 ## Troubleshooting
 
 - If startup reports a missing default asset, run `npm run media:prepare` and
@@ -421,8 +467,9 @@ bundle.
 ## Directory Map
 
 ```text
-architecturev2.md       V2 product and technical architecture
-sprintv2.md             live V2 implementation tracker
+architecturev3.md       current V3 product and renderer architecture
+architecturev2.md       historical V2 product and technical architecture
+sprintv2.md             live V3 implementation tracker
 AGENTS.md               repository instructions
 src/config/             levels, schemas, powers, and game configuration
 src/config/micro-levels optional short-challenge level configurations
@@ -436,8 +483,7 @@ tests/e2e/              Playwright browser journeys
 
 - The simulation advances at a fixed 60 Hz using a clamped accumulator.
 - Rendering runs independently through `requestAnimationFrame` and Three.js.
-- Resolved SVG sources are parsed once and reused as cached `GraphicsContext`
-  objects.
+- GLB model sources are cached once and cloned for individual scene entities.
 - Static collision geometry is precomputed and Three.js scene objects are reused.
 - Trail and ghost samples are bounded to prevent unbounded memory growth.
 - The development HUD exposes rolling rendered FPS and collision diagnostics.
@@ -459,3 +505,14 @@ thresholds, and captured evidence.
 
 See [`PERFORMANCE.md`](PERFORMANCE.md), [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md),
 and [`RELEASE_CHECKLIST.md`](RELEASE_CHECKLIST.md) for release evidence.
+
+## License and attribution
+
+Path Protocol source code and project-authored media are available under the
+[MIT License](LICENSE). Developed by
+[Eric Silver](https://www.linkedin.com/in/eric-silver-tx/) of ArgentQuest;
+contact [esilver@argentquest.com](mailto:esilver@argentquest.com).
+
+Bundled third-party media remains under its recorded upstream license. See
+[`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md) and the license or credit
+files stored beside each asset collection.

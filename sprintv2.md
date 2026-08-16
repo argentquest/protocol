@@ -1052,6 +1052,75 @@ authorable in the 3D Theme Workshop.
 
 ---
 
+## Sprint 39 — Kenney modular course builder
+
+**Goal:** Turn the complete Kenney model catalog into practical, editable level
+building blocks and provide a one-click demonstration workflow.
+
+| ID | Task | Size | Status | Notes |
+|---|---|---:|---|---|
+| V3-S39-01 | Define validated course-piece templates | M | `DONE` | A versioned JSON contract registers nine fairway, green, ramp, and hazard templates and verifies their model roles. |
+| V3-S39-02 | Expand templates into level geometry | M | `DONE` | Placements create standard terrain, wall, ramp, and obstacle JSON; collision remains independent from GLB bounds. |
+| V3-S39-03 | Add the Theme Workshop palette | M | `DONE` | Preview cards place templates at the world center and immediately select the primary editable entity. |
+| V3-S39-04 | Add a demonstration theme workflow | M | `DONE` | One action clones the default campaign, appends a schema-valid solvable showcase level, saves it, and opens the editor. |
+| V3-S39-05 | Verify builder integration | M | `DONE` | All 199 unit tests, lint/JSDoc/docs, production build, 22 full Chromium journeys, and both focused Workshop journeys pass. |
+
+### Sprint 39 exit criteria
+
+- Course pieces are driven by validated data instead of a second hard-coded catalog.
+- Every placed visual maps to editable JSON-owned gameplay geometry.
+- The demonstration level passes schema and generated-course solvability validation.
+- Full automated checks and the production build pass.
+
+---
+
+## Sprint 40 — Precise main-hole capture
+
+**Goal:** Require the ball to approach the center of the main hole instead of
+completing as soon as its outside edge touches the target.
+
+| ID | Task | Size | Status | Notes |
+|---|---|---:|---|---|
+| V3-S40-01 | Tighten main-hole contact | S | `DONE` | Swept detection now requires the token center to enter the configured main-target footprint. |
+| V3-S40-02 | Preserve bonus accessibility | S | `DONE` | Optional bonus targets retain their established complete-token edge-contact rule. |
+| V3-S40-03 | Verify target behavior | M | `DONE` | All 200 unit tests, lint/JSDoc/docs, production build, and all 17 Chromium gameplay journeys pass. |
+
+### Sprint 40 exit criteria
+
+- A ball whose edge only touches the main target does not finish the level.
+- Fast fixed-step movement still sweeps through the tighter capture area.
+- Bonus-target behavior remains unchanged.
+- Full automated checks and the production build pass.
+
+---
+
+## Sprint 41 — Public open-source launch controls
+
+**Goal:** Prepare V3 for a safe public GitHub launch and production community
+themes with moderation, storage limits, and consent-based traffic analytics.
+
+| ID | Task | Size | Status | Notes |
+|---|---|---:|---|---|
+| V3-S41-01 | Add first-visit public theme selection | M | `DONE` | New visitors choose from the complete enabled public-theme directory, with stale selections returning safely to the chooser. |
+| V3-S41-02 | Add administrator moderation | M | `DONE` | Server-granted admins can review owners, disable, enable, and delete community themes while registration and the default remain protected. |
+| V3-S41-03 | Verify account-wide media quota | S | `DONE` | The existing 500 MiB default covers retained uploads and copied media across every owned theme and rejects over-limit writes. |
+| V3-S41-04 | Add consent-based GA4 | M | `DONE` | Production ID `G-2ZWLL7P02J` loads only after acceptance and ships with a privacy notice and CSP configuration. |
+| V3-S41-05 | Add open-source repository files | M | `DONE` | MIT licensing, author attribution, community standards, issue/PR templates, CI, CodeQL, Dependabot, and public deployment details are included. |
+| V3-S41-06 | Remove retained source archives | S | `DONE` | Redundant catalog archives were removed while provenance, checksums, extracted assets, and license evidence remain. |
+| V3-S41-07 | Verify the public-release candidate | L | `DONE` | All 206 unit/component/server assertions, lint/JSDoc/docs, media validation, production build, and 23 applicable Chromium journeys pass; the dedicated subpath journey remains environment-gated. |
+
+### Sprint 41 exit criteria
+
+- Anonymous visitors can discover every enabled public campaign.
+- Owners cannot exceed their account-wide media allowance.
+- Administrators can review and moderate every mutable theme.
+- Analytics remains off before explicit consent.
+- Public repository metadata, licensing, contribution, security, and CI files
+  are complete.
+- All release gates pass before GitHub visibility changes.
+
+---
+
 ## 4. Dependency sequence
 
 ```text
@@ -1094,6 +1163,9 @@ Sprint 0: Decisions and branch
                                                                     → Sprint 36: Two modeled V3 test holes
                                                                       → Sprint 37: Round Green level 100 simplification
                                                                         → Sprint 38: Three-only mini-golf walls
+                                                                          → Sprint 39: Kenney modular course builder
+                                                                            → Sprint 40: Precise main-hole capture
+                                                                              → Sprint 41: Public open-source launch controls
 ```
 
 Some tasks may overlap after their contracts stabilize. For example, WAV asset

@@ -8,3 +8,12 @@ data/
 .env
 .env.*
 !.env.example
+!.env.production
+.codex/
+.agents/
+
+# Local review and scratch artifacts
+AI_Strategy_Governance_CoE_Plan.pptx
+generate_ai_presentation.py
+probe-workshop.mjs
+public/media/default/audio/source/AI.md

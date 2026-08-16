@@ -40,7 +40,23 @@ function publicMetadata(metadata) {
   delete visible.editKey
   delete visible.ownerUserId
   delete visible.levelOrder
-  return { ...visible, levelCount: metadata.levelOrder.length }
+  return {
+    ...visible,
+    disabled: metadata.disabled === true,
+    levelCount: metadata.levelOrder.length,
+  }
+}
+
+/**
+ * Projects stored metadata for authenticated site moderation.
+ *
+ * @pure
+ * @param {object} metadata Stored theme metadata.
+ * @returns {object} Moderation metadata including the owner identifier.
+ */
+function adminMetadata(metadata) {
+  const visible = publicMetadata(metadata)
+  return { ...visible, ownerUserId: metadata.ownerUserId ?? null }
 }
 
 /**
@@ -80,7 +96,33 @@ async function readJson(filePath) {
 async function atomicJson(filePath, value) {
   const temporaryPath = `${filePath}.${randomUUID()}.tmp`
   await writeFile(temporaryPath, `${JSON.stringify(value, null, 2)}\n`)
-  await rename(temporaryPath, filePath)
+  try {
+    await renameWithRetry(temporaryPath, filePath)
+  } catch (error) {
+    await rm(temporaryPath, { force: true })
+    throw error
+  }
+}
+
+/**
+ * Replaces a JSON file while tolerating short Windows scanner or concurrent
+ * autosave locks.
+ *
+ * @param {string} sourcePath Temporary JSON path.
+ * @param {string} destinationPath Final JSON path.
+ * @returns {Promise<void>} Resolves after the atomic replacement.
+ */
+async function renameWithRetry(sourcePath, destinationPath) {
+  const retryableCodes = new Set(['EACCES', 'EBUSY', 'EPERM'])
+  for (let attempt = 0; attempt < 12; attempt += 1) {
+    try {
+      await rename(sourcePath, destinationPath)
+      return
+    } catch (error) {
+      if (!retryableCodes.has(error.code) || attempt === 11) throw error
+      await new Promise((resolve) => setTimeout(resolve, 50))
+    }
+  }
 }
 
 /**
@@ -228,6 +270,7 @@ export async function createThemeStore({
         name: 'Default',
         description: 'The read-only source-controlled Path Protocol campaign.',
         public: true,
+        disabled: false,
         readOnly: true,
         createdAt: null,
         updatedAt: null,
@@ -260,8 +303,10 @@ export async function createThemeStore({
   }
 
   /** @pure @param {object} metadata Theme metadata. @param {string|null} userId Account UUID. @returns {boolean} Whether private content is readable. */
-  function canAccess(metadata, userId) {
-    return metadata.public || (!metadata.readOnly && metadata.ownerUserId === userId)
+  function canAccess(metadata, userId, isAdmin = false) {
+    if (isAdmin) return true
+    const owned = !metadata.readOnly && metadata.ownerUserId === userId
+    return owned || (metadata.public && !metadata.disabled)
   }
 
   /**
@@ -310,7 +355,9 @@ export async function createThemeStore({
       if (!entry.isDirectory() || !THEME_ID_PATTERN.test(entry.name)) continue
       try {
         const metadata = await readMetadata(entry.name)
-        if (metadata.public) themes.push(publicMetadata(metadata))
+        if (metadata.public && !metadata.disabled) {
+          themes.push(publicMetadata(metadata))
+        }
       } catch {
         // Ignore incomplete folders left by interrupted external writes.
       }
@@ -335,6 +382,22 @@ export async function createThemeStore({
     return themes.sort((first, second) => first.name.localeCompare(second.name))
   }
 
+  /** @returns {Promise<object[]>} Every mutable theme for site moderation. */
+  async function listAllThemes() {
+    const themes = []
+    for (const entry of await readdir(dataDirectory, { withFileTypes: true })) {
+      if (!entry.isDirectory() || !THEME_ID_PATTERN.test(entry.name)) continue
+      try {
+        themes.push(adminMetadata(await readMetadata(entry.name)))
+      } catch {
+        // Ignore incomplete folders left by interrupted external writes.
+      }
+    }
+    return themes.sort((first, second) =>
+      String(second.updatedAt ?? '').localeCompare(String(first.updatedAt ?? '')),
+    )
+  }
+
   /**
    * Reads accessible theme metadata and ordered level summaries.
    *
@@ -342,9 +405,9 @@ export async function createThemeStore({
    * @param {string|null} userId Requesting account UUID.
    * @returns {Promise<object>} Theme details.
    */
-  async function getTheme(themeId, userId) {
+  async function getTheme(themeId, userId, isAdmin = false) {
     const metadata = await readMetadata(themeId)
-    if (!canAccess(metadata, userId)) {
+    if (!canAccess(metadata, userId, isAdmin)) {
       throw Object.assign(new Error('Theme not found.'), { status: 404 })
     }
     const levels = await readThemeLevels(themeId, metadata)
@@ -368,9 +431,9 @@ export async function createThemeStore({
    * @param {string|null} userId Requesting account UUID.
    * @returns {Promise<object>} Public metadata and complete ordered levels.
    */
-  async function getCampaign(themeId, userId) {
+  async function getCampaign(themeId, userId, isAdmin = false) {
     const metadata = await readMetadata(themeId)
-    if (!canAccess(metadata, userId)) {
+    if (!canAccess(metadata, userId, isAdmin)) {
       throw Object.assign(new Error('Theme not found.'), { status: 404 })
     }
     return {
@@ -401,7 +464,10 @@ export async function createThemeStore({
       throw Object.assign(new Error('Theme name is required.'), { status: 400 })
     }
     const sourceMetadata = await readMetadata(sourceThemeId)
-    if (!sourceMetadata.public && sourceThemeId !== DEFAULT_THEME_ID) {
+    if (
+      (!sourceMetadata.public || sourceMetadata.disabled) &&
+      sourceThemeId !== DEFAULT_THEME_ID
+    ) {
       throw Object.assign(new Error('Only published themes can be cloned.'), {
         status: 403,
       })
@@ -421,6 +487,7 @@ export async function createThemeStore({
       name: String(name).trim().slice(0, 80),
       description: String(description ?? '').trim().slice(0, 500),
       public: false,
+      disabled: false,
       readOnly: false,
       ownerUserId,
       createdAt: now,
@@ -623,6 +690,12 @@ export async function createThemeStore({
   async function setPublished(themeId, userId, published) {
     const metadata = await readMetadata(themeId)
     authorize(metadata, userId)
+    if (published && metadata.disabled) {
+      throw Object.assign(
+        new Error('A disabled theme cannot be published until an administrator enables it.'),
+        { status: 409 },
+      )
+    }
     metadata.public = Boolean(published)
     metadata.updatedAt = new Date().toISOString()
     await atomicJson(metadataPath(themeId), metadata)
@@ -782,9 +855,9 @@ export async function createThemeStore({
    * @param {string|null} userId Requesting account UUID.
    * @returns {Promise<object>} Resolved media manifest.
    */
-  async function getMediaManifest(themeId, userId) {
+  async function getMediaManifest(themeId, userId, isAdmin = false) {
     const metadata = await readMetadata(themeId)
-    if (!canAccess(metadata, userId)) {
+    if (!canAccess(metadata, userId, isAdmin)) {
       throw Object.assign(new Error('Theme not found.'), { status: 404 })
     }
     const { manifest } = await resolveThemeManifest({
@@ -876,9 +949,9 @@ export async function createThemeStore({
    * @param {string} relativePath Theme-relative media path.
    * @returns {Promise<string>} Absolute existing file path.
    */
-  async function resolveMediaFile(themeId, userId, relativePath) {
+  async function resolveMediaFile(themeId, userId, relativePath, isAdmin = false) {
     const metadata = await readMetadata(themeId)
-    if (!canAccess(metadata, userId)) {
+    if (!canAccess(metadata, userId, isAdmin)) {
       throw Object.assign(new Error('Theme not found.'), { status: 404 })
     }
     const target = themeMediaFile(themeId, relativePath)
@@ -908,21 +981,55 @@ export async function createThemeStore({
     await rm(target, { recursive: true })
   }
 
+  /** @param {string} themeId Mutable theme ID. @param {boolean} disabled Moderation state. @param {string} adminUserId Acting administrator UUID. @returns {Promise<object>} Updated moderation metadata. */
+  async function setDisabled(themeId, disabled, adminUserId) {
+    const metadata = await readMetadata(themeId)
+    if (metadata.readOnly) {
+      throw Object.assign(new Error('The default theme cannot be disabled.'), {
+        status: 409,
+      })
+    }
+    metadata.disabled = Boolean(disabled)
+    metadata.moderatedAt = new Date().toISOString()
+    metadata.moderatedByUserId = adminUserId
+    metadata.updatedAt = metadata.moderatedAt
+    await atomicJson(metadataPath(themeId), metadata)
+    return adminMetadata(metadata)
+  }
+
+  /** @param {string} themeId Mutable theme ID. @returns {Promise<void>} */
+  async function deleteThemeAsAdmin(themeId) {
+    const metadata = await readMetadata(themeId)
+    if (metadata.readOnly) {
+      throw Object.assign(new Error('The default theme cannot be deleted.'), {
+        status: 409,
+      })
+    }
+    const target = themeDirectory(themeId)
+    if (path.dirname(target) !== path.resolve(dataDirectory)) {
+      throw Object.assign(new Error('Unsafe theme path.'), { status: 400 })
+    }
+    await rm(target, { recursive: true })
+  }
+
   return {
     addLevel,
     cloneTheme,
     deleteLevel,
     deleteTheme,
+    deleteThemeAsAdmin,
     getLevel,
     getCampaign,
     getMediaManifest,
     getTheme,
     listOwnedThemes,
+    listAllThemes,
     listPublicThemes,
     reorderLevels,
     resolveMediaFile,
     saveLevel,
     setAudioMedia,
+    setDisabled,
     setEntityMediaOverride,
     setPublished,
     setVisualMedia,
