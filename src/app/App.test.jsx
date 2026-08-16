@@ -134,6 +134,28 @@ describe('App', () => {
     expect(screen.getByRole('heading', { name: /one route/i })).toBeInTheDocument()
   })
 
+  it('opens the personal project story and contribution links from the menu', async () => {
+    await boot()
+    fireEvent.click(screen.getByRole('button', { name: /^about$/i }))
+
+    expect(
+      screen.getByRole('heading', { name: /a game built through curiosity/i }),
+    ).toBeInTheDocument()
+    expect(screen.getByText(/original concept came from an idea my son had/i)).toBeInTheDocument()
+    expect(screen.getByText(/open source under the mit license/i)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /view on github/i })).toHaveAttribute(
+      'href',
+      'https://github.com/argentquest/protocol',
+    )
+    expect(screen.getByRole('link', { name: /connect with me on linkedin/i })).toHaveAttribute(
+      'href',
+      'https://www.linkedin.com/in/eric-silver-tx/',
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: /open theme workshop/i }))
+    expect(screen.getByRole('heading', { name: /theme workshop/i })).toBeInTheDocument()
+  })
+
   it('opens the power lab with five numbered consumable powers', async () => {
     await boot()
     fireEvent.click(screen.getByRole('button', { name: /power lab/i }))
