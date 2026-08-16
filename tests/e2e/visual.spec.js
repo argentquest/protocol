@@ -13,7 +13,10 @@ test('keeps the home and gameplay composition stable at desktop viewports', asyn
   page,
   browserName,
 }) => {
-  test.skip(browserName !== 'chromium', 'Visual baselines use Chromium on Windows.')
+  test.skip(
+    browserName !== 'chromium' || process.platform !== 'win32',
+    'Visual baselines use Chromium on Windows.',
+  )
   await page.setViewportSize({ width: 1440, height: 900 })
   await boot(page)
   await expect(page).toHaveScreenshot('home-1440x900.png', {
