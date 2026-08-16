@@ -150,7 +150,7 @@ button:disabled {
 
 .shell-header nav {
   display: flex;
-  gap: 34px;
+  gap: clamp(14px, 2vw, 34px);
 }
 
 .shell-header nav button {
@@ -1051,6 +1051,87 @@ button:disabled {
 .guide-callout span {
   color: #8099ab;
   font-size: 0.82rem;
+}
+
+.about-story {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+}
+
+.about-story article {
+  min-height: 250px;
+  padding: 30px;
+  border: 1px solid rgba(117, 185, 210, 0.17);
+  background:
+    linear-gradient(145deg, rgba(25, 69, 94, 0.18), transparent 58%),
+    rgba(8, 19, 34, 0.76);
+}
+
+.about-story__lead {
+  border-color: rgba(112, 246, 255, 0.3) !important;
+}
+
+.about-story__chapter {
+  margin: 0;
+  color: #70f6ff;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.about-story h2,
+.about-invitation h2 {
+  margin: 24px 0 12px;
+  font-size: clamp(1.45rem, 2vw, 2rem);
+  font-weight: 500;
+}
+
+.about-story article > p:last-child,
+.about-invitation > div > p:last-child {
+  margin: 0;
+  color: #88a2b6;
+  line-height: 1.75;
+}
+
+.about-invitation {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
+  gap: 48px;
+  margin-top: 16px;
+  padding: 34px;
+  border-left: 3px solid #43e5b0;
+  background: rgba(67, 229, 176, 0.06);
+}
+
+.about-invitation h2 {
+  margin-top: 14px;
+}
+
+.about-actions {
+  display: grid;
+  align-content: center;
+  gap: 12px;
+}
+
+.about-actions .primary-button,
+.about-actions .secondary-button {
+  width: 100%;
+}
+
+.about-actions .primary-button {
+  text-decoration: none;
+}
+
+.about-link {
+  color: #8eaabf;
+  font-size: 0.8rem;
+  text-underline-offset: 4px;
+}
+
+.about-link:hover {
+  color: #70f6ff;
 }
 
 .settings-panel {
@@ -2280,6 +2361,10 @@ input[type='range'] {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .about-story {
+    grid-template-columns: 1fr;
+  }
+
   .game-layout {
     grid-template-columns: 220px minmax(500px, 1fr);
   }
@@ -2366,6 +2451,11 @@ input[type='range'] {
 
   .micro-protocol-grid {
     grid-template-columns: 1fr;
+  }
+
+  .about-invitation {
+    grid-template-columns: 1fr;
+    padding: 26px;
   }
 
   .hero-copy h1 {

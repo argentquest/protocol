@@ -12,6 +12,7 @@ import {
 import GameView from '../game/GameView.jsx'
 import ThemeWorkshop from '../themeWorkshop/ThemeWorkshop.jsx'
 import { themeApi } from '../themeWorkshop/themeApi.js'
+import About from './About.jsx'
 import { createAudioManager } from '../game/audio/audioManager.js'
 import { recordPlaytestRun } from '../game/debug/playtestLog.js'
 import { generateLevel } from '../game/generation/levelGenerator.js'
@@ -162,6 +163,7 @@ function ShellHeader({
   onLevels,
   onPowers,
   onInstructions,
+  onAbout,
   onSettings,
   onWorkshop,
   score,
@@ -185,6 +187,9 @@ function ShellHeader({
         </button>
         <button type="button" onClick={onInstructions}>
           Field guide
+        </button>
+        <button type="button" onClick={onAbout}>
+          About
         </button>
         <button type="button" onClick={onSettings}>
           Controls
@@ -1376,6 +1381,7 @@ function PathProtocolApp() {
           onLevels={() => navigate('levels')}
           onPowers={() => navigate('powers')}
           onInstructions={() => navigate('instructions')}
+          onAbout={() => navigate('about')}
           onSettings={() => navigate('settings')}
           onWorkshop={() => navigate('workshop')}
           devMode={devMode}
@@ -1416,6 +1422,7 @@ function PathProtocolApp() {
         />
       )}
       {screen === 'instructions' && <Instructions />}
+      {screen === 'about' && <About onWorkshop={() => navigate('workshop')} />}
       {screen === 'settings' && (
         <Settings
           settings={progress.settings}
