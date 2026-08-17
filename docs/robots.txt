@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://argentquest.github.io/protocol/sitemap.xml
+

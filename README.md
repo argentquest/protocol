@@ -16,6 +16,8 @@ scores comparable without repeating a small set of route lanes.
 
 Play the current release at
 [app.inkandquill.io/protocol](https://app.inkandquill.io/protocol/).
+Visit the [GitHub Pages project overview](https://argentquest.github.io/protocol/)
+for the story, participation paths, and technical introduction.
 Hosting is provided as a complimentary service from ArgentQuest.
 
 Developed by [Eric Silver](https://www.linkedin.com/in/eric-silver-tx/) of

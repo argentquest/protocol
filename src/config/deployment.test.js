@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import manifest from '../../public/media/manifests/future-lab.json'
 
@@ -63,6 +63,28 @@ describe('production deployment contract', () => {
       expect(workflow).toContain('cancel-in-progress: true')
       expect(workflow).toContain('timeout-minutes:')
       expect(workflow).not.toMatch(/uses: [^\n]+@(v|main|master)\d*\s*$/m)
+    }
+  })
+
+  it('keeps the branch-published GitHub Pages landing site complete', () => {
+    const page = readFileSync('docs/index.html', 'utf8')
+    const styles = readFileSync('docs/assets/site.css', 'utf8')
+
+    expect(existsSync('docs/.nojekyll')).toBe(true)
+    expect(page).toContain('<html lang="en">')
+    expect(page).toContain('https://argentquest.github.io/protocol/')
+    expect(page).toContain('https://app.inkandquill.io/protocol/')
+    expect(page).toContain('https://github.com/argentquest/protocol')
+    expect(page).toContain('class="skip-link"')
+    expect(styles).toContain('@media (prefers-reduced-motion: reduce)')
+
+    for (const asset of [
+      'path-protocol-social-preview.jpg',
+      'path-protocol-origin-story.jpg',
+      'path-protocol-theme-workshop.jpg',
+    ]) {
+      expect(existsSync(`docs/assets/${asset}`)).toBe(true)
+      expect(page).toContain(`assets/${asset}`)
     }
   })
 })
