@@ -1,3 +1,5 @@
+# DEVELOPMENT ONLY: this image exposes Vite source modules and hot reload.
+# Use Dockerfile for every public, staging, or production deployment.
 FROM node:20.19-bookworm-slim AS build
 
 WORKDIR /app

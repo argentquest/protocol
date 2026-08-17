@@ -2,7 +2,8 @@
 
 [![Status: Playable](https://img.shields.io/badge/status-playable-36d7ff)](https://app.inkandquill.io/protocol/)
 [![Renderer: Three.js WebGL](https://img.shields.io/badge/renderer-Three.js%20WebGL-8b5cf6)](https://threejs.org/)
-[![Tests: Vitest + Playwright](https://img.shields.io/badge/tests-Vitest%20%2B%20Playwright-22c55e)](#testing)
+[![CI](https://github.com/argentquest/protocol/actions/workflows/ci.yml/badge.svg)](https://github.com/argentquest/protocol/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/argentquest/protocol/actions/workflows/codeql.yml/badge.svg)](https://github.com/argentquest/protocol/actions/workflows/codeql.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-22c55e)](LICENSE)
 
 Path Protocol is a 100-level desktop browser precision game. The player guides a
@@ -20,6 +21,11 @@ Hosting is provided as a complimentary service from ArgentQuest.
 Developed by [Eric Silver](https://www.linkedin.com/in/eric-silver-tx/) of
 ArgentQuest. Contact: [esilver@argentquest.com](mailto:esilver@argentquest.com).
 
+Path Protocol is open source and welcomes focused contributions. Start with
+[`CONTRIBUTING.md`](CONTRIBUTING.md), browse
+[good first issues](https://github.com/argentquest/protocol/labels/good%20first%20issue),
+or share an idea in [GitHub Discussions](https://github.com/argentquest/protocol/discussions).
+
 ## Quickstart
 
 Requirements:
@@ -31,7 +37,7 @@ Requirements:
 Install and start the local development server:
 
 ```powershell
-npm install
+npm ci
 npm run dev
 ```
 
@@ -380,7 +386,9 @@ For each sprint:
 
 ## Docker
 
-The existing repository provides a multi-stage static-site Docker deployment:
+The repository provides a multi-stage production deployment that builds the
+Vite application and runs the optimized frontend plus the Theme Workshop API
+through the production Node/Express server:
 
 ```powershell
 docker compose up --build -d
@@ -393,8 +401,10 @@ http://localhost:8080
 ```
 
 The build stage installs FFmpeg, validates and prepares all media, and creates
-the Vite bundle. The final stage copies only static output into Nginx; Node,
-npm, FFmpeg, source WAV masters outside `dist`, and build tooling are absent.
+the Vite bundle. The runtime installs production Node dependencies, serves
+`dist`, and persists accounts, sessions, themes, and personal media beneath the
+mounted `/app/data` volume. Build-only development tools are absent. The
+`ffmpeg-static` runtime dependency supports Theme Workshop audio imports.
 
 Inspect the container:
 
@@ -403,8 +413,8 @@ docker compose build
 docker compose up -d
 docker compose ps
 curl.exe -I http://localhost:8080/
-curl.exe http://localhost:8080/healthz
-docker compose exec path-protocol sh -c "command -v node || true; command -v ffmpeg || true"
+curl.exe http://localhost:8080/api/health
+docker compose exec path-protocol node --version
 ```
 
 Stop it with:
@@ -423,15 +433,19 @@ Compose file:
 printf 'VITE_BASE_PATH=/protocol/\n' > .env
 docker compose up --build -d
 docker compose ps
-curl -f http://127.0.0.1:8080/healthz
-curl -f http://127.0.0.1:8080/protocol/media/manifests/future-lab.json
+curl -f http://127.0.0.1:8080/api/health
+curl -f http://127.0.0.1:8080/media/manifests/future-lab.json
 ```
 
 Configure the external reverse proxy to forward `/protocol/` to
-`http://127.0.0.1:8080`. The runtime Nginx image accepts the prefixed path
-whether the proxy preserves or strips the prefix. Rebuilding is required after
-changing `VITE_BASE_PATH` because Vite writes the prefix into the production
-bundle.
+`http://127.0.0.1:8080` **after stripping the `/protocol` prefix**. API requests
+under `/protocol/api/` must be forwarded to `/api/` on the container. Rebuilding
+is required after changing `VITE_BASE_PATH` because Vite writes the prefix into
+the production bundle.
+
+`Dockerfile.dev` starts Vite and the watch-mode API for remote development only.
+It exposes source modules and hot-reload endpoints and must not be used for a
+public or production deployment.
 
 ### Production analytics
 
@@ -444,8 +458,9 @@ or an empty value before running `npm run build`.
 
 The privacy notice is published at `/PRIVACY.html`. Deployments that enforce a
 Content Security Policy must permit scripts from `www.googletagmanager.com` and
-connections to `*.google-analytics.com`; the provided Nginx configuration
-already includes those sources.
+connections to `*.google-analytics.com`; a suitable policy is documented in
+`docker/nginx.conf` for deployments that use an external Nginx proxy. The Node
+container itself does not inject that header.
 
 ## Troubleshooting
 
@@ -504,7 +519,20 @@ thresholds, and captured evidence.
 - `sprintv2.md` must stay synchronized with completed work.
 
 See [`PERFORMANCE.md`](PERFORMANCE.md), [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md),
-and [`RELEASE_CHECKLIST.md`](RELEASE_CHECKLIST.md) for release evidence.
+[`NOTICE.md`](NOTICE.md), [`CHANGELOG.md`](CHANGELOG.md), and
+[`RELEASE_CHECKLIST.md`](RELEASE_CHECKLIST.md) for release evidence.
+
+## Contributing
+
+Bug reports, documentation fixes, accessibility improvements, focused features,
+tests, themes, and level-authoring improvements are welcome. Read
+[`CONTRIBUTING.md`](CONTRIBUTING.md) before starting, and discuss gameplay,
+architecture, dependency, or asset-license changes in an issue first.
+
+The project is currently maintained by Eric Silver. Pull requests require the
+automated quality, browser, and security checks; the maintainer may use the
+administrator bypass described in [`GOVERNANCE.md`](GOVERNANCE.md) when no
+independent maintainer is available.
 
 ## License and attribution
 
