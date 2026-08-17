@@ -42,4 +42,27 @@ describe('production deployment contract', () => {
       expect(audio.sources.every((source) => source.endsWith('?v=1'))).toBe(true)
     }
   })
+
+  it('documents the production server and marks the remote-development image', () => {
+    const readme = readFileSync('README.md', 'utf8')
+    const developmentDockerfile = readFileSync('Dockerfile.dev', 'utf8')
+    const developmentEntrypoint = readFileSync('entrypoint.sh', 'utf8')
+
+    expect(readme).toContain('production Node/Express server')
+    expect(readme).toContain('http://localhost:8080/api/health')
+    expect(readme).not.toContain('http://localhost:8080/healthz')
+    expect(developmentDockerfile).toContain('DEVELOPMENT ONLY')
+    expect(developmentEntrypoint).toContain('must not be used in production')
+  })
+
+  it('pins and bounds required GitHub Actions workflows', () => {
+    const ci = readFileSync('.github/workflows/ci.yml', 'utf8')
+    const codeql = readFileSync('.github/workflows/codeql.yml', 'utf8')
+
+    for (const workflow of [ci, codeql]) {
+      expect(workflow).toContain('cancel-in-progress: true')
+      expect(workflow).toContain('timeout-minutes:')
+      expect(workflow).not.toMatch(/uses: [^\n]+@(v|main|master)\d*\s*$/m)
+    }
+  })
 })
