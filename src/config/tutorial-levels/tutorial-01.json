@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 2,
+  "id": "level-01",
+  "number": 1,
+  "name": "First Steps",
+  "seed": "aurora-academy-01-v1",
+  "difficulty": 1,
+  "briefing": "Objective: learn to guide the token. Click the token to link it, then move the pointer — the token follows at a controlled pace. Success: reach the green target without touching the arena edge.",
+  "arena": {
+    "shape": "rect",
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
+  },
+  "token": {
+    "shape": "circle",
+    "size": 46,
+    "mediaId": "token-circle"
+  },
+  "movement": {
+    "maximumSpeed": 488,
+    "acceleration": 1280,
+    "deceleration": 1535,
+    "keyboardSpeed": 324
+  },
+  "start": {
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 240,
+    "y": 450
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 1330,
+    "y": 450,
+    "size": 58
+  },
+  "generation": {
+    "obstacleCount": 0,
+    "allowedShapes": [
+      "circle",
+      "rect",
+      "diamond"
+    ],
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    },
+    "minSize": 50,
+    "maxSize": 102,
+    "minimumGap": 70,
+    "pathGrid": 20
+  },
+  "manualObstacles": [
+    {
+      "id": "pillar-1",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 870,
+      "y": 340,
+      "width": 72,
+      "height": 72
+    }
+  ],
+  "movingObstacles": [],
+  "trackingObstacles": [],
+  "dynamicObstacles": [],
+  "switches": [],
+  "forceFields": [],
+  "coins": [],
+  "rewards": {
+    "completionCoins": 1,
+    "bonusCoinsPerTarget": 0
+  },
+  "scoring": {
+    "baseMaximum": 5500,
+    "parTimeMs": 10000,
+    "parDistance": 900,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 0,
+    "rewardPerTarget": 0,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0,
+    "targets": []
+  }
+}

@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 2,
+  "id": "level-06",
+  "number": 6,
+  "name": "Phase Window",
+  "seed": "aurora-academy-06-v1",
+  "difficulty": 2,
+  "briefing": "Objective: time a crossing through a phase gate. Gates cycle solid → warning → open. Success: cross while the gate is open, never during warning or solid.",
+  "arena": {
+    "shape": "rect",
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
+  },
+  "token": {
+    "shape": "circle",
+    "size": 46,
+    "mediaId": "token-circle"
+  },
+  "movement": {
+    "maximumSpeed": 510,
+    "acceleration": 1360,
+    "deceleration": 1620,
+    "keyboardSpeed": 340
+  },
+  "start": {
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 220,
+    "y": 450
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 1350,
+    "y": 450,
+    "size": 58
+  },
+  "generation": {
+    "obstacleCount": 0,
+    "allowedShapes": [
+      "circle",
+      "rect",
+      "diamond"
+    ],
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    },
+    "minSize": 50,
+    "maxSize": 102,
+    "minimumGap": 70,
+    "pathGrid": 20
+  },
+  "manualObstacles": [],
+  "movingObstacles": [],
+  "trackingObstacles": [],
+  "dynamicObstacles": [
+    {
+      "id": "gate-1",
+      "mediaId": "obstacle-phase-gate",
+      "shape": "rect",
+      "x": 650,
+      "y": 450,
+      "width": 210,
+      "height": 30,
+      "behavior": {
+        "type": "phase",
+        "cycleMs": 6200,
+        "solidMs": 2400,
+        "warningMs": 500,
+        "offsetMs": 0
+      }
+    },
+    {
+      "id": "gate-2",
+      "mediaId": "obstacle-phase-gate",
+      "shape": "rect",
+      "x": 1080,
+      "y": 450,
+      "width": 210,
+      "height": 30,
+      "behavior": {
+        "type": "phase",
+        "cycleMs": 6200,
+        "solidMs": 2400,
+        "warningMs": 500,
+        "offsetMs": 2000
+      }
+    }
+  ],
+  "switches": [],
+  "forceFields": [],
+  "coins": [],
+  "rewards": {
+    "completionCoins": 1,
+    "bonusCoinsPerTarget": 0
+  },
+  "scoring": {
+    "baseMaximum": 9000,
+    "parTimeMs": 14000,
+    "parDistance": 1000,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 0,
+    "rewardPerTarget": 0,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0,
+    "targets": []
+  }
+}

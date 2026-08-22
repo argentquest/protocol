@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 2,
+  "id": "level-02",
+  "number": 2,
+  "name": "Static Shapes",
+  "seed": "aurora-academy-02-v1",
+  "difficulty": 1,
+  "briefing": "Objective: avoid obstacle contacts. Each contact costs a penalty; the third recalibrates the attempt. Success: steer around all three shapes and touch the target.",
+  "arena": {
+    "shape": "rect",
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
+  },
+  "token": {
+    "shape": "circle",
+    "size": 46,
+    "mediaId": "token-circle"
+  },
+  "movement": {
+    "maximumSpeed": 488,
+    "acceleration": 1280,
+    "deceleration": 1535,
+    "keyboardSpeed": 324
+  },
+  "start": {
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 230,
+    "y": 450
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 1340,
+    "y": 450,
+    "size": 58
+  },
+  "generation": {
+    "obstacleCount": 1,
+    "allowedShapes": [
+      "circle",
+      "rect",
+      "diamond"
+    ],
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    },
+    "minSize": 50,
+    "maxSize": 102,
+    "minimumGap": 70,
+    "pathGrid": 20
+  },
+  "manualObstacles": [
+    {
+      "id": "shape-1",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 560,
+      "y": 450,
+      "width": 84,
+      "height": 84
+    },
+    {
+      "id": "shape-2",
+      "mediaId": "obstacle-static-rect",
+      "shape": "rect",
+      "x": 880,
+      "y": 520,
+      "width": 120,
+      "height": 70
+    },
+    {
+      "id": "shape-3",
+      "mediaId": "obstacle-static-diamond",
+      "shape": "diamond",
+      "x": 1130,
+      "y": 400,
+      "width": 78,
+      "height": 78
+    }
+  ],
+  "movingObstacles": [],
+  "trackingObstacles": [],
+  "dynamicObstacles": [],
+  "switches": [],
+  "forceFields": [],
+  "coins": [],
+  "rewards": {
+    "completionCoins": 1,
+    "bonusCoinsPerTarget": 0
+  },
+  "scoring": {
+    "baseMaximum": 6000,
+    "parTimeMs": 12000,
+    "parDistance": 940,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 0,
+    "rewardPerTarget": 0,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0,
+    "targets": []
+  }
+}

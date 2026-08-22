@@ -189,6 +189,37 @@
         "targetPulseDurationMs": 1000,
         "collisionFlashDurationMs": 200
       }
+    },
+    "aurora-academy": {
+      "name": "Aurora Academy",
+      "mediaRoot": "/media/themes/aurora-academy",
+      "colors": {
+        "background": "#070b18",
+        "backgroundRaised": "#0d1226",
+        "panel": "#101830",
+        "panelStrong": "#17203f",
+        "grid": "#223052",
+        "gridBright": "#37528c",
+        "token": "#2ef2b0",
+        "tokenCore": "#e6fff4",
+        "collisionGuide": "#ffffff",
+        "mainTarget": "#34f0c8",
+        "bonusTarget": "#5ad7ff",
+        "hazard": "#ffb224",
+        "hazardCore": "#ff5f56",
+        "danger": "#ff4664",
+        "text": "#eef7ff",
+        "textMuted": "#8fa8c8",
+        "success": "#34f0c8"
+      },
+      "effects": {
+        "glowIntensity": 0.75,
+        "trailWidth": 5,
+        "collisionGuideWidth": 1.5,
+        "ghostTrailOpacity": 0.16,
+        "targetPulseDurationMs": 950,
+        "collisionFlashDurationMs": 210
+      }
     }
   }
 }

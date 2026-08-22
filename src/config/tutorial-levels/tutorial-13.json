@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 2,
+  "id": "level-13",
+  "number": 13,
+  "name": "Shadow Chaser",
+  "seed": "aurora-academy-13-v1",
+  "difficulty": 5,
+  "briefing": "Objective: outmaneuver a tracking hazard. The chaser homes toward the token inside its zone. Success: keep moving to shake it, or use the Slow Field power (key 3) to buy time.",
+  "arena": {
+    "shape": "rect",
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
+  },
+  "token": {
+    "shape": "circle",
+    "size": 44,
+    "mediaId": "token-circle"
+  },
+  "movement": {
+    "maximumSpeed": 560,
+    "acceleration": 1600,
+    "deceleration": 1900,
+    "keyboardSpeed": 376
+  },
+  "start": {
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 220,
+    "y": 450
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 1330,
+    "y": 450,
+    "size": 58
+  },
+  "generation": {
+    "obstacleCount": 1,
+    "allowedShapes": [
+      "circle",
+      "rect",
+      "diamond"
+    ],
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    },
+    "minSize": 50,
+    "maxSize": 108,
+    "minimumGap": 64,
+    "pathGrid": 20
+  },
+  "manualObstacles": [],
+  "movingObstacles": [],
+  "trackingObstacles": [
+    {
+      "id": "chaser-1",
+      "mediaId": "obstacle-tracking-circle",
+      "shape": "circle",
+      "x": 820,
+      "y": 350,
+      "width": 54,
+      "height": 54,
+      "zone": {
+        "x": 300,
+        "y": 120,
+        "width": 1000,
+        "height": 660
+      },
+      "maxSpeed": 250,
+      "acceleration": 340,
+      "turnRateDegreesPerSecond": 300
+    }
+  ],
+  "dynamicObstacles": [],
+  "switches": [],
+  "forceFields": [],
+  "coins": [],
+  "rewards": {
+    "completionCoins": 3,
+    "bonusCoinsPerTarget": 0
+  },
+  "scoring": {
+    "baseMaximum": 20000,
+    "parTimeMs": 15000,
+    "parDistance": 1050,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 0,
+    "rewardPerTarget": 0,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0,
+    "targets": []
+  }
+}

@@ -42,6 +42,7 @@
     "preview": "node server/index.js",
     "start": "node server/index.js",
     "admin:grant": "node scripts/grant-admin.mjs",
+    "seed:tutorial": "node scripts/seed-tutorial-theme.mjs",
     "server:test": "vitest run server/themeApi.test.js",
     "lint": "eslint . && npm run docs:validate",
     "docs:build": "node scripts/build-designer-help.mjs",

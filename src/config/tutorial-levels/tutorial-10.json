@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 2,
+  "id": "level-10",
+  "number": 10,
+  "name": "Switchback",
+  "seed": "aurora-academy-10-v1",
+  "difficulty": 4,
+  "briefing": "Objective: activate a switch, then use its effect. Touching the pad opens the barrier for a limited window. Success: open the barrier and cross before it closes.",
+  "arena": {
+    "shape": "rect",
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
+  },
+  "token": {
+    "shape": "circle",
+    "size": 44,
+    "mediaId": "token-circle"
+  },
+  "movement": {
+    "maximumSpeed": 545,
+    "acceleration": 1520,
+    "deceleration": 1800,
+    "keyboardSpeed": 366
+  },
+  "start": {
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 230,
+    "y": 450
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 1330,
+    "y": 450,
+    "size": 58
+  },
+  "generation": {
+    "obstacleCount": 1,
+    "allowedShapes": [
+      "circle",
+      "rect",
+      "diamond"
+    ],
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    },
+    "minSize": 50,
+    "maxSize": 106,
+    "minimumGap": 66,
+    "pathGrid": 20
+  },
+  "manualObstacles": [
+    {
+      "id": "barrier-guard",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 1100,
+      "y": 300,
+      "width": 90,
+      "height": 90
+    }
+  ],
+  "movingObstacles": [],
+  "trackingObstacles": [],
+  "dynamicObstacles": [
+    {
+      "id": "switch-barrier-1",
+      "mediaId": "obstacle-switch-barrier",
+      "shape": "rect",
+      "x": 820,
+      "y": 450,
+      "width": 26,
+      "height": 300,
+      "behavior": {
+        "type": "switch",
+        "switchId": "switch-1",
+        "initiallySolid": true
+      }
+    }
+  ],
+  "switches": [
+    {
+      "id": "switch-1",
+      "mediaId": "switch-pad",
+      "x": 430,
+      "y": 660,
+      "size": 44,
+      "activation": "timed",
+      "durationMs": 8000
+    }
+  ],
+  "forceFields": [],
+  "coins": [],
+  "rewards": {
+    "completionCoins": 2,
+    "bonusCoinsPerTarget": 0
+  },
+  "scoring": {
+    "baseMaximum": 16000,
+    "parTimeMs": 15000,
+    "parDistance": 1050,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 0,
+    "rewardPerTarget": 0,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0,
+    "targets": []
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 2,
+  "id": "level-19",
+  "number": 19,
+  "name": "Bonus Relay",
+  "seed": "aurora-academy-19-v1",
+  "difficulty": 8,
+  "briefing": "Objective: choose to bank or pursue a bonus. After the main target a bonus relay is offered. Success: use the Obstacle Shield power (key 1) to clear the return path and decide.",
+  "arena": {
+    "shape": "rect",
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
+  },
+  "token": {
+    "shape": "circle",
+    "size": 44,
+    "mediaId": "token-circle"
+  },
+  "movement": {
+    "maximumSpeed": 596,
+    "acceleration": 1760,
+    "deceleration": 2045,
+    "keyboardSpeed": 408
+  },
+  "start": {
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 220,
+    "y": 450
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 1340,
+    "y": 450,
+    "size": 58
+  },
+  "generation": {
+    "obstacleCount": 1,
+    "allowedShapes": [
+      "circle",
+      "rect",
+      "diamond"
+    ],
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    },
+    "minSize": 50,
+    "maxSize": 110,
+    "minimumGap": 62,
+    "pathGrid": 20
+  },
+  "manualObstacles": [
+    {
+      "id": "gauntlet-1",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 1000,
+      "y": 640,
+      "width": 90,
+      "height": 90
+    },
+    {
+      "id": "gauntlet-2",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 860,
+      "y": 700,
+      "width": 90,
+      "height": 90
+    },
+    {
+      "id": "gauntlet-3",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 720,
+      "y": 660,
+      "width": 90,
+      "height": 90
+    }
+  ],
+  "movingObstacles": [],
+  "trackingObstacles": [],
+  "dynamicObstacles": [],
+  "switches": [],
+  "forceFields": [],
+  "coins": [],
+  "rewards": {
+    "completionCoins": 5,
+    "bonusCoinsPerTarget": 3
+  },
+  "scoring": {
+    "baseMaximum": 32000,
+    "parTimeMs": 18000,
+    "parDistance": 1150,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 1,
+    "rewardPerTarget": 1200,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.1,
+    "targets": [
+      {
+        "id": "bonus-a",
+        "mediaId": "target-bonus",
+        "x": 250,
+        "y": 700,
+        "size": 48
+      }
+    ]
+  }
+}

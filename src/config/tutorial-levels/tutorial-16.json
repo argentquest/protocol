@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 2,
+  "id": "level-16",
+  "number": 16,
+  "name": "Reset & Reward",
+  "seed": "aurora-academy-16-v1",
+  "difficulty": 6,
+  "briefing": "Objective: use a reset surface deliberately. Reset returns the token to its last stopped position. Success: recover at the reset point and finish under the perfect-shots goal.",
+  "arena": {
+    "shape": "rect",
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
+  },
+  "token": {
+    "shape": "circle",
+    "size": 44,
+    "mediaId": "token-circle"
+  },
+  "movement": {
+    "maximumSpeed": 578,
+    "acceleration": 1680,
+    "deceleration": 1960,
+    "keyboardSpeed": 394
+  },
+  "shotMechanic": {
+    "inputStyle": "drag-release",
+    "minimumAimDistance": 10,
+    "minimumLaunchSpeed": 180,
+    "maximumLaunchSpeed": 760,
+    "aimDistanceForMaximumSpeed": 260,
+    "dragPerSecond": 250,
+    "airDragPerSecond": 20,
+    "stopSpeed": 24,
+    "restitution": 0.75,
+    "maximumImpactsPerStep": 5
+  },
+  "shotGoals": {
+    "par": 3,
+    "perfectShots": 2,
+    "maximumShots": 6
+  },
+  "start": {
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 220,
+    "y": 450
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 1320,
+    "y": 620,
+    "size": 62
+  },
+  "generation": {
+    "obstacleCount": 0,
+    "allowedShapes": [
+      "circle",
+      "rect",
+      "diamond"
+    ],
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    },
+    "minSize": 50,
+    "maxSize": 108,
+    "minimumGap": 64,
+    "pathGrid": 20
+  },
+  "manualObstacles": [
+    {
+      "id": "reset-1",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 860,
+      "y": 330,
+      "width": 62,
+      "height": 62,
+      "kineticResponse": {
+        "type": "reset"
+      }
+    }
+  ],
+  "movingObstacles": [],
+  "trackingObstacles": [],
+  "dynamicObstacles": [],
+  "switches": [],
+  "forceFields": [],
+  "coins": [
+    {
+      "id": "coin-1",
+      "mediaId": "coin-standard",
+      "x": 700,
+      "y": 600,
+      "size": 30,
+      "value": 1
+    },
+    {
+      "id": "coin-2",
+      "mediaId": "coin-standard",
+      "x": 1080,
+      "y": 430,
+      "size": 30,
+      "value": 1
+    }
+  ],
+  "rewards": {
+    "completionCoins": 3,
+    "bonusCoinsPerTarget": 0
+  },
+  "scoring": {
+    "baseMaximum": 24000,
+    "parTimeMs": 17000,
+    "parDistance": 1150,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 0,
+    "rewardPerTarget": 0,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0,
+    "targets": []
+  }
+}

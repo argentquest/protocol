@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 2,
+  "id": "level-04",
+  "number": 4,
+  "name": "Wall Work",
+  "seed": "aurora-academy-04-v1",
+  "difficulty": 2,
+  "briefing": "Objective: use walls as course boundaries. Walls stop the token on contact without a hazard penalty. Success: follow the wall channel around the bend to the target.",
+  "arena": {
+    "shape": "rect",
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
+  },
+  "token": {
+    "shape": "circle",
+    "size": 46,
+    "mediaId": "token-circle"
+  },
+  "movement": {
+    "maximumSpeed": 510,
+    "acceleration": 1360,
+    "deceleration": 1620,
+    "keyboardSpeed": 340
+  },
+  "start": {
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 220,
+    "y": 450
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 1330,
+    "y": 450,
+    "size": 58
+  },
+  "generation": {
+    "obstacleCount": 0,
+    "allowedShapes": [
+      "circle",
+      "rect",
+      "diamond"
+    ],
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    },
+    "minSize": 50,
+    "maxSize": 102,
+    "minimumGap": 70,
+    "pathGrid": 20
+  },
+  "manualObstacles": [],
+  "walls": [
+    {
+      "id": "wall-top",
+      "mediaId": "obstacle-static-rect",
+      "shape": "rect",
+      "x": 620,
+      "y": 300,
+      "width": 26,
+      "height": 240,
+      "orientation": 0,
+      "kind": "interior"
+    },
+    {
+      "id": "wall-bottom",
+      "mediaId": "obstacle-static-rect",
+      "shape": "rect",
+      "x": 1000,
+      "y": 600,
+      "width": 26,
+      "height": 240,
+      "orientation": 0,
+      "kind": "interior"
+    }
+  ],
+  "movingObstacles": [],
+  "trackingObstacles": [],
+  "dynamicObstacles": [],
+  "switches": [],
+  "forceFields": [],
+  "coins": [],
+  "rewards": {
+    "completionCoins": 1,
+    "bonusCoinsPerTarget": 0
+  },
+  "scoring": {
+    "baseMaximum": 6500,
+    "parTimeMs": 12000,
+    "parDistance": 980,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 0,
+    "rewardPerTarget": 0,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0,
+    "targets": []
+  }
+}

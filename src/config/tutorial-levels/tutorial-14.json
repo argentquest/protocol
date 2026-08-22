@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 2,
+  "id": "level-14",
+  "number": 14,
+  "name": "First Shot",
+  "seed": "aurora-academy-14-v1",
+  "difficulty": 5,
+  "briefing": "Objective: learn the ricochet launch. Press the token, pull backward to aim, and release to shoot. Success: use momentum and drag to reach the target within par shots.",
+  "arena": {
+    "shape": "rect",
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
+  },
+  "token": {
+    "shape": "circle",
+    "size": 44,
+    "mediaId": "token-circle"
+  },
+  "movement": {
+    "maximumSpeed": 560,
+    "acceleration": 1600,
+    "deceleration": 1900,
+    "keyboardSpeed": 376
+  },
+  "shotMechanic": {
+    "inputStyle": "drag-release",
+    "minimumAimDistance": 10,
+    "minimumLaunchSpeed": 180,
+    "maximumLaunchSpeed": 760,
+    "aimDistanceForMaximumSpeed": 260,
+    "dragPerSecond": 250,
+    "airDragPerSecond": 20,
+    "stopSpeed": 24,
+    "restitution": 0.75,
+    "maximumImpactsPerStep": 5
+  },
+  "shotGoals": {
+    "par": 3,
+    "perfectShots": 2,
+    "maximumShots": 6
+  },
+  "start": {
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 220,
+    "y": 450
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 1330,
+    "y": 450,
+    "size": 62
+  },
+  "generation": {
+    "obstacleCount": 0,
+    "allowedShapes": [
+      "circle",
+      "rect",
+      "diamond"
+    ],
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    },
+    "minSize": 50,
+    "maxSize": 108,
+    "minimumGap": 64,
+    "pathGrid": 20
+  },
+  "manualObstacles": [],
+  "movingObstacles": [],
+  "trackingObstacles": [],
+  "dynamicObstacles": [],
+  "switches": [],
+  "forceFields": [],
+  "coins": [],
+  "rewards": {
+    "completionCoins": 3,
+    "bonusCoinsPerTarget": 0
+  },
+  "scoring": {
+    "baseMaximum": 20000,
+    "parTimeMs": 16000,
+    "parDistance": 1050,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 0,
+    "rewardPerTarget": 0,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0,
+    "targets": []
+  }
+}

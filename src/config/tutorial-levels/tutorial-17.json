@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 2,
+  "id": "level-17",
+  "number": 17,
+  "name": "Ramp Launch",
+  "seed": "aurora-academy-17-v1",
+  "difficulty": 7,
+  "briefing": "Objective: launch from a ramp. Approach with speed in the ramp's direction to fly. Success: ride the launch over the gap, land, and settle into the target.",
+  "arena": {
+    "shape": "rect",
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
+  },
+  "token": {
+    "shape": "circle",
+    "size": 44,
+    "mediaId": "token-circle"
+  },
+  "movement": {
+    "maximumSpeed": 620,
+    "acceleration": 1900,
+    "deceleration": 2200,
+    "keyboardSpeed": 430
+  },
+  "verticalPhysics": {
+    "gravity": 1000,
+    "maximumFallSpeed": 850,
+    "groundHeight": 0,
+    "maximumStepHeight": 24
+  },
+  "ramps": [
+    {
+      "id": "ramp-1",
+      "mediaId": "obstacle-static-rect",
+      "x": 700,
+      "y": 450,
+      "width": 170,
+      "height": 120,
+      "directionDegrees": 0,
+      "launchVelocity": 520,
+      "minimumApproachSpeed": 130
+    }
+  ],
+  "start": {
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 200,
+    "y": 450
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 1250,
+    "y": 450,
+    "size": 64
+  },
+  "generation": {
+    "obstacleCount": 0,
+    "allowedShapes": [
+      "circle",
+      "rect",
+      "diamond"
+    ],
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    },
+    "minSize": 50,
+    "maxSize": 108,
+    "minimumGap": 64,
+    "pathGrid": 20
+  },
+  "manualObstacles": [
+    {
+      "id": "barrier-1",
+      "mediaId": "obstacle-static-rect",
+      "shape": "rect",
+      "x": 1010,
+      "y": 450,
+      "width": 70,
+      "height": 300,
+      "collisionHeight": 60,
+      "visualHeight": 110
+    }
+  ],
+  "movingObstacles": [],
+  "trackingObstacles": [],
+  "dynamicObstacles": [],
+  "switches": [],
+  "forceFields": [],
+  "coins": [],
+  "rewards": {
+    "completionCoins": 4,
+    "bonusCoinsPerTarget": 0
+  },
+  "scoring": {
+    "baseMaximum": 28000,
+    "parTimeMs": 16000,
+    "parDistance": 1150,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 0,
+    "rewardPerTarget": 0,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0,
+    "targets": []
+  }
+}

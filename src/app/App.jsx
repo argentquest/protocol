@@ -13,6 +13,7 @@ import GameView from '../game/GameView.jsx'
 import ThemeWorkshop from '../themeWorkshop/ThemeWorkshop.jsx'
 import { themeApi } from '../themeWorkshop/themeApi.js'
 import About from './About.jsx'
+import Tutorial from './Tutorial.jsx'
 import { createAudioManager } from '../game/audio/audioManager.js'
 import { recordPlaytestRun } from '../game/debug/playtestLog.js'
 import { generateLevel } from '../game/generation/levelGenerator.js'
@@ -163,6 +164,7 @@ function ShellHeader({
   onLevels,
   onPowers,
   onInstructions,
+  onTutorial,
   onAbout,
   onSettings,
   onWorkshop,
@@ -187,6 +189,9 @@ function ShellHeader({
         </button>
         <button type="button" onClick={onInstructions}>
           Field guide
+        </button>
+        <button type="button" onClick={onTutorial}>
+          Tutorial
         </button>
         <button type="button" onClick={onAbout}>
           About
@@ -1381,6 +1386,7 @@ function PathProtocolApp() {
           onLevels={() => navigate('levels')}
           onPowers={() => navigate('powers')}
           onInstructions={() => navigate('instructions')}
+          onTutorial={() => navigate('tutorial')}
           onAbout={() => navigate('about')}
           onSettings={() => navigate('settings')}
           onWorkshop={() => navigate('workshop')}
@@ -1422,6 +1428,9 @@ function PathProtocolApp() {
         />
       )}
       {screen === 'instructions' && <Instructions />}
+      {screen === 'tutorial' && (
+        <Tutorial onFieldGuide={() => navigate('instructions')} />
+      )}
       {screen === 'about' && <About onWorkshop={() => navigate('workshop')} />}
       {screen === 'settings' && (
         <Settings

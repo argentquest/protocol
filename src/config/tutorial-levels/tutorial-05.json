@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 2,
+  "id": "level-05",
+  "number": 5,
+  "name": "Oscillators",
+  "seed": "aurora-academy-05-v1",
+  "difficulty": 2,
+  "briefing": "Objective: read a moving hazard. The obstacle slides side to side on a fixed track. Success: watch one full pass, then cross when it clears your lane.",
+  "arena": {
+    "shape": "rect",
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
+  },
+  "token": {
+    "shape": "circle",
+    "size": 46,
+    "mediaId": "token-circle"
+  },
+  "movement": {
+    "maximumSpeed": 510,
+    "acceleration": 1360,
+    "deceleration": 1620,
+    "keyboardSpeed": 340
+  },
+  "start": {
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 200,
+    "y": 200
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 1380,
+    "y": 680,
+    "size": 58
+  },
+  "generation": {
+    "obstacleCount": 1,
+    "allowedShapes": [
+      "circle",
+      "rect",
+      "diamond"
+    ],
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    },
+    "minSize": 50,
+    "maxSize": 102,
+    "minimumGap": 70,
+    "pathGrid": 20
+  },
+  "manualObstacles": [],
+  "movingObstacles": [
+    {
+      "id": "mover-1",
+      "mediaId": "obstacle-moving-circle",
+      "shape": "circle",
+      "x": 800,
+      "y": 450,
+      "size": 46,
+      "axis": "y",
+      "amplitude": 140,
+      "periodMs": 4200,
+      "phase": 0
+    }
+  ],
+  "trackingObstacles": [],
+  "dynamicObstacles": [],
+  "switches": [],
+  "forceFields": [],
+  "coins": [],
+  "rewards": {
+    "completionCoins": 1,
+    "bonusCoinsPerTarget": 0
+  },
+  "scoring": {
+    "baseMaximum": 9000,
+    "parTimeMs": 13000,
+    "parDistance": 1150,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 0,
+    "rewardPerTarget": 0,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0,
+    "targets": []
+  }
+}

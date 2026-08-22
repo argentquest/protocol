@@ -1,0 +1,174 @@
+{
+  "schemaVersion": 2,
+  "id": "level-20",
+  "number": 20,
+  "name": "Convergence",
+  "seed": "aurora-academy-20-v1",
+  "difficulty": 15,
+  "briefing": "Objective: combine every protocol. Time the phase gate, avoid the orbiter, hold against the current, and collect the coins. Success: finish the course with all skills in play.",
+  "arena": {
+    "shape": "rect",
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
+  },
+  "token": {
+    "shape": "circle",
+    "size": 42,
+    "mediaId": "token-circle"
+  },
+  "movement": {
+    "maximumSpeed": 632,
+    "acceleration": 1920,
+    "deceleration": 2215,
+    "keyboardSpeed": 436
+  },
+  "start": {
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 220,
+    "y": 450
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 1330,
+    "y": 450,
+    "size": 58
+  },
+  "generation": {
+    "obstacleCount": 2,
+    "allowedShapes": [
+      "circle",
+      "rect",
+      "diamond"
+    ],
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    },
+    "minSize": 50,
+    "maxSize": 112,
+    "minimumGap": 58,
+    "pathGrid": 20
+  },
+  "manualObstacles": [],
+  "movingObstacles": [],
+  "trackingObstacles": [],
+  "dynamicObstacles": [
+    {
+      "id": "gate-1",
+      "mediaId": "obstacle-phase-gate",
+      "shape": "rect",
+      "x": 620,
+      "y": 450,
+      "width": 200,
+      "height": 28,
+      "behavior": {
+        "type": "phase",
+        "cycleMs": 5600,
+        "solidMs": 2000,
+        "warningMs": 450,
+        "offsetMs": 0
+      }
+    },
+    {
+      "id": "orbiter-1",
+      "mediaId": "obstacle-orbiter",
+      "shape": "circle",
+      "x": 1000,
+      "y": 280,
+      "size": 44,
+      "behavior": {
+        "type": "orbit",
+        "radiusX": 150,
+        "radiusY": 90,
+        "periodMs": 6000,
+        "phase": 0
+      }
+    },
+    {
+      "id": "spinner-1",
+      "mediaId": "obstacle-spinner",
+      "shape": "rect",
+      "x": 1050,
+      "y": 620,
+      "width": 200,
+      "height": 20,
+      "behavior": {
+        "type": "rotate",
+        "speedDegreesPerSecond": 50,
+        "initialDegrees": 0
+      }
+    }
+  ],
+  "switches": [],
+  "forceFields": [
+    {
+      "id": "current-1",
+      "mediaId": "field-conveyor",
+      "type": "conveyor",
+      "x": 760,
+      "y": 700,
+      "width": 340,
+      "height": 150,
+      "directionDegrees": 0,
+      "force": 300
+    }
+  ],
+  "coins": [
+    {
+      "id": "coin-1",
+      "mediaId": "coin-standard",
+      "x": 500,
+      "y": 620,
+      "size": 30,
+      "value": 1
+    },
+    {
+      "id": "coin-2",
+      "mediaId": "coin-standard",
+      "x": 700,
+      "y": 300,
+      "size": 30,
+      "value": 1
+    },
+    {
+      "id": "coin-3",
+      "mediaId": "coin-standard",
+      "x": 1150,
+      "y": 520,
+      "size": 30,
+      "value": 1
+    }
+  ],
+  "rewards": {
+    "completionCoins": 5,
+    "bonusCoinsPerTarget": 3
+  },
+  "scoring": {
+    "baseMaximum": 55000,
+    "parTimeMs": 22000,
+    "parDistance": 1300,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 1,
+    "rewardPerTarget": 1500,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0.1,
+    "targets": [
+      {
+        "id": "bonus-a",
+        "mediaId": "target-bonus",
+        "x": 250,
+        "y": 200,
+        "size": 48
+      }
+    ]
+  }
+}

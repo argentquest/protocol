@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 2,
+  "id": "level-11",
+  "number": 11,
+  "name": "Crosscurrent",
+  "seed": "aurora-academy-11-v1",
+  "difficulty": 4,
+  "briefing": "Objective: counter-steer through a current. The conveyor pushes the token in one direction. Success: steer against the push to hold your line and reach the target.",
+  "arena": {
+    "shape": "rect",
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
+  },
+  "token": {
+    "shape": "circle",
+    "size": 44,
+    "mediaId": "token-circle"
+  },
+  "movement": {
+    "maximumSpeed": 545,
+    "acceleration": 1520,
+    "deceleration": 1800,
+    "keyboardSpeed": 366
+  },
+  "start": {
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 200,
+    "y": 450
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 1350,
+    "y": 450,
+    "size": 58
+  },
+  "generation": {
+    "obstacleCount": 1,
+    "allowedShapes": [
+      "circle",
+      "rect",
+      "diamond"
+    ],
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    },
+    "minSize": 50,
+    "maxSize": 106,
+    "minimumGap": 66,
+    "pathGrid": 20
+  },
+  "manualObstacles": [
+    {
+      "id": "island-1",
+      "mediaId": "obstacle-static-circle",
+      "shape": "circle",
+      "x": 1090,
+      "y": 240,
+      "width": 84,
+      "height": 84
+    }
+  ],
+  "movingObstacles": [],
+  "trackingObstacles": [],
+  "dynamicObstacles": [],
+  "switches": [],
+  "forceFields": [
+    {
+      "id": "current-1",
+      "mediaId": "field-conveyor",
+      "type": "conveyor",
+      "x": 680,
+      "y": 360,
+      "width": 400,
+      "height": 200,
+      "directionDegrees": 180,
+      "force": 340
+    }
+  ],
+  "coins": [],
+  "rewards": {
+    "completionCoins": 2,
+    "bonusCoinsPerTarget": 0
+  },
+  "scoring": {
+    "baseMaximum": 16000,
+    "parTimeMs": 15000,
+    "parDistance": 1100,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 0,
+    "rewardPerTarget": 0,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0,
+    "targets": []
+  }
+}

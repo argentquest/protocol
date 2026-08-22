@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 2,
+  "id": "level-03",
+  "number": 3,
+  "name": "Coin Trail",
+  "seed": "aurora-academy-03-v1",
+  "difficulty": 1,
+  "briefing": "Objective: collect coins on an efficient route. Coins are one-time pickups worth points. Success: gather the coin arc and still reach the target on the par line.",
+  "arena": {
+    "shape": "rect",
+    "mediaId": "arena-standard",
+    "margin": 35,
+    "cornerRadius": 38
+  },
+  "token": {
+    "shape": "circle",
+    "size": 46,
+    "mediaId": "token-circle"
+  },
+  "movement": {
+    "maximumSpeed": 488,
+    "acceleration": 1280,
+    "deceleration": 1535,
+    "keyboardSpeed": 324
+  },
+  "start": {
+    "mode": "manual",
+    "mediaId": "start-pad",
+    "x": 230,
+    "y": 450
+  },
+  "mainTarget": {
+    "mode": "manual",
+    "mediaId": "target-main",
+    "x": 1330,
+    "y": 450,
+    "size": 58
+  },
+  "generation": {
+    "obstacleCount": 0,
+    "allowedShapes": [
+      "circle",
+      "rect",
+      "diamond"
+    ],
+    "mediaByShape": {
+      "circle": "obstacle-static-circle",
+      "rect": "obstacle-static-rect",
+      "diamond": "obstacle-static-diamond"
+    },
+    "minSize": 50,
+    "maxSize": 102,
+    "minimumGap": 70,
+    "pathGrid": 20
+  },
+  "manualObstacles": [],
+  "movingObstacles": [],
+  "trackingObstacles": [],
+  "dynamicObstacles": [],
+  "switches": [],
+  "forceFields": [],
+  "coins": [
+    {
+      "id": "coin-1",
+      "mediaId": "coin-standard",
+      "x": 480,
+      "y": 400,
+      "size": 30,
+      "value": 1
+    },
+    {
+      "id": "coin-2",
+      "mediaId": "coin-standard",
+      "x": 680,
+      "y": 330,
+      "size": 30,
+      "value": 1
+    },
+    {
+      "id": "coin-3",
+      "mediaId": "coin-standard",
+      "x": 890,
+      "y": 340,
+      "size": 30,
+      "value": 1
+    },
+    {
+      "id": "coin-4",
+      "mediaId": "coin-standard",
+      "x": 1090,
+      "y": 410,
+      "size": 30,
+      "value": 1
+    }
+  ],
+  "rewards": {
+    "completionCoins": 1,
+    "bonusCoinsPerTarget": 0
+  },
+  "scoring": {
+    "baseMaximum": 6500,
+    "parTimeMs": 11000,
+    "parDistance": 960,
+    "timeWeight": 0.5,
+    "distanceWeight": 0.5,
+    "collisionPenaltyRate": 0.2,
+    "maximumCollisions": 3
+  },
+  "bonuses": {
+    "maximumTargets": 0,
+    "rewardPerTarget": 0,
+    "offerChanceMode": "currentScorePercent",
+    "failurePenaltyRate": 0,
+    "targets": []
+  }
+}

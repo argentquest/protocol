@@ -1,0 +1,552 @@
+{
+  "schemaVersion": 1,
+  "mediaVersion": 1,
+  "theme": "aurora-academy",
+  "visuals": [
+    {
+      "mediaId": "arena-ellipse",
+      "alias": "aurora-academy:arena-ellipse:v1",
+      "src": "/media/default/arenas/arena-ellipse.svg?v=1",
+      "category": "arenas",
+      "renderMode": "vector",
+      "sizing": "stretch",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "arena-polygon",
+      "alias": "aurora-academy:arena-polygon:v1",
+      "src": "/media/default/arenas/arena-polygon.svg?v=1",
+      "category": "arenas",
+      "renderMode": "vector",
+      "sizing": "stretch",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "arena-standard",
+      "alias": "aurora-academy:arena-standard:v1",
+      "src": "/media/default/arenas/arena-standard.svg?v=1",
+      "category": "arenas",
+      "renderMode": "vector",
+      "sizing": "stretch",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "coin-standard",
+      "alias": "aurora-academy:coin-standard:v1",
+      "src": "/media/default/coins/coin-standard.svg?v=1",
+      "category": "coins",
+      "renderMode": "vector",
+      "sizing": "contain",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "field-conveyor",
+      "alias": "aurora-academy:field-conveyor:v1",
+      "src": "/media/default/obstacles/field-conveyor.svg?v=1",
+      "category": "obstacles",
+      "renderMode": "vector",
+      "sizing": "stretch",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "field-radial",
+      "alias": "aurora-academy:field-radial:v1",
+      "src": "/media/default/obstacles/field-radial.svg?v=1",
+      "category": "obstacles",
+      "renderMode": "vector",
+      "sizing": "stretch",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "obstacle-moving-circle",
+      "alias": "aurora-academy:obstacle-moving-circle:v1",
+      "src": "/media/default/obstacles/obstacle-moving-circle.svg?v=1",
+      "category": "obstacles",
+      "renderMode": "vector",
+      "sizing": "contain",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "obstacle-moving-diamond",
+      "alias": "aurora-academy:obstacle-moving-diamond:v1",
+      "src": "/media/default/obstacles/obstacle-moving-diamond.svg?v=1",
+      "category": "obstacles",
+      "renderMode": "vector",
+      "sizing": "contain",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "obstacle-moving-rect",
+      "alias": "aurora-academy:obstacle-moving-rect:v1",
+      "src": "/media/default/obstacles/obstacle-moving-rect.svg?v=1",
+      "category": "obstacles",
+      "renderMode": "vector",
+      "sizing": "stretch",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "obstacle-orbiter",
+      "alias": "aurora-academy:obstacle-orbiter:v1",
+      "src": "/media/default/obstacles/obstacle-orbiter.svg?v=1",
+      "category": "obstacles",
+      "renderMode": "vector",
+      "sizing": "contain",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "obstacle-phase-gate",
+      "alias": "aurora-academy:obstacle-phase-gate:v1",
+      "src": "/media/default/obstacles/obstacle-phase-gate.svg?v=1",
+      "category": "obstacles",
+      "renderMode": "vector",
+      "sizing": "stretch",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "obstacle-pulse-block",
+      "alias": "aurora-academy:obstacle-pulse-block:v1",
+      "src": "/media/default/obstacles/obstacle-pulse-block.svg?v=1",
+      "category": "obstacles",
+      "renderMode": "vector",
+      "sizing": "stretch",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "obstacle-spinner",
+      "alias": "aurora-academy:obstacle-spinner:v1",
+      "src": "/media/default/obstacles/obstacle-spinner.svg?v=1",
+      "category": "obstacles",
+      "renderMode": "vector",
+      "sizing": "stretch",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "obstacle-static-circle",
+      "alias": "aurora-academy:obstacle-static-circle:v1",
+      "src": "/media/default/obstacles/obstacle-static-circle.svg?v=1",
+      "category": "obstacles",
+      "renderMode": "vector",
+      "sizing": "contain",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "obstacle-static-diamond",
+      "alias": "aurora-academy:obstacle-static-diamond:v1",
+      "src": "/media/default/obstacles/obstacle-static-diamond.svg?v=1",
+      "category": "obstacles",
+      "renderMode": "vector",
+      "sizing": "contain",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "obstacle-static-rect",
+      "alias": "aurora-academy:obstacle-static-rect:v1",
+      "src": "/media/default/obstacles/obstacle-static-rect.svg?v=1",
+      "category": "obstacles",
+      "renderMode": "vector",
+      "sizing": "stretch",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "obstacle-switch-barrier",
+      "alias": "aurora-academy:obstacle-switch-barrier:v1",
+      "src": "/media/default/obstacles/obstacle-switch-barrier.svg?v=1",
+      "category": "obstacles",
+      "renderMode": "vector",
+      "sizing": "stretch",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "obstacle-tracking-circle",
+      "alias": "aurora-academy:obstacle-tracking-circle:v1",
+      "src": "/media/default/obstacles/obstacle-tracking-circle.svg?v=1",
+      "category": "obstacles",
+      "renderMode": "vector",
+      "sizing": "contain",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "obstacle-tracking-diamond",
+      "alias": "aurora-academy:obstacle-tracking-diamond:v1",
+      "src": "/media/default/obstacles/obstacle-tracking-diamond.svg?v=1",
+      "category": "obstacles",
+      "renderMode": "vector",
+      "sizing": "contain",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "obstacle-tracking-rect",
+      "alias": "aurora-academy:obstacle-tracking-rect:v1",
+      "src": "/media/default/obstacles/obstacle-tracking-rect.svg?v=1",
+      "category": "obstacles",
+      "renderMode": "vector",
+      "sizing": "stretch",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "power-coin-magnet",
+      "alias": "aurora-academy:power-coin-magnet:v1",
+      "src": "/media/default/powers/power-coin-magnet.svg?v=1",
+      "category": "powers",
+      "renderMode": "vector",
+      "sizing": "contain",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "power-full-shield",
+      "alias": "aurora-academy:power-full-shield:v1",
+      "src": "/media/default/powers/power-full-shield.svg?v=1",
+      "category": "powers",
+      "renderMode": "vector",
+      "sizing": "contain",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "power-obstacle-shield",
+      "alias": "aurora-academy:power-obstacle-shield:v1",
+      "src": "/media/default/powers/power-obstacle-shield.svg?v=1",
+      "category": "powers",
+      "renderMode": "vector",
+      "sizing": "contain",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "power-route-scan",
+      "alias": "aurora-academy:power-route-scan:v1",
+      "src": "/media/default/powers/power-route-scan.svg?v=1",
+      "category": "powers",
+      "renderMode": "vector",
+      "sizing": "contain",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "power-slow-field",
+      "alias": "aurora-academy:power-slow-field:v1",
+      "src": "/media/default/powers/power-slow-field.svg?v=1",
+      "category": "powers",
+      "renderMode": "vector",
+      "sizing": "contain",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "start-pad",
+      "alias": "aurora-academy:start-pad:v1",
+      "src": "/media/default/targets/start-pad.svg?v=1",
+      "category": "targets",
+      "renderMode": "vector",
+      "sizing": "contain",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "switch-pad",
+      "alias": "aurora-academy:switch-pad:v1",
+      "src": "/media/default/targets/switch-pad.svg?v=1",
+      "category": "targets",
+      "renderMode": "vector",
+      "sizing": "contain",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "target-bonus",
+      "alias": "aurora-academy:target-bonus:v1",
+      "src": "/media/default/bonus/target-bonus.svg?v=1",
+      "category": "bonus",
+      "renderMode": "vector",
+      "sizing": "contain",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "target-main",
+      "alias": "aurora-academy:target-main:v1",
+      "src": "/media/default/targets/target-main.svg?v=1",
+      "category": "targets",
+      "renderMode": "vector",
+      "sizing": "contain",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "token-circle",
+      "alias": "aurora-academy:token-circle:v1",
+      "src": "/media/default/tokens/token-circle.svg?v=1",
+      "category": "tokens",
+      "renderMode": "vector",
+      "sizing": "contain",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "token-diamond",
+      "alias": "aurora-academy:token-diamond:v1",
+      "src": "/media/default/tokens/token-diamond.svg?v=1",
+      "category": "tokens",
+      "renderMode": "vector",
+      "sizing": "contain",
+      "sourceScope": "default"
+    },
+    {
+      "mediaId": "token-rect",
+      "alias": "aurora-academy:token-rect:v1",
+      "src": "/media/default/tokens/token-rect.svg?v=1",
+      "category": "tokens",
+      "renderMode": "vector",
+      "sizing": "contain",
+      "sourceScope": "default"
+    }
+  ],
+  "audio": [
+    {
+      "soundId": "ambience",
+      "sources": [
+        "/media/default/audio/ambience.webm?v=1",
+        "/media/default/audio/ambience.mp3?v=1"
+      ],
+      "settings": {
+        "volume": 0.22,
+        "cooldownMs": 0,
+        "loop": true,
+        "fadeInMs": 1200,
+        "fadeOutMs": 800,
+        "channel": "ambience"
+      },
+      "fileSourceScope": "default",
+      "settingsSourceScope": "default"
+    },
+    {
+      "soundId": "attempt-failed",
+      "sources": [
+        "/media/default/audio/attempt-failed.webm?v=1",
+        "/media/default/audio/attempt-failed.mp3?v=1"
+      ],
+      "settings": {
+        "volume": 0.65,
+        "cooldownMs": 250,
+        "loop": false,
+        "fadeInMs": 0,
+        "fadeOutMs": 0,
+        "channel": "effects"
+      },
+      "fileSourceScope": "default",
+      "settingsSourceScope": "default"
+    },
+    {
+      "soundId": "bonus-accepted",
+      "sources": [
+        "/media/default/audio/bonus-accepted.webm?v=1",
+        "/media/default/audio/bonus-accepted.mp3?v=1"
+      ],
+      "settings": {
+        "volume": 0.58,
+        "cooldownMs": 120,
+        "loop": false,
+        "fadeInMs": 0,
+        "fadeOutMs": 0,
+        "channel": "effects"
+      },
+      "fileSourceScope": "default",
+      "settingsSourceScope": "default"
+    },
+    {
+      "soundId": "bonus-offered",
+      "sources": [
+        "/media/default/audio/bonus-offered.webm?v=1",
+        "/media/default/audio/bonus-offered.mp3?v=1"
+      ],
+      "settings": {
+        "volume": 0.58,
+        "cooldownMs": 120,
+        "loop": false,
+        "fadeInMs": 0,
+        "fadeOutMs": 0,
+        "channel": "effects"
+      },
+      "fileSourceScope": "default",
+      "settingsSourceScope": "default"
+    },
+    {
+      "soundId": "coin-collected",
+      "sources": [
+        "/media/default/audio/coin-collected.webm?v=1",
+        "/media/default/audio/coin-collected.mp3?v=1"
+      ],
+      "settings": {
+        "volume": 0.52,
+        "cooldownMs": 60,
+        "loop": false,
+        "fadeInMs": 0,
+        "fadeOutMs": 0,
+        "channel": "effects"
+      },
+      "fileSourceScope": "default",
+      "settingsSourceScope": "default"
+    },
+    {
+      "soundId": "collision",
+      "sources": [
+        "/media/default/audio/collision.webm?v=1",
+        "/media/default/audio/collision.mp3?v=1"
+      ],
+      "settings": {
+        "volume": 0.7,
+        "cooldownMs": 180,
+        "loop": false,
+        "fadeInMs": 0,
+        "fadeOutMs": 0,
+        "channel": "effects"
+      },
+      "fileSourceScope": "default",
+      "settingsSourceScope": "default"
+    },
+    {
+      "soundId": "drag-start",
+      "sources": [
+        "/media/default/audio/drag-start.webm?v=1",
+        "/media/default/audio/drag-start.mp3?v=1"
+      ],
+      "settings": {
+        "volume": 0.55,
+        "cooldownMs": 80,
+        "loop": false,
+        "fadeInMs": 0,
+        "fadeOutMs": 0,
+        "channel": "effects"
+      },
+      "fileSourceScope": "default",
+      "settingsSourceScope": "default"
+    },
+    {
+      "soundId": "level-complete",
+      "sources": [
+        "/media/default/audio/level-complete.webm?v=1",
+        "/media/default/audio/level-complete.mp3?v=1"
+      ],
+      "settings": {
+        "volume": 0.68,
+        "cooldownMs": 500,
+        "loop": false,
+        "fadeInMs": 0,
+        "fadeOutMs": 0,
+        "channel": "effects"
+      },
+      "fileSourceScope": "default",
+      "settingsSourceScope": "default"
+    },
+    {
+      "soundId": "power-coin-magnet",
+      "sources": [
+        "/media/default/audio/power-coin-magnet.webm?v=1",
+        "/media/default/audio/power-coin-magnet.mp3?v=1"
+      ],
+      "settings": {
+        "volume": 0.62,
+        "cooldownMs": 150,
+        "loop": false,
+        "fadeInMs": 0,
+        "fadeOutMs": 0,
+        "channel": "effects"
+      },
+      "fileSourceScope": "default",
+      "settingsSourceScope": "default"
+    },
+    {
+      "soundId": "power-full-shield",
+      "sources": [
+        "/media/default/audio/power-full-shield.webm?v=1",
+        "/media/default/audio/power-full-shield.mp3?v=1"
+      ],
+      "settings": {
+        "volume": 0.62,
+        "cooldownMs": 150,
+        "loop": false,
+        "fadeInMs": 0,
+        "fadeOutMs": 0,
+        "channel": "effects"
+      },
+      "fileSourceScope": "default",
+      "settingsSourceScope": "default"
+    },
+    {
+      "soundId": "power-obstacle-shield",
+      "sources": [
+        "/media/default/audio/power-obstacle-shield.webm?v=1",
+        "/media/default/audio/power-obstacle-shield.mp3?v=1"
+      ],
+      "settings": {
+        "volume": 0.62,
+        "cooldownMs": 150,
+        "loop": false,
+        "fadeInMs": 0,
+        "fadeOutMs": 0,
+        "channel": "effects"
+      },
+      "fileSourceScope": "default",
+      "settingsSourceScope": "default"
+    },
+    {
+      "soundId": "power-route-scan",
+      "sources": [
+        "/media/default/audio/power-route-scan.webm?v=1",
+        "/media/default/audio/power-route-scan.mp3?v=1"
+      ],
+      "settings": {
+        "volume": 0.62,
+        "cooldownMs": 150,
+        "loop": false,
+        "fadeInMs": 0,
+        "fadeOutMs": 0,
+        "channel": "effects"
+      },
+      "fileSourceScope": "default",
+      "settingsSourceScope": "default"
+    },
+    {
+      "soundId": "power-slow-field",
+      "sources": [
+        "/media/default/audio/power-slow-field.webm?v=1",
+        "/media/default/audio/power-slow-field.mp3?v=1"
+      ],
+      "settings": {
+        "volume": 0.62,
+        "cooldownMs": 150,
+        "loop": false,
+        "fadeInMs": 0,
+        "fadeOutMs": 0,
+        "channel": "effects"
+      },
+      "fileSourceScope": "default",
+      "settingsSourceScope": "default"
+    },
+    {
+      "soundId": "power-unavailable",
+      "sources": [
+        "/media/default/audio/power-unavailable.webm?v=1",
+        "/media/default/audio/power-unavailable.mp3?v=1"
+      ],
+      "settings": {
+        "volume": 0.5,
+        "cooldownMs": 180,
+        "loop": false,
+        "fadeInMs": 0,
+        "fadeOutMs": 0,
+        "channel": "effects"
+      },
+      "fileSourceScope": "default",
+      "settingsSourceScope": "default"
+    },
+    {
+      "soundId": "target-reached",
+      "sources": [
+        "/media/default/audio/target-reached.webm?v=1",
+        "/media/default/audio/target-reached.mp3?v=1"
+      ],
+      "settings": {
+        "volume": 0.62,
+        "cooldownMs": 120,
+        "loop": false,
+        "fadeInMs": 0,
+        "fadeOutMs": 0,
+        "channel": "effects"
+      },
+      "fileSourceScope": "default",
+      "settingsSourceScope": "default"
+    }
+  ]
+}

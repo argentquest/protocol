@@ -304,6 +304,31 @@ Protocols. These short challenges teach one dynamic behavior in the selected
 movement mode, keep separate records, grant only one-time rewards, and never
 affect campaign score or unlocks.
 
+## Aurora Academy tutorial theme
+
+The **Aurora Academy** theme is a 20-level tutorial campaign that introduces
+every Path Protocol mechanic one lesson at a time. Each level's `briefing` is
+written as an explicit lesson objective (`Objective: … / Success: …`), and the
+in-app **Tutorial** page (nav → Tutorial) explains all 20 lessons in detail,
+including the deeper mechanic explanation and a practical tip for each.
+
+The levels are authored in `src/config/tutorial-levels/` (`tutorial-01.json` …
+`tutorial-20.json`) and are validated against the level JSON Schema and the
+deterministic generator (`generateLevel`) before they are playable. Materialize
+the published theme package with:
+
+```powershell
+npm run seed:tutorial
+```
+
+This writes `data/themes/aurora-academy/` (theme metadata plus the 20 levels
+with stable, deterministic IDs) and is safe to re-run — the same source always
+produces the same package. With the server running, the theme appears in the
+first-visit **Pick a public theme** chooser as a 20-level campaign, and the
+**Aurora Academy** presentation palette is selectable from Settings. The
+campaign covers both movement modes: Guided lessons 01–13, Ricochet lessons
+14–16, and combined mechanics through the finale.
+
 ## V2 configuration and media commands
 
 The completed V2 foundation provides:
