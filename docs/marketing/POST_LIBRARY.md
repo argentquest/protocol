@@ -97,22 +97,7 @@ Suggested image: `path-protocol-theme-workshop.jpg`
 
 Suggested image: a current real gameplay screenshot.
 
-> I did not start Path Protocol because I already knew how to build a browser
-> game. I started it because I wanted to learn.
->
-> AI-assisted development helped me move quickly between ideas, implementation,
-> tests, and documentation. It did not remove the need to make decisions. The
-> most valuable work was still defining the rules clearly: deterministic
-> movement, collision boundaries, scoring, rendering ownership, persistence,
-> security, and what the Theme Workshop should allow.
->
-> I have made the result open source so the experiment can continue in public:
-> https://github.com/argentquest/protocol
->
-> What have you learned—or struggled with—while using AI as a development
-> partner?
->
-> #AIAssistedDevelopment #SoftwareArchitecture #OpenSource #GameDevelopment
+
 
 ## Short social launch
 
@@ -160,7 +145,9 @@ Submission URL: use the Hacker News tracked play link.
 
 Suggested first comment:
 
-> I built Path Protocol on and off over the last month after my son suggested the
+> 
+
+## Reddit or forum templateI built Path Protocol on and off over the last month after my son suggested the
 > original concept. I had always wanted to make a mini-golf game, so I used it as
 > a way to learn browser game development and experiment with AI-assisted coding.
 >
@@ -172,8 +159,6 @@ Suggested first comment:
 >
 > I would value direct feedback on the controls, the authoring workflow, and the
 > architecture. I will be here to answer questions and fix reproducible issues.
-
-## Reddit or forum template
 
 Do not post until the community rules have been checked. Replace the bracketed
 line with a question relevant to that community.
